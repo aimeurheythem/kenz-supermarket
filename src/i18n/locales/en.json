@@ -1,0 +1,259 @@
+{
+    "login": {
+        "title": "Asset Spec Management",
+        "welcome": "Welcome Back, Please login to",
+        "account": "your account",
+        "email": "Email address",
+        "email_placeholder": "name@company.com",
+        "password": "Password",
+        "password_placeholder": "••••••••••••",
+        "remember_me": "Remember me",
+        "forgot_password": "Forgot password?",
+        "login_button": "Login",
+        "logging_in": "Logging In...",
+        "errors": {
+            "invalid_credentials": "Invalid credentials",
+            "system_error": "System error"
+        }
+    },
+    "sidebar": {
+        "dashboard": "Dashboard",
+        "inventory": "Inventory",
+        "pos_sales": "POS / Sales",
+        "stock_control": "Stock Control",
+        "suppliers": "Suppliers",
+        "purchases": "Purchases",
+        "reports": "Reports",
+        "users": "Users",
+        "settings": "Settings",
+        "credit": "Credit",
+        "help": "Help & Contact",
+        "terms": "Terms of Use",
+        "logout": "Logout",
+        "general": "General",
+        "operations": "Operations",
+        "supply_chain": "Supply Chain",
+        "management": "Management",
+        "support": "Support"
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "header": {
+            "title": "Main Dashboard",
+            "subtitle": "Overview of your store performance"
+        },
+        "welcome": "Welcome back! Here's a snapshot of your store's performance today.",
+        "welcome_card": {
+            "greeting_morning": "Good Morning",
+            "greeting_afternoon": "Good Afternoon",
+            "greeting_evening": "Good Evening",
+            "message": "Welcome back to your workstation. Everything is ready for a productive shift.",
+            "current_time": "Current Time",
+            "system_live": "System Live"
+        },
+        "stats": {
+            "today_revenue": "Today's Revenue",
+            "total_products": "Total Products",
+            "today_orders": "Today's Orders",
+            "low_stock_alerts": "Low Stock Alerts",
+            "orders_count": "{{count}} orders",
+            "no_sales": "No sales yet",
+            "units_in_stock": "{{count}} units in stock",
+            "avg_order": "{{amount}} avg",
+            "needs_attention": "Needs attention",
+            "all_stocked": "All stocked"
+        },
+        "shortcuts": {
+            "title": "Quick Actions",
+            "pos": "POS",
+            "inventory": "Inventory",
+            "suppliers": "Suppliers",
+            "reports": "Reports"
+        },
+        "contact_support": "Contact Support",
+        "faq": "Frequently Asked Questions",
+        "documentation": "Documentation",
+        "recent_sales": {
+            "title": "Recent Sales",
+            "view_all": "View All",
+            "walk_in": "Walk-in Customer",
+            "demo_sale": "Example Sale (Demo)",
+            "cash_payment": "Cash Payment",
+            "total_amount": "Total Amount",
+            "products": "Products",
+            "items": "Items",
+            "cashier": "Cashier",
+            "no_sales_today": "No registered sales today"
+        },
+        "top_performance": {
+            "title": "Top 5 Products",
+            "subtitle": "Highest margin performance this month",
+            "badge": "Margin • Month",
+            "monthly_profit": "Monthly Net Profit"
+        },
+        "decorative_label": "Dashboard",
+        "recent_operations": {
+            "title": "Recent Operations",
+            "subtitle": "Lately processed sales and orders",
+            "sell_now": "Sell Now",
+            "no_records": "No sales record found for today.",
+            "order_number": "Order #{{id}}"
+        },
+        "stock_alerts": {
+            "title": "Stock Alerts",
+            "subtitle": "Items requiring immediate attention",
+            "needs_restock": "{{count}} Needs Restock",
+            "inventory_great": "Inventory is looking great!",
+            "manage_full": "Manage full inventory ({{count}} items)"
+        },
+        "quick_info": {
+            "stock_value": "Estimated Stock Value",
+            "base_cost": "Base Cost",
+            "active_supply": "Active Supply Chain",
+            "partners": "{{count}} Partners",
+            "procurement_flows": "Manage all procurement flows",
+            "product_categories": "Product Categories",
+            "groups": "{{count}} Groups",
+            "stock_classification": "Optimized stock classification"
+        },
+        "credit": {
+            "status": "Development in Progress",
+            "title": "Credit System",
+            "coming_soon": "Coming Soon",
+            "description": "We're building a powerful credit and debt management system to help you track customer balances and payments seamlessly.",
+            "completion": "65% Completed"
+        },
+        "help": {
+            "title": "Help & Contact",
+            "subtitle": "Need assistance with your workstation? We are here to help you get the most out of your management system.",
+            "contact": {
+                "email_support": "Email Support",
+                "phone_support": "Phone Support",
+                "live_chat": "Live Chat"
+            },
+            "faq": {
+                "title": "Common Questions",
+                "q1": "How do I reset my shift stats?",
+                "a1": "Go to settings and select 'Reset Session' to start a fresh shift counter.",
+                "q2": "Can I use multiple cashiers simultaneously?",
+                "a2": "Yes, use the cashier selector in the top right to switch between profiles.",
+                "q3": "How are margins calculated?",
+                "a3": "Margins are the difference between your selling price and the recorded base cost."
+            }
+        },
+        "analytics": {
+            "revenue_title": "Revenue Statistics",
+            "revenue_subtitle": "Interactive financial performance tracking",
+            "peak_hours_title": "Peak Hours",
+            "peak_hours_subtitle": "Staffing optimization guide",
+            "today": "Today",
+            "seven_days": "7 Days",
+            "month": "Month",
+            "recommended_staff": "Recommended Staff",
+            "waiters": "Waiters",
+            "revenue_label": "Revenue",
+            "density_label": "Staffing Density",
+            "time_label": "Time"
+        },
+        "terms": {
+            "title": "Terms of Use",
+            "subtitle": "Please review our professional guidelines for using this workstation.",
+            "version": "Last Updated: Feb 2026",
+            "sections": {
+                "general": {
+                    "title": "General Usage",
+                    "content": "These terms govern your use of the SuperMarket Management System. By accessing the workstation, you agree to comply with our professional standards and data handling policies."
+                },
+                "privacy": {
+                    "title": "Data Privacy",
+                    "content": "We take your data seriously. All transaction records and customer information are encrypted and handled in accordance with local data protection regulations."
+                },
+                "license": {
+                    "title": "Software License",
+                    "content": "The software is provided \"as is\" for internal management purposes. Redistribution or modification of the source code without explicit permission is strictly prohibited."
+                }
+            },
+            "footer": {
+                "title": "Questions about these terms?",
+                "subtitle": "Contact our legal and compliance department."
+            }
+        }
+    },
+    "pos": {
+        "title": "Point of Sale",
+        "system": "POS system",
+        "search_placeholder": "Search products ...",
+        "scanner_active": "Scanner Active",
+        "scanner_ready": "Scanner Ready",
+        "search_results": "Search Results",
+        "items_found": "{{count}} items found",
+        "cart": {
+            "title": "Current Cart",
+            "new_order": "New Order",
+            "clear_all": "Clear All",
+            "empty": "Empty Cart",
+            "empty_hint": "Scan items to begin",
+            "subtotal": "Subtotal",
+            "service_fee": "Service Fee",
+            "tax": "Tax (0%)",
+            "grand_total": "Grand Total",
+            "checkout": "Checkout Order",
+            "pay_cash": "Cash",
+            "pay_card": "Card",
+            "pay_mobile": "E-Pay",
+            "coming_soon": "Coming\nsoon"
+        },
+        "simulation": {
+            "printing": "Printing Bill",
+            "please_wait": "Please wait...",
+            "payment_received": "Payment Received",
+            "order_completed": "Order Completed"
+        },
+        "flash_deals": {
+            "title": "Flash deals & Promotions",
+            "special_price": "Special Price",
+            "off": "{{percent}}% OFF",
+            "product": "Product",
+            "stock": "Stock",
+            "add_to_cart": "Add to cart",
+            "in_cart": "In Cart",
+            "added": "Added!"
+        },
+        "quick_access": {
+            "title": "Quick Access",
+            "single_unit": "Single unit",
+            "units": "{{count}} units",
+            "configure": "Quick Access Config",
+            "manage_buttons": "Manage high-frequency sales buttons",
+            "add_product": "Add New Product",
+            "no_items": "No Quick Access Items",
+            "no_items_hint": "Configure items like eggs for fast checkout",
+            "add_first": "Add Your First Item",
+            "save": "Save Configuration",
+            "cancel": "Cancel",
+            "select_product": "Select Product",
+            "display_name": "Display Name",
+            "theme_color": "Theme Color",
+            "variations": "Variations / Options",
+            "add_option": "+ Add Option",
+            "add_customized": "Add Customized Products"
+        },
+        "inventory": {
+            "title": "In-Stock Inventory",
+            "quick_select": "Quick select",
+            "products_available": "{{count}} Products Available"
+        }
+    },
+    "common": {
+        "language": "Language",
+        "english": "English",
+        "french": "French",
+        "customer": "Customer"
+    },
+    "footer": {
+        "copyright": "© 2024 SuperMarket App. All rights reserved.",
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service",
+        "status": "System Operational"
+    }
+}

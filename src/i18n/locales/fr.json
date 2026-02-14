@@ -1,0 +1,256 @@
+{
+    "login": {
+        "title": "Gestion des Spécifications d'Actifs",
+        "welcome": "Bienvenue, veuillez vous connecter à",
+        "account": "votre compte",
+        "email": "Adresse e-mail",
+        "email_placeholder": "nom@entreprise.com",
+        "password": "Mot de passe",
+        "password_placeholder": "••••••••••••",
+        "remember_me": "Se souvenir de moi",
+        "forgot_password": "Mot de passe oublié ?",
+        "login_button": "Connexion",
+        "logging_in": "Connexion en cours...",
+        "errors": {
+            "invalid_credentials": "Identifiants invalides",
+            "system_error": "Erreur système"
+        }
+    },
+    "sidebar": {
+        "dashboard": "Tableau de bord",
+        "inventory": "Inventaire",
+        "pos_sales": "PDV / Ventes",
+        "stock_control": "Contrôle des stocks",
+        "suppliers": "Fournisseurs",
+        "purchases": "Achats",
+        "reports": "Rapports",
+        "users": "Utilisateurs",
+        "settings": "Paramètres",
+        "credit": "Crédit",
+        "help": "Aide & Contact",
+        "terms": "Conditions d'Utilisation",
+        "logout": "Déconnexion",
+        "general": "Général",
+        "operations": "Opérations",
+        "supply_chain": "Chaîne d'Approvisionnement",
+        "management": "Gestion",
+        "support": "Support"
+    },
+    "dashboard": {
+        "title": "Tableau de bord",
+        "header": {
+            "title": "Tableau de Bord Principal",
+            "subtitle": "Aperçu de la performance de votre magasin"
+        },
+        "welcome": "Bon retour ! Voici un aperçu de la performance de votre magasin aujourd'hui.",
+        "welcome_card": {
+            "greeting_morning": "Bonjour",
+            "greeting_afternoon": "Bonne journée",
+            "greeting_evening": "Bonsoir",
+            "message": "Ravi de vous revoir. Tout est prêt pour une journée productive.",
+            "current_time": "Heure Actuelle",
+            "system_live": "Système En Ligne"
+        },
+        "stats": {
+            "today_revenue": "Chiffre d'affaires aujourd'hui",
+            "total_products": "Total des produits",
+            "today_orders": "Commandes aujourd'hui",
+            "low_stock_alerts": "Alertes de stock faible",
+            "orders_count": "{{count}} commandes",
+            "no_sales": "Pas encore de ventes",
+            "units_in_stock": "{{count}} unités en stock",
+            "avg_order": "{{amount}} moy",
+            "needs_attention": "Nécessite une attention",
+            "all_stocked": "Tout est en stock"
+        },
+        "shortcuts": {
+            "title": "Actions Rapides",
+            "pos": "PDV",
+            "inventory": "Inventaire",
+            "suppliers": "Fournisseurs",
+            "reports": "Rapports"
+        },
+        "recent_sales": {
+            "title": "Ventes Récentes",
+            "view_all": "Voir Tout",
+            "walk_in": "Client Direct",
+            "demo_sale": "Exemple de Vente (Démo)",
+            "cash_payment": "Paiement en Espèces",
+            "total_amount": "Montant Total",
+            "products": "Produits",
+            "items": "Articles",
+            "cashier": "Caissier",
+            "no_sales_today": "Aucune vente enregistrée aujourd'hui"
+        },
+        "top_performance": {
+            "title": "Top 5 Produits",
+            "subtitle": "Meilleure performance de marge ce mois-ci",
+            "badge": "Marge • Mois",
+            "monthly_profit": "Bénéfice Net Mensuel"
+        },
+        "decorative_label": "Tableau de Bord",
+        "recent_operations": {
+            "title": "Opérations récentes",
+            "subtitle": "Ventes et commandes traitées dernièrement",
+            "sell_now": "Vendre maintenant",
+            "no_records": "Aucun record de vente trouvé pour aujourd'hui.",
+            "order_number": "Commande #{{id}}"
+        },
+        "stock_alerts": {
+            "title": "Alertes de stock",
+            "subtitle": "Articles nécessitant une attention immédiate",
+            "needs_restock": "{{count}} nécessite un réapprovisionnement",
+            "inventory_great": "L'inventaire est superbe !",
+            "manage_full": "Gérer l'inventaire complet ({{count}} articles)"
+        },
+        "quick_info": {
+            "stock_value": "Valeur estimée du stock",
+            "base_cost": "Coût de base",
+            "active_supply": "Chaîne d'approvisionnement active",
+            "partners": "{{count}} Partenaires",
+            "procurement_flows": "Gérer tous les flux d'approvisionnement",
+            "product_categories": "Catégories de produits",
+            "groups": "{{count}} Groupes",
+            "stock_classification": "Classification optimisée des stocks"
+        },
+        "credit": {
+            "status": "Développement en cours",
+            "title": "Système de Crédit",
+            "coming_soon": "Bientôt disponible",
+            "description": "Nous construisons un système puissant de gestion des crédits et des dettes pour vous aider à suivre les soldes et les paiements des clients de manière transparente.",
+            "completion": "65% Terminé"
+        },
+        "help": {
+            "title": "Aide & Contact",
+            "subtitle": "Besoin d'aide avec votre station de travail ? Nous sommes là pour vous aider à tirer le meilleur parti de votre système de gestion.",
+            "contact": {
+                "email_support": "Support par Email",
+                "phone_support": "Support Téléphonique",
+                "live_chat": "Chat en Direct"
+            },
+            "faq": {
+                "title": "Questions Fréquentes",
+                "q1": "Comment réinitialiser mes stats de service ?",
+                "a1": "Allez dans les paramètres et sélectionnez 'Réinitialiser la session' pour démarrer un nouveau compteur.",
+                "q2": "Puis-je utiliser plusieurs caissiers simultanément ?",
+                "a2": "Oui, utilisez le sélecteur de caissier en haut à droite pour basculer entre les profils.",
+                "q3": "Comment les marges sont-elles calculées ?",
+                "a3": "La marge est la différence entre votre prix de vente et le coût de base enregistré."
+            }
+        },
+        "analytics": {
+            "revenue_title": "Statistiques de Revenus",
+            "revenue_subtitle": "Suivi interactif de la performance financière",
+            "peak_hours_title": "Heures de Pointe",
+            "peak_hours_subtitle": "Guide d'optimisation du personnel",
+            "today": "Aujourd'hui",
+            "seven_days": "7 Jours",
+            "month": "Mois",
+            "recommended_staff": "Personnel Recommandé",
+            "waiters": "Serveurs",
+            "revenue_label": "Revenus",
+            "density_label": "Densité du Personnel",
+            "time_label": "Temps"
+        },
+        "terms": {
+            "title": "Conditions d'Utilisation",
+            "subtitle": "Veuillez consulter nos directives professionnelles pour l'utilisation de cette station de travail.",
+            "version": "Dernière mise à jour : Fév 2026",
+            "sections": {
+                "general": {
+                    "title": "Utilisation Générale",
+                    "content": "Ces conditions régissent votre utilisation du système de gestion SuperMarket. En accédant à la station de travail, vous acceptez de respecter nos normes professionnelles et nos politiques de traitement des données."
+                },
+                "privacy": {
+                    "title": "Confidentialité des Données",
+                    "content": "Nous prenons vos données au sérieux. Tous les enregistrements de transactions et les informations clients sont cryptés et traités conformément aux réglementations locales."
+                },
+                "license": {
+                    "title": "Licence Logicielle",
+                    "content": "Le logiciel est fourni \"en l'état\" à des fins de gestion interne. La redistribution ou la modification du code source sans autorisation explicite est strictement interdite."
+                }
+            },
+            "footer": {
+                "title": "Des questions sur ces conditions ?",
+                "subtitle": "Contactez notre département juridique et de conformité."
+            }
+        }
+    },
+    "pos": {
+        "title": "Point de Vente",
+        "system": "Système PDV",
+        "search_placeholder": "Rechercher produits ...",
+        "scanner_active": "Scanner Actif",
+        "scanner_ready": "Scanner Prêt",
+        "search_results": "Résultats de recherche",
+        "items_found": "{{count}} articles trouvés",
+        "cart": {
+            "title": "Panier Actuel",
+            "new_order": "Nouvelle Commande",
+            "clear_all": "Tout Effacer",
+            "empty": "Panier Vide",
+            "empty_hint": "Scanner des articles pour commencer",
+            "subtotal": "Sous-total",
+            "service_fee": "Frais de service",
+            "tax": "TVA (0%)",
+            "grand_total": "Total Général",
+            "checkout": "Valider la Commande",
+            "pay_cash": "Espèces",
+            "pay_card": "Carte",
+            "pay_mobile": "E-Paiement",
+            "coming_soon": "Bientôt\ndispo"
+        },
+        "simulation": {
+            "printing": "Impression du Ticket",
+            "please_wait": "Veuillez patienter...",
+            "payment_received": "Paiement Reçu",
+            "order_completed": "Commande Terminée"
+        },
+        "flash_deals": {
+            "title": "Ventes Flash & Promotions",
+            "special_price": "Prix Spécial",
+            "off": "-{{percent}}%",
+            "product": "Produit",
+            "stock": "Stock",
+            "add_to_cart": "Ajouter",
+            "in_cart": "Dans le panier",
+            "added": "Ajouté !"
+        },
+        "quick_access": {
+            "title": "Accès Rapide",
+            "single_unit": "Unité seule",
+            "units": "{{count}} unités",
+            "configure": "Config Accès Rapide",
+            "manage_buttons": "Gérer les boutons de vente fréquents",
+            "add_product": "Ajouter Nouveau Produit",
+            "no_items": "Aucun article d'accès rapide",
+            "no_items_hint": "Configurez des articles comme les œufs pour un encaissement rapide",
+            "add_first": "Ajouter votre premier article",
+            "save": "Enregistrer la Configuration",
+            "cancel": "Annuler",
+            "select_product": "Sélectionner un produit",
+            "display_name": "Nom d'affichage",
+            "theme_color": "Couleur du thème",
+            "variations": "Variations / Options",
+            "add_option": "+ Ajouter une option",
+            "add_customized": "Ajouter produits personnalisés"
+        },
+        "inventory": {
+            "title": "Inventaire en Stock",
+            "quick_select": "Sélection rapide",
+            "products_available": "{{count}} Produits Disponibles"
+        }
+    },
+    "common": {
+        "language": "Langue",
+        "english": "Anglais",
+        "french": "Français",
+        "customer": "Client"
+    },
+    "footer": {
+        "copyright": "© 2024 SuperMarket App. Tous droits réservés.",
+        "privacy": "Politique de confidentialité",
+        "terms": "Conditions d'utilisation",
+        "status": "Système opérationnel"
+    }
+}

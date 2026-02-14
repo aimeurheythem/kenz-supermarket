@@ -1,0 +1,37 @@
+import { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import Sidebar from './Sidebar';
+import TitleBar from './TitleBar';
+import Footer from './Footer';
+import LanguageTransition from '../common/LanguageTransition';
+
+interface AppShellProps {
+    children: ReactNode;
+}
+
+export default function AppShell({ children }: AppShellProps) {
+    const { i18n } = useTranslation();
+    const isArabic = i18n.language === 'ar';
+
+    return (
+        <div
+            className="h-screen w-screen flex overflow-hidden bg-secondary text-secondary selection:bg-accent-light app-drag-region"
+        >
+            {/*ltr:rounded-tl-[2rem] ltr:rounded-bl-[2rem] rtl:rounded-tr-[2rem] rtl:rounded-br-[2rem]border border-gray-100 m-2 shadow-md*/}
+            <LanguageTransition />
+            <Sidebar />
+            <div className="flex-1 flex flex-col min-w-0 bg-primary ltr:rounded-tl-[2rem] ltr:rounded-bl-[2rem] rtl:rounded-tr-[2rem] rtl:rounded-br-[2rem]border border-gray-100 m-2 shadow-md overflow-hidden animate-fadeIn relative">
+                <TitleBar />
+                <main className="flex-1 overflow-y-auto bg-primary scrollbar-hide app-no-drag flex flex-col">
+                    <div className="w-full p-6 flex-1">
+                        {children}
+                    </div>
+                    <Footer />
+                </main>
+
+                {/* Smooth Bottom Fade */}
+                <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none z-20" />
+            </div>
+        </div>
+    );
+}

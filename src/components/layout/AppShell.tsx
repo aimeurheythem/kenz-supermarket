@@ -20,7 +20,7 @@ export default function AppShell({ children }: AppShellProps) {
             {/*ltr:rounded-tl-[2rem] ltr:rounded-bl-[2rem] rtl:rounded-tr-[2rem] rtl:rounded-br-[2rem]border border-gray-100 m-2 shadow-md*/}
             <LanguageTransition />
             <Sidebar />
-            <div className="flex-1 flex flex-col min-w-0 bg-primary ltr:rounded-tl-[2rem] ltr:rounded-bl-[2rem] rtl:rounded-tr-[2rem] rtl:rounded-br-[2rem]border border-gray-100 m-2 shadow-md overflow-hidden animate-fadeIn relative">
+            <div className="flex-1 flex flex-col min-w-0 bg-primary overflow-hidden animate-fadeIn relative">
                 <TitleBar />
                 <main className="flex-1 overflow-y-auto bg-primary scrollbar-hide app-no-drag flex flex-col">
                     <div className="w-full p-6 flex-1">

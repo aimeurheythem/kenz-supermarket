@@ -176,6 +176,19 @@
             }
         }
     },
+    "categories": {
+        "Dairy": "Produits Laitiers",
+        "Bakery": "Boulangerie",
+        "Produce": "Fruits & Légumes",
+        "Meat & Poultry": "Viande & Volaille",
+        "Beverages": "Boissons",
+        "Canned Goods": "Conserves",
+        "Snacks": "Snacks",
+        "Frozen Foods": "Produits Surgelés",
+        "Cleaning": "Nettoyage",
+        "Personal Care": "Soins Personnels",
+        "Uncategorized": "Non Catégorisé"
+    },
     "pos": {
         "title": "Point de Vente",
         "system": "Système PDV",
@@ -245,6 +258,7 @@
         "language": "Langue",
         "english": "Anglais",
         "french": "Français",
+        "arabic": "Arabe",
         "customer": "Client"
     },
     "footer": {
@@ -252,5 +266,106 @@
         "privacy": "Politique de confidentialité",
         "terms": "Conditions d'utilisation",
         "status": "Système opérationnel"
+    },
+    "inventory": {
+        "title": "Inventaire",
+        "management_system": "Système de Gestion",
+        "import": "Importer l'Inventaire",
+        "export": "Exporter l'Inventaire",
+        "add_product": "Ajouter un Produit",
+        "stats": {
+            "total_products": "Total Produits",
+            "low_stock": "Stock Faible",
+            "total_value": "Valeur Totale",
+            "items": "Articles",
+            "alerts": "Alertes"
+        },
+        "filters": {
+            "search_placeholder": "Rechercher dans l'inventaire...",
+            "low_stock_only": "Stock Faible Uniquement",
+            "export_low_stock": "Exporter Stock Faible",
+            "filter_by_category": "Filtrer par Catégorie",
+            "all_items": "Tous les Articles",
+            "clear": "Effacer"
+        },
+        "table": {
+            "id": "Id",
+            "product": "Produit",
+            "barcode": "Code-barres",
+            "unit": "Unité",
+            "cost": "Coût",
+            "selling": "Vente",
+            "created_at": "Créé le",
+            "category": "Catégorie",
+            "stock_level": "Niveau de Stock",
+            "actions": "Actions",
+            "price": "Prix"
+        },
+        "status": {
+            "in_stock": "En Stock",
+            "low_stock": "Stock Faible",
+            "out_of_stock": "Rupture de Stock"
+        },
+        "empty": {
+            "no_products": "Aucun Produit Trouvé"
+        },
+        "pagination": {
+            "showing": "Affichage de",
+            "to": "à",
+            "of": "sur",
+            "prev": "Précédent",
+            "next": "Suivant"
+        },
+        "actions": {
+            "edit": "Modifier le Produit",
+            "delete": "Supprimer"
+        },
+        "delete_modal": {
+            "title": "Supprimer le Produit",
+            "description": "Êtes-vous sûr de vouloir supprimer ce produit ? Cela le retirera définitivement de votre inventaire.",
+            "cancel": "Annuler",
+            "confirm": "Supprimer"
+        },
+        "form": {
+            "new_title": "Nouveau Produit",
+            "edit_title": "Modifier le Produit",
+            "new_desc": "Ajouter à l'inventaire",
+            "edit_desc": "Mettre à jour les détails de l'implémentation",
+            "sections": {
+                "basic": "Informations de Base",
+                "inventory_pricing": "Inventaire & Prix"
+            },
+            "labels": {
+                "name": "Nom du Produit",
+                "barcode": "Code-barres / SKU",
+                "category": "Catégorie",
+                "unit": "Type d'Unité",
+                "cost": "Prix de Coût",
+                "selling": "Prix de Vente",
+                "initial_stock": "Stock Initial",
+                "low_stock_alert": "Alerte de Stock Faible"
+            },
+            "placeholders": {
+                "name_eg": "ex. Café Premium",
+                "scan_type": "Scanner ou taper...",
+                "select_category": "Sélectionner une Catégorie...",
+                "none": "Aucune",
+                "uncategorized": "Non Catégorisé"
+            },
+            "buttons": {
+                "cancel": "Annuler",
+                "save": "Enregistrer les Modifications",
+                "create": "Créer le Produit"
+            }
+        },
+        "units": {
+            "piece": "Pièce",
+            "kg": "Kg",
+            "g": "G",
+            "l": "L",
+            "ml": "Ml",
+            "box": "Boîte",
+            "pack": "Paquet"
+        }
     }
 }

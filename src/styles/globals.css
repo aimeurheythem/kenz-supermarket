@@ -31,8 +31,8 @@
   /* Very light gray borders */
   --border-hover: #D1D5DB;
   /* Slightly darker on hover */
-  --border-focus: #10A37F;
-  /* OpenAI green focus */
+  --border-focus: #e5e7eb;
+  /* Light gray instead of green */
 
   /* Text Colors */
   --text-primary: #111827;
@@ -402,7 +402,7 @@ body,
 }
 
 .input:focus {
-  border-color: var(--border-focus);
+  border-color: #000000;
   outline: none;
 }
 
@@ -657,14 +657,13 @@ body,
 /* =============================================
    FOCUS STATES
    ============================================= */
-*:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+/* Global focus suppression */
+*:focus {
+  outline: none !important;
 }
 
-/* Remove default focus for mouse users */
-*:focus:not(:focus-visible) {
-  outline: none;
+*:focus-visible {
+  outline: none !important;
 }
 
 /* =============================================

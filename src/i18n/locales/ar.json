@@ -179,6 +179,19 @@
             }
         }
     },
+    "categories": {
+        "Dairy": "الألبان",
+        "Bakery": "المخبوزات",
+        "Produce": "الخضروات والفواكه",
+        "Meat & Poultry": "اللحوم والدواجن",
+        "Beverages": "المشروبات",
+        "Canned Goods": "المعلبات",
+        "Snacks": "الوجبات الخفيفة",
+        "Frozen Foods": "المجمدات",
+        "Cleaning": "التنظيف",
+        "Personal Care": "العناية الشخصية",
+        "Uncategorized": "غير مصنف"
+    },
     "pos": {
         "title": "نقطة البيع",
         "system": "نظام نقاط البيع",
@@ -248,6 +261,7 @@
         "language": "اللغة",
         "english": "الإنجليزية",
         "french": "الفرنسية",
+        "arabic": "العربية",
         "customer": "العميل"
     },
     "footer": {
@@ -255,5 +269,106 @@
         "privacy": "سياسة الخصوصية",
         "terms": "شروط الخدمة",
         "status": "النظام يعمل"
+    },
+    "inventory": {
+        "title": "المخزون",
+        "management_system": "نظام الإدارة",
+        "import": "استيراد المخزون",
+        "export": "تصدير المخزون",
+        "add_product": "إضافة منتج",
+        "stats": {
+            "total_products": "إجمالي المنتجات",
+            "low_stock": "مخزون منخفض",
+            "total_value": "القيمة الإجمالية",
+            "items": "عناصر",
+            "alerts": "تنبيهات"
+        },
+        "filters": {
+            "search_placeholder": "البحث في المخزون...",
+            "low_stock_only": "المخزون المنخفض فقط",
+            "export_low_stock": "تصدير المخزون المنخفض",
+            "filter_by_category": "تصفية حسب الفئة",
+            "all_items": "جميع العناصر",
+            "clear": "مسح"
+        },
+        "table": {
+            "id": "المعرف",
+            "product": "المنتج",
+            "barcode": "الباركود",
+            "unit": "الوحدة",
+            "cost": "التكلفة",
+            "selling": "البيع",
+            "created_at": "تاريخ الإنشاء",
+            "category": "الفئة",
+            "stock_level": "مستوى المخزون",
+            "actions": "إجراءات",
+            "price": "السعر"
+        },
+        "status": {
+            "in_stock": "متوفر",
+            "low_stock": "مخزون منخفض",
+            "out_of_stock": "نفذ المخزون"
+        },
+        "empty": {
+            "no_products": "لم يتم العثور على منتجات"
+        },
+        "pagination": {
+            "showing": "عرض",
+            "to": "إلى",
+            "of": "من",
+            "prev": "السابق",
+            "next": "التالي"
+        },
+        "actions": {
+            "edit": "تعديل المنتج",
+            "delete": "حذف"
+        },
+        "delete_modal": {
+            "title": "حذف المنتج",
+            "description": "هل أنت متأكد أنك تريد حذف هذا المنتج؟ سيؤدي هذا إلى إزالته نهائيًا من مخزونك.",
+            "cancel": "إلغاء",
+            "confirm": "حذف الآن"
+        },
+        "form": {
+            "new_title": "منتج جديد",
+            "edit_title": "تعديل المنتج",
+            "new_desc": "إضافة إلى المخزون",
+            "edit_desc": "تحديث تفاصيل التنفيذ",
+            "sections": {
+                "basic": "معلومات أساسية",
+                "inventory_pricing": "المخزون والتسعير"
+            },
+            "labels": {
+                "name": "اسم المنتج",
+                "barcode": "الباركود / SKU",
+                "category": "الفئة",
+                "unit": "نوع الوحدة",
+                "cost": "سعر التكلفة",
+                "selling": "سعر البيع",
+                "initial_stock": "المخزون الأولي",
+                "low_stock_alert": "تنبيه المخزون المنخفض"
+            },
+            "placeholders": {
+                "name_eg": "مثل: قهوة فاخرة",
+                "scan_type": "امسح أو اكتب...",
+                "select_category": "اختر فئة...",
+                "none": "لا يوجد",
+                "uncategorized": "غير مصنف"
+            },
+            "buttons": {
+                "cancel": "إلغاء",
+                "save": "حفظ التغييرات",
+                "create": "إنشاء منتج"
+            }
+        },
+        "units": {
+            "piece": "قطعة",
+            "kg": "كغ",
+            "g": "غ",
+            "l": "ل",
+            "ml": "مل",
+            "box": "صندوق",
+            "pack": "عبوة"
+        }
     }
 }

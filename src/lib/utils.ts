@@ -22,7 +22,7 @@ export function formatCurrency(amount: number) {
 }
 
 export function formatDate(date: string | Date) {
-    return new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat(i18n.language, {
         month: "long",
         day: "numeric",
         year: "numeric",

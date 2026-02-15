@@ -11,12 +11,15 @@ import {
     User,
     Save,
     CreditCard,
+    DollarSign,
 } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useSupplierStore } from '@/stores/useSupplierStore';
 import SearchInput from '@/components/common/SearchInput';
 import Button from '@/components/common/Button';
 import Modal from '@/components/common/Modal';
+import { FormModal } from '@/components/common/FormModal';
+import { DeleteConfirmModal } from '@/components/common/DeleteConfirmModal';
 import type { Supplier, SupplierInput } from '@/lib/types';
 
 const defaultForm: SupplierInput = {
@@ -37,6 +40,8 @@ export default function Suppliers() {
     const [isPaymentOpen, setIsPaymentOpen] = useState(false);
     const [paymentAmount, setPaymentAmount] = useState('');
     const [selectedSupplierForPayment, setSelectedSupplierForPayment] = useState<Supplier | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [supplierToDelete, setSupplierToDelete] = useState<Supplier | null>(null);
 
     useEffect(() => {
         loadSuppliers();
@@ -64,10 +69,20 @@ export default function Suppliers() {
     };
 
     const handleDelete = (id: number) => {
-        if (confirm('Are you sure you want to remove this supplier?')) {
-            deleteSupplier(id);
+        const supplier = suppliers.find(s => s.id === id);
+        if (supplier) {
+            setSupplierToDelete(supplier);
+            setIsDeleteModalOpen(true);
         }
         setActiveMenu(null);
+    };
+
+    const confirmDelete = () => {
+        if (supplierToDelete) {
+            deleteSupplier(supplierToDelete.id);
+            setIsDeleteModalOpen(false);
+            setSupplierToDelete(null);
+        }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -106,12 +121,9 @@ export default function Suppliers() {
     };
 
     const inputClass = cn(
-        'w-full px-3 py-2.5 rounded-[var(--radius-md)]',
-        'bg-[var(--color-bg-input)] border border-[var(--color-border)]',
-        'text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]',
-        'focus:outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)]',
-        'transition-all duration-200'
+        'w-full h-14 px-5 rounded-3xl bg-zinc-100/50 border-none font-bold text-black outline-none ring-0 focus:ring-0 focus-visible:ring-0 focus:outline-none transition-all placeholder:text-zinc-300'
     );
+    const labelClass = "text-[10px] font-black text-zinc-400 uppercase tracking-[0.15em] ml-1 mb-1.5 block";
 
     return (
         <div className="space-y-5 animate-fadeIn">
@@ -237,68 +249,109 @@ export default function Suppliers() {
             )}
 
             {/* Supplier Form Modal */}
-            <Modal isOpen={isFormOpen} onClose={handleCloseForm} title={editingSupplier ? 'Edit Supplier' : 'Add New Supplier'}>
-                <form onSubmit={handleSubmit} className="space-y-4">
+            <FormModal
+                isOpen={isFormOpen}
+                onClose={handleCloseForm}
+                title={editingSupplier ? 'Edit Supplier' : 'New Supplier'}
+                description={editingSupplier ? 'Update supplier information' : 'Register a new supplier'}
+                icon={<Truck size={24} strokeWidth={1.5} />}
+            >
+                <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label className="text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 block">Company Name *</label>
-                        <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Fresh Farms Inc." className={inputClass} required autoFocus />
-                    </div>
-                    <div>
-                        <label className="text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 block">Contact Person</label>
-                        <input type="text" value={form.contact_person || ''} onChange={(e) => setForm({ ...form, contact_person: e.target.value })} placeholder="e.g. John Miller" className={inputClass} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 block">Phone</label>
-                            <input type="tel" value={form.phone || ''} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+1-555-0101" className={inputClass} />
-                        </div>
-                        <div>
-                            <label className="text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 block">Email</label>
-                            <input type="email" value={form.email || ''} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="contact@company.com" className={inputClass} />
+                        <label className={labelClass}>Company Name *</label>
+                        <div className="relative border-2 border-zinc-300 rounded-3xl overflow-hidden">
+                            <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Fresh Farms Inc." className={inputClass} required autoFocus />
                         </div>
                     </div>
                     <div>
-                        <label className="text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 block">Address</label>
-                        <input type="text" value={form.address || ''} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="123 Commerce St, City" className={inputClass} />
+                        <label className={labelClass}>Contact Person</label>
+                        <div className="relative border-2 border-zinc-300 rounded-3xl">
+                            <User size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" strokeWidth={1.5} />
+                            <input type="text" value={form.contact_person || ''} onChange={(e) => setForm({ ...form, contact_person: e.target.value })} placeholder="e.g. John Miller" className={inputClass + " pl-12"} />
+                        </div>
                     </div>
-                    <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--color-border)]">
-                        <Button variant="secondary" onClick={handleCloseForm}>Cancel</Button>
-                        <Button type="submit" icon={<Save size={15} />}>{editingSupplier ? 'Update' : 'Add Supplier'}</Button>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelClass}>Phone Number</label>
+                            <div className="relative border-2 border-zinc-300 rounded-3xl overflow-hidden">
+                                <Phone size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" strokeWidth={1.5} />
+                                <input type="tel" value={form.phone || ''} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+1-555-0101" className={inputClass + " pl-12"} />
+                            </div>
+                        </div>
+                        <div>
+                            <label className={labelClass}>Email Address</label>
+                            <div className="relative border-2 border-zinc-300 rounded-3xl overflow-hidden">
+                                <Mail size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" strokeWidth={1.5} />
+                                <input type="email" value={form.email || ''} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="contact@company.com" className={inputClass + " pl-12"} />
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label className={labelClass}>Physical Address</label>
+                        <div className="relative border-2 border-zinc-300 rounded-3xl overflow-hidden">
+                            <MapPin size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" strokeWidth={1.5} />
+                            <input type="text" value={form.address || ''} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="123 Commerce St, City" className={inputClass + " pl-12"} />
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-end gap-4 pt-6 mt-6 border-t border-zinc-100">
+                        <Button variant="ghost" onClick={handleCloseForm} className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-xs transition-all hover:bg-zinc-100 text-zinc-400 hover:text-black">Cancel</Button>
+                        <Button type="submit" icon={<Save size={18} />} className="flex-[2] h-14 rounded-2xl bg-black text-white font-black uppercase tracking-widest text-xs transition-all hover:bg-zinc-800 flex items-center justify-center gap-2 shadow-xl shadow-black/10 border-none">{editingSupplier ? 'Update' : 'Add Supplier'}</Button>
                     </div>
                 </form>
-            </Modal>
+            </FormModal>
 
             {/* Payment Modal */}
-            <Modal isOpen={isPaymentOpen} onClose={() => setIsPaymentOpen(false)} title="Register Payment">
-                <form onSubmit={handlePaymentSubmit} className="space-y-4">
-                    <div className="p-3 bg-[var(--color-bg-secondary)] rounded-[var(--radius-md)] border border-[var(--color-border)] mb-4">
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="text-[var(--color-text-muted)]">Current Balance:</span>
-                            <span className="font-medium text-[var(--color-text-primary)]">
-                                {selectedSupplierForPayment ? formatCurrency(selectedSupplierForPayment.balance) : '$0.00'}
-                            </span>
+            <FormModal
+                isOpen={isPaymentOpen}
+                onClose={() => setIsPaymentOpen(false)}
+                title="Register Payment"
+                description="Record a payment made to this supplier"
+                icon={<CreditCard size={24} strokeWidth={1.5} />}
+                maxWidth="max-w-md"
+            >
+                <form onSubmit={handlePaymentSubmit} className="space-y-6">
+                    <div className="p-4 bg-zinc-50 rounded-3xl border-2 border-zinc-300 space-y-1">
+                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Current Balance</span>
+                        <div className="text-xl font-black text-black">
+                            {selectedSupplierForPayment ? formatCurrency(selectedSupplierForPayment.balance) : '$0.00'}
                         </div>
                     </div>
                     <div>
-                        <label className="text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 block">Payment Amount ($)</label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            min="0.01"
-                            value={paymentAmount}
-                            onChange={(e) => setPaymentAmount(e.target.value)}
-                            placeholder="0.00"
-                            className={inputClass}
-                            required
-                            autoFocus
-                        />
+                        <label className={labelClass}>Payment Amount ($)</label>
+                        <div className="relative border-2 border-zinc-300 rounded-3xl">
+                            <DollarSign size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" strokeWidth={1.5} />
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                value={paymentAmount}
+                                onChange={(e) => setPaymentAmount(e.target.value)}
+                                placeholder="0.00"
+                                className={inputClass + " pl-12"}
+                                required
+                                autoFocus
+                            />
+                        </div>
                     </div>
-                    <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--color-border)]">
-                        <Button variant="secondary" onClick={() => setIsPaymentOpen(false)}>Cancel</Button>
-                        <Button type="submit" icon={<CreditCard size={15} />}>Confirm Payment</Button>
+                    <div className="flex items-center justify-end gap-3 pt-6 border-t border-zinc-100">
+                        <Button variant="ghost" onClick={() => setIsPaymentOpen(false)} className="flex-1 h-12 rounded-xl text-zinc-400 font-bold uppercase text-[10px] tracking-widest">Cancel</Button>
+                        <Button type="submit" icon={<CreditCard size={15} />} className="flex-[2] h-12 rounded-xl bg-black text-white font-bold uppercase text-[10px] tracking-widest shadow-lg shadow-black/10 border-none">Confirm Payment</Button>
                     </div>
                 </form>
-            </Modal>
+            </FormModal>
+
+            {/* Global Delete Confirmation Modal */}
+            <DeleteConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => {
+                    setIsDeleteModalOpen(false);
+                    setSupplierToDelete(null);
+                }}
+                onConfirm={confirmDelete}
+                title="Delete Supplier"
+                description="Are you sure you want to remove this supplier? This will also remove their transaction history."
+                itemName={supplierToDelete?.name}
+            />
         </div>
     );
 }

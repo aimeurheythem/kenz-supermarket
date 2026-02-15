@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Save } from 'lucide-react';
-import Modal from '@/components/common/Modal';
+import { useTranslation } from 'react-i18next';
+import { Package, Box, DollarSign, Barcode, Scale, Save, ChevronDown, Check } from 'lucide-react';
+import { FormModal } from '@/components/common/FormModal';
 import Button from '@/components/common/Button';
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import type { Product, ProductInput, Category } from '@/lib/types';
 
@@ -26,6 +33,7 @@ const defaultForm: ProductInput = {
 };
 
 export default function ProductFormModal({ isOpen, onClose, onSubmit, product, categories }: ProductFormModalProps) {
+    const { t } = useTranslation();
     const [form, setForm] = useState<ProductInput>(defaultForm);
     const isEditing = !!product;
 
@@ -54,173 +62,201 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
         onClose();
     };
 
-    const inputClass = cn(
-        'w-full px-3 py-2.5 rounded-[var(--radius-md)]',
-        'bg-[var(--color-bg-input)] border border-[var(--color-border)]',
-        'text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]',
-        'focus:outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)]',
-        'transition-all duration-200'
-    );
+    const inputWrapperClass = "space-y-2";
+    const labelClass = "text-[10px] font-black text-zinc-400 uppercase tracking-[0.15em] ml-1";
+    const inputClass = "w-full h-14 px-5 rounded-3xl bg-zinc-100/70 border-2 border-zinc-300 font-bold text-black outline-none !ring-0 focus:ring-0 focus-visible:ring-0 focus:outline-none transition-all placeholder:text-zinc-300";
+    const selectTriggerClass = "w-full h-14 px-5 flex items-center justify-between rounded-3xl bg-zinc-100/50 border-2 border-zinc-300 font-bold text-black outline-none !ring-0 focus:!ring-0 focus-visible:!ring-0 focus:outline-none transition-all cursor-pointer group";
+    const sectionTitleClass = "flex items-center gap-3 mb-6";
+    const sectionLineClass = "h-px bg-zinc-100 flex-1";
+    const sectionLabelClass = "text-[10px] font-black uppercase tracking-[0.2em] text-zinc-300";
 
-    const labelClass = 'text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 block';
+    const currentCategory = categories.find(c => c.id === form.category_id);
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? 'Edit Product' : 'Add New Product'} maxWidth="max-w-2xl">
-            <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Row 1: Name + Barcode */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className={labelClass}>Product Name *</label>
-                        <input
-                            type="text"
-                            value={form.name}
-                            onChange={(e) => setForm({ ...form, name: e.target.value })}
-                            placeholder="e.g. Whole Milk 1L"
-                            className={inputClass}
-                            required
-                            autoFocus
-                        />
+        <FormModal
+            isOpen={isOpen}
+            onClose={onClose}
+            title={isEditing ? t('inventory.form.edit_title') : t('inventory.form.new_title')}
+            description={isEditing ? t('inventory.form.edit_desc') : t('inventory.form.new_desc')}
+            icon={isEditing ? <Box size={20} strokeWidth={2} /> : <Package size={20} strokeWidth={2} />}
+        >
+            <form id="product-form" onSubmit={handleSubmit} className="space-y-10">
+                {/* Basic Information */}
+                <div className="space-y-6">
+                    <div className={sectionTitleClass}>
+                        <span className={sectionLabelClass}>{t('inventory.form.sections.basic')}</span>
+                        <div className={sectionLineClass} />
                     </div>
-                    <div>
-                        <label className={labelClass}>Barcode</label>
-                        <input
-                            type="text"
-                            value={form.barcode || ''}
-                            onChange={(e) => setForm({ ...form, barcode: e.target.value })}
-                            placeholder="e.g. 5901234123457"
-                            className={inputClass}
-                        />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className={inputWrapperClass}>
+                            <label className={labelClass}>{t('inventory.form.labels.name')}</label>
+                            <input
+                                type="text"
+                                value={form.name}
+                                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                placeholder={t('inventory.form.placeholders.name_eg')}
+                                className={inputClass}
+                                required
+                            />
+                        </div>
+                        <div className={inputWrapperClass}>
+                            <label className={labelClass}>{t('inventory.form.labels.barcode')}</label>
+                            <div className="relative">
+                                <Barcode size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400" strokeWidth={1.5} />
+                                <input
+                                    type="text"
+                                    value={form.barcode || ''}
+                                    onChange={(e) => setForm({ ...form, barcode: e.target.value })}
+                                    placeholder={t('inventory.form.placeholders.scan_type')}
+                                    className={inputClass + " pl-12 font-mono text-sm"}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className={inputWrapperClass}>
+                            <label className={labelClass}>{t('inventory.form.labels.category')}</label>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger className={selectTriggerClass}>
+                                    <span className={cn(form.category_id ? "text-black" : "text-zinc-300")}>
+                                        {currentCategory ? t(`categories.${currentCategory.name}`, { defaultValue: currentCategory.name }) : t('inventory.form.placeholders.select_category')}
+                                    </span>
+                                    <ChevronDown size={14} className="text-zinc-400 group-hover:text-black transition-colors" />
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-white border border-zinc-100 rounded-2xl p-1 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                                    <DropdownMenuItem
+                                        onClick={() => setForm({ ...form, category_id: undefined })}
+                                        className="text-zinc-400 hover:text-black focus:bg-zinc-50 rounded-xl px-4 py-3 font-bold transition-all cursor-pointer"
+                                    >
+                                        {t('inventory.form.placeholders.none')}
+                                    </DropdownMenuItem>
+                                    {categories.map((cat) => (
+                                        <DropdownMenuItem
+                                            key={cat.id}
+                                            onClick={() => setForm({ ...form, category_id: cat.id })}
+                                            className={cn(
+                                                "flex items-center justify-between px-4 py-3 rounded-xl font-bold transition-all cursor-pointer",
+                                                form.category_id === cat.id ? "text-black bg-zinc-50" : "text-zinc-400 hover:text-black focus:bg-zinc-50"
+                                            )}
+                                        >
+                                            {t(`categories.${cat.name}`, { defaultValue: cat.name })}
+                                            {form.category_id === cat.id && <Check size={14} className="text-black" />}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                        <div className={inputWrapperClass}>
+                            <label className={labelClass}>{t('inventory.form.labels.unit')}</label>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger className={selectTriggerClass}>
+                                    <div className="flex items-center gap-4">
+                                        <Scale size={18} className="text-zinc-400" />
+                                        <span className="text-black uppercase tracking-wider text-xs">
+                                            {t(`inventory.units.${form.unit || 'piece'}`)}
+                                        </span>
+                                    </div>
+                                    <ChevronDown size={14} className="text-zinc-400 group-hover:text-black transition-colors" />
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-white border border-zinc-100 rounded-2xl p-1 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                                    {['piece', 'kg', 'g', 'l', 'ml', 'box', 'pack'].map((u) => (
+                                        <DropdownMenuItem
+                                            key={u}
+                                            onClick={() => setForm({ ...form, unit: u })}
+                                            className={cn(
+                                                "px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-[0.2em] transition-all cursor-pointer",
+                                                form.unit === u ? "text-black bg-zinc-50" : "text-zinc-400 hover:text-black focus:bg-zinc-50"
+                                            )}
+                                        >
+                                            {t(`inventory.units.${u}`)}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     </div>
                 </div>
 
-                {/* Row 2: Category + Unit */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className={labelClass}>Category</label>
-                        <select
-                            value={form.category_id || ''}
-                            onChange={(e) => setForm({ ...form, category_id: e.target.value ? Number(e.target.value) : undefined })}
-                            className={inputClass}
-                        >
-                            <option value="">No Category</option>
-                            {categories.map((cat) => (
-                                <option key={cat.id} value={cat.id}>{cat.name}</option>
-                            ))}
-                        </select>
+                {/* Inventory & Pricing */}
+                <div className="space-y-6">
+                    <div className={sectionTitleClass}>
+                        <span className={sectionLabelClass}>{t('inventory.form.sections.inventory_pricing')}</span>
+                        <div className={sectionLineClass} />
                     </div>
-                    <div>
-                        <label className={labelClass}>Unit</label>
-                        <select
-                            value={form.unit || 'piece'}
-                            onChange={(e) => setForm({ ...form, unit: e.target.value })}
-                            className={inputClass}
-                        >
-                            <option value="piece">Piece</option>
-                            <option value="kg">Kilogram (kg)</option>
-                            <option value="g">Gram (g)</option>
-                            <option value="l">Liter (L)</option>
-                            <option value="ml">Milliliter (mL)</option>
-                            <option value="box">Box</option>
-                            <option value="pack">Pack</option>
-                        </select>
-                    </div>
-                </div>
 
-                {/* Row 3: Cost + Selling Price */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className={labelClass}>Cost Price ($) *</label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={form.cost_price}
-                            onChange={(e) => setForm({ ...form, cost_price: parseFloat(e.target.value) || 0 })}
-                            className={inputClass}
-                            required
-                        />
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className={inputWrapperClass}>
+                            <label className={labelClass}>{t('inventory.form.labels.cost')}</label>
+                            <div className="relative">
+                                <DollarSign size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400" strokeWidth={1.5} />
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={form.cost_price}
+                                    onChange={(e) => setForm({ ...form, cost_price: parseFloat(e.target.value) || 0 })}
+                                    className={inputClass + " pl-10"}
+                                />
+                            </div>
+                        </div>
+                        <div className={inputWrapperClass}>
+                            <label className={labelClass}>{t('inventory.form.labels.selling')}</label>
+                            <div className="relative">
+                                <DollarSign size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-500" strokeWidth={2} />
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={form.selling_price}
+                                    onChange={(e) => setForm({ ...form, selling_price: parseFloat(e.target.value) || 0 })}
+                                    className={inputClass + " pl-10 bg-zinc-200/50"}
+                                />
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label className={labelClass}>Selling Price ($) *</label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={form.selling_price}
-                            onChange={(e) => setForm({ ...form, selling_price: parseFloat(e.target.value) || 0 })}
-                            className={inputClass}
-                            required
-                        />
-                    </div>
-                </div>
 
-                {/* Profit margin indicator */}
-                {form.selling_price > 0 && form.cost_price > 0 && (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-[var(--radius-md)] bg-[var(--color-bg-hover)]">
-                        <span className="text-xs text-[var(--color-text-muted)]">Profit Margin:</span>
-                        <span
-                            className="text-xs font-semibold"
-                            style={{
-                                color:
-                                    ((form.selling_price - form.cost_price) / form.selling_price) * 100 > 20
-                                        ? 'var(--color-success)'
-                                        : 'var(--color-warning)',
-                            }}
-                        >
-                            {(((form.selling_price - form.cost_price) / form.selling_price) * 100).toFixed(1)}%
-                        </span>
-                        <span className="text-xs text-[var(--color-text-muted)]">
-                            (${(form.selling_price - form.cost_price).toFixed(2)} per unit)
-                        </span>
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className={inputWrapperClass}>
+                            <label className={labelClass}>{t('inventory.form.labels.initial_stock')}</label>
+                            <input
+                                type="number"
+                                value={form.stock_quantity}
+                                onChange={(e) => setForm({ ...form, stock_quantity: parseInt(e.target.value) || 0 })}
+                                className={inputClass}
+                            />
+                        </div>
+                        <div className={inputWrapperClass}>
+                            <label className={labelClass}>{t('inventory.form.labels.low_stock_alert')}</label>
+                            <input
+                                type="number"
+                                value={form.reorder_level}
+                                onChange={(e) => setForm({ ...form, reorder_level: parseInt(e.target.value) || 0 })}
+                                className={inputClass + " bg-red-100/10 text-red-600"}
+                            />
+                        </div>
                     </div>
-                )}
-
-                {/* Row 4: Stock + Reorder Level */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className={labelClass}>Current Stock</label>
-                        <input
-                            type="number"
-                            min="0"
-                            value={form.stock_quantity || 0}
-                            onChange={(e) => setForm({ ...form, stock_quantity: parseInt(e.target.value) || 0 })}
-                            className={inputClass}
-                        />
-                    </div>
-                    <div>
-                        <label className={labelClass}>Reorder Level</label>
-                        <input
-                            type="number"
-                            min="0"
-                            value={form.reorder_level || 10}
-                            onChange={(e) => setForm({ ...form, reorder_level: parseInt(e.target.value) || 0 })}
-                            className={inputClass}
-                        />
-                    </div>
-                </div>
-
-                {/* Description */}
-                <div>
-                    <label className={labelClass}>Description</label>
-                    <textarea
-                        value={form.description || ''}
-                        onChange={(e) => setForm({ ...form, description: e.target.value })}
-                        placeholder="Optional product description..."
-                        rows={2}
-                        className={cn(inputClass, 'resize-none')}
-                    />
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--color-border)]">
-                    <Button variant="secondary" onClick={onClose}>
-                        Cancel
+                <div className="flex gap-4 pt-4">
+                    <Button
+                        variant="ghost"
+                        onClick={onClose}
+                        className="flex-1 h-16 rounded-2xl font-black uppercase tracking-widest text-xs transition-all hover:bg-zinc-100 text-zinc-400 hover:text-black"
+                    >
+                        {t('inventory.form.buttons.cancel')}
                     </Button>
-                    <Button type="submit" icon={<Save size={15} />}>
-                        {isEditing ? 'Update Product' : 'Add Product'}
+                    <Button
+                        type="submit"
+                        className="flex-[2] h-16 rounded-2xl bg-black text-white font-black uppercase tracking-widest text-xs transition-all hover:bg-black/90 flex items-center justify-center gap-2 shadow-none border-none"
+                    >
+                        <Save size={18} />
+                        {isEditing ? t('inventory.form.buttons.save') : t('inventory.form.buttons.create')}
                     </Button>
                 </div>
             </form>
-        </Modal>
+        </FormModal>
     );
 }
+
+

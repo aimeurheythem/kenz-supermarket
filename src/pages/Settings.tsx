@@ -13,6 +13,10 @@ export default function Settings() {
 
     // Local state for password change
     const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deletePassword, setDeletePassword] = useState('');
+    const [deleteError, setDeleteError] = useState('');
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     // Local state for form handling
     const [formData, setFormData] = useState<Record<string, string>>({});
@@ -94,8 +98,28 @@ export default function Settings() {
     };
 
     const handleDeleteAccount = async () => {
-        if (!confirm('⚠️ WARNING: This will permanently delete ALL data (users, products, sales, everything) and restart the setup wizard. Are you sure?')) return;
-        if (!confirm('This action is IRREVERSIBLE. Click OK to confirm deletion.')) return;
+        if (!deletePassword) {
+            setDeleteError('Please enter your password');
+            return;
+        }
+
+        setDeleteLoading(true);
+        setDeleteError('');
+
+        // Verify password using login
+        const { login } = useAuthStore.getState();
+        const isValid = await login(user!.username, deletePassword);
+        if (!isValid) {
+            setDeleteError('Incorrect password. Account deletion denied.');
+            setDeleteLoading(false);
+            return;
+        }
+
+        // Final confirmation
+        if (!confirm('⚠️ LAST WARNING: All data will be permanently deleted. This cannot be undone. Proceed?')) {
+            setDeleteLoading(false);
+            return;
+        }
 
         try {
             const { execute } = await import('../../database/db');
@@ -132,7 +156,8 @@ export default function Settings() {
             window.location.reload();
         } catch (error) {
             console.error('Failed to delete account:', error);
-            alert('Failed to delete account. Please try again.');
+            setDeleteError('Failed to delete account. Please try again.');
+            setDeleteLoading(false);
         }
     };
 
@@ -272,13 +297,47 @@ export default function Settings() {
                                 <p className="text-sm text-[var(--color-text-muted)] mb-4">
                                     This will permanently delete your account, all products, sales, and every piece of data. The app will restart from scratch with the setup wizard.
                                 </p>
-                                <button
-                                    onClick={handleDeleteAccount}
-                                    className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
-                                >
-                                    <Trash2 size={16} />
-                                    Delete Account & All Data
-                                </button>
+
+                                {!showDeleteConfirm ? (
+                                    <button
+                                        onClick={() => setShowDeleteConfirm(true)}
+                                        className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
+                                    >
+                                        <Trash2 size={16} />
+                                        Delete Account & All Data
+                                    </button>
+                                ) : (
+                                    <div className="p-4 border-2 border-red-300 bg-red-50 rounded-xl space-y-3">
+                                        <p className="text-sm font-semibold text-red-700">Enter your password to confirm deletion:</p>
+                                        <input
+                                            type="password"
+                                            value={deletePassword}
+                                            onChange={e => { setDeletePassword(e.target.value); setDeleteError(''); }}
+                                            placeholder="Enter your password"
+                                            className="w-full px-3 py-2.5 rounded-lg bg-white border border-red-300 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all text-sm"
+                                            autoFocus
+                                        />
+                                        {deleteError && (
+                                            <p className="text-sm text-red-600 font-medium">{deleteError}</p>
+                                        )}
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={handleDeleteAccount}
+                                                disabled={deleteLoading}
+                                                className="px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
+                                            >
+                                                <Trash2 size={16} />
+                                                {deleteLoading ? 'Deleting...' : 'Confirm Delete'}
+                                            </button>
+                                            <button
+                                                onClick={() => { setShowDeleteConfirm(false); setDeletePassword(''); setDeleteError(''); }}
+                                                className="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-semibold rounded-lg transition-colors"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                         </div>

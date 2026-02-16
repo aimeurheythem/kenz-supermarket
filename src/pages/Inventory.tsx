@@ -178,7 +178,7 @@ export default function Inventory() {
     };
 
     return (
-        <div className="relative flex flex-col h-full gap-8 p-6 lg:p-8 animate-fadeIn bg-white rounded-[3rem] mt-4 min-h-[85vh]">
+        <div className="relative flex flex-col h-full gap-8 p-6 lg:p-8 animate-fadeIn mt-4 min-h-[85vh]">
             {/* Grid Background (Matching Dashboard/POS) */}
             <div className="absolute inset-0 rounded-[3rem] pointer-events-none opacity-[0.15]"
                 style={{

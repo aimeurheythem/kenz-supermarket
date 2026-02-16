@@ -100,7 +100,7 @@ export default function Dashboard() {
     return (
         <div className="space-y-8 animate-fadeIn pb-12 h-full flex flex-col mt-8">
             {/* NEW: Welcome Card (Full Width) */}
-            <div className="relative overflow-hidden bg-white p-8 rounded-[3rem] animate-fadeIn flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all duration-300">
+            <div className="relative overflow-hidden bg-white border-2 border-gray-200 p-8 rounded-[4rem] animate-fadeIn flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all duration-300">
                 {/* Grid Background */}
                 <div className="absolute inset-0 pointer-events-none opacity-40"
                     style={{

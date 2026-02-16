@@ -17,12 +17,16 @@
      ============================================= */
 
   /* Background Colors */
-  --bg-primary: #FFFFFF;
-  /* Pure white main background */
-  --bg-secondary: #F9FAFB;
-  /* Very light gray for sidebar/cards */
-  --bg-tertiary: #F3F4F6;
-  /* Slightly darker for hover/active */
+  /* Option 1: Cool Soft (Current) - #F9FAFB */
+  /* Option 2: Warm Soft (Stone) - #FAFAF9 */
+  /* Option 3: Neutral Soft - #F5F5F5 */
+
+  --bg-primary: #FAFAF9;
+  /* Warm Soft White (Stone-50) */
+  --bg-secondary: #F5F5F4;
+  /* Warm Light Gray (Stone-100) */
+  --bg-tertiary: #E7E5E4;
+  /* Stone-200 */
   --bg-input: #FFFFFF;
   /* White inputs */
 

@@ -182,9 +182,9 @@ export default function POS() {
     const cartTotal = getCartTotal();
 
     return (
-        <div className="relative flex flex-col lg:flex-row items-start gap-8 p-6 lg:p-8 animate-fadeIn bg-white rounded-[3rem] mt-4">
+        <div className="relative flex flex-col lg:flex-row items-start gap-8 p-6 lg:p-8 animate-fadeIn mt-4">
             {/* Grid Background (Matching Dashboard) */}
-            <div className="absolute inset-0 pointer-events-none opacity-[0.15]"
+            <div className="absolute inset-0 pointer-events-none opacity-[0.15] rounded-[3rem]"
                 style={{
                     backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 1px, transparent 1px)`,
                     backgroundSize: '32px 32px',

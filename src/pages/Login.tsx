@@ -11,8 +11,8 @@ export default function Login() {
     const location = useLocation();
     const from = location.state?.from?.pathname || '/';
 
-    const [username, setUsername] = useState('admin');
-    const [password, setPassword] = useState('admin123');
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState('');
@@ -165,14 +165,8 @@ export default function Login() {
                             {loading ? t('login.logging_in', 'Logging in...') : t('login.login_button', 'Login')}
                         </button>
 
-                        {/* Demo Credentials */}
-                        <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                            <p className="text-xs text-gray-500 font-semibold mb-2">Demo Credentials:</p>
-                            <div className="space-y-1 text-xs text-gray-600">
-                                <p><span className="font-bold">Owner:</span> admin / admin123</p>
-                                <p><span className="font-bold">Cashiers:</span> Click "Cashier Login" button above</p>
-                            </div>
-                        </div>
+
+
 
                     </form>
                 </div>

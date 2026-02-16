@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { UserRepo } from '../database/repositories/user.repo';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import AppShell from './components/layout/AppShell';
@@ -14,6 +15,7 @@ import Users from './pages/Users';
 import Customers from './pages/Customers';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
+import Onboarding from './pages/Onboarding';
 import Credit from './pages/Credit';
 import BarcodeLabels from './pages/BarcodeLabels';
 import AuditLogs from './pages/AuditLogs';
@@ -70,6 +72,7 @@ export default function App() {
     const { isAuthenticated, user, currentSession, logout } = useAuthStore();
     const { loadSettings } = useSettingsStore();
     const [showCashierLogin, setShowCashierLogin] = useState(false);
+    const [needsSetup, setNeedsSetup] = useState<boolean | null>(null);
 
     useEffect(() => {
         loadSettings();
@@ -80,6 +83,15 @@ export default function App() {
         document.documentElement.dir = dir;
         document.documentElement.lang = i18n.language;
     }, [i18n.language]);
+
+    // Check for first-time setup
+    useEffect(() => {
+        const checkSetup = async () => {
+            const hasUsers = await UserRepo.hasAnyUsers();
+            setNeedsSetup(!hasUsers);
+        };
+        checkSetup();
+    }, []);
 
     // Reset cashier login modal state when not authenticated
     useEffect(() => {
@@ -97,18 +109,12 @@ export default function App() {
             return;
         }
 
-        // Only show cashier login modal if:
-        // 1. User is authenticated
-        // 2. User is a cashier
-        // 3. No active session
-        // 4. Not currently on the login page (to avoid conflict with Login.tsx modal)
         const isLoginPage = window.location.hash === '#/login' || window.location.pathname === '/login';
 
         if (isAuthenticated && user?.role === 'cashier' && !currentSession && !isLoginPage) {
             console.log('Showing cashier session modal from App.tsx');
             setShowCashierLogin(true);
         } else if (isLoginPage) {
-            // Close the App.tsx modal if we're on login page
             setShowCashierLogin(false);
         }
     }, [isAuthenticated, user, currentSession, logout]);
@@ -120,9 +126,25 @@ export default function App() {
         return '/';
     };
 
+    // Show nothing until we know if setup is needed
+    if (needsSetup === null) {
+        return null;
+    }
+
+    // Force redirect to onboarding if no users exist
+    if (needsSetup) {
+        return (
+            <Routes>
+                <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="*" element={<Navigate to="/onboarding" replace />} />
+            </Routes>
+        );
+    }
+
     return (
         <>
             <Routes>
+                <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="/login" element={<Login />} />
 
                 <Route

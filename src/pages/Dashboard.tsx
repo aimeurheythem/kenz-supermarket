@@ -166,9 +166,7 @@ export default function Dashboard() {
                                     onClick={() => navigate(shortcut.path)}
                                     className={cn(
                                         "p-6 rounded-[30px] transition-all duration-500 ease-out cursor-pointer group relative overflow-hidden",
-                                        "bg-[linear-gradient(to_bottom,black_50%,#ffee00_50%)] bg-[length:100%_250%] bg-no-repeat bg-top hover:bg-bottom",
-                                        // clean gradient approach: shows black (top half) initially, slides to yellow (bottom half) on hover. 
-                                        // 250% size ensures plenty of buffer so we don't accidentally see the other color due to subpixel rendering.
+                                        "bg-[linear-gradient(to_bottom,black_50%,#ffee00_50%)] bg-[length:100%_250%] bg-no-repeat bg-top hover:bg-bottom"
                                     )}
                                 >
                                     {/* Content Layer */}

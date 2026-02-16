@@ -21,6 +21,8 @@ interface AuthStore {
     loginCashier: (cashierId: number, pinCode: string) => Promise<boolean>;
     startCashierSession: (cashierId: number, openingCash: number) => Promise<CashierSession | null>;
     closeCashierSession: (closingCash: number, notes?: string) => Promise<void>;
+    updateProfile: (data: Partial<User>) => Promise<boolean>;
+    changePassword: (current: string, newPass: string) => Promise<boolean>;
     logout: () => void;
     checkAuth: () => boolean;
     hasPermission: (permission: Permission) => boolean;
@@ -146,6 +148,34 @@ export const useAuthStore = create<AuthStore>()(
                     get().closeCashierSession(0, 'Auto-closed on logout');
                 }
                 set({ user: null, isAuthenticated: false, currentSession: null, error: null });
+            },
+
+            updateProfile: async (data: Partial<User>) => {
+                const currentUser = get().user;
+                if (!currentUser) return false;
+
+                try {
+                    // Type assertion needed because User model has 'null' for pin_code while UpdateInput expects 'undefined'
+                    const updatedUser = await UserRepo.update(currentUser.id, data as any);
+                    set({ user: updatedUser });
+                    return true;
+                } catch (error) {
+                    console.error('Failed to update profile:', error);
+                    return false;
+                }
+            },
+
+            changePassword: async (current: string, newPass: string) => {
+                const currentUser = get().user;
+                if (!currentUser) return false;
+
+                try {
+                    const success = await UserRepo.updatePassword(currentUser.id, current, newPass);
+                    return success;
+                } catch (error) {
+                    console.error('Failed to change password:', error);
+                    return false;
+                }
             },
 
             checkAuth: () => {

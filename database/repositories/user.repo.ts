@@ -25,6 +25,11 @@ async function verifyPassword(password: string, hash: string): Promise<boolean> 
 }
 
 export const UserRepo = {
+    async hasAnyUsers(): Promise<boolean> {
+        const result = await get<{ count: number }>('SELECT COUNT(*) as count FROM users');
+        return (result?.count ?? 0) > 0;
+    },
+
     async getAll(): Promise<User[]> {
         return query<User>('SELECT * FROM users ORDER BY full_name');
     },
@@ -90,10 +95,10 @@ export const UserRepo = {
         if (input.username !== undefined) { fields.push('username = ?'); values.push(input.username); }
         if (input.full_name !== undefined) { fields.push('full_name = ?'); values.push(input.full_name); }
         if (input.role !== undefined) { fields.push('role = ?'); values.push(input.role); }
-        if (input.password !== undefined) { 
+        if (input.password !== undefined) {
             const hashedPassword = await hashPassword(input.password);
-            fields.push('password_hash = ?'); 
-            values.push(hashedPassword); 
+            fields.push('password_hash = ?');
+            values.push(hashedPassword);
         }
         if (input.pin_code !== undefined) { fields.push('pin_code = ?'); values.push(input.pin_code); }
         if (input.is_active !== undefined) { fields.push('is_active = ?'); values.push(input.is_active); }
@@ -105,22 +110,21 @@ export const UserRepo = {
         return this.getById(id) as Promise<User>;
     },
 
+    async updatePassword(id: number, currentPassword: string, newPassword: string): Promise<boolean> {
+        const user = await this.getById(id);
+        if (!user) return false;
+
+        const isValid = await verifyPassword(currentPassword, user.password_hash);
+        if (!isValid) return false;
+
+        const newHash = await hashPassword(newPassword);
+        await execute("UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?", [newHash, id]);
+        return true;
+    },
+
     async delete(id: number): Promise<void> {
         await execute('UPDATE users SET is_active = 0 WHERE id = ?', [id]);
     },
 
-    /**
-     * Seed default admin user if no users exist.
-     */
-    async seedDefault(): Promise<void> {
-        const admin = await this.getByUsername('admin');
-        if (!admin) {
-            await this.create({
-                username: 'admin',
-                password: 'admin123',
-                full_name: 'System Administrator',
-                role: 'admin',
-            });
-        }
-    },
+
 };

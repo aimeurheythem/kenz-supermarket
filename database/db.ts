@@ -150,7 +150,7 @@ function saveDatabaseBinary(): void {
 }
 
 /** Force an immediate save (bypass debounce). Used before app close. */
-async function saveDatabaseImmediate(): Promise<void> {
+export async function saveDatabaseImmediate(): Promise<void> {
     if (!sqlJsDb) return;
     if (saveTimer) {
         clearTimeout(saveTimer);

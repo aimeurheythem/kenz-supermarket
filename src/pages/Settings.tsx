@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Database, Upload, Download, Settings as SettingsIcon, Globe, Receipt, DollarSign, Store } from 'lucide-react';
+import { Save, Database, Upload, Download, Settings as SettingsIcon, Globe, Receipt, DollarSign, Store, User, Trash2 } from 'lucide-react';
 import Button from '@/components/common/Button';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
@@ -7,9 +7,12 @@ import { backupDatabase, restoreDatabase, triggerSave } from '../../database/db'
 import { cn } from '@/lib/utils';
 
 export default function Settings() {
-    const { user } = useAuthStore();
+    const { user, updateProfile, changePassword } = useAuthStore();
     const { settings, loadSettings, updateSettings, isLoading } = useSettingsStore();
-    const [activeTab, setActiveTab] = useState<'general' | 'localization' | 'sales' | 'receipt' | 'system'>('general');
+    const [activeTab, setActiveTab] = useState<'account' | 'general' | 'localization' | 'sales' | 'receipt' | 'system'>('account');
+
+    // Local state for password change
+    const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
 
     // Local state for form handling
     const [formData, setFormData] = useState<Record<string, string>>({});
@@ -20,15 +23,51 @@ export default function Settings() {
 
     useEffect(() => {
         setFormData(settings);
-    }, [settings]);
+        if (user) {
+            setFormData(prev => ({
+                ...prev,
+                'user.name': user.full_name,
+                'user.username': user.username
+            }));
+        }
+    }, [settings, user]);
 
     const handleChange = (key: string, value: string) => {
         setFormData(prev => ({ ...prev, [key]: value }));
     };
 
     const handleSave = async () => {
+        // Save Settings
         await updateSettings(formData);
+
+        // Update User Profile if changed
+        if (user && (formData['user.name'] !== user.full_name || formData['user.username'] !== user.username)) {
+            await updateProfile({
+                full_name: formData['user.name'],
+                username: formData['user.username']
+            });
+        }
+
         alert('Settings saved successfully!');
+    };
+
+    const handlePasswordChange = async () => {
+        if (passwords.new !== passwords.confirm) {
+            alert('New passwords do not match');
+            return;
+        }
+        if (passwords.new.length < 4) {
+            alert('Password must be at least 4 characters');
+            return;
+        }
+
+        const success = await changePassword(passwords.current, passwords.new);
+        if (success) {
+            alert('Password changed successfully');
+            setPasswords({ current: '', new: '', confirm: '' });
+        } else {
+            alert('Failed to change password. Check current password.');
+        }
     };
 
     const handleBackup = async () => {
@@ -54,6 +93,49 @@ export default function Settings() {
         }
     };
 
+    const handleDeleteAccount = async () => {
+        if (!confirm('⚠️ WARNING: This will permanently delete ALL data (users, products, sales, everything) and restart the setup wizard. Are you sure?')) return;
+        if (!confirm('This action is IRREVERSIBLE. Click OK to confirm deletion.')) return;
+
+        try {
+            const { execute } = await import('../../database/db');
+            // Delete all data from all tables (child tables first for FK constraints)
+            const tables = [
+                'sale_items',
+                'sales',
+                'cashier_sessions',
+                'purchase_order_items',
+                'purchase_orders',
+                'stock_movements',
+                'product_batches',
+                'pos_quick_access',
+                'products',
+                'categories',
+                'suppliers',
+                'customer_transactions',
+                'customers',
+                'expenses',
+                'audit_logs',
+                'app_settings',
+                'users',
+            ];
+            for (const table of tables) {
+                try { await execute(`DELETE FROM ${table}`); } catch (_) { /* table may not exist */ }
+            }
+
+            // Force persist to disk BEFORE reloading (execute uses debounced save which won't complete in time)
+            const { saveDatabaseImmediate } = await import('../../database/db');
+            await saveDatabaseImmediate();
+
+            // Clear auth state and reload — triggers onboarding
+            localStorage.removeItem('auth-storage');
+            window.location.reload();
+        } catch (error) {
+            console.error('Failed to delete account:', error);
+            alert('Failed to delete account. Please try again.');
+        }
+    };
+
     if (user?.role !== 'admin') {
         return (
             <div className="flex flex-col items-center justify-center h-full text-[var(--color-text-muted)]">
@@ -65,6 +147,7 @@ export default function Settings() {
     }
 
     const tabs = [
+        { id: 'account', label: 'My Account', icon: User },
         { id: 'general', label: 'General', icon: Store },
         { id: 'localization', label: 'Localization', icon: Globe },
         { id: 'sales', label: 'Sales & Tax', icon: DollarSign },
@@ -101,6 +184,106 @@ export default function Settings() {
 
                 {/* Content Area */}
                 <div className="flex-1 space-y-6">
+                    {/* Account Settings */}
+                    {activeTab === 'account' && (
+                        <div className="bg-[var(--color-bg-card)] p-6 rounded-xl border border-[var(--color-border)] shadow-sm animate-fadeIn space-y-8">
+
+                            {/* Profile Info */}
+                            <div>
+                                <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                                    <User size={20} className="text-blue-600" />
+                                    Profile Information
+                                </h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Full Name</label>
+                                        <input
+                                            type="text"
+                                            value={formData['user.name'] || ''}
+                                            onChange={e => handleChange('user.name', e.target.value)}
+                                            className="w-full px-3 py-2.5 rounded-lg bg-[var(--color-bg-input)] border border-[var(--color-border)] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Username</label>
+                                        <input
+                                            type="text"
+                                            value={formData['user.username'] || ''}
+                                            onChange={e => handleChange('user.username', e.target.value)}
+                                            className="w-full px-3 py-2.5 rounded-lg bg-[var(--color-bg-input)] border border-[var(--color-border)] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="mt-4 flex justify-end">
+                                    <Button onClick={handleSave} icon={<Save size={16} />}>Update Profile</Button>
+                                </div>
+                            </div>
+
+                            <div className="w-full h-px bg-[var(--color-border)]" />
+
+                            {/* Password Change */}
+                            <div>
+                                <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                                    <SettingsIcon size={20} className="text-red-500" />
+                                    Change Password
+                                </h2>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Current Password</label>
+                                        <input
+                                            type="password"
+                                            value={passwords.current}
+                                            onChange={e => setPasswords({ ...passwords, current: e.target.value })}
+                                            className="w-full px-3 py-2.5 rounded-lg bg-[var(--color-bg-input)] border border-[var(--color-border)] focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">New Password</label>
+                                        <input
+                                            type="password"
+                                            value={passwords.new}
+                                            onChange={e => setPasswords({ ...passwords, new: e.target.value })}
+                                            className="w-full px-3 py-2.5 rounded-lg bg-[var(--color-bg-input)] border border-[var(--color-border)] focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Confirm Password</label>
+                                        <input
+                                            type="password"
+                                            value={passwords.confirm}
+                                            onChange={e => setPasswords({ ...passwords, confirm: e.target.value })}
+                                            className="w-full px-3 py-2.5 rounded-lg bg-[var(--color-bg-input)] border border-[var(--color-border)] focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="mt-4 flex justify-end">
+                                    <Button onClick={handlePasswordChange} icon={<Save size={16} />} variant="secondary">Change Password</Button>
+                                </div>
+                            </div>
+
+                            <div className="w-full h-px bg-[var(--color-border)]" />
+
+                            {/* Danger Zone */}
+                            <div>
+                                <h2 className="text-lg font-bold mb-2 flex items-center gap-2 text-red-600">
+                                    <Trash2 size={20} />
+                                    Danger Zone
+                                </h2>
+                                <p className="text-sm text-[var(--color-text-muted)] mb-4">
+                                    This will permanently delete your account, all products, sales, and every piece of data. The app will restart from scratch with the setup wizard.
+                                </p>
+                                <button
+                                    onClick={handleDeleteAccount}
+                                    className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
+                                >
+                                    <Trash2 size={16} />
+                                    Delete Account & All Data
+                                </button>
+                            </div>
+
+                        </div>
+                    )}
+
                     {/* General Settings */}
                     {activeTab === 'general' && (
                         <div className="bg-[var(--color-bg-card)] p-6 rounded-xl border border-[var(--color-border)] shadow-sm animate-fadeIn">

@@ -1,3 +1,4 @@
+// Fixed POS.tsx
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
     ShoppingCart,
@@ -26,6 +27,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useQuickAccessStore } from '@/stores/useQuickAccessStore';
 import Portal from '@/components/common/Portal';
 import Button from '@/components/common/Button';
+import BarcodeScanner from '@/components/common/BarcodeScanner';
 import type { Product, QuickAccessItem, QuickAccessOption } from '@/lib/types';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -54,6 +56,7 @@ export default function POS() {
     const [lastSale, setLastSale] = useState<Sale | null>(null);
     const [lastSaleItems, setLastSaleItems] = useState<SaleItem[]>([]);
     const [printReceipt, setPrintReceipt] = useState(true);
+    const [showScanner, setShowScanner] = useState(false);
 
     const [currentTime, setCurrentTime] = useState(new Date());
     useEffect(() => {
@@ -128,7 +131,6 @@ export default function POS() {
 
     const handleBeforeCheckout = useCallback(() => {
         if (cart.length === 0) return;
-        // Skip simulation, go straight to checkout -> receipt
         handleFinalizeCheckout();
     }, [cart.length, printReceipt]);
 
@@ -136,10 +138,9 @@ export default function POS() {
         try {
             const sessionId = getCurrentSessionId();
 
-            // Capture items for receipt before they are cleared
             const currentItems: SaleItem[] = cart.map((item) => ({
-                id: 0, // Placeholder
-                sale_id: 0, // Placeholder
+                id: 0,
+                sale_id: 0,
                 product_id: item.product.id,
                 product_name: item.product.name,
                 quantity: item.quantity,
@@ -151,7 +152,7 @@ export default function POS() {
             const sale = await checkout(
                 {
                     method: paymentMethod,
-                    customer_name: selectedCustomer ? selectedCustomer.full_name : (selectedCustomer === null ? 'Walk-in Customer' : 'Walk-in Customer'),
+                    customer_name: selectedCustomer ? selectedCustomer.full_name : 'Walk-in Customer',
                     customer_id: selectedCustomer?.id
                 },
                 undefined,
@@ -179,11 +180,21 @@ export default function POS() {
         }
     };
 
+    const handleScan = async (code: string) => {
+        const product = await getByBarcode(code);
+        if (product) {
+            addToCart({ product, quantity: 1, discount: 0 });
+            setShowScanner(false);
+        } else {
+            alert(t('pos.scan.not_found', 'Product not found with barcode: ') + code);
+        }
+    };
+
     const cartTotal = getCartTotal();
 
     return (
         <div className="relative flex flex-col lg:flex-row items-start gap-8 p-6 lg:p-8 animate-fadeIn mt-4">
-            {/* Grid Background (Matching Dashboard) */}
+            {/* Grid Background */}
             <div className="absolute inset-0 pointer-events-none opacity-[0.15] rounded-[3rem]"
                 style={{
                     backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 1px, transparent 1px)`,
@@ -209,52 +220,53 @@ export default function POS() {
                                     <span className="text-[10px] font-black text-black uppercase tracking-widest">{user?.full_name}</span>
                                 </div>
                             )}
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-md border border-zinc-100 shadow-none transition-all hover:bg-zinc-50 group cursor-pointer" onClick={() => searchInputRef.current?.focus()}>
-                                <Barcode size={16} className="text-zinc-400 group-hover:text-black transition-colors" />
-                                <span className="text-[10px] font-black text-zinc-400 group-hover:text-black uppercase tracking-widest transition-colors">
-                                    {t('pos.scanner_active')}
+                            <button
+                                onClick={() => setShowScanner(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-md border border-black shadow-lg shadow-black/20 hover:bg-neutral-800 transition-all active:scale-95"
+                            >
+                                <Barcode size={16} />
+                                <span className="text-[10px] font-black uppercase tracking-widest">
+                                    {t('pos.scan', 'Scan')}
                                 </span>
-                            </div>
+                            </button>
                         </div>
                     </div>
-
-                    {/* Search Bar */}
-                    <div className="relative group">
-                        <Search size={22} className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-black transition-colors" />
-                        <input
-                            ref={searchInputRef}
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder={t('pos.search_placeholder')}
-                            className={cn(
-                                "w-full pl-16 pr-16 py-5 rounded-[2.5rem]",
-                                "bg-white border border-zinc-200 shadow-none",
-                                "text-black placeholder:text-zinc-300 text-lg font-bold",
-                                "focus:outline-none focus:ring-0 focus:!outline-none focus-visible:!outline-none focus-visible:ring-0 focus:border-zinc-400 transition-all placeholder:transition-opacity focus:placeholder:opacity-50"
-                            )}
-                        />
-                        {searchQuery && (
-                            <motion.button
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.8 }}
-                                onClick={() => {
-                                    setSearchQuery('');
-                                    searchInputRef.current?.focus();
-                                }}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-zinc-100 text-zinc-400 hover:bg-black hover:text-white transition-all duration-300"
-                            >
-                                <X size={16} strokeWidth={3} />
-                            </motion.button>
-                        )}
-                    </div>
-
                 </div>
+
+                {/* Search Bar */}
+                <div className="relative group">
+                    <Search size={22} className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-black transition-colors" />
+                    <input
+                        ref={searchInputRef}
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder={t('pos.search_placeholder')}
+                        className={cn(
+                            "w-full pl-16 pr-16 py-5 rounded-[2.5rem]",
+                            "bg-white border border-zinc-200 shadow-none",
+                            "text-black placeholder:text-zinc-300 text-lg font-bold",
+                            "focus:outline-none focus:ring-0 focus:!outline-none focus-visible:!outline-none focus-visible:ring-0 focus:border-zinc-400 transition-all placeholder:transition-opacity focus:placeholder:opacity-50"
+                        )}
+                    />
+                    {searchQuery && (
+                        <motion.button
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            onClick={() => {
+                                setSearchQuery('');
+                                searchInputRef.current?.focus();
+                            }}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-zinc-100 text-zinc-400 hover:bg-black hover:text-white transition-all duration-300"
+                        >
+                            <X size={16} strokeWidth={3} />
+                        </motion.button>
+                    )}
+                </div>
+
                 {/* Product Grid Area */}
-                <div className="space-y-12 w-full">
-                    {/* Flash Deals & Promotions */}
-                    {/* Standard Inventory Preview (Cool Minimal Grid) */}
+                <div className="space-y-12 w-full mt-8">
                     {!searchQuery && (
                         <InventoryPreview
                             products={products}
@@ -265,7 +277,6 @@ export default function POS() {
                         />
                     )}
 
-                    {/* Customizable Quick Access (Shown when no search) */}
                     {!searchQuery && (
                         <QuickAccess
                             user={user}
@@ -277,7 +288,6 @@ export default function POS() {
                         />
                     )}
 
-                    {/* Flash Deals & Promotions */}
                     {!searchQuery && (
                         <FlashDealsPromotions
                             products={products}
@@ -288,7 +298,6 @@ export default function POS() {
                         />
                     )}
 
-                    {/* Standard Inventory (Hidden by default, shown on search) */}
                     {searchQuery && (
                         <>
                             <div className="flex items-center justify-between">
@@ -321,13 +330,11 @@ export default function POS() {
                                                     {inCart.quantity}
                                                 </div>
                                             )}
-
                                             <div className="mb-10 relative">
                                                 <div className="w-16 h-16 rounded-[1.5rem] bg-white flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
                                                     <ShoppingBag size={28} className={style.iconColor} />
                                                 </div>
                                             </div>
-
                                             <div className="mt-auto space-y-2">
                                                 <h3 className="text-[17px] font-black text-black leading-tight uppercase tracking-tight">
                                                     {product.name}
@@ -358,7 +365,6 @@ export default function POS() {
 
             {/* Right Column: Mini-POS / Receipt Panel */}
             <div className="relative z-10 w-full lg:w-[450px] lg:sticky lg:top-8 flex flex-col bg-white rounded-[3rem] border-2 border-gray-200 shadow-none overflow-hidden">
-                {/* Header */}
                 <div className="p-10 pb-0">
                     <div className="mb-6">
                         <CustomerSelector
@@ -389,7 +395,6 @@ export default function POS() {
                     </div>
                 </div>
 
-                {/* Items List */}
                 <div className="px-10 space-y-4">
                     {cart.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center space-y-4 opacity-10">
@@ -426,7 +431,6 @@ export default function POS() {
                     )}
                 </div>
 
-                {/* Footer / Summary */}
                 <div className="p-10 pt-6 space-y-8 bg-zinc-50/50">
                     <div className="space-y-4">
                         <div className="flex items-center justify-between text-[10px] font-black text-zinc-400 uppercase tracking-widest">
@@ -445,13 +449,12 @@ export default function POS() {
                         </div>
                     </div>
 
-                    {/* Payment Methods */}
                     <div className="flex gap-4">
                         {[
                             { key: 'cash' as const, icon: Banknote, label: 'Cash', comingSoon: false },
                             { key: 'card' as const, icon: CreditCard, label: 'Card', comingSoon: true },
                             { key: 'mobile' as const, icon: Smartphone, label: 'E-Pay', comingSoon: true },
-                            { key: 'credit' as const, icon: Wallet, label: 'Credit', comingSoon: false }, // New Credit Option
+                            { key: 'credit' as const, icon: Wallet, label: 'Credit', comingSoon: false },
                         ].map((method) => (
                             <button
                                 key={method.key}
@@ -459,9 +462,9 @@ export default function POS() {
                                 className={cn(
                                     "flex-1 flex flex-col items-center gap-3 py-5 rounded-[2rem] transition-all duration-300 relative group overflow-hidden",
                                     paymentMethod === method.key
-                                        ? " text-black"
-                                        : "text-blue-400",
-                                    method.comingSoon && "cursor-not-allowed"
+                                        ? "bg-yellow-400 text-black"
+                                        : "bg-zinc-100 text-zinc-400 hover:bg-zinc-200",
+                                    method.comingSoon && "cursor-not-allowed opacity-50"
                                 )}
                             >
                                 <method.icon size={24} strokeWidth={paymentMethod === method.key ? 3 : 2.5} />
@@ -469,7 +472,6 @@ export default function POS() {
                                     "text-[10px] font-black uppercase tracking-widest transition-opacity",
                                     paymentMethod === method.key ? "opacity-100" : "opacity-60"
                                 )}>{t(method.label === 'Cash' ? 'pos.cart.pay_cash' : method.label === 'Card' ? 'pos.cart.pay_card' : method.label === 'Credit' ? 'Credit' : 'pos.cart.pay_mobile')}</span>
-
                                 {method.comingSoon && (
                                     <div className="absolute inset-0 bg-white/95 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
                                         <span className="text-[8px] font-black uppercase tracking-tighter text-black leading-none px-2 text-center whitespace-pre-line">
@@ -481,7 +483,6 @@ export default function POS() {
                         ))}
                     </div>
 
-                    {/* Print Receipt Toggle */}
                     <div className="flex bg-zinc-200/50 p-1 rounded-2xl">
                         <button
                             onClick={() => setPrintReceipt(true)}
@@ -504,7 +505,7 @@ export default function POS() {
                             {t('pos.print.no', 'No Receipt')}
                         </button>
                     </div>
-                    {/* Action */}
+
                     <motion.button
                         onClick={handleBeforeCheckout}
                         disabled={cart.length === 0}
@@ -522,26 +523,22 @@ export default function POS() {
                 </div>
             </div>
 
-            {
-                showSimulation && (
-                    <CheckoutSimulation
-                        total={cartTotal}
-                        onComplete={handleFinalizeCheckout}
-                    />
-                )
-            }
+            {/* Modals */}
+            {showSimulation && (
+                <CheckoutSimulation
+                    total={cartTotal}
+                    onComplete={handleFinalizeCheckout}
+                />
+            )}
 
-            {
-                showReceipt && lastSale && (
-                    <ReceiptPreview
-                        sale={lastSale}
-                        items={lastSaleItems}
-                        onClose={() => setShowReceipt(false)}
-                    />
-                )
-            }
+            {showReceipt && lastSale && (
+                <ReceiptPreview
+                    sale={lastSale}
+                    items={lastSaleItems}
+                    onClose={() => setShowReceipt(false)}
+                />
+            )}
 
-            {/* Quick Access Manager Modal */}
             <AnimatePresence>
                 {isManagerOpen && (
                     <QuickAccessManager
@@ -554,13 +551,18 @@ export default function POS() {
                     />
                 )}
             </AnimatePresence>
-        </div >
+
+            {showScanner && (
+                <BarcodeScanner
+                    onScan={handleScan}
+                    onClose={() => setShowScanner(false)}
+                    title={t('pos.scan_product', 'Scan Product')}
+                />
+            )}
+        </div>
     );
 }
 
-/**
- * Quick Access Manager Component
- */
 function QuickAccessManager({ onClose, products, items, onAdd, onUpdate, onDelete }: any) {
     const { t } = useTranslation();
     const [isAdding, setIsAdding] = useState(false);
@@ -575,7 +577,6 @@ function QuickAccessManager({ onClose, products, items, onAdd, onUpdate, onDelet
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
                     className="bg-white w-full max-w-4xl max-h-[90vh] rounded-[3rem] shadow-2xl overflow-hidden flex flex-col"
                 >
-                    {/* Header */}
                     <div className="p-8 border-b border-zinc-100 flex items-center justify-between bg-[#fcfcfc]">
                         <div className="flex items-center gap-4">
                             <div className="p-3 bg-black text-white rounded-2xl">
@@ -591,7 +592,6 @@ function QuickAccessManager({ onClose, products, items, onAdd, onUpdate, onDelet
                         </button>
                     </div>
 
-                    {/* Content */}
                     <div className="flex-1 overflow-y-auto p-8 bg-white custom-scrollbar">
                         {isAdding || editingItem ? (
                             <QuickAccessForm
@@ -658,9 +658,6 @@ function QuickAccessManager({ onClose, products, items, onAdd, onUpdate, onDelet
     );
 }
 
-/**
- * Quick Access Form Component
- */
 function QuickAccessForm({ products, initialData, onSave, onCancel }: any) {
     const { t } = useTranslation();
     const [formData, setFormData] = useState({
@@ -700,7 +697,6 @@ function QuickAccessForm({ products, initialData, onSave, onCancel }: any) {
     return (
         <div className="space-y-8 animate-fadeIn">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Left: Basic Info */}
                 <div className="space-y-6">
                     <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('pos.quick_access.select_product')}</label>
@@ -756,7 +752,6 @@ function QuickAccessForm({ products, initialData, onSave, onCancel }: any) {
                     </div>
                 </div>
 
-                {/* Right: Options Manager */}
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
                         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('pos.quick_access.variations')}</label>
@@ -801,7 +796,6 @@ function QuickAccessForm({ products, initialData, onSave, onCancel }: any) {
                 </div>
             </div>
 
-            {/* Footer Actions */}
             <div className="flex gap-4 pt-4 border-t border-zinc-50">
                 <button
                     onClick={onCancel}

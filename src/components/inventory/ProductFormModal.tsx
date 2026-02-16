@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Package, Box, DollarSign, Barcode, Scale, Save, ChevronDown, Check } from 'lucide-react';
+import { Package, Box, DollarSign, Barcode, Scale, Save, ChevronDown, Check, ScanBarcode } from 'lucide-react';
 import { FormModal } from '@/components/common/FormModal';
 import Button from '@/components/common/Button';
+import BarcodeScanner from '@/components/common/BarcodeScanner';
 import {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -35,6 +36,7 @@ const defaultForm: ProductInput = {
 export default function ProductFormModal({ isOpen, onClose, onSubmit, product, categories }: ProductFormModalProps) {
     const { t } = useTranslation();
     const [form, setForm] = useState<ProductInput>(defaultForm);
+    const [showScanner, setShowScanner] = useState(false);
     const isEditing = !!product;
 
     useEffect(() => {
@@ -109,8 +111,16 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                                     value={form.barcode || ''}
                                     onChange={(e) => setForm({ ...form, barcode: e.target.value })}
                                     placeholder={t('inventory.form.placeholders.scan_type')}
-                                    className={inputClass + " pl-12 font-mono text-sm"}
+                                    className={inputClass + " pl-12 pr-12 font-mono text-sm"}
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowScanner(true)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-zinc-200 hover:bg-zinc-300 text-zinc-600 transition-colors"
+                                    title="Scan Barcode"
+                                >
+                                    <ScanBarcode size={18} />
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -255,6 +265,16 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                     </Button>
                 </div>
             </form>
+
+            {showScanner && (
+                <BarcodeScanner
+                    onScan={(code) => {
+                        setForm({ ...form, barcode: code });
+                        setShowScanner(false);
+                    }}
+                    onClose={() => setShowScanner(false)}
+                />
+            )}
         </FormModal>
     );
 }

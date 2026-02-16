@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import AppShell from './components/layout/AppShell';
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
-import POS from './pages/POS';
 import Suppliers from './pages/Suppliers';
 import StockControl from './pages/StockControl';
 import Purchases from './pages/Purchases';
@@ -26,6 +25,7 @@ import Terms from './pages/Terms';
 import { useAuthStore } from './stores/useAuthStore';
 import { useSettingsStore } from './stores/useSettingsStore';
 import CashierLoginModal from './components/auth/CashierLoginModal';
+import POS from './pages/POS';
 
 // Protected route wrapper
 function RequireAuth({ children, requireAdmin = false }: { children: React.ReactElement; requireAdmin?: boolean }) {

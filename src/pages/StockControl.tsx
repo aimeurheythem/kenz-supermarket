@@ -33,8 +33,8 @@ export default function StockControl() {
         loadMovements();
     }, []);
 
-    const loadMovements = () => {
-        const mvts = StockRepo.getMovements({ limit: 20 });
+    const loadMovements = async () => {
+        const mvts = await StockRepo.getMovements({ limit: 20 });
         setMovements(mvts);
     };
 
@@ -44,22 +44,22 @@ export default function StockControl() {
         return true;
     });
 
-    const handleAdjust = () => {
+    const handleAdjust = async () => {
         if (!adjustModal || adjustQty <= 0) return;
         const { product, type } = adjustModal;
         if (type === 'add') {
-            StockRepo.addStock(product.id, adjustQty, adjustReason || 'Stock added');
+            await StockRepo.addStock(product.id, adjustQty, adjustReason || 'Stock added');
         } else if (type === 'remove') {
-            StockRepo.removeStock(product.id, adjustQty, adjustReason || 'Stock removed');
+            await StockRepo.removeStock(product.id, adjustQty, adjustReason || 'Stock removed');
         } else {
-            StockRepo.adjustStock(product.id, adjustQty, adjustReason || 'Stock adjusted');
+            await StockRepo.adjustStock(product.id, adjustQty, adjustReason || 'Stock adjusted');
         }
         setAdjustModal(null);
         setAdjustQty(0);
         setAdjustReason('');
-        loadProducts();
-        loadLowStock();
-        loadMovements();
+        await loadProducts();
+        await loadLowStock();
+        await loadMovements();
     };
 
     const getMovementColor = (type: string) => {

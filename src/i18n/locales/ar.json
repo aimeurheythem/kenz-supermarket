@@ -83,7 +83,9 @@
             "products": "المنتجات",
             "items": "عناصر",
             "cashier": "الكاشير",
-            "no_sales_today": "لا توجد مبيعات مسجلة اليوم"
+            "no_sales_today": "لا توجد مبيعات مسجلة اليوم",
+            "no_sales_title": "لا توجد مبيعات بعد",
+            "no_sales_message": "أتمم أول عملية بيع في نقطة البيع لتظهر هنا."
         },
         "top_performance": {
             "title": "أفضل 5 منتجات",

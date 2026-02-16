@@ -27,7 +27,7 @@ export default function Login() {
 
         try {
             await new Promise(resolve => setTimeout(resolve, 800));
-            const success = login(username, password);
+            const success = await login(username, password);
             if (success) {
                 navigate(from, { replace: true });
             } else {

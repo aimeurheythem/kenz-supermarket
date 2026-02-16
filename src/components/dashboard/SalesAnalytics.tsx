@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     Area,
@@ -32,61 +32,45 @@ import {
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatCurrency } from '@/lib/utils';
+import { SaleRepo } from '../../../database/repositories/sale.repo';
 
-// Mock Data
-const hourlyData = [
-    { time: '08:00', revenue: 1200 },
-    { time: '09:00', revenue: 2100 },
-    { time: '10:00', revenue: 4500 },
-    { time: '11:00', revenue: 6200 },
-    { time: '12:00', revenue: 8900 },
-    { time: '13:00', revenue: 7500 },
-    { time: '14:00', revenue: 5800 },
-    { time: '15:00', revenue: 4200 },
-    { time: '16:00', revenue: 6800 },
-    { time: '17:00', revenue: 9500 },
-    { time: '18:00', revenue: 11000 },
-    { time: '19:00', revenue: 8200 },
-    { time: '20:00', revenue: 3500 },
-];
-
-const dailyData = [
-    { day: 'Mon', revenue: 45000 },
-    { day: 'Tue', revenue: 52000 },
-    { day: 'Wed', revenue: 49000 },
-    { day: 'Thu', revenue: 61000 },
-    { day: 'Fri', revenue: 75000 },
-    { day: 'Sat', revenue: 92000 },
-    { day: 'Sun', revenue: 88000 },
-];
-
-const monthlyData = [
-    { month: 'Jan', revenue: 1200000 },
-    { month: 'Feb', revenue: 1450000 },
-    { month: 'Mar', revenue: 1380000 },
-    { month: 'Apr', revenue: 1650000 },
-    { month: 'May', revenue: 1890000 },
-    { month: 'Jun', revenue: 2100000 },
-];
-
-const peakHoursData = [
-    { hour: '08:00', density: 20 },
-    { hour: '10:00', density: 45 },
-    { hour: '12:00', density: 85 },
-    { hour: '14:00', density: 60 },
-    { hour: '16:00', density: 55 },
-    { hour: '18:00', density: 100 },
-    { hour: '20:00', density: 40 },
-];
+type TimeRange = 'hourly' | 'daily' | 'monthly';
 
 export default function SalesAnalytics() {
     const { t, i18n } = useTranslation();
-    const [timeRange, setTimeRange] = useState<'hourly' | 'daily' | 'monthly'>('hourly');
+    const [timeRange, setTimeRange] = useState<TimeRange>('hourly');
+
+    // Real data states
+    const [hourlyData, setHourlyData] = useState<{ time: string; revenue: number }[]>([]);
+    const [dailyData, setDailyData] = useState<{ day: string; revenue: number }[]>([]);
+    const [monthlyData, setMonthlyData] = useState<{ month: string; revenue: number }[]>([]);
+    const [peakHoursData, setPeakHoursData] = useState<{ hour: string; density: number }[]>([]);
+
+    // Fetch all analytics data on mount
+    useEffect(() => {
+        const loadAnalytics = async () => {
+            try {
+                const [hourly, daily, monthly, peaks] = await Promise.all([
+                    SaleRepo.getHourlyRevenue(),
+                    SaleRepo.getDailyRevenue(),
+                    SaleRepo.getMonthlyRevenue(),
+                    SaleRepo.getPeakHours(),
+                ]);
+                setHourlyData(hourly);
+                setDailyData(daily);
+                setMonthlyData(monthly);
+                setPeakHoursData(peaks);
+            } catch (err) {
+                console.error('Failed to load analytics:', err);
+            }
+        };
+        loadAnalytics();
+    }, []);
 
     const chartConfig = {
         revenue: {
             label: t('dashboard.analytics.revenue_label'),
-            color: "#BCFF2F", // Chartreuse
+            color: "#BCFF2F",
         },
         density: {
             label: t('dashboard.analytics.density_label'),
@@ -103,6 +87,13 @@ export default function SalesAnalytics() {
     };
 
     const getDataKey = () => timeRange === 'hourly' ? 'time' : (timeRange === 'daily' ? 'day' : 'month');
+
+    // Calculate peak hour for the recommendation card
+    const peakHour = peakHoursData.reduce<{ hour: string; density: number } | null>(
+        (max, curr) => (!max || curr.density > max.density) ? curr : max,
+        null
+    );
+    const totalTodaySales = peakHoursData.reduce((sum, h) => sum + h.density, 0);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -248,11 +239,15 @@ export default function SalesAnalytics() {
 
                     <div className="mt-6 flex items-center justify-between p-2.5 rounded-[1.5rem] bg-[#ffee00ff]">
                         <div className="flex flex-col">
-                            <span className="text-[9px] uppercase font-bold text-black tracking-widest">{t('dashboard.analytics.recommended_staff')}</span>
-                            <span className="text-xl font-bold text-black mt-1">4 {t('dashboard.analytics.waiters')}</span>
+                            <span className="text-[9px] uppercase font-bold text-black tracking-widest">
+                                {peakHour ? t('dashboard.analytics.peak_hours_title') : t('dashboard.analytics.recommended_staff')}
+                            </span>
+                            <span className="text-xl font-bold text-black mt-1">
+                                {peakHour ? `${peakHour.hour} — ${peakHour.density} sales` : `${totalTodaySales} sales`}
+                            </span>
                         </div>
                         <div className="w-10 h-10 rounded-full flex items-center justify-center">
-                            <span className="text-black font-black text-xs">GO</span>
+                            <span className="text-black font-black text-xs">{totalTodaySales}</span>
                         </div>
                     </div>
                 </CardContent>

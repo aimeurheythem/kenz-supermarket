@@ -7,11 +7,6 @@ import {
     Users,
     CreditCard,
     ArrowUpRight,
-    Coffee,
-    Pizza,
-    Beer,
-    IceCream,
-    Apple,
     ChevronLeft,
     ChevronRight,
     Hand,
@@ -19,11 +14,14 @@ import {
     MonitorCog,
     Container,
     CloudUpload,
+    TrendingUp,
+    Award,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useProductStore } from '@/stores/useProductStore';
 import { useSaleStore } from '@/stores/useSaleStore';
+import { useExpenseStore } from '@/stores/useExpenseStore';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -31,27 +29,37 @@ import type { User } from '@/lib/types';
 import CashierSelector from '@/components/dashboard/CashierSelector';
 import RecentProducts from '@/components/dashboard/RecentProducts';
 import SalesAnalytics from '@/components/dashboard/SalesAnalytics';
+import { SaleRepo } from '../../database/repositories/sale.repo';
+
+// Rank-based color palette for Top Products carousel
+const RANK_COLORS = [
+    { color: 'bg-amber-400/20', iconColor: 'text-amber-500' },    // #1 Gold
+    { color: 'bg-slate-300/30', iconColor: 'text-slate-500' },     // #2 Silver
+    { color: 'bg-orange-400/20', iconColor: 'text-orange-600' },   // #3 Bronze
+    { color: 'bg-sky-400/20', iconColor: 'text-sky-500' },         // #4
+    { color: 'bg-emerald-400/20', iconColor: 'text-emerald-500' }, // #5
+];
 
 // Dashboard Component - Main Entry Point
 export default function Dashboard() {
     const { products, lowStockProducts, loadProducts, loadLowStock } = useProductStore();
     const { todayStats, loadRecent, loadTodayStats } = useSaleStore();
+    const { stats: expenseStats, loadStats: loadExpenseStats } = useExpenseStore();
     const { user: authUser } = useAuthStore();
     const [selectedCashier, setSelectedCashier] = useState<User | null>(null);
     const [activeProductIndex, setActiveProductIndex] = useState(0);
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
 
-    // Mock Top Products by Margin
-    const topProducts = [
-        { name: 'Espresso Roast', margin: '45,000', icon: Coffee, color: 'bg-orange-500/20', iconColor: 'text-orange-500' },
-        { name: 'Pepperoni Large', margin: '38,200', icon: Pizza, color: 'bg-red-500/20', iconColor: 'text-red-500' },
-        { name: 'Craft Lager', margin: '32,100', icon: Beer, color: 'bg-amber-500/20', iconColor: 'text-amber-500' },
-        { name: 'Vanilla Bean', margin: '28,500', icon: IceCream, color: 'bg-sky-500/20', iconColor: 'text-sky-500' },
-        { name: 'Green Apples', margin: '22,900', icon: Apple, color: 'bg-emerald-500/20', iconColor: 'text-emerald-500' },
-    ];
+    // Real Top Products by Profit
+    const [topProducts, setTopProducts] = useState<{ name: string; profit: number; total_sold: number }[]>([]);
 
     useEffect(() => {
+        SaleRepo.getTopProductsByProfit(5).then(setTopProducts).catch(console.error);
+    }, []);
+
+    useEffect(() => {
+        if (topProducts.length === 0) return;
         const interval = setInterval(() => {
             setActiveProductIndex((prev) => (prev + 1) % topProducts.length);
         }, 5000);
@@ -59,14 +67,17 @@ export default function Dashboard() {
     }, [topProducts.length]);
 
     useEffect(() => {
+        const today = new Date().toISOString().split('T')[0];
         loadProducts();
         loadLowStock();
         loadRecent();
         loadTodayStats();
+        loadExpenseStats(today, today);
     }, []);
 
     // Data for Stats
     const totalRevenue = todayStats.revenue;
+    const netProfit = todayStats.profit - expenseStats.total;
     const totalProducts = products.length;
 
     // Data for Shortcuts
@@ -181,66 +192,79 @@ export default function Dashboard() {
 
                 </div>
                 <div className="xl:col-span-3 h-full flex flex-col gap-6">
-                    {/* Revenue Card & Products Card Stacked */}
-                    <div className="grid grid-cols-1 gap-6">
+                    {/* Revenue, Profit & Stock Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-1 gap-6">
                         {/* Revenue Card */}
                         <motion.div
-                            className="bg-white border-2 border-black/10 flex flex-col justify-between aspect-[2/1] md:aspect-auto md:h-48 p-8 rounded-[3rem] relative overflow-hidden group cursor-pointer"
+                            className="bg-white border-2 border-black/10 flex flex-col justify-between aspect-[2/1] md:aspect-auto md:h-40 p-6 rounded-[2.5rem] relative overflow-hidden group cursor-pointer"
                         >
-                            {/* Technical Decorative Label */}
-                            <div className="absolute -right-6 -bottom-2 opacity-8 pointer-events-none group-hover:scale-110 transition-transform duration-700">
-                                <span className="text-[120px] font-black tracking-tighter uppercase italic">Revenue</span>
-                            </div>
-
                             <div className="flex items-center justify-between relative z-10">
-                                <div className="px-3 py-1 rounded-full bg-black/5 border border-black/5 flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-black animate-pulse" />
-                                    <span className="text-[10px] font-bold text-black uppercase tracking-widest">{t('dashboard.stats.today_revenue')}</span>
+                                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('dashboard.stats.today_revenue')}</span>
+                                <div className="p-2 bg-zinc-100 rounded-full">
+                                    <DollarSign size={16} className="text-black" />
                                 </div>
-                                <DollarSign size={20} className="text-black/20" />
                             </div>
 
                             <div className="relative z-10">
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-5xl font-black text-black tracking-tighter">
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-3xl font-black text-black tracking-tighter">
                                         {formatCurrency(totalRevenue).replace('DZD', '').replace('دج', '').trim()}
                                     </span>
-                                    <span className="text-xs font-black text-black uppercase opacity-40">
+                                    <span className="text-[10px] font-bold text-zinc-400 uppercase">
                                         {i18n.language === 'ar' ? 'دج' : 'DZD'}
                                     </span>
-                                </div>
-                                <div className="mt-2 flex items-center gap-2">
-                                    <div className="h-[2px] w-8 bg-black/10 rounded-full" />
-                                    <span className="text-[9px] font-bold text-black/40 uppercase tracking-widest">+12.5% {t('dashboard.welcome_card.system_live')}</span>
                                 </div>
                             </div>
                         </motion.div>
 
-                        {/* Products Card */}
+                        {/* Net Profit Card */}
                         <motion.div
-                            className="bg-yellow-300 border-2 border-black/10 flex flex-col justify-between aspect-[2/1] md:aspect-auto md:h-48 p-8 rounded-[3rem] relative overflow-hidden group cursor-pointer"
+                            className="bg-black text-white flex flex-col justify-between aspect-[2/1] md:aspect-auto md:h-40 p-6 rounded-[2.5rem] relative overflow-hidden group cursor-pointer"
                         >
-                            {/* Technical Decorative Label */}
-                            <div className="absolute -right-6 -bottom-2 opacity-8 pointer-events-none group-hover:scale-110 transition-transform duration-700">
-                                <span className="text-[120px] font-black tracking-tighter uppercase italic">Stock</span>
-                            </div>
+                            <div className="absolute top-0 right-0 p-16 bg-zinc-800 rounded-full blur-2xl opacity-20 -translate-y-1/2 translate-x-1/2" />
 
                             <div className="flex items-center justify-between relative z-10">
-                                <div className="px-3 py-1 rounded-full bg-black/5 border border-black/5 flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-black" />
-                                    <span className="text-[10px] font-bold text-black uppercase tracking-widest">{t('dashboard.stats.total_products')}</span>
+                                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Net Profit</span>
+                                <div className="p-2 bg-white/10 rounded-full">
+                                    <TrendingUp size={16} className="text-white" />
                                 </div>
-                                <Package size={20} className="text-black/20" />
                             </div>
 
                             <div className="relative z-10">
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-5xl font-black text-black tracking-tighter">{totalProducts.toLocaleString()}</span>
-                                    <span className="text-xs font-black text-black uppercase opacity-40">Items</span>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-3xl font-black text-white tracking-tighter">
+                                        {formatCurrency(netProfit).replace('DZD', '').replace('دج', '').trim()}
+                                    </span>
+                                    <span className="text-[10px] font-bold text-zinc-500 uppercase">
+                                        {i18n.language === 'ar' ? 'دج' : 'DZD'}
+                                    </span>
                                 </div>
-                                <div className="mt-2 flex items-center gap-2">
-                                    <div className="h-[2px] w-8 bg-black/10 rounded-full" />
-                                    <span className="text-[9px] font-bold text-black/40 uppercase tracking-widest">{lowStockProducts.length} {t('dashboard.stats.low_stock')}</span>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-[10px] text-zinc-400">Gross: {formatCurrency(todayStats.profit)}</span>
+                                    <span className="text-[10px] text-zinc-400">•</span>
+                                    <span className="text-[10px] text-zinc-400">Exp: {formatCurrency(expenseStats.total)}</span>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        {/* Stock Card */}
+                        <motion.div
+                            className="bg-yellow-300 border-2 border-black/10 flex flex-col justify-between aspect-[2/1] md:aspect-auto md:h-40 p-6 rounded-[2.5rem] relative overflow-hidden group cursor-pointer"
+                        >
+                            <div className="flex items-center justify-between relative z-10">
+                                <span className="text-[10px] font-bold text-black/60 uppercase tracking-widest">{t('dashboard.stats.total_products')}</span>
+                                <div className="p-2 bg-black/5 rounded-full">
+                                    <Package size={16} className="text-black" />
+                                </div>
+                            </div>
+
+                            <div className="relative z-10">
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-3xl font-black text-black tracking-tighter">{totalProducts.toLocaleString()}</span>
+                                    <span className="text-[10px] font-bold text-black/60 uppercase">Items</span>
+                                </div>
+                                <div className="mt-1">
+                                    <span className="text-[10px] font-bold text-black/60 uppercase tracking-widest">{lowStockProducts.length} {t('dashboard.stats.low_stock')}</span>
                                 </div>
                             </div>
                         </motion.div>
@@ -249,16 +273,18 @@ export default function Dashboard() {
                     {/* Unified Top Products Carousel Card */}
                     <div className="rounded-[3rem] p-8 min-h-[400px] flex-1 flex flex-col relative overflow-hidden transition-all duration-700">
                         {/* Dynamic Background Overlays */}
-                        {topProducts.map((product, idx) => (
+                        {topProducts.length > 0 ? topProducts.map((product, idx) => (
                             <div
                                 key={`bg-${product.name}`}
                                 className={cn(
                                     "absolute inset-0 transition-opacity duration-1000 ease-in-out",
-                                    product.color,
+                                    RANK_COLORS[idx]?.color ?? 'bg-zinc-100',
                                     idx === activeProductIndex ? "opacity-100" : "opacity-0"
                                 )}
                             />
-                        ))}
+                        )) : (
+                            <div className="absolute inset-0 bg-zinc-100" />
+                        )}
 
                         <div className="flex items-start justify-between mb-8 relative z-20">
                             <div>
@@ -273,7 +299,7 @@ export default function Dashboard() {
                         </div>
 
                         <div className="relative flex-1 flex flex-col items-center justify-center z-10">
-                            {topProducts.map((product, idx) => (
+                            {topProducts.length > 0 ? topProducts.map((product, idx) => (
                                 <div
                                     key={product.name}
                                     className={cn(
@@ -281,9 +307,12 @@ export default function Dashboard() {
                                         idx === activeProductIndex ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-90 translate-y-10 pointer-events-none"
                                     )}
                                 >
-                                    {/* Standalone Big Icon */}
-                                    <div className="mb-12">
-                                        <product.icon size={150} className={cn(product.iconColor, "filter")} />
+                                    {/* Rank Badge + Icon */}
+                                    <div className="mb-12 relative">
+                                        <Award size={150} className={cn(RANK_COLORS[idx]?.iconColor ?? 'text-zinc-400', "filter")} />
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <span className="text-5xl font-black text-black/20">#{idx + 1}</span>
+                                        </div>
                                     </div>
 
                                     {/* Product Info */}
@@ -292,14 +321,21 @@ export default function Dashboard() {
                                         <div className="flex flex-col items-center gap-2">
                                             <div className="px-6 py-2">
                                                 <span className="text-3xl text-black">
-                                                    +{product.margin} {i18n.language === 'ar' ? 'دج' : 'DZD'}
+                                                    +{formatCurrency(product.profit).replace('DZD', '').replace('دج', '').trim()} {i18n.language === 'ar' ? 'دج' : 'DZD'}
                                                 </span>
                                             </div>
                                             <span className="text-xs text-black/50 uppercase tracking-widest mt-2">{t('dashboard.top_performance.monthly_profit')}</span>
+                                            <span className="text-[10px] text-black/30 uppercase tracking-wider">{product.total_sold} units sold</span>
                                         </div>
                                     </div>
                                 </div>
-                            ))}
+                            )) : (
+                                <div className="flex flex-col items-center justify-center py-16">
+                                    <Award size={80} className="text-black/10 mb-4" />
+                                    <p className="text-lg font-semibold text-black/40">No sales data this month</p>
+                                    <p className="text-sm text-black/25 mt-1">Make sales to see your top performers</p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Pagination Dots */}

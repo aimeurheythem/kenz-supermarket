@@ -22,14 +22,9 @@ export default function CheckoutSimulation({ total, onComplete }: CheckoutSimula
                 setStep('success');
             }, 3000);
             return () => clearTimeout(timer);
-        } else if (step === 'success') {
-            // Step 2: Success (3s) -> Complete/Reload
-            const timer = setTimeout(() => {
-                onComplete();
-            }, 3000);
-            return () => clearTimeout(timer);
         }
-    }, [step, onComplete]);
+        // Step 2: Success - Wait for manual close (User Request)
+    }, [step]);
 
     return (
         <Portal>
@@ -104,7 +99,7 @@ export default function CheckoutSimulation({ total, onComplete }: CheckoutSimula
                     </AnimatePresence>
                 </div>
 
-                <div className="flex flex-col">
+                <div className="flex flex-col flex-1">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={step}
@@ -123,14 +118,22 @@ export default function CheckoutSimulation({ total, onComplete }: CheckoutSimula
                                     </p>
                                 </>
                             ) : (
-                                <>
-                                    <h3 className="text-sm font-black text-green-600 uppercase tracking-wider">
-                                        {t('pos.simulation.payment_received')}
-                                    </h3>
-                                    <p className="text-[10px] font-bold text-green-400 uppercase tracking-widest mt-1">
-                                        {t('pos.simulation.order_completed')}
-                                    </p>
-                                </>
+                                <div className="flex items-center justify-between w-full">
+                                    <div>
+                                        <h3 className="text-sm font-black text-green-600 uppercase tracking-wider">
+                                            {t('pos.simulation.success')}
+                                        </h3>
+                                        <p className="text-[10px] font-bold text-green-400 uppercase tracking-widest mt-1">
+                                            {t('pos.simulation.done')}
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={onComplete}
+                                        className="bg-black text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-colors"
+                                    >
+                                        {t('common.close', 'Close')}
+                                    </button>
+                                </div>
                             )}
                         </motion.div>
                     </AnimatePresence>

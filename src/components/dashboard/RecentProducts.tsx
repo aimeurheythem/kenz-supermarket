@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BadgeCent, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import { BadgeCent, ChevronLeft, ChevronRight, ExternalLink, ShoppingBag } from 'lucide-react';
 import { useSaleStore } from '@/stores/useSaleStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { formatCurrency } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 // Precise constants to ensure cards land in the EXACT same place
 const CARD_W = 340;
-const GAP = 18; // Reduced space between cards
-const MARGIN = 15; // Small margin on the start
+const GAP = 18;
+const MARGIN = 15;
 const VIEW_OFFSET = CARD_W + GAP;
 
 interface SaleCardProps {
@@ -19,9 +20,10 @@ interface SaleCardProps {
     currency: string;
     itemsCount: number;
     cashierName: string;
+    paymentMethod?: string;
 }
 
-const SaleCard = ({ id, timestamp, amount, currency, itemsCount, cashierName }: SaleCardProps) => {
+const SaleCard = ({ id, timestamp, amount, currency, itemsCount, cashierName, paymentMethod }: SaleCardProps) => {
     const { t } = useTranslation();
 
     return (
@@ -31,7 +33,7 @@ const SaleCard = ({ id, timestamp, amount, currency, itemsCount, cashierName }: 
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
                     <span className="text-[12px] uppercase tracking-widest text-black/80">
-                        {['Sale', 'ID'].includes(String(id).split(' ')[0]) ? id : `Sale #${id}`}
+                        Sale #{id}
                     </span>
                 </div>
                 <span className="text-[10px] text-black/40 uppercase">
@@ -72,6 +74,15 @@ const SaleCard = ({ id, timestamp, amount, currency, itemsCount, cashierName }: 
                 </div>
             </div>
 
+            {/* Payment Method Badge */}
+            {paymentMethod && (
+                <div className="absolute top-8 ltr:right-24 rtl:left-24">
+                    <span className="text-[9px] uppercase tracking-wider px-2 py-1 rounded-full bg-black/5 text-black/40">
+                        {paymentMethod}
+                    </span>
+                </div>
+            )}
+
             {/* Background Decorative Icon */}
             <div className="absolute top-1/2 -translate-y-1/2 ltr:-right-0 rtl:-left-0 opacity-10 pointer-events-none transition-transform duration-500">
                 <BadgeCent size={90} className="text-black" />
@@ -82,17 +93,46 @@ const SaleCard = ({ id, timestamp, amount, currency, itemsCount, cashierName }: 
     );
 };
 
+// Empty state when no sales exist
+const EmptyState = () => {
+    const { t } = useTranslation();
+    const navigate = useNavigate();
+
+    return (
+        <div className="flex items-center justify-center w-full py-16">
+            <div className="text-center">
+                <div className="w-16 h-16 bg-black/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <ShoppingBag size={28} className="text-black/30" />
+                </div>
+                <h3 className="text-lg font-semibold text-black/60 mb-1">
+                    {t('dashboard.recent_sales.no_sales_title', 'No Sales Yet')}
+                </h3>
+                <p className="text-sm text-black/40 mb-4">
+                    {t('dashboard.recent_sales.no_sales_message', 'Complete your first sale in the POS to see it here.')}
+                </p>
+                <button
+                    onClick={() => navigate('/pos')}
+                    className="px-6 py-2 bg-black text-white text-xs uppercase tracking-widest rounded-full hover:bg-zinc-800 transition-colors"
+                >
+                    {t('dashboard.shortcuts.pos', 'Open POS')}
+                </button>
+            </div>
+        </div>
+    );
+};
+
 export default function RecentProducts() {
     const { t, i18n } = useTranslation();
     const { recentSales } = useSaleStore();
     const { user: authUser } = useAuthStore();
+    const navigate = useNavigate();
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const isRtl = i18n.dir() === 'rtl';
-    const displayCount = recentSales.length > 0 ? recentSales.length : 5;
+    const hasSales = recentSales.length > 0;
 
     const next = () => {
-        if (currentIndex < displayCount - 3) {
+        if (currentIndex < recentSales.length - 3) {
             setCurrentIndex(prev => prev + 1);
         }
     };
@@ -115,25 +155,31 @@ export default function RecentProducts() {
                     >
                         {t('dashboard.recent_sales.title')}
                     </h2>
-                    <span className="px-2 py-0.5 rounded-full bg-black/5 text-[10px] font-bold text-black uppercase tracking-wider">
-                        {displayCount}
-                    </span>
+                    {hasSales && (
+                        <span className="px-2 py-0.5 rounded-full bg-black/5 text-[10px] font-bold text-black uppercase tracking-wider">
+                            {recentSales.length}
+                        </span>
+                    )}
                 </div>
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={prev}
-                        disabled={currentIndex === 0}
-                        className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-black hover:border-zinc-300 transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer rtl:rotate-180"
-                    >
-                        <ChevronLeft size={20} />
-                    </button>
-                    <button
-                        onClick={next}
-                        disabled={currentIndex >= displayCount - 3}
-                        className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-black hover:border-zinc-300 transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer rtl:rotate-180"
-                    >
-                        <ChevronRight size={20} />
-                    </button>
+                    {hasSales && (
+                        <>
+                            <button
+                                onClick={prev}
+                                disabled={currentIndex === 0}
+                                className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-black hover:border-zinc-300 transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer rtl:rotate-180"
+                            >
+                                <ChevronLeft size={20} />
+                            </button>
+                            <button
+                                onClick={next}
+                                disabled={currentIndex >= recentSales.length - 3}
+                                className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-black hover:border-zinc-300 transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer rtl:rotate-180"
+                            >
+                                <ChevronRight size={20} />
+                            </button>
+                        </>
+                    )}
                     <motion.button
                         initial="initial"
                         whileHover="hover"
@@ -141,6 +187,7 @@ export default function RecentProducts() {
                             initial: { backgroundColor: "#000000" },
                             hover: { backgroundColor: "#18181b" }
                         }}
+                        onClick={() => navigate('/transactions')}
                         className="ms-2 px-6 py-2 rounded-full text-white text-xs uppercase tracking-widest transition-all active:scale-95 flex items-center gap-0 hover:gap-2 cursor-pointer group/viewall"
                     >
                         <span className="text-white">{t('dashboard.recent_sales.view_all')}</span>
@@ -159,48 +206,41 @@ export default function RecentProducts() {
             </div>
 
             <div className="relative">
-                {/* Elegant Edge Fade */}
-                <div className="absolute end-0 top-0 bottom-0 w-32 bg-gradient-to-l rtl:bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+                {hasSales ? (
+                    <>
+                        {/* Elegant Edge Fade */}
+                        <div className="absolute end-0 top-0 bottom-0 w-32 bg-gradient-to-l rtl:bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
 
-                <div className="overflow-hidden">
-                    <motion.div
-                        className="flex pb-8"
-                        style={{ gap: GAP, paddingInlineStart: MARGIN, paddingInlineEnd: MARGIN }}
-                        animate={{ x: (isRtl ? 1 : -1) * (currentIndex * VIEW_OFFSET) }}
-                        transition={{
-                            type: "spring",
-                            stiffness: 260,
-                            damping: 24,
-                            mass: 0.8
-                        }}
-                    >
-                        {recentSales.length > 0 ? recentSales.map((sale) => (
-                            <SaleCard
-                                key={sale.id}
-                                id={String(sale.id).slice(-4)}
-                                timestamp={new Date(sale.sale_date || sale.created_at).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
-                                amount={formatCurrency(sale.total).replace('DZD', '').replace('دج', '').trim()}
-                                currency={currencyLabel}
-                                itemsCount={12} // Placeholder logic can be improved later
-                                cashierName={sale.user_name || authUser?.full_name || 'System Admin'}
-                            />
-                        )) : (
-                            <>
-                                {[1, 2, 3, 4, 5].map((idx) => (
+                        <div className="overflow-hidden">
+                            <motion.div
+                                className="flex pb-8"
+                                style={{ gap: GAP, paddingInlineStart: MARGIN, paddingInlineEnd: MARGIN }}
+                                animate={{ x: (isRtl ? 1 : -1) * (currentIndex * VIEW_OFFSET) }}
+                                transition={{
+                                    type: "spring",
+                                    stiffness: 260,
+                                    damping: 24,
+                                    mass: 0.8
+                                }}
+                            >
+                                {recentSales.map((sale) => (
                                     <SaleCard
-                                        key={`example-${idx}`}
-                                        id={`ID #${1000 + idx}`}
-                                        timestamp="19:24"
-                                        amount={(idx * 12500).toLocaleString(i18n.language)}
+                                        key={sale.id}
+                                        id={sale.id}
+                                        timestamp={new Date(sale.sale_date || sale.created_at).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
+                                        amount={formatCurrency(sale.total).replace('DZD', '').replace('دج', '').trim()}
                                         currency={currencyLabel}
-                                        itemsCount={15}
-                                        cashierName="Rachid"
+                                        itemsCount={(sale as any).item_count ?? 0}
+                                        cashierName={sale.user_name || authUser?.full_name || 'Admin'}
+                                        paymentMethod={sale.payment_method}
                                     />
                                 ))}
-                            </>
-                        )}
-                    </motion.div>
-                </div>
+                            </motion.div>
+                        </div>
+                    </>
+                ) : (
+                    <EmptyState />
+                )}
             </div>
         </div>
     );

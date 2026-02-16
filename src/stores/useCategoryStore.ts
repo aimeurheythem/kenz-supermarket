@@ -4,34 +4,37 @@ import { CategoryRepo } from '../../database/repositories/category.repo';
 
 interface CategoryStore {
     categories: Category[];
-    loadCategories: () => void;
-    addCategory: (input: CategoryInput) => Category;
-    updateCategory: (id: number, input: Partial<CategoryInput>) => Category;
-    deleteCategory: (id: number) => void;
+    isLoading: boolean;
+    loadCategories: () => Promise<void>;
+    addCategory: (input: CategoryInput) => Promise<Category>;
+    updateCategory: (id: number, input: Partial<CategoryInput>) => Promise<Category>;
+    deleteCategory: (id: number) => Promise<void>;
 }
 
 export const useCategoryStore = create<CategoryStore>((set, get) => ({
     categories: [],
+    isLoading: false,
 
-    loadCategories: () => {
-        const categories = CategoryRepo.getAll();
-        set({ categories });
+    loadCategories: async () => {
+        set({ isLoading: true });
+        const categories = await CategoryRepo.getAll();
+        set({ categories, isLoading: false });
     },
 
-    addCategory: (input: CategoryInput) => {
-        const category = CategoryRepo.create(input);
-        get().loadCategories();
+    addCategory: async (input: CategoryInput) => {
+        const category = await CategoryRepo.create(input);
+        await get().loadCategories();
         return category;
     },
 
-    updateCategory: (id: number, input: Partial<CategoryInput>) => {
-        const category = CategoryRepo.update(id, input);
-        get().loadCategories();
+    updateCategory: async (id: number, input: Partial<CategoryInput>) => {
+        const category = await CategoryRepo.update(id, input);
+        await get().loadCategories();
         return category;
     },
 
-    deleteCategory: (id: number) => {
-        CategoryRepo.delete(id);
-        get().loadCategories();
+    deleteCategory: async (id: number) => {
+        await CategoryRepo.delete(id);
+        await get().loadCategories();
     },
 }));

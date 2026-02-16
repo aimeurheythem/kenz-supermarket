@@ -5,18 +5,6 @@ import { cn } from '@/lib/utils';
 import { useLayoutStore } from '@/stores/useLayoutStore';
 import { useTranslation } from 'react-i18next';
 
-declare global {
-    interface Window {
-        electronAPI: {
-            isMaximized: () => Promise<boolean>;
-            onMaximizedChange: (callback: (isMaximized: boolean) => void) => void;
-            minimizeWindow: () => void;
-            maximizeWindow: () => void;
-            closeWindow: () => void;
-        };
-    }
-}
-
 export default function TitleBar() {
     const [isMaximized, setIsMaximized] = useState(false);
     const { isSidebarCollapsed: collapsed, toggleSidebar } = useLayoutStore();
@@ -94,7 +82,7 @@ export default function TitleBar() {
                 <div className="fixed top-0 ltr:right-0 rtl:left-0 h-10 flex items-center gap-0.5 px-3 z-[9999] app-no-drag pointer-events-auto">
                     {/* Minimize */}
                     <button
-                        onClick={() => window.electronAPI.minimizeWindow()}
+                        onClick={() => window.electronAPI?.minimizeWindow()}
                         className="group flex items-center justify-center w-10 min-h-full hover:bg-black/[0.08] active:bg-black/[0.12] transition-colors duration-200"
                         title="Minimize"
                     >
@@ -103,7 +91,7 @@ export default function TitleBar() {
 
                     {/* Maximize/Restore */}
                     <button
-                        onClick={() => window.electronAPI.maximizeWindow()}
+                        onClick={() => window.electronAPI?.maximizeWindow()}
                         className="group flex items-center justify-center w-10 min-h-full hover:bg-black/[0.08] active:bg-black/[0.12] transition-colors duration-200"
                         title={isMaximized ? "Restore" : "Maximize"}
                     >
@@ -116,7 +104,7 @@ export default function TitleBar() {
 
                     {/* Close */}
                     <button
-                        onClick={() => window.electronAPI.closeWindow()}
+                        onClick={() => window.electronAPI?.closeWindow()}
                         className="group flex items-center justify-center w-11 min-h-full hover:bg-[#E81123] active:bg-[#AC0F1C] transition-colors duration-200"
                         title="Close"
                     >

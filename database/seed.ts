@@ -2,21 +2,21 @@
  * Seed initial data for development and first-time setup.
  */
 
-import { execute, query } from './db';
+import { execute, query, get } from './db';
 import { CategoryRepo } from './repositories/category.repo';
 import { ProductRepo } from './repositories/product.repo';
 import { SupplierRepo } from './repositories/supplier.repo';
 import { UserRepo } from './repositories/user.repo';
 
-export function seedDatabase(): void {
+export async function seedDatabase(): Promise<void> {
     // Only seed if we have no data
-    const productCount = query<{ count: number }>('SELECT COUNT(*) as count FROM products');
-    if ((productCount[0]?.count ?? 0) > 0) return;
+    const productCount = await get<{ count: number }>('SELECT COUNT(*) as count FROM products');
+    if ((productCount?.count ?? 0) > 0) return;
 
     console.log('🌱 Seeding database with initial data...');
 
     // Seed default admin user
-    UserRepo.seedDefault();
+    await UserRepo.seedDefault();
 
     // Seed sample cashiers
     const cashiers = [
@@ -27,10 +27,10 @@ export function seedDatabase(): void {
     ];
 
     for (const cashier of cashiers) {
-        const existing = query<{ id: number }>('SELECT id FROM users WHERE username = ?', [cashier.username]);
-        if (existing.length === 0) {
+        const existing = await get<{ id: number }>('SELECT id FROM users WHERE username = ?', [cashier.username]);
+        if (!existing) {
             try {
-                UserRepo.create(cashier);
+                await UserRepo.create(cashier);
                 console.log(`✅ Created cashier: ${cashier.full_name}`);
             } catch (e) {
                 console.error('Error creating cashier:', cashier.full_name, e);
@@ -55,11 +55,11 @@ export function seedDatabase(): void {
     const categoryIds: Record<string, number> = {};
     for (const cat of categories) {
         try {
-            const existing = query<{ id: number }>('SELECT id FROM categories WHERE name = ?', [cat.name]);
-            if (existing.length > 0) {
-                categoryIds[cat.name] = existing[0].id;
+            const existing = await get<{ id: number }>('SELECT id FROM categories WHERE name = ?', [cat.name]);
+            if (existing) {
+                categoryIds[cat.name] = existing.id;
             } else {
-                const created = CategoryRepo.create(cat);
+                const created = await CategoryRepo.create(cat);
                 if (created) {
                     categoryIds[cat.name] = created.id;
                 } else {
@@ -109,9 +109,9 @@ export function seedDatabase(): void {
                 continue;
             }
 
-            const existing = query<{ id: number }>('SELECT id FROM products WHERE barcode = ?', [p.barcode]);
-            if (existing.length === 0) {
-                ProductRepo.create({
+            const existing = await get<{ id: number }>('SELECT id FROM products WHERE barcode = ?', [p.barcode]);
+            if (!existing) {
+                await ProductRepo.create({
                     name: p.name,
                     barcode: p.barcode,
                     category_id: catId,
@@ -137,9 +137,9 @@ export function seedDatabase(): void {
 
     for (const s of suppliers) {
         try {
-            const existing = query<{ id: number }>('SELECT id FROM suppliers WHERE name = ?', [s.name]);
-            if (existing.length === 0) {
-                SupplierRepo.create(s);
+            const existing = await get<{ id: number }>('SELECT id FROM suppliers WHERE name = ?', [s.name]);
+            if (!existing) {
+                await SupplierRepo.create(s);
             }
         } catch (e) {
             console.error('Error seeding supplier:', s.name, e);

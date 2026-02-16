@@ -1,39 +1,39 @@
-import { query, execute, lastInsertId } from '../db';
+import { query, execute, lastInsertId, get } from '../db';
 import type { QuickAccessItem, QuickAccessItemInput } from '../../src/lib/types';
 
 export const QuickAccessRepo = {
-    getAll(): QuickAccessItem[] {
+    async getAll(): Promise<QuickAccessItem[]> {
         const sql = `
             SELECT qa.*, COALESCE(p.name, 'Unknown Product') as product_name
             FROM pos_quick_access qa
             LEFT JOIN products p ON qa.product_id = p.id
             ORDER BY qa.created_at DESC
         `;
-        const results = query<any>(sql);
+        const results = await query<any>(sql);
         return results.map(row => ({
             ...row,
             options: JSON.parse(row.options || '[]')
         }));
     },
 
-    getById(id: number): QuickAccessItem | undefined {
+    async getById(id: number): Promise<QuickAccessItem | undefined> {
         const sql = `
             SELECT qa.*, COALESCE(p.name, 'Unknown Product') as product_name
             FROM pos_quick_access qa
             LEFT JOIN products p ON qa.product_id = p.id
             WHERE qa.id = ?
         `;
-        const results = query<any>(sql, [id]);
-        if (results.length === 0) return undefined;
+        const result = await get<any>(sql, [id]);
+        if (!result) return undefined;
 
         return {
-            ...results[0],
-            options: JSON.parse(results[0].options || '[]')
+            ...result,
+            options: JSON.parse(result.options || '[]')
         };
     },
 
-    create(input: QuickAccessItemInput): QuickAccessItem {
-        execute(
+    async create(input: QuickAccessItemInput): Promise<QuickAccessItem> {
+        await execute(
             `INSERT INTO pos_quick_access (product_id, display_name, icon, color, bg_color, options)
              VALUES (?, ?, ?, ?, ?, ?)`,
             [
@@ -45,11 +45,11 @@ export const QuickAccessRepo = {
                 JSON.stringify(input.options || [])
             ]
         );
-        const id = lastInsertId();
-        return this.getById(id)!;
+        const id = await lastInsertId();
+        return this.getById(id) as Promise<QuickAccessItem>;
     },
 
-    update(id: number, input: Partial<QuickAccessItemInput>): QuickAccessItem {
+    async update(id: number, input: Partial<QuickAccessItemInput>): Promise<QuickAccessItem> {
         const fields: string[] = [];
         const values: unknown[] = [];
 
@@ -63,11 +63,11 @@ export const QuickAccessRepo = {
         fields.push("updated_at = datetime('now')");
         values.push(id);
 
-        execute(`UPDATE pos_quick_access SET ${fields.join(', ')} WHERE id = ?`, values);
-        return this.getById(id)!;
+        await execute(`UPDATE pos_quick_access SET ${fields.join(', ')} WHERE id = ?`, values);
+        return this.getById(id) as Promise<QuickAccessItem>;
     },
 
-    delete(id: number): void {
-        execute('DELETE FROM pos_quick_access WHERE id = ?', [id]);
+    async delete(id: number): Promise<void> {
+        await execute('DELETE FROM pos_quick_access WHERE id = ?', [id]);
     }
 };

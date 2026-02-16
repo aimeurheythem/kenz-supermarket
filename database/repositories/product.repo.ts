@@ -1,8 +1,10 @@
-import { query, execute, lastInsertId, transaction } from '../db';
+import { query, execute, lastInsertId, get } from '../db';
 import type { Product, ProductInput } from '../../src/lib/types';
 
+import { AuditLogRepo } from './audit-log.repo';
+
 export const ProductRepo = {
-    getAll(filters?: { category_id?: number; search?: string; low_stock?: boolean; active_only?: boolean }): Product[] {
+    async getAll(filters?: { category_id?: number; search?: string; low_stock?: boolean; active_only?: boolean }): Promise<Product[]> {
         let sql = `
       SELECT p.*, c.name as category_name
       FROM products p
@@ -30,30 +32,28 @@ export const ProductRepo = {
         return query<Product>(sql, params);
     },
 
-    getById(id: number): Product | undefined {
-        const results = query<Product>(
+    async getById(id: number): Promise<Product | undefined> {
+        return get<Product>(
             `SELECT p.*, c.name as category_name
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        WHERE p.id = ?`,
             [id]
         );
-        return results[0];
     },
 
-    getByBarcode(barcode: string): Product | undefined {
-        const results = query<Product>(
+    async getByBarcode(barcode: string): Promise<Product | undefined> {
+        return get<Product>(
             `SELECT p.*, c.name as category_name
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        WHERE p.barcode = ?`,
             [barcode]
         );
-        return results[0];
     },
 
-    create(input: ProductInput): Product {
-        execute(
+    async create(input: ProductInput): Promise<Product> {
+        await execute(
             `INSERT INTO products (barcode, name, description, category_id, cost_price, selling_price, stock_quantity, reorder_level, unit, image_url)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
@@ -69,11 +69,18 @@ export const ProductRepo = {
                 input.image_url || '',
             ]
         );
-        const id = lastInsertId();
-        return this.getById(id)!;
+        const id = await lastInsertId();
+        const product = await this.getById(id) as Product;
+
+        // Audit Log
+        await AuditLogRepo.log('CREATE', 'PRODUCT', id, `Created product: ${product.name}`, null, product);
+
+        return product;
     },
 
-    update(id: number, input: Partial<ProductInput>): Product {
+    async update(id: number, input: Partial<ProductInput>): Promise<Product> {
+        const oldProduct = await this.getById(id);
+
         const fields: string[] = [];
         const values: unknown[] = [];
 
@@ -89,26 +96,39 @@ export const ProductRepo = {
         if (input.image_url !== undefined) { fields.push('image_url = ?'); values.push(input.image_url); }
 
         fields.push("updated_at = datetime('now')");
-        values.push(id);
+        values.push(id); // For WHERE clause
 
-        execute(`UPDATE products SET ${fields.join(', ')} WHERE id = ?`, values);
-        return this.getById(id)!;
+        await execute(`UPDATE products SET ${fields.join(', ')} WHERE id = ?`, values);
+        const newProduct = await this.getById(id) as Product;
+
+        // Audit Log
+        await AuditLogRepo.log('UPDATE', 'PRODUCT', id, `Updated product: ${newProduct.name}`, oldProduct, newProduct);
+
+        return newProduct;
     },
 
-    updateStock(id: number, newQuantity: number): void {
-        execute("UPDATE products SET stock_quantity = ?, updated_at = datetime('now') WHERE id = ?", [newQuantity, id]);
+    async updateStock(id: number, newQuantity: number): Promise<void> {
+        const product = await this.getById(id);
+        const oldQty = product?.stock_quantity;
+
+        await execute("UPDATE products SET stock_quantity = ?, updated_at = datetime('now') WHERE id = ?", [newQuantity, id]);
+
+        await AuditLogRepo.log('UPDATE_STOCK', 'PRODUCT', id, `Updated stock for ${product?.name}`, { stock_quantity: oldQty }, { stock_quantity: newQuantity });
     },
 
-    delete(id: number): void {
-        execute('UPDATE products SET is_active = 0 WHERE id = ?', [id]);
+    async delete(id: number): Promise<void> {
+        const product = await this.getById(id);
+        await execute('UPDATE products SET is_active = 0 WHERE id = ?', [id]);
+
+        await AuditLogRepo.log('DELETE', 'PRODUCT', id, `Deleted (soft) product: ${product?.name}`, product, null);
     },
 
-    count(): number {
-        const result = query<{ count: number }>('SELECT COUNT(*) as count FROM products WHERE is_active = 1');
-        return result[0]?.count ?? 0;
+    async count(): Promise<number> {
+        const result = await get<{ count: number }>('SELECT COUNT(*) as count FROM products WHERE is_active = 1');
+        return result?.count ?? 0;
     },
 
-    getLowStock(): Product[] {
+    async getLowStock(): Promise<Product[]> {
         return query<Product>(
             `SELECT p.*, c.name as category_name
        FROM products p

@@ -1,11 +1,11 @@
-import { query, execute, lastInsertId, getDatabase, saveDatabase } from '../db';
+import { query, execute, lastInsertId, get } from '../db';
 import type { CashierSession, CashierSessionInput, SessionCloseInput } from '../../src/lib/types';
 
 export const CashierSessionRepo = {
     /**
      * Get all sessions (with optional filters)
      */
-    getAll(filters?: { cashier_id?: number; status?: string; date_from?: string; date_to?: string }): CashierSession[] {
+    async getAll(filters?: { cashier_id?: number; status?: string; date_from?: string; date_to?: string }): Promise<CashierSession[]> {
         let sql = `
             SELECT cs.*, u.full_name as cashier_name
             FROM cashier_sessions cs
@@ -38,15 +38,14 @@ export const CashierSessionRepo = {
     /**
      * Get session by ID
      */
-    getById(id: number): CashierSession | undefined {
+    async getById(id: number): Promise<CashierSession | undefined> {
         try {
-            const results = query<CashierSession>(`
+            return get<CashierSession>(`
                 SELECT cs.*, u.full_name as cashier_name
                 FROM cashier_sessions cs
                 LEFT JOIN users u ON cs.cashier_id = u.id
                 WHERE cs.id = ?
             `, [id]);
-            return results[0];
         } catch (error) {
             console.error('Error getting session by ID:', error);
             return undefined;
@@ -56,8 +55,8 @@ export const CashierSessionRepo = {
     /**
      * Get active session for a cashier
      */
-    getActiveSession(cashier_id: number): CashierSession | undefined {
-        const results = query<CashierSession>(`
+    async getActiveSession(cashier_id: number): Promise<CashierSession | undefined> {
+        const results = await query<CashierSession>(`
             SELECT cs.*, u.full_name as cashier_name
             FROM cashier_sessions cs
             JOIN users u ON cs.cashier_id = u.id
@@ -71,91 +70,56 @@ export const CashierSessionRepo = {
     /**
      * Start a new cashier session (shift)
      */
-    startSession(input: CashierSessionInput): CashierSession | null {
+    async startSession(input: CashierSessionInput): Promise<CashierSession | null> {
         try {
-            console.log('CashierSessionRepo: Starting session for cashier', input.cashier_id, 'with opening cash:', input.opening_cash);
-            
             // First verify the table exists
-            const tableCheck = query<{ name: string }>("SELECT name FROM sqlite_master WHERE type='table' AND name='cashier_sessions'");
-            console.log('CashierSessionRepo: Table check:', tableCheck);
-            
+            const tableCheck = await query<{ name: string }>("SELECT name FROM sqlite_master WHERE type='table' AND name='cashier_sessions'");
             if (tableCheck.length === 0) {
-                console.error('CashierSessionRepo: cashier_sessions table does not exist!');
+                console.error('cashier_sessions table does not exist');
                 return null;
-            }
-            
-            // Close any existing active sessions for this cashier first
-            try {
-                execute(`
-                    UPDATE cashier_sessions 
-                    SET status = 'force_closed', logout_time = datetime('now'), notes = 'Auto-closed: new session started'
-                    WHERE cashier_id = ? AND status = 'active'
-                `, [input.cashier_id]);
-                console.log('CashierSessionRepo: Closed existing sessions');
-            } catch (e) {
-                console.log('CashierSessionRepo: No existing sessions to close or error:', e);
             }
 
-            console.log('CashierSessionRepo: About to insert new session...');
-            
-            // Get database directly to have more control
-            const database = getDatabase();
-            let newSessionId = 0;
-            
+            // Close any existing active sessions for this cashier first
             try {
-                // Close existing sessions first (outside transaction)
-                database.run(`
+                await execute(`
                     UPDATE cashier_sessions 
                     SET status = 'force_closed', logout_time = datetime('now'), notes = 'Auto-closed: new session started'
                     WHERE cashier_id = ? AND status = 'active'
                 `, [input.cashier_id]);
-                
-                // Insert new session
-                console.log('CashierSessionRepo: Executing INSERT...');
-                database.run(
-                    'INSERT INTO cashier_sessions (cashier_id, opening_cash, status) VALUES (?, ?, ?)',
-                    [input.cashier_id, input.opening_cash, 'active']
-                );
-                
-                // Get the ID immediately after insert
-                console.log('CashierSessionRepo: Getting last insert ID...');
-                const stmt = database.prepare('SELECT last_insert_rowid() as id');
-                stmt.step();
-                const result = stmt.getAsObject() as { id: number };
-                stmt.free();
-                
-                newSessionId = result.id;
-                console.log('CashierSessionRepo: Got ID:', newSessionId);
-                
-                // Save database
-                saveDatabase();
-                
-            } catch (insertError) {
-                console.error('CashierSessionRepo: Insert failed:', insertError);
-                return null;
+            } catch (e) {
+                // No existing sessions to close — non-critical
             }
-            
+
+            // Insert new session
+            await execute(
+                'INSERT INTO cashier_sessions (cashier_id, opening_cash, status) VALUES (?, ?, ?)',
+                [input.cashier_id, input.opening_cash, 'active']
+            );
+
+            // Get the ID immediately after insert
+            let newSessionId = await lastInsertId();
+
+            // If last_insert_rowid() returns 0, try getting the max id instead
             if (!newSessionId || newSessionId === 0) {
-                console.error('CashierSessionRepo: Invalid session ID after insert:', newSessionId);
+                const maxResult = await query<{ max_id: number }>('SELECT MAX(id) as max_id FROM cashier_sessions');
+                newSessionId = maxResult[0]?.max_id ?? 0;
+            }
+
+            if (!newSessionId || newSessionId === 0) {
+                console.error('Invalid session ID after insert');
                 return null;
             }
-            
-            // Get the session directly from the table
-            console.log('CashierSessionRepo: Fetching session with ID:', newSessionId);
-            const session = this.getById(newSessionId);
-            console.log('CashierSessionRepo: Retrieved session:', session);
-            
+
+            // Retrieve the created session
+            const session = await this.getById(newSessionId);
             if (!session || !session.id) {
-                console.error('CashierSessionRepo: Failed to retrieve created session');
-                // Try to query all recent sessions for debugging
-                const recentSessions = query<CashierSession>('SELECT * FROM cashier_sessions ORDER BY id DESC LIMIT 5');
-                console.log('CashierSessionRepo: Recent sessions in table:', recentSessions);
+                console.error('Failed to retrieve created session');
                 return null;
             }
-            
+
             return session;
         } catch (error) {
-            console.error('CashierSessionRepo: Error starting session:', error);
+            console.error('Error starting cashier session:', error);
             return null;
         }
     },
@@ -163,12 +127,12 @@ export const CashierSessionRepo = {
     /**
      * Close a cashier session
      */
-    closeSession(input: SessionCloseInput): CashierSession {
-        const session = this.getById(input.session_id);
+    async closeSession(input: SessionCloseInput): Promise<CashierSession> {
+        const session = await this.getById(input.session_id);
         if (!session) throw new Error('Session not found');
 
         // Calculate expected cash (opening + all cash sales in this session)
-        const cashSales = query<{ total: number }>(`
+        const cashSales = await query<{ total: number }>(`
             SELECT COALESCE(SUM(total), 0) as total
             FROM sales
             WHERE session_id = ? AND payment_method = 'cash' AND status = 'completed'
@@ -177,7 +141,7 @@ export const CashierSessionRepo = {
         const expected_cash = session.opening_cash + (cashSales[0]?.total ?? 0);
         const cash_difference = input.closing_cash - expected_cash;
 
-        execute(`
+        await execute(`
             UPDATE cashier_sessions 
             SET 
                 logout_time = datetime('now'),
@@ -189,21 +153,21 @@ export const CashierSessionRepo = {
             WHERE id = ?
         `, [input.closing_cash, expected_cash, cash_difference, input.notes || '', input.session_id]);
 
-        return this.getById(input.session_id)!;
+        return this.getById(input.session_id) as Promise<CashierSession>;
     },
 
     /**
      * Get session statistics
      */
-    getSessionStats(session_id: number): {
+    async getSessionStats(session_id: number): Promise<{
         total_sales: number;
         total_transactions: number;
         cash_sales: number;
         card_sales: number;
         mobile_sales: number;
         average_order: number;
-    } {
-        const result = query<{
+    }> {
+        const result = await query<{
             total_sales: number;
             total_transactions: number;
             cash_sales: number;
@@ -230,8 +194,8 @@ export const CashierSessionRepo = {
 
         return {
             ...stats,
-            average_order: stats.total_transactions > 0 
-                ? stats.total_sales / stats.total_transactions 
+            average_order: stats.total_transactions > 0
+                ? stats.total_sales / stats.total_transactions
                 : 0
         };
     },
@@ -239,13 +203,13 @@ export const CashierSessionRepo = {
     /**
      * Get cashier performance report
      */
-    getCashierPerformance(cashier_id: number, date_from?: string, date_to?: string): {
+    async getCashierPerformance(cashier_id: number, date_from?: string, date_to?: string): Promise<{
         total_sessions: number;
         total_sales: number;
         total_transactions: number;
         average_sale: number;
         total_hours: number;
-    } {
+    }> {
         let sql = `
             SELECT 
                 COUNT(*) as total_sessions,
@@ -266,7 +230,7 @@ export const CashierSessionRepo = {
             params.push(date_to);
         }
 
-        const result = query<{
+        const result = await query<{
             total_sessions: number;
             total_sales: number;
             total_transactions: number;

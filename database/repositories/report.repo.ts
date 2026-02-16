@@ -45,19 +45,20 @@ export interface SessionReport {
 }
 
 export const ReportRepo = {
-    getSalesParams(period: '7days' | '30days' | 'year'): { start: string, end: string } {
+    getSalesParams(period: 'today' | '7days' | '30days' | 'year'): { start: string, end: string } {
         const now = new Date();
         const end = now.toISOString();
         let start = new Date();
 
-        if (period === '7days') start.setDate(now.getDate() - 7);
+        if (period === 'today') start.setHours(0, 0, 0, 0);
+        else if (period === '7days') start.setDate(now.getDate() - 7);
         else if (period === '30days') start.setDate(now.getDate() - 30);
         else if (period === 'year') start.setFullYear(now.getFullYear() - 1);
 
         return { start: start.toISOString(), end };
     },
 
-    getSalesChart(period: '7days' | '30days' | 'year'): SalesChartData[] {
+    async getSalesChart(period: 'today' | '7days' | '30days' | 'year'): Promise<SalesChartData[]> {
         const { start, end } = this.getSalesParams(period);
         // SQLite doesn't natively support easy date generation for filling gaps, 
         // so we'll just query existing data and let frontend fill gaps or just show available points.
@@ -77,7 +78,7 @@ export const ReportRepo = {
         `, [start, end]);
     },
 
-    getTopProducts(limit: number = 5): TopProductData[] {
+    async getTopProducts(limit: number = 5): Promise<TopProductData[]> {
         return query<TopProductData>(`
             SELECT 
                 p.id,
@@ -94,7 +95,7 @@ export const ReportRepo = {
         `, [limit]);
     },
 
-    getCategoryPerformance(): { name: string; value: number }[] {
+    async getCategoryPerformance(): Promise<{ name: string; value: number }[]> {
         return query<{ name: string; value: number }>(`
             SELECT 
                 c.name, 
@@ -112,9 +113,9 @@ export const ReportRepo = {
     // CASHIER REPORTS
     // =============================================
 
-    getCashierPerformance(period: '7days' | '30days' | 'year', cashierId?: number): CashierPerformanceData[] {
+    async getCashierPerformance(period: 'today' | '7days' | '30days' | 'year', cashierId?: number): Promise<CashierPerformanceData[]> {
         const { start, end } = this.getSalesParams(period);
-        
+
         let sql = `
             SELECT 
                 u.id as cashier_id,
@@ -129,25 +130,25 @@ export const ReportRepo = {
             LEFT JOIN sales s ON cs.id = s.session_id AND s.status = 'completed'
             WHERE u.role = 'cashier' AND u.is_active = 1
         `;
-        
+
         const params: unknown[] = [start, end];
-        
+
         if (cashierId) {
             sql += ' AND u.id = ?';
             params.push(cashierId);
         }
-        
+
         sql += `
             GROUP BY u.id
             ORDER BY total_sales DESC
         `;
-        
+
         return query<CashierPerformanceData>(sql, params);
     },
 
-    getCashierDailyPerformance(period: '7days' | '30days' | 'year', cashierId?: number): CashierDailyPerformance[] {
+    async getCashierDailyPerformance(period: 'today' | '7days' | '30days' | 'year', cashierId?: number): Promise<CashierDailyPerformance[]> {
         const { start, end } = this.getSalesParams(period);
-        
+
         let sql = `
             SELECT 
                 strftime('%Y-%m-%d', s.sale_date) as date,
@@ -161,25 +162,25 @@ export const ReportRepo = {
             WHERE u.role = 'cashier' AND u.is_active = 1
                 AND (s.sale_date BETWEEN ? AND ? OR s.sale_date IS NULL)
         `;
-        
+
         const params: unknown[] = [start, end];
-        
+
         if (cashierId) {
             sql += ' AND u.id = ?';
             params.push(cashierId);
         }
-        
+
         sql += `
             GROUP BY date, u.id
             ORDER BY date DESC, revenue DESC
         `;
-        
+
         return query<CashierDailyPerformance>(sql, params);
     },
 
-    getSessionReports(period: '7days' | '30days' | 'year', cashierId?: number): SessionReport[] {
+    async getSessionReports(period: 'today' | '7days' | '30days' | 'year', cashierId?: number): Promise<SessionReport[]> {
         const { start, end } = this.getSalesParams(period);
-        
+
         let sql = `
             SELECT 
                 cs.id as session_id,
@@ -198,19 +199,19 @@ export const ReportRepo = {
             LEFT JOIN sales s ON cs.id = s.session_id AND s.status = 'completed'
             WHERE cs.login_time BETWEEN ? AND ?
         `;
-        
+
         const params: unknown[] = [start, end];
-        
+
         if (cashierId) {
             sql += ' AND cs.cashier_id = ?';
             params.push(cashierId);
         }
-        
+
         sql += `
             GROUP BY cs.id
             ORDER BY cs.login_time DESC
         `;
-        
+
         return query<SessionReport>(sql, params);
     }
 };

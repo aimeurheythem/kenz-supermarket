@@ -15,7 +15,9 @@ import {
     Zap,
     ArrowRight,
     Settings2,
-    Pencil
+    Pencil,
+    Printer,
+    Wallet
 } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useProductStore } from '@/stores/useProductStore';
@@ -31,6 +33,9 @@ import FlashDealsPromotions from '@/components/POS/FlashDealsPromotions';
 import QuickAccess from '@/components/POS/QuickAccess';
 import InventoryPreview from '@/components/POS/InventoryPreview';
 import CheckoutSimulation from '@/components/POS/CheckoutSimulation';
+import ReceiptPreview from '@/components/POS/ReceiptPreview';
+import CustomerSelector from '@/components/POS/CustomerSelector';
+import type { Sale, SaleItem, Customer } from '@/lib/types';
 
 export default function POS() {
     const { t, i18n } = useTranslation();
@@ -41,10 +46,14 @@ export default function POS() {
 
     const [searchQuery, setSearchQuery] = useState('');
     const [showSimulation, setShowSimulation] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'mobile'>('cash');
-    const [customerName, setCustomerName] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'mobile' | 'credit'>('cash');
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [promoIndex, setPromoIndex] = useState(0);
     const [isManagerOpen, setIsManagerOpen] = useState(false);
+    const [showReceipt, setShowReceipt] = useState(false);
+    const [lastSale, setLastSale] = useState<Sale | null>(null);
+    const [lastSaleItems, setLastSaleItems] = useState<SaleItem[]>([]);
+    const [printReceipt, setPrintReceipt] = useState(true);
 
     const [currentTime, setCurrentTime] = useState(new Date());
     useEffect(() => {
@@ -57,14 +66,14 @@ export default function POS() {
     const barcodeBuffer = useRef('');
     const barcodeTimer = useRef<NodeJS.Timeout | null>(null);
 
-    const handleBarcodeInput = useCallback((e: KeyboardEvent) => {
+    const handleBarcodeInput = useCallback(async (e: KeyboardEvent) => {
         const target = e.target as HTMLElement;
         if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
 
         if (e.key === 'Enter' && barcodeBuffer.current.length > 3) {
             const barcode = barcodeBuffer.current;
             barcodeBuffer.current = '';
-            const product = getByBarcode(barcode);
+            const product = await getByBarcode(barcode);
             if (product) {
                 addToCart({ product, quantity: 1, discount: 0 });
             }
@@ -119,33 +128,50 @@ export default function POS() {
 
     const handleBeforeCheckout = useCallback(() => {
         if (cart.length === 0) return;
-        setShowSimulation(true);
-    }, [cart.length]);
+        // Skip simulation, go straight to checkout -> receipt
+        handleFinalizeCheckout();
+    }, [cart.length, printReceipt]);
 
-    const handleFinalizeCheckout = useCallback(() => {
+    const handleFinalizeCheckout = useCallback(async () => {
         try {
             const sessionId = getCurrentSessionId();
-            checkout(
-                { method: paymentMethod, customer_name: customerName || 'Walk-in Customer' },
+
+            // Capture items for receipt before they are cleared
+            const currentItems: SaleItem[] = cart.map((item) => ({
+                id: 0, // Placeholder
+                sale_id: 0, // Placeholder
+                product_id: item.product.id,
+                product_name: item.product.name,
+                quantity: item.quantity,
+                unit_price: item.product.selling_price,
+                discount: item.discount,
+                total: (item.product.selling_price * item.quantity) - item.discount
+            }));
+
+            const sale = await checkout(
+                {
+                    method: paymentMethod,
+                    customer_name: selectedCustomer ? selectedCustomer.full_name : (selectedCustomer === null ? 'Walk-in Customer' : 'Walk-in Customer'),
+                    customer_id: selectedCustomer?.id
+                },
                 undefined,
                 sessionId || undefined
             );
-            setShowSimulation(false);
-            setPaymentMethod('cash');
-            setCustomerName('');
-            loadProducts();
 
-            // Force reload after a short delay to ensure state settles
-            setTimeout(() => {
-                window.location.reload();
-            }, 500);
+            setLastSale(sale);
+            setLastSaleItems(currentItems);
+            setShowSimulation(false);
+            setShowReceipt(true);
+
+            setPaymentMethod('cash');
+            setSelectedCustomer(null);
+            loadProducts();
         } catch (err: any) {
             console.error('Checkout failed:', err);
-            // Show error to user if checkout fails
             alert('Checkout error: ' + (err.message || 'Unknown error'));
             setShowSimulation(false);
         }
-    }, [checkout, paymentMethod, customerName, getCurrentSessionId, loadProducts]);
+    }, [checkout, paymentMethod, selectedCustomer, getCurrentSessionId, loadProducts, cart]);
 
     const handleEndShift = () => {
         if (confirm('Are you sure you want to end your shift?')) {
@@ -334,6 +360,12 @@ export default function POS() {
             <div className="relative z-10 w-full lg:w-[450px] lg:sticky lg:top-8 flex flex-col bg-white rounded-[3rem] border-2 border-gray-200 shadow-none overflow-hidden">
                 {/* Header */}
                 <div className="p-10 pb-0">
+                    <div className="mb-6">
+                        <CustomerSelector
+                            selectedCustomer={selectedCustomer}
+                            onSelect={setSelectedCustomer}
+                        />
+                    </div>
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex flex-col gap-1">
                             <span className="text-[10px] text-zinc-400 uppercase tracking-[0.2em] font-bold">{t('pos.cart.new_order')}</span>
@@ -419,6 +451,7 @@ export default function POS() {
                             { key: 'cash' as const, icon: Banknote, label: 'Cash', comingSoon: false },
                             { key: 'card' as const, icon: CreditCard, label: 'Card', comingSoon: true },
                             { key: 'mobile' as const, icon: Smartphone, label: 'E-Pay', comingSoon: true },
+                            { key: 'credit' as const, icon: Wallet, label: 'Credit', comingSoon: false }, // New Credit Option
                         ].map((method) => (
                             <button
                                 key={method.key}
@@ -435,7 +468,7 @@ export default function POS() {
                                 <span className={cn(
                                     "text-[10px] font-black uppercase tracking-widest transition-opacity",
                                     paymentMethod === method.key ? "opacity-100" : "opacity-60"
-                                )}>{t(method.label === 'Cash' ? 'pos.cart.pay_cash' : method.label === 'Card' ? 'pos.cart.pay_card' : 'pos.cart.pay_mobile')}</span>
+                                )}>{t(method.label === 'Cash' ? 'pos.cart.pay_cash' : method.label === 'Card' ? 'pos.cart.pay_card' : method.label === 'Credit' ? 'Credit' : 'pos.cart.pay_mobile')}</span>
 
                                 {method.comingSoon && (
                                     <div className="absolute inset-0 bg-white/95 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
@@ -448,6 +481,29 @@ export default function POS() {
                         ))}
                     </div>
 
+                    {/* Print Receipt Toggle */}
+                    <div className="flex bg-zinc-200/50 p-1 rounded-2xl">
+                        <button
+                            onClick={() => setPrintReceipt(true)}
+                            className={cn(
+                                "flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all gap-2 flex items-center justify-center",
+                                printReceipt ? "bg-white text-black shadow-sm" : "text-zinc-400 hover:text-zinc-600"
+                            )}
+                        >
+                            <Printer size={14} className={printReceipt ? "text-black" : "text-zinc-400"} />
+                            {t('pos.print.yes', 'Receipt')}
+                        </button>
+                        <button
+                            onClick={() => setPrintReceipt(false)}
+                            className={cn(
+                                "flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all gap-2 flex items-center justify-center",
+                                !printReceipt ? "bg-white text-black shadow-sm" : "text-zinc-400 hover:text-zinc-600"
+                            )}
+                        >
+                            <span className={!printReceipt ? "text-black" : "text-zinc-400"}>✕</span>
+                            {t('pos.print.no', 'No Receipt')}
+                        </button>
+                    </div>
                     {/* Action */}
                     <motion.button
                         onClick={handleBeforeCheckout}
@@ -463,15 +519,27 @@ export default function POS() {
                     >
                         {t('pos.cart.checkout')}
                     </motion.button>
-                </div >
-            </div >
+                </div>
+            </div>
 
-            {showSimulation && (
-                <CheckoutSimulation
-                    total={cartTotal}
-                    onComplete={handleFinalizeCheckout}
-                />
-            )}
+            {
+                showSimulation && (
+                    <CheckoutSimulation
+                        total={cartTotal}
+                        onComplete={handleFinalizeCheckout}
+                    />
+                )
+            }
+
+            {
+                showReceipt && lastSale && (
+                    <ReceiptPreview
+                        sale={lastSale}
+                        items={lastSaleItems}
+                        onClose={() => setShowReceipt(false)}
+                    />
+                )
+            }
 
             {/* Quick Access Manager Modal */}
             <AnimatePresence>

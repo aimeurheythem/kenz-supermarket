@@ -6,19 +6,23 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
 }
 
+import { useSettingsStore } from '@/stores/useSettingsStore';
+
 export function formatCurrency(amount: number) {
-    const isArabic = i18n.language === 'ar';
-    if (isArabic) {
-        return new Intl.NumberFormat('ar-DZ', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        }).format(amount) + ' دج';
-    }
-    return new Intl.NumberFormat("fr-DZ", {
-        style: "currency",
-        currency: "DZD",
+    const settings = useSettingsStore.getState().settings;
+    const symbol = settings['currency.symbol'] || 'DZD';
+    const position = settings['currency.position'] || 'suffix';
+
+    // Format number with spaces for thousands
+    const formattedNumber = new Intl.NumberFormat('fr-FR', {
         minimumFractionDigits: 2,
-    }).format(amount)
+        maximumFractionDigits: 2,
+    }).format(amount);
+
+    if (position === 'prefix') {
+        return `${symbol} ${formattedNumber}`;
+    }
+    return `${formattedNumber} ${symbol}`;
 }
 
 export function formatDate(date: string | Date) {

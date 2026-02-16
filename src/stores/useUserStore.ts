@@ -6,50 +6,54 @@ import { CashierSessionRepo } from '../../database';
 interface UserStore {
     users: User[];
     cashierSessions: CashierSession[];
-    loadUsers: () => void;
-    addUser: (input: UserInput) => void;
-    updateUser: (id: number, input: Partial<UserInput & { is_active?: number }>) => void;
-    deleteUser: (id: number) => void;
-    loadCashierSessions: (cashierId?: number) => void;
-    getCashierPerformance: (cashierId: number) => {
+    isLoading: boolean;
+    loadUsers: () => Promise<void>;
+    addUser: (input: UserInput) => Promise<void>;
+    updateUser: (id: number, input: Partial<UserInput & { is_active?: number }>) => Promise<void>;
+    deleteUser: (id: number) => Promise<void>;
+    loadCashierSessions: (cashierId?: number) => Promise<void>;
+    getCashierPerformance: (cashierId: number) => Promise<{
         total_sessions: number;
         total_sales: number;
         total_transactions: number;
         average_sale: number;
         total_hours: number;
-    };
+    }>;
 }
 
 export const useUserStore = create<UserStore>((set, get) => ({
     users: [],
     cashierSessions: [],
+    isLoading: false,
 
-    loadUsers: () => {
-        const users = UserRepo.getAll();
-        set({ users });
+    loadUsers: async () => {
+        set({ isLoading: true });
+        const users = await UserRepo.getAll();
+        set({ users, isLoading: false });
     },
 
-    addUser: (input) => {
-        UserRepo.create(input);
-        get().loadUsers();
+    addUser: async (input) => {
+        await UserRepo.create(input);
+        await get().loadUsers();
     },
 
-    updateUser: (id, input) => {
-        UserRepo.update(id, input);
-        get().loadUsers();
+    updateUser: async (id, input) => {
+        await UserRepo.update(id, input);
+        await get().loadUsers();
     },
 
-    deleteUser: (id) => {
-        UserRepo.delete(id); // This is soft delete (is_active = 0)
-        get().loadUsers();
+    deleteUser: async (id) => {
+        await UserRepo.delete(id); // This is soft delete (is_active = 0)
+        await get().loadUsers();
     },
 
-    loadCashierSessions: (cashierId) => {
-        const sessions = CashierSessionRepo.getAll(cashierId ? { cashier_id: cashierId } : undefined);
-        set({ cashierSessions: sessions });
+    loadCashierSessions: async (cashierId) => {
+        set({ isLoading: true });
+        const sessions = await CashierSessionRepo.getAll(cashierId ? { cashier_id: cashierId } : undefined);
+        set({ cashierSessions: sessions, isLoading: false });
     },
 
-    getCashierPerformance: (cashierId) => {
-        return CashierSessionRepo.getCashierPerformance(cashierId);
+    getCashierPerformance: async (cashierId) => {
+        return await CashierSessionRepo.getCashierPerformance(cashierId);
     }
 }));

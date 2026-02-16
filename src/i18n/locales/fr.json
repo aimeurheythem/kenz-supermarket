@@ -80,7 +80,9 @@
             "products": "Produits",
             "items": "Articles",
             "cashier": "Caissier",
-            "no_sales_today": "Aucune vente enregistrée aujourd'hui"
+            "no_sales_today": "Aucune vente enregistrée aujourd'hui",
+            "no_sales_title": "Aucune Vente",
+            "no_sales_message": "Effectuez votre première vente dans le PDV pour la voir ici."
         },
         "top_performance": {
             "title": "Top 5 Produits",

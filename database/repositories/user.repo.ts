@@ -1,8 +1,7 @@
-import { query, execute, lastInsertId } from '../db';
+import { query, execute, lastInsertId, get } from '../db';
 import type { User, UserInput } from '../../src/lib/types';
 
-// Simple hash function for demo purposes.
-// In production, use bcryptjs in Electron main process.
+// Simple hash for password (no external dependencies)
 function simpleHash(password: string): string {
     let hash = 0;
     for (let i = 0; i < password.length; i++) {
@@ -13,63 +12,70 @@ function simpleHash(password: string): string {
     return 'sh_' + Math.abs(hash).toString(36) + '_' + password.length;
 }
 
-function verifyHash(password: string, hash: string): boolean {
+function verifySimpleHash(password: string, hash: string): boolean {
     return simpleHash(password) === hash;
 }
 
+async function hashPassword(password: string): Promise<string> {
+    return simpleHash(password);
+}
+
+async function verifyPassword(password: string, hash: string): Promise<boolean> {
+    return verifySimpleHash(password, hash);
+}
+
 export const UserRepo = {
-    getAll(): User[] {
+    async getAll(): Promise<User[]> {
         return query<User>('SELECT * FROM users ORDER BY full_name');
     },
 
-    getById(id: number): User | undefined {
-        const results = query<User>('SELECT * FROM users WHERE id = ?', [id]);
-        return results[0];
+    async getById(id: number): Promise<User | undefined> {
+        return get<User>('SELECT * FROM users WHERE id = ?', [id]);
     },
 
-    getByUsername(username: string): User | undefined {
-        const results = query<User>('SELECT * FROM users WHERE username = ?', [username]);
-        return results[0];
+    async getByUsername(username: string): Promise<User | undefined> {
+        return get<User>('SELECT * FROM users WHERE username = ?', [username]);
     },
 
-    create(input: UserInput): User {
-        const passwordHash = simpleHash(input.password);
+    async create(input: UserInput): Promise<User> {
+        const passwordHash = await hashPassword(input.password);
         const pinCode = input.pin_code || null;
-        execute(
+        await execute(
             'INSERT INTO users (username, password_hash, pin_code, full_name, role) VALUES (?, ?, ?, ?, ?)',
             [input.username, passwordHash, pinCode, input.full_name, input.role]
         );
-        const id = lastInsertId();
-        return this.getById(id)!;
+        const id = await lastInsertId();
+        return this.getById(id) as Promise<User>;
     },
 
-    authenticate(username: string, password: string): User | null {
-        const user = this.getByUsername(username);
+    async authenticate(username: string, password: string): Promise<User | null> {
+        const user = await this.getByUsername(username);
         if (!user || !user.is_active) return null;
-        if (!verifyHash(password, user.password_hash)) return null;
+        const isValid = await verifyPassword(password, user.password_hash);
+        if (!isValid) return null;
 
         // Update last login
-        execute("UPDATE users SET last_login = datetime('now') WHERE id = ?", [user.id]);
+        await execute("UPDATE users SET last_login = datetime('now') WHERE id = ?", [user.id]);
         return user;
     },
 
     /**
      * Authenticate cashier using PIN code (quick login for POS)
      */
-    authenticateWithPin(cashier_id: number, pin_code: string): User | null {
-        const user = this.getById(cashier_id);
+    async authenticateWithPin(cashier_id: number, pin_code: string): Promise<User | null> {
+        const user = await this.getById(cashier_id);
         if (!user || !user.is_active) return null;
         if (!user.pin_code || user.pin_code !== pin_code) return null;
 
         // Update last login
-        execute("UPDATE users SET last_login = datetime('now') WHERE id = ?", [user.id]);
+        await execute("UPDATE users SET last_login = datetime('now') WHERE id = ?", [user.id]);
         return user;
     },
 
     /**
      * Get all active cashiers (for dropdown selection)
      */
-    getActiveCashiers(): User[] {
+    async getActiveCashiers(): Promise<User[]> {
         return query<User>(`
             SELECT * FROM users 
             WHERE role = 'cashier' AND is_active = 1 
@@ -77,35 +83,39 @@ export const UserRepo = {
         `);
     },
 
-    update(id: number, input: Partial<UserInput & { is_active?: number }>): User {
+    async update(id: number, input: Partial<UserInput & { is_active?: number }>): Promise<User> {
         const fields: string[] = [];
         const values: unknown[] = [];
 
         if (input.username !== undefined) { fields.push('username = ?'); values.push(input.username); }
         if (input.full_name !== undefined) { fields.push('full_name = ?'); values.push(input.full_name); }
         if (input.role !== undefined) { fields.push('role = ?'); values.push(input.role); }
-        if (input.password !== undefined) { fields.push('password_hash = ?'); values.push(simpleHash(input.password)); }
+        if (input.password !== undefined) { 
+            const hashedPassword = await hashPassword(input.password);
+            fields.push('password_hash = ?'); 
+            values.push(hashedPassword); 
+        }
         if (input.pin_code !== undefined) { fields.push('pin_code = ?'); values.push(input.pin_code); }
         if (input.is_active !== undefined) { fields.push('is_active = ?'); values.push(input.is_active); }
 
         fields.push("updated_at = datetime('now')");
         values.push(id);
 
-        execute(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`, values);
-        return this.getById(id)!;
+        await execute(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`, values);
+        return this.getById(id) as Promise<User>;
     },
 
-    delete(id: number): void {
-        execute('UPDATE users SET is_active = 0 WHERE id = ?', [id]);
+    async delete(id: number): Promise<void> {
+        await execute('UPDATE users SET is_active = 0 WHERE id = ?', [id]);
     },
 
     /**
      * Seed default admin user if no users exist.
      */
-    seedDefault(): void {
-        const admin = this.getByUsername('admin');
+    async seedDefault(): Promise<void> {
+        const admin = await this.getByUsername('admin');
         if (!admin) {
-            this.create({
+            await this.create({
                 username: 'admin',
                 password: 'admin123',
                 full_name: 'System Administrator',

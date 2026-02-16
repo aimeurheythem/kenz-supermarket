@@ -13,22 +13,24 @@ interface AuthStore {
     user: User | null;
     isAuthenticated: boolean;
     currentSession: SessionInfo | null;
+    isLoading: boolean;
+    error: string | null;
 
     // Actions
-    login: (username: string, password: string) => boolean;
-    loginCashier: (cashierId: number, pinCode: string) => boolean;
-    startCashierSession: (cashierId: number, openingCash: number) => CashierSession | null;
-    closeCashierSession: (closingCash: number, notes?: string) => void;
+    login: (username: string, password: string) => Promise<boolean>;
+    loginCashier: (cashierId: number, pinCode: string) => Promise<boolean>;
+    startCashierSession: (cashierId: number, openingCash: number) => Promise<CashierSession | null>;
+    closeCashierSession: (closingCash: number, notes?: string) => Promise<void>;
     logout: () => void;
     checkAuth: () => boolean;
     hasPermission: (permission: Permission) => boolean;
-    
+
     // Getters
     getUserRole: () => 'admin' | 'manager' | 'cashier' | null;
     getCurrentSessionId: () => number | null;
 }
 
-export type Permission = 
+export type Permission =
     | 'view_dashboard'
     | 'view_inventory'
     | 'edit_inventory'
@@ -66,33 +68,47 @@ export const useAuthStore = create<AuthStore>()(
             user: null,
             isAuthenticated: false,
             currentSession: null as SessionInfo | null,
+            isLoading: false,
+            error: null,
 
-            login: (username: string, password: string) => {
-                const user = UserRepo.authenticate(username, password);
-                if (user) {
-                    set({ user, isAuthenticated: true, currentSession: null });
-                    return true;
-                }
-                return false;
-            },
-
-            loginCashier: (cashierId: number, pinCode: string) => {
-                const user = UserRepo.authenticateWithPin(cashierId, pinCode);
-                if (user) {
-                    set({ user, isAuthenticated: true });
-                    return true;
-                }
-                return false;
-            },
-
-            startCashierSession: (cashierId: number, openingCash: number) => {
+            login: async (username: string, password: string) => {
+                set({ isLoading: true, error: null });
                 try {
-                    console.log('AuthStore: Starting session for cashier', cashierId);
-                    const session = CashierSessionRepo.startSession({
+                    const user = await UserRepo.authenticate(username, password);
+                    if (user) {
+                        set({ user, isAuthenticated: true, currentSession: null, isLoading: false });
+                        return true;
+                    }
+                    set({ error: 'Invalid username or password', isLoading: false });
+                    return false;
+                } catch (error: any) {
+                    set({ error: error.message || 'Login failed', isLoading: false });
+                    return false;
+                }
+            },
+
+            loginCashier: async (cashierId: number, pinCode: string) => {
+                set({ isLoading: true, error: null });
+                try {
+                    const user = await UserRepo.authenticateWithPin(cashierId, pinCode);
+                    if (user) {
+                        set({ user, isAuthenticated: true, isLoading: false });
+                        return true;
+                    }
+                    set({ error: 'Invalid PIN code', isLoading: false });
+                    return false;
+                } catch (error: any) {
+                    set({ error: error.message || 'Login failed', isLoading: false });
+                    return false;
+                }
+            },
+
+            startCashierSession: async (cashierId: number, openingCash: number) => {
+                try {
+                    const session = await CashierSessionRepo.startSession({
                         cashier_id: cashierId,
                         opening_cash: openingCash
                     });
-                    console.log('AuthStore: Session created:', session);
                     if (session && session.id) {
                         set({
                             currentSession: { session, openingCash }
@@ -107,11 +123,11 @@ export const useAuthStore = create<AuthStore>()(
                 }
             },
 
-            closeCashierSession: (closingCash: number, notes?: string) => {
+            closeCashierSession: async (closingCash: number, notes?: string) => {
                 const { currentSession } = get();
                 if (currentSession?.session?.id) {
                     try {
-                        CashierSessionRepo.closeSession({
+                        await CashierSessionRepo.closeSession({
                             session_id: currentSession.session.id,
                             closing_cash: closingCash,
                             notes
@@ -129,7 +145,7 @@ export const useAuthStore = create<AuthStore>()(
                 if (currentSession) {
                     get().closeCashierSession(0, 'Auto-closed on logout');
                 }
-                set({ user: null, isAuthenticated: false, currentSession: null });
+                set({ user: null, isAuthenticated: false, currentSession: null, error: null });
             },
 
             checkAuth: () => {
@@ -153,10 +169,10 @@ export const useAuthStore = create<AuthStore>()(
         }),
         {
             name: 'auth-storage',
-            partialize: (state) => ({ 
-                user: state.user, 
+            partialize: (state) => ({
+                user: state.user,
                 isAuthenticated: state.isAuthenticated,
-                currentSession: state.currentSession 
+                currentSession: state.currentSession
             })
         }
     )

@@ -109,19 +109,51 @@ export interface PurchaseOrderItem {
 }
 
 // =============================================
+// CUSTOMERS
+// =============================================
+export interface Customer {
+    id: number;
+    full_name: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    loyalty_points: number;
+    total_debt: number;
+    notes?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CustomerTransaction {
+    id: number;
+    customer_id: number;
+    type: 'debt' | 'payment';
+    amount: number;
+    balance_after: number;
+    reference_type?: 'sale' | 'payment';
+    reference_id?: number;
+    description?: string;
+    created_at: string;
+}
+
+export type CustomerInput = Pick<Customer, 'full_name'> &
+    Partial<Pick<Customer, 'phone' | 'email' | 'address' | 'notes' | 'loyalty_points'>>;
+
+
+// =============================================
 // SALES
 // =============================================
 export interface Sale {
-    customer_id: any;
     id: number;
     user_id: number | null;
     session_id: number | null;
+    customer_id: number | null; // Linked customer
     sale_date: string;
     subtotal: number;
     tax_amount: number;
     discount_amount: number;
     total: number;
-    payment_method: 'cash' | 'card' | 'mobile';
+    payment_method: 'cash' | 'card' | 'mobile' | 'credit';
     customer_name: string;
     status: 'completed' | 'refunded' | 'voided';
     created_at: string;
@@ -267,3 +299,20 @@ export interface QuickAccessItem {
 
 export type QuickAccessItemInput = Pick<QuickAccessItem, 'product_id' | 'display_name'> &
     Partial<Pick<QuickAccessItem, 'icon' | 'color' | 'bg_color' | 'options'>>;
+
+// =============================================
+// EXPENSES
+// =============================================
+export interface Expense {
+    id: number;
+    description: string;
+    amount: number;
+    category: string;
+    date: string;
+    payment_method: string;
+    user_id: number | null;
+    created_at: string;
+}
+
+export type ExpenseInput = Pick<Expense, 'description' | 'amount' | 'category'> &
+    Partial<Pick<Expense, 'date' | 'payment_method' | 'user_id'>>;

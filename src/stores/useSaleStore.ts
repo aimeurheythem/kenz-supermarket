@@ -5,12 +5,12 @@ import { SaleRepo } from '../../database/repositories/sale.repo';
 interface SaleStore {
     sales: Sale[];
     recentSales: Sale[];
-    todayStats: { revenue: number; orders: number };
+    todayStats: { revenue: number; orders: number; profit: number };
     cart: CartItem[];
 
-    loadSales: (filters?: { from?: string; to?: string }) => void;
-    loadRecent: () => void;
-    loadTodayStats: () => void;
+    loadSales: (filters?: { from?: string; to?: string }) => Promise<void>;
+    loadRecent: () => Promise<void>;
+    loadTodayStats: () => Promise<void>;
 
     // Cart operations
     addToCart: (item: CartItem) => void;
@@ -20,27 +20,27 @@ interface SaleStore {
     getCartTotal: () => number;
 
     // Checkout
-    checkout: (payment: { method: string; customer_name?: string; tax_rate?: number; discount?: number }, userId?: number, sessionId?: number) => Sale;
+    checkout: (payment: { method: string; customer_name?: string; customer_id?: number | null; tax_rate?: number; discount?: number }, userId?: number, sessionId?: number) => Promise<Sale>;
 }
 
 export const useSaleStore = create<SaleStore>((set, get) => ({
     sales: [],
     recentSales: [],
-    todayStats: { revenue: 0, orders: 0 },
+    todayStats: { revenue: 0, orders: 0, profit: 0 },
     cart: [],
 
-    loadSales: (filters) => {
-        const sales = SaleRepo.getAll(filters);
+    loadSales: async (filters) => {
+        const sales = await SaleRepo.getAll(filters);
         set({ sales });
     },
 
-    loadRecent: () => {
-        const recentSales = SaleRepo.getRecentSales(5);
+    loadRecent: async () => {
+        const recentSales = await SaleRepo.getRecentSales(10);
         set({ recentSales });
     },
 
-    loadTodayStats: () => {
-        const todayStats = SaleRepo.getTodayStats();
+    loadTodayStats: async () => {
+        const todayStats = await SaleRepo.getTodayStats();
         set({ todayStats });
     },
 
@@ -86,15 +86,15 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
         );
     },
 
-    checkout: (payment, userId, sessionId) => {
+    checkout: async (payment, userId, sessionId) => {
         const { cart } = get();
         if (cart.length === 0) throw new Error('Cart is empty');
 
-        const sale = SaleRepo.createFromCart(cart, payment, userId, sessionId);
+        const sale = await SaleRepo.createFromCart(cart, payment, userId, sessionId);
         set({ cart: [] });
-        get().loadSales();
-        get().loadRecent();
-        get().loadTodayStats();
+        await get().loadSales();
+        await get().loadRecent();
+        await get().loadTodayStats();
         return sale;
     },
 }));

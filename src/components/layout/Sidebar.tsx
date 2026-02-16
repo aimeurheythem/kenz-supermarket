@@ -18,6 +18,8 @@ import {
     ChevronsUpDown,
     User,
     Languages,
+    DollarSign,
+    ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -103,6 +105,7 @@ export default function Sidebar() {
             items: [
                 { label: t('sidebar.pos_sales'), path: '/pos', icon: ShoppingCart, roles: ['admin', 'manager', 'cashier'] },
                 { label: t('sidebar.inventory'), path: '/inventory', icon: Package, roles: ['admin', 'manager'] },
+                { label: 'Labels', path: '/barcodes', icon: ScanBarcode, roles: ['admin', 'manager'] },
                 { label: t('sidebar.stock_control'), path: '/stock', icon: ClipboardList, roles: ['admin', 'manager'] },
             ]
         },
@@ -112,12 +115,16 @@ export default function Sidebar() {
                 { label: t('sidebar.suppliers'), path: '/suppliers', icon: Truck, roles: ['admin', 'manager'] },
                 { label: t('sidebar.purchases'), path: '/purchases', icon: ScanBarcode, roles: ['admin', 'manager'] },
                 { label: t('sidebar.credit'), path: '/credit', icon: Wallet, roles: ['admin', 'manager'] },
+                { label: 'Expenses', path: '/expenses', icon: DollarSign, roles: ['admin', 'manager'] },
             ]
         },
         {
             title: t('sidebar.management') || "Management",
             items: [
                 { label: t('sidebar.reports'), path: '/reports', icon: BarChart3, roles: ['admin', 'manager'] },
+                { label: 'Transactions', path: '/transactions', icon: ClipboardList, roles: ['admin', 'manager'] },
+                { label: 'Audit Logs', path: '/audit-logs', icon: ShieldCheck, roles: ['admin'] },
+                { label: 'Customers', path: '/customers', icon: Users, roles: ['admin', 'manager', 'cashier'] },
                 { label: t('sidebar.users'), path: '/users', icon: Users, roles: ['admin'] },
                 { label: t('sidebar.settings'), path: '/settings', icon: Settings, roles: ['admin'] },
             ]

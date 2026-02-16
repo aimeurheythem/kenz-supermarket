@@ -21,7 +21,7 @@ export const useQuickAccessStore = create<QuickAccessState>((set, get) => ({
         set({ loading: true });
         try {
             const { QuickAccessRepo } = await import('../../database/repositories/quick_access.repo');
-            const items = QuickAccessRepo.getAll();
+            const items = await QuickAccessRepo.getAll();
             set({ items, loading: false });
         } catch (err) {
             set({ error: (err as Error).message, loading: false });
@@ -31,7 +31,7 @@ export const useQuickAccessStore = create<QuickAccessState>((set, get) => ({
     addItem: async (input) => {
         try {
             const { QuickAccessRepo } = await import('../../database/repositories/quick_access.repo');
-            const newItem = QuickAccessRepo.create(input);
+            const newItem = await QuickAccessRepo.create(input);
             if (newItem) {
                 set({ items: [newItem, ...get().items] });
             }
@@ -43,7 +43,7 @@ export const useQuickAccessStore = create<QuickAccessState>((set, get) => ({
     updateItem: async (id, input) => {
         try {
             const { QuickAccessRepo } = await import('../../database/repositories/quick_access.repo');
-            const updated = QuickAccessRepo.update(id, input);
+            const updated = await QuickAccessRepo.update(id, input);
             if (updated) {
                 set({
                     items: get().items.map(item => item.id === id ? updated : item)
@@ -57,7 +57,7 @@ export const useQuickAccessStore = create<QuickAccessState>((set, get) => ({
     deleteItem: async (id) => {
         try {
             const { QuickAccessRepo } = await import('../../database/repositories/quick_access.repo');
-            QuickAccessRepo.delete(id);
+            await QuickAccessRepo.delete(id);
             set({
                 items: get().items.filter(item => item.id !== id)
             });

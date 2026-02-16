@@ -32,3 +32,28 @@ declare module 'sql.js' {
 
     export default function initSqlJs(config?: SqlJsConfig): Promise<SqlJsStatic>;
 }
+
+// ============================================
+// Electron API — Single Source of Truth
+// ============================================
+declare global {
+    interface Window {
+        electronAPI?: {
+            // Window controls
+            minimizeWindow: () => void;
+            maximizeWindow: () => void;
+            closeWindow: () => void;
+            isMaximized: () => Promise<boolean>;
+            onMaximizedChange: (callback: (isMaximized: boolean) => void) => void;
+
+            // Database persistence (file system)
+            loadDatabase: () => Promise<ArrayBuffer | null>;
+            saveDatabase: (data: Uint8Array) => Promise<{ success: boolean; size?: number; error?: string }>;
+            getDatabasePath: () => Promise<string>;
+            exportDatabase: () => Promise<ArrayBuffer | null>;
+            importDatabase: (data: Uint8Array) => Promise<{ success: boolean; error?: string }>;
+        };
+    }
+}
+
+export { };

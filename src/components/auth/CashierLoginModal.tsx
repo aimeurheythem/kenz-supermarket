@@ -17,9 +17,27 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
     const [openingCash, setOpeningCash] = useState('');
     const [step, setStep] = useState<'select' | 'pin' | 'cash'>('select');
     const [error, setError] = useState('');
+    const [cashiers, setCashiers] = useState<User[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const { loginCashier, startCashierSession } = useAuthStore();
-    const cashiers = UserRepo.getActiveCashiers();
+
+    // Load cashiers when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            loadCashiers();
+        }
+    }, [isOpen]);
+
+    const loadCashiers = async () => {
+        try {
+            const activeCashiers = await UserRepo.getActiveCashiers();
+            setCashiers(activeCashiers);
+        } catch (err) {
+            console.error('Failed to load cashiers:', err);
+            setError('Failed to load cashiers');
+        }
+    };
 
     // Reset state when modal opens
     useEffect(() => {
@@ -43,13 +61,15 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
         setError('');
     };
 
-    const handlePinSubmit = (e: React.FormEvent) => {
+    const handlePinSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedCashier) return;
 
         console.log('Attempting PIN login for cashier:', selectedCashier.id);
-        const success = loginCashier(selectedCashier.id, pinCode);
+        setIsLoading(true);
+        const success = await loginCashier(selectedCashier.id, pinCode);
         console.log('PIN login result:', success);
+        setIsLoading(false);
 
         if (success) {
             console.log('PIN accepted, moving to cash step');
@@ -61,7 +81,7 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
         }
     };
 
-    const handleCashSubmit = (e: React.FormEvent) => {
+    const handleCashSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedCashier) return;
 
@@ -78,13 +98,16 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
             console.log('Cashier Name:', selectedCashier.full_name);
 
             setError('Creating session... Please wait.');
+            setIsLoading(true);
 
-            const session = startCashierSession(selectedCashier.id, cash);
+            const session = await startCashierSession(selectedCashier.id, cash);
 
             console.log('=== SESSION RESULT ===');
             console.log('Session object:', session);
             console.log('Session ID:', session?.id);
             console.log('Session login_time:', session?.login_time);
+
+            setIsLoading(false);
 
             if (session && session.id && session.login_time) {
                 console.log('✓ Session created successfully!');
@@ -101,6 +124,7 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
                 setError('Failed to start session. Check console for details (F12).');
             }
         } catch (err) {
+            setIsLoading(false);
             console.error('=== EXCEPTION ===');
             console.error('Error starting session:', err);
             setError('Error: ' + (err instanceof Error ? err.message : 'Unknown error'));
@@ -205,10 +229,10 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
                                     </button>
                                     <button
                                         type="submit"
-                                        disabled={pinCode.length < 4}
+                                        disabled={pinCode.length < 4 || isLoading}
                                         className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        Continue
+                                        {isLoading ? 'Verifying...' : 'Continue'}
                                     </button>
                                 </div>
                             </form>
@@ -254,10 +278,10 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
                                     </button>
                                     <button
                                         type="submit"
-                                        disabled={!openingCash}
+                                        disabled={!openingCash || isLoading}
                                         className="flex-1 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        Start Shift
+                                        {isLoading ? 'Starting...' : 'Start Shift'}
                                     </button>
                                 </div>
                             </form>

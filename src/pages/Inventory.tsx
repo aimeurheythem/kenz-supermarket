@@ -74,14 +74,20 @@ export default function Inventory() {
         loadLowStock();
     }, []);
 
+    // Debounce search to prevent too many queries
     useEffect(() => {
-        setFilters({
-            search: search || undefined,
-            category_id: categoryFilter ?? undefined,
-            low_stock: lowStockOnly || undefined,
-        });
-        setCurrentPage(1); // Reset to first page when filtering
-    }, [search, categoryFilter, lowStockOnly, setFilters]);
+        const timer = setTimeout(() => {
+            setFilters({
+                search: search || undefined,
+                category_id: categoryFilter ?? undefined,
+                low_stock: lowStockOnly || undefined,
+            });
+            loadProducts();
+            setCurrentPage(1); // Reset to first page when filtering
+        }, 300); // 300ms debounce
+
+        return () => clearTimeout(timer);
+    }, [search, categoryFilter, lowStockOnly]);
 
     const x = useMotionValue(0);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -126,26 +132,6 @@ export default function Inventory() {
 
         animate(x, newX, { type: "spring", stiffness: 300, damping: 30 });
     };
-
-    // Add unique mock categories for demonstration
-    const mockCategories: Category[] = [
-        { id: -1, name: 'Dairy & Eggs', description: '', color: '#2563eb', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-        { id: -2, name: 'Beverages', description: '', color: '#2563eb', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-        { id: -3, name: 'Snacks', description: '', color: '#2563eb', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-        { id: -4, name: 'Frozen Foods', description: '', color: '#2563eb', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-        { id: -5, name: 'Bakery', description: '', color: '#2563eb', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-        { id: -6, name: 'Personal Care', description: '', color: '#2563eb', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-        { id: -7, name: 'Household', description: '', color: '#2563eb', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-        { id: -8, name: 'Baby Care', description: '', color: '#2563eb', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-        { id: -9, name: 'Pet Supplies', description: '', color: '#2563eb', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-        { id: -10, name: 'Health & Wellness', description: '', color: '#2563eb', created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
-    ];
-
-    // Filter out mock categories that already exist in the real data to avoid duplicates
-    const displayCategories = [
-        ...categories,
-        ...mockCategories.filter(mock => !categories.some(cat => cat.name === mock.name))
-    ];
 
     const handleEdit = (product: Product) => {
         setEditingProduct(product);
@@ -419,7 +405,7 @@ export default function Inventory() {
                                     )} />
                                     <span className="relative z-10 group-hover:text-white transition-colors">{t('inventory.filters.all_items')}</span>
                                 </button>
-                                {displayCategories.map((cat, index) => (
+                                {categories.map((cat: Category, index: number) => (
                                     <button
                                         key={`${cat.id}-${index}`}
                                         onClick={() => setCategoryFilter(cat.id)}

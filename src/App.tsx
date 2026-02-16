@@ -9,14 +9,20 @@ import Suppliers from './pages/Suppliers';
 import StockControl from './pages/StockControl';
 import Purchases from './pages/Purchases';
 import Reports from './pages/Reports';
+import Transactions from './pages/Transactions';
 import Users from './pages/Users';
+import Customers from './pages/Customers';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Credit from './pages/Credit';
+import BarcodeLabels from './pages/BarcodeLabels';
+import AuditLogs from './pages/AuditLogs';
+import Expenses from './pages/Expenses';
 import Help from './pages/Help';
 import Terms from './pages/Terms';
 
 import { useAuthStore } from './stores/useAuthStore';
+import { useSettingsStore } from './stores/useSettingsStore';
 import CashierLoginModal from './components/auth/CashierLoginModal';
 
 // Protected route wrapper
@@ -62,7 +68,12 @@ function RequirePermission({ children, permission }: { children: React.ReactElem
 export default function App() {
     const { i18n } = useTranslation();
     const { isAuthenticated, user, currentSession, logout } = useAuthStore();
+    const { loadSettings } = useSettingsStore();
     const [showCashierLogin, setShowCashierLogin] = useState(false);
+
+    useEffect(() => {
+        loadSettings();
+    }, []);
 
     useEffect(() => {
         const dir = i18n.language.startsWith('ar') ? 'rtl' : 'ltr';
@@ -85,14 +96,14 @@ export default function App() {
             logout();
             return;
         }
-        
+
         // Only show cashier login modal if:
         // 1. User is authenticated
         // 2. User is a cashier
         // 3. No active session
         // 4. Not currently on the login page (to avoid conflict with Login.tsx modal)
         const isLoginPage = window.location.hash === '#/login' || window.location.pathname === '/login';
-        
+
         if (isAuthenticated && user?.role === 'cashier' && !currentSession && !isLoginPage) {
             console.log('Showing cashier session modal from App.tsx');
             setShowCashierLogin(true);
@@ -121,91 +132,131 @@ export default function App() {
                             <AppShell>
                                 <Routes>
                                     {/* Cashier-only routes */}
-                                    <Route 
-                                        path="/pos" 
+                                    <Route
+                                        path="/pos"
                                         element={
                                             <RequirePermission permission="use_pos">
                                                 <POS />
                                             </RequirePermission>
-                                        } 
+                                        }
                                     />
 
                                     {/* Admin/Manager routes */}
-                                    <Route 
-                                        path="/" 
+                                    <Route
+                                        path="/"
                                         element={
                                             <RequirePermission permission="view_dashboard">
                                                 <Dashboard />
                                             </RequirePermission>
-                                        } 
+                                        }
                                     />
-                                    <Route 
-                                        path="/inventory" 
+                                    <Route
+                                        path="/inventory"
                                         element={
                                             <RequirePermission permission="view_inventory">
                                                 <Inventory />
                                             </RequirePermission>
-                                        } 
+                                        }
                                     />
-                                    <Route 
-                                        path="/stock" 
+                                    <Route
+                                        path="/stock"
                                         element={
                                             <RequirePermission permission="view_inventory">
                                                 <StockControl />
                                             </RequirePermission>
-                                        } 
+                                        }
                                     />
-                                    <Route 
-                                        path="/suppliers" 
+                                    <Route
+                                        path="/barcodes"
+                                        element={
+                                            <RequirePermission permission="view_inventory">
+                                                <BarcodeLabels />
+                                            </RequirePermission>
+                                        }
+                                    />
+                                    <Route
+                                        path="/audit-logs"
+                                        element={
+                                            <RequirePermission permission="view_reports">
+                                                <AuditLogs />
+                                            </RequirePermission>
+                                        }
+                                    />
+                                    <Route
+                                        path="/suppliers"
                                         element={
                                             <RequirePermission permission="view_suppliers">
                                                 <Suppliers />
                                             </RequirePermission>
-                                        } 
+                                        }
                                     />
-                                    <Route 
-                                        path="/purchases" 
+                                    <Route
+                                        path="/purchases"
                                         element={
                                             <RequirePermission permission="view_suppliers">
                                                 <Purchases />
                                             </RequirePermission>
-                                        } 
+                                        }
                                     />
-                                    <Route 
-                                        path="/reports" 
+                                    <Route
+                                        path="/reports"
                                         element={
                                             <RequirePermission permission="view_reports">
                                                 <Reports />
                                             </RequirePermission>
-                                        } 
+                                        }
                                     />
-                                    <Route 
-                                        path="/users" 
+                                    <Route
+                                        path="/transactions"
+                                        element={
+                                            <RequirePermission permission="view_reports">
+                                                <Transactions />
+                                            </RequirePermission>
+                                        }
+                                    />
+                                    <Route
+                                        path="/users"
                                         element={
                                             <RequirePermission permission="view_users">
                                                 <Users />
                                             </RequirePermission>
-                                        } 
+                                        }
                                     />
-                                    <Route 
-                                        path="/credit" 
+                                    <Route
+                                        path="/customers"
+                                        element={
+                                            <RequirePermission permission="use_pos">
+                                                <Customers />
+                                            </RequirePermission>
+                                        }
+                                    />
+                                    <Route
+                                        path="/credit"
                                         element={
                                             <RequirePermission permission="view_reports">
                                                 <Credit />
                                             </RequirePermission>
-                                        } 
+                                        }
                                     />
-                                    <Route 
-                                        path="/settings" 
+                                    <Route
+                                        path="/expenses"
+                                        element={
+                                            <RequirePermission permission="view_reports">
+                                                <Expenses />
+                                            </RequirePermission>
+                                        }
+                                    />
+                                    <Route
+                                        path="/settings"
                                         element={
                                             <RequirePermission permission="view_settings">
                                                 <Settings />
                                             </RequirePermission>
-                                        } 
+                                        }
                                     />
                                     <Route path="/help" element={<Help />} />
                                     <Route path="/terms" element={<Terms />} />
-                                    
+
                                     {/* Default redirect */}
                                     <Route path="*" element={<Navigate to={getDefaultRoute()} replace />} />
                                 </Routes>

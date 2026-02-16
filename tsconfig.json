@@ -18,6 +18,6 @@
       "@db/*": ["database/*"]
     }
   },
-  "include": ["src", "electron", "database"],
+  "include": ["src", "electron", "database", "src/types"],
   "exclude": ["node_modules", "dist"]
 }

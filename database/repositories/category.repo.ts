@@ -1,26 +1,25 @@
-import { query, execute, lastInsertId, transaction } from '../db';
+import { query, execute, lastInsertId, get } from '../db';
 import type { Category, CategoryInput } from '../../src/lib/types';
 
 export const CategoryRepo = {
-    getAll(): Category[] {
+    async getAll(): Promise<Category[]> {
         return query<Category>('SELECT * FROM categories ORDER BY name');
     },
 
-    getById(id: number): Category | undefined {
-        const results = query<Category>('SELECT * FROM categories WHERE id = ?', [id]);
-        return results[0];
+    async getById(id: number): Promise<Category | undefined> {
+        return get<Category>('SELECT * FROM categories WHERE id = ?', [id]);
     },
 
-    create(input: CategoryInput): Category {
-        execute(
+    async create(input: CategoryInput): Promise<Category> {
+        await execute(
             'INSERT INTO categories (name, description, color) VALUES (?, ?, ?)',
             [input.name, input.description || '', input.color || '#6366f1']
         );
-        const id = lastInsertId();
-        return this.getById(id)!;
+        const id = await lastInsertId();
+        return this.getById(id) as Promise<Category>;
     },
 
-    update(id: number, input: Partial<CategoryInput>): Category {
+    async update(id: number, input: Partial<CategoryInput>): Promise<Category> {
         const fields: string[] = [];
         const values: unknown[] = [];
 
@@ -31,16 +30,16 @@ export const CategoryRepo = {
         fields.push("updated_at = datetime('now')");
         values.push(id);
 
-        execute(`UPDATE categories SET ${fields.join(', ')} WHERE id = ?`, values);
-        return this.getById(id)!;
+        await execute(`UPDATE categories SET ${fields.join(', ')} WHERE id = ?`, values);
+        return this.getById(id) as Promise<Category>;
     },
 
-    delete(id: number): void {
-        execute('DELETE FROM categories WHERE id = ?', [id]);
+    async delete(id: number): Promise<void> {
+        await execute('DELETE FROM categories WHERE id = ?', [id]);
     },
 
-    count(): number {
-        const result = query<{ count: number }>('SELECT COUNT(*) as count FROM categories');
-        return result[0]?.count ?? 0;
+    async count(): Promise<number> {
+        const result = await get<{ count: number }>('SELECT COUNT(*) as count FROM categories');
+        return result?.count ?? 0;
     },
 };

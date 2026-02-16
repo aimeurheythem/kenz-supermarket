@@ -83,7 +83,9 @@
             "products": "Products",
             "items": "Items",
             "cashier": "Cashier",
-            "no_sales_today": "No registered sales today"
+            "no_sales_today": "No registered sales today",
+            "no_sales_title": "No Sales Yet",
+            "no_sales_message": "Complete your first sale in the POS to see it here."
         },
         "top_performance": {
             "title": "Top 5 Products",

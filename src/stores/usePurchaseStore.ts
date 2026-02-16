@@ -5,39 +5,43 @@ import { PurchaseRepo } from '../../database/repositories/purchase.repo';
 interface PurchaseStore {
     orders: PurchaseOrder[];
     currentOrderItems: PurchaseOrderItem[];
-    loadOrders: () => void;
-    loadOrderItems: (orderId: number) => void;
-    createOrder: (data: { supplier_id: number; status: string; notes?: string; items: { product_id: number; quantity: number; unit_cost: number }[] }) => void;
-    receiveOrder: (id: number) => void;
-    updateStatus: (id: number, status: string) => void;
+    isLoading: boolean;
+    loadOrders: () => Promise<void>;
+    loadOrderItems: (orderId: number) => Promise<void>;
+    createOrder: (data: { supplier_id: number; status: string; notes?: string; items: { product_id: number; quantity: number; unit_cost: number }[] }) => Promise<void>;
+    receiveOrder: (id: number) => Promise<void>;
+    updateStatus: (id: number, status: string) => Promise<void>;
 }
 
 export const usePurchaseStore = create<PurchaseStore>((set, get) => ({
     orders: [],
     currentOrderItems: [],
+    isLoading: false,
 
-    loadOrders: () => {
-        const orders = PurchaseRepo.getAll();
-        set({ orders });
+    loadOrders: async () => {
+        set({ isLoading: true });
+        const orders = await PurchaseRepo.getAll();
+        set({ orders, isLoading: false });
     },
 
-    loadOrderItems: (orderId: number) => {
-        const items = PurchaseRepo.getItems(orderId);
-        set({ currentOrderItems: items });
+    loadOrderItems: async (orderId: number) => {
+        set({ isLoading: true });
+        const items = await PurchaseRepo.getItems(orderId);
+        set({ currentOrderItems: items, isLoading: false });
     },
 
-    createOrder: (data) => {
-        PurchaseRepo.create(data);
-        get().loadOrders();
+    createOrder: async (data) => {
+        await PurchaseRepo.create(data);
+        await get().loadOrders();
     },
 
-    receiveOrder: (id: number) => {
-        PurchaseRepo.receive(id);
-        get().loadOrders();
+    receiveOrder: async (id: number) => {
+        await PurchaseRepo.receive(id);
+        await get().loadOrders();
     },
 
-    updateStatus: (id: number, status: string) => {
-        PurchaseRepo.updateStatus(id, status);
-        get().loadOrders();
+    updateStatus: async (id: number, status: string) => {
+        await PurchaseRepo.updateStatus(id, status);
+        await get().loadOrders();
     }
 }));

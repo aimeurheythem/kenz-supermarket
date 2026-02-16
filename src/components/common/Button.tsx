@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 interface ButtonProps {
     children: ReactNode;
-    onClick?: () => void;
+    onClick?: ((e: React.MouseEvent<HTMLButtonElement>) => void) | (() => void);
     type?: 'button' | 'submit';
     variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
     size?: 'sm' | 'md' | 'lg';

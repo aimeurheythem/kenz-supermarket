@@ -98,17 +98,52 @@ CREATE TABLE IF NOT EXISTS purchase_order_items (
 -- =============================================
 -- SALES
 -- =============================================
+-- =============================================
+-- CUSTOMERS
+-- =============================================
+CREATE TABLE IF NOT EXISTS customers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  full_name TEXT NOT NULL,
+  phone TEXT,
+  email TEXT,
+  address TEXT,
+  loyalty_points INTEGER DEFAULT 0,
+  total_debt REAL DEFAULT 0,
+  notes TEXT,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+-- =============================================
+-- CUSTOMER TRANSACTIONS (Ledger)
+-- =============================================
+CREATE TABLE IF NOT EXISTS customer_transactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_id INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+  type TEXT NOT NULL, -- 'debt' (sale on credit) or 'payment' (paying off debt)
+  amount REAL NOT NULL,
+  balance_after REAL NOT NULL,
+  reference_type TEXT, -- 'sale', 'payment'
+  reference_id INTEGER, -- sale_id or null
+  description TEXT,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+-- =============================================
+-- SALES
+-- =============================================
 CREATE TABLE IF NOT EXISTS sales (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER REFERENCES users(id),
-  session_id INTEGER REFERENCES cashier_sessions(id), -- Links sale to cashier shift
+  session_id INTEGER REFERENCES cashier_sessions(id),
+  customer_id INTEGER REFERENCES customers(id) ON DELETE SET NULL, -- Linked customer
   sale_date TEXT DEFAULT (datetime('now')),
   subtotal REAL NOT NULL DEFAULT 0,
   tax_amount REAL DEFAULT 0,
   discount_amount REAL DEFAULT 0,
   total REAL NOT NULL DEFAULT 0,
   payment_method TEXT DEFAULT 'cash',
-  customer_name TEXT DEFAULT 'Walk-in Customer',
+  customer_name TEXT DEFAULT 'Walk-in Customer', -- Fallback or denormalized name
   status TEXT DEFAULT 'completed',
   created_at TEXT DEFAULT (datetime('now'))
 );
@@ -173,6 +208,61 @@ CREATE TABLE IF NOT EXISTS cashier_sessions (
   cash_difference REAL, -- closing_cash - expected_cash
   status TEXT DEFAULT 'active', -- 'active', 'closed', 'force_closed'
   notes TEXT DEFAULT '',
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+-- =============================================
+-- POS QUICK ACCESS (Customizable product shortcuts)
+-- =============================================
+CREATE TABLE IF NOT EXISTS pos_quick_access (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  display_name TEXT NOT NULL,
+  icon TEXT DEFAULT 'shopping-bag',
+  color TEXT DEFAULT 'text-zinc-500',
+  bg_color TEXT DEFAULT 'bg-zinc-50',
+  options TEXT DEFAULT '[]',
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+-- =============================================
+-- APP SETTINGS (Key-Value Store)
+-- =============================================
+CREATE TABLE IF NOT EXISTS app_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT,
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+-- =============================================
+-- EXPENSES
+-- =============================================
+CREATE TABLE IF NOT EXISTS expenses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  description TEXT NOT NULL,
+  amount REAL NOT NULL,
+  category TEXT NOT NULL,
+  date TEXT DEFAULT (datetime('now')),
+  payment_method TEXT DEFAULT 'cash',
+  user_id INTEGER REFERENCES users(id),
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+-- =============================================
+-- AUDIT LOGS
+-- =============================================
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER REFERENCES users(id),
+  user_name TEXT,
+  action TEXT NOT NULL,
+  entity TEXT NOT NULL,
+  entity_id TEXT,
+  details TEXT,
+  old_value TEXT,
+  new_value TEXT,
+  ip_address TEXT,
   created_at TEXT DEFAULT (datetime('now'))
 );
 

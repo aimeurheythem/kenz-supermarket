@@ -14,13 +14,13 @@ interface ProductStore {
     isLoading: boolean;
     filters: ProductFilters;
 
-    loadProducts: () => void;
-    loadLowStock: () => void;
+    loadProducts: () => Promise<void>;
+    loadLowStock: () => Promise<void>;
     setFilters: (filters: ProductFilters) => void;
-    addProduct: (input: ProductInput) => Product;
-    updateProduct: (id: number, input: Partial<ProductInput>) => Product;
-    deleteProduct: (id: number) => void;
-    getByBarcode: (barcode: string) => Product | undefined;
+    addProduct: (input: ProductInput) => Promise<Product>;
+    updateProduct: (id: number, input: Partial<ProductInput>) => Promise<Product>;
+    deleteProduct: (id: number) => Promise<void>;
+    getByBarcode: (barcode: string) => Promise<Product | undefined>;
 }
 
 export const useProductStore = create<ProductStore>((set, get) => ({
@@ -29,43 +29,44 @@ export const useProductStore = create<ProductStore>((set, get) => ({
     isLoading: false,
     filters: {},
 
-    loadProducts: () => {
+    loadProducts: async () => {
+        set({ isLoading: true });
         const { filters } = get();
-        const products = ProductRepo.getAll(filters);
-        set({ products });
+        const products = await ProductRepo.getAll(filters);
+        set({ products, isLoading: false });
     },
 
-    loadLowStock: () => {
-        const lowStockProducts = ProductRepo.getLowStock();
+    loadLowStock: async () => {
+        const lowStockProducts = await ProductRepo.getLowStock();
         set({ lowStockProducts });
     },
 
     setFilters: (filters: ProductFilters) => {
         set({ filters });
-        get().loadProducts();
+        // Don't auto-load here - let the component handle it
     },
 
-    addProduct: (input: ProductInput) => {
-        const product = ProductRepo.create(input);
-        get().loadProducts();
-        get().loadLowStock();
+    addProduct: async (input: ProductInput) => {
+        const product = await ProductRepo.create(input);
+        await get().loadProducts();
+        await get().loadLowStock();
         return product;
     },
 
-    updateProduct: (id: number, input: Partial<ProductInput>) => {
-        const product = ProductRepo.update(id, input);
-        get().loadProducts();
-        get().loadLowStock();
+    updateProduct: async (id: number, input: Partial<ProductInput>) => {
+        const product = await ProductRepo.update(id, input);
+        await get().loadProducts();
+        await get().loadLowStock();
         return product;
     },
 
-    deleteProduct: (id: number) => {
-        ProductRepo.delete(id);
-        get().loadProducts();
-        get().loadLowStock();
+    deleteProduct: async (id: number) => {
+        await ProductRepo.delete(id);
+        await get().loadProducts();
+        await get().loadLowStock();
     },
 
-    getByBarcode: (barcode: string) => {
+    getByBarcode: async (barcode: string) => {
         return ProductRepo.getByBarcode(barcode);
     },
 }));

@@ -28,7 +28,7 @@ export const ProductRepo = {
             sql += ' AND p.stock_quantity <= p.reorder_level';
         }
 
-        sql += ' ORDER BY p.name';
+        sql += ' ORDER BY p.id DESC';
         return query<Product>(sql, params);
     },
 

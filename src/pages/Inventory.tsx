@@ -30,7 +30,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { motion, useMotionValue, animate } from 'framer-motion';
-import { cn, formatCurrency, formatDate } from '@/lib/utils';
+import { cn, formatDate } from '@/lib/utils';
 import { useProductStore } from '@/stores/useProductStore';
 import { useCategoryStore } from '@/stores/useCategoryStore';
 import ProductFormModal from '@/components/inventory/ProductFormModal';
@@ -72,7 +72,16 @@ export default function Inventory() {
         loadCategories();
         loadProducts();
         loadLowStock();
-    }, []);
+
+        // Refresh products when window becomes visible
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                loadProducts();
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, [loadProducts, loadLowStock]);
 
     // Debounce search to prevent too many queries
     useEffect(() => {
@@ -162,6 +171,14 @@ export default function Inventory() {
     // Calculations for stats
     const totalValue = products.reduce((sum, p) => sum + p.selling_price * p.stock_quantity, 0);
 
+    const formatPrice = (price: number) => {
+        const formatted = new Intl.NumberFormat('fr-FR', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2,
+        }).format(price);
+        return i18n.language === 'ar' ? `${formatted} دج` : `${formatted} DZ`;
+    };
+
     // Styles for product cards (matching POS)
     const getProductStyle = (id: number) => {
         const productStyles = [
@@ -179,7 +196,7 @@ export default function Inventory() {
 
     return (
         <div className="relative flex flex-col h-full gap-8 p-6 lg:p-8 animate-fadeIn mt-4 min-h-[85vh]">
-            {/* Grid Background (Matching Dashboard/POS) */}
+            {/* Grid Background */}
             <div className="absolute inset-0 rounded-[3rem] pointer-events-none opacity-[0.15]"
                 style={{
                     backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 1px, transparent 1px)`,
@@ -255,7 +272,7 @@ export default function Inventory() {
                             <span className="text-[10px] font-black uppercase tracking-widest text-black">{t('inventory.stats.total_value')}</span>
                         </div>
                         <div className="relative z-10 flex items-baseline gap-2">
-                            <span className="text-3xl font-black text-black tracking-tighter">{formatCurrency(totalValue)}</span>
+                            <span className="text-3xl font-black text-black tracking-tighter">{formatPrice(totalValue)}</span>
                         </div>
                         <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-black/50 blur-[60px] pointer-events-none" />
                     </div>
@@ -512,12 +529,12 @@ export default function Inventory() {
 
                                             {/* Cost Price */}
                                             <div className="text-right">
-                                                <p className="text-sm font-black text-zinc-500">{formatCurrency(product.cost_price)}</p>
+                                                <p className="text-sm font-black text-zinc-500">{formatPrice(product.cost_price)}</p>
                                             </div>
 
                                             {/* Selling Price */}
                                             <div className="text-right">
-                                                <p className="text-sm font-black text-black">{formatCurrency(product.selling_price)}</p>
+                                                <p className="text-sm font-black text-black">{formatPrice(product.selling_price)}</p>
                                             </div>
 
                                             {/* Created At */}
@@ -626,7 +643,7 @@ export default function Inventory() {
                                             {/* Price */}
                                             <div>
                                                 <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('inventory.table.price')}</p>
-                                                <p className="text-lg font-black text-black">{formatCurrency(product.selling_price)}</p>
+                                                <p className="text-lg font-black text-black">{formatPrice(product.selling_price)}</p>
                                             </div>
 
                                             {/* Stock with Color Code */}
@@ -728,6 +745,13 @@ export default function Inventory() {
                         await updateProduct(editingProduct.id, data);
                     } else {
                         await addProduct(data);
+                        // Force clear all local filters to match store optimistic update
+                        setSearch('');
+                        setCategoryFilter(null);
+                        setLowStockOnly(false);
+                        setCurrentPage(1);
+                        // Force reload to be safe
+                        loadProducts();
                     }
                     handleCloseForm();
                 }}

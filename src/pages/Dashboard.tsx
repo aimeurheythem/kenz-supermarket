@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
-    DollarSign,
+    Banknote,
     Package,
     ArrowRight,
     FileText,
@@ -199,17 +199,17 @@ export default function Dashboard() {
                             <div className="flex items-center justify-between relative z-10">
                                 <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('dashboard.stats.today_revenue')}</span>
                                 <div className="p-2 bg-zinc-100 rounded-full">
-                                    <DollarSign size={16} className="text-black" />
+                                    <Banknote size={16} className="text-black" />
                                 </div>
                             </div>
 
                             <div className="relative z-10">
                                 <div className="flex items-baseline gap-1">
                                     <span className="text-3xl font-black text-black tracking-tighter">
-                                        {formatCurrency(totalRevenue).replace('DZD', '').replace('دج', '').trim()}
+                                        {formatCurrency(totalRevenue, false)}
                                     </span>
                                     <span className="text-[10px] font-bold text-zinc-400 uppercase">
-                                        {i18n.language === 'ar' ? 'دج' : 'DZD'}
+                                        {i18n.language === 'ar' ? 'دج' : 'DZ'}
                                     </span>
                                 </div>
                             </div>
@@ -231,10 +231,10 @@ export default function Dashboard() {
                             <div className="relative z-10">
                                 <div className="flex items-baseline gap-1">
                                     <span className="text-3xl font-black text-white tracking-tighter">
-                                        {formatCurrency(netProfit).replace('DZD', '').replace('دج', '').trim()}
+                                        {formatCurrency(netProfit, false)}
                                     </span>
                                     <span className="text-[10px] font-bold text-zinc-500 uppercase">
-                                        {i18n.language === 'ar' ? 'دج' : 'DZD'}
+                                        {i18n.language === 'ar' ? 'دج' : 'DZ'}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2 mt-1">
@@ -319,7 +319,7 @@ export default function Dashboard() {
                                         <div className="flex flex-col items-center gap-2">
                                             <div className="px-6 py-2">
                                                 <span className="text-3xl text-black">
-                                                    +{formatCurrency(product.profit).replace('DZD', '').replace('دج', '').trim()} {i18n.language === 'ar' ? 'دج' : 'DZD'}
+                                                    +{formatCurrency(product.profit, false)} {i18n.language === 'ar' ? 'دج' : 'DZ'}
                                                 </span>
                                             </div>
                                             <span className="text-xs text-black/50 uppercase tracking-widest mt-2">{t('dashboard.top_performance.monthly_profit')}</span>

@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 interface InventoryPreviewProps {
     products: Product[];
     cart: any[];
-    formatCurrency: (amount: number) => string;
+    formatCurrency: (amount: number, includeSymbol?: boolean) => string;
     i18n: any;
     handleAddProduct: (product: Product) => void;
 }
@@ -52,19 +52,21 @@ export default function InventoryPreview({
                     const isOutOfStock = product.stock_quantity <= 0;
                     const inCart = cart.find(c => c.product.id === product.id);
                     const recentlyAdded = addedItems[String(product.id)];
+                    const isAtLimit = inCart && inCart.quantity >= product.stock_quantity;
 
                     return (
                         <motion.button
                             key={`inventory-${product.id}`}
                             onClick={() => handleAdd(product)}
                             disabled={isOutOfStock}
-                            whileHover={{ scale: 0.98 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileHover={{ scale: isOutOfStock ? 1 : 0.98 }}
+                            whileTap={{ scale: isOutOfStock ? 1 : 0.95 }}
                             className={cn(
                                 "group relative p-5 rounded-[3rem] transition-all duration-500 ease-out text-left flex items-center gap-4 h-24",
                                 "bg-white border-2 border-gray-200",
                                 inCart && "border-yellow-400",
-                                isOutOfStock && "opacity-30 grayscale cursor-not-allowed"
+                                isOutOfStock && "opacity-30 grayscale cursor-not-allowed",
+                                !isOutOfStock && isAtLimit && "opacity-60 cursor-pointer"
                             )}
                         >
                             {/* Background Layer (Handles the yellow slide effect) */}
@@ -105,10 +107,10 @@ export default function InventoryPreview({
                                 </h3>
                                 <div className="flex items-center gap-2">
                                     <span className="text-xl font-black text-black tracking-tighter">
-                                        {formatCurrency(product.selling_price).replace('DZD', '').replace('دج', '').trim()}
+                                        {formatCurrency(product.selling_price, false)}
                                     </span>
                                     <span className="text-[8px] font-bold text-zinc-400 group-hover:text-black/40 uppercase">
-                                        {i18n.language === 'ar' ? 'دج' : 'DZD'}
+                                        {i18n.language === 'ar' ? 'دج' : 'DZ'}
                                     </span>
                                 </div>
                             </div>

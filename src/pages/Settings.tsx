@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Database, Upload, Download, Settings as SettingsIcon, Globe, Receipt, DollarSign, Store, User, Trash2 } from 'lucide-react';
+import { Save, Database, Upload, Download, Settings as SettingsIcon, Globe, Receipt, Banknote, Store, User, Trash2 } from 'lucide-react';
 import Button from '@/components/common/Button';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
@@ -175,7 +175,7 @@ export default function Settings() {
         { id: 'account', label: 'My Account', icon: User },
         { id: 'general', label: 'General', icon: Store },
         { id: 'localization', label: 'Localization', icon: Globe },
-        { id: 'sales', label: 'Sales & Tax', icon: DollarSign },
+        { id: 'sales', label: 'Sales & Tax', icon: Banknote },
         { id: 'receipt', label: 'Receipt', icon: Receipt },
         { id: 'system', label: 'System', icon: Database },
     ];
@@ -414,22 +414,22 @@ export default function Settings() {
                                     <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Currency Symbol</label>
                                     <input
                                         type="text"
-                                        value={formData['currency.symbol'] || '$'}
+                                        value={formData['currency.symbol'] || 'DZ'}
                                         onChange={e => handleChange('currency.symbol', e.target.value)}
                                         className="w-full px-3 py-2.5 rounded-lg bg-[var(--color-bg-input)] border border-[var(--color-border)] focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                                        placeholder="$"
+                                        placeholder="DZ"
                                     />
-                                    <p className="text-xs text-[var(--color-text-muted)] mt-1">Symbol displayed next to prices (e.g. $, €, £, DA).</p>
+                                    <p className="text-xs text-[var(--color-text-muted)] mt-1">Symbol displayed next to prices (e.g. DZ, €, £).</p>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Currency Position</label>
                                     <select
-                                        value={formData['currency.position'] || 'prefix'}
+                                        value={formData['currency.position'] || 'suffix'}
                                         onChange={e => handleChange('currency.position', e.target.value)}
                                         className="w-full px-3 py-2.5 rounded-lg bg-[var(--color-bg-input)] border border-[var(--color-border)] focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
                                     >
-                                        <option value="prefix">Prefix ($100)</option>
-                                        <option value="suffix">Suffix (100$)</option>
+                                        <option value="prefix">Prefix (DZ 100)</option>
+                                        <option value="suffix">Suffix (100 DZ)</option>
                                     </select>
                                 </div>
                             </div>
@@ -443,7 +443,7 @@ export default function Settings() {
                     {activeTab === 'sales' && (
                         <div className="bg-[var(--color-bg-card)] p-6 rounded-xl border border-[var(--color-border)] shadow-sm animate-fadeIn">
                             <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                                <DollarSign size={20} className="text-purple-500" />
+                                <Banknote size={20} className="text-purple-500" />
                                 Sales & Tax
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

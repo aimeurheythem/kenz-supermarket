@@ -143,7 +143,7 @@ export default function RecentProducts() {
         }
     };
 
-    const currencyLabel = i18n.language === 'ar' ? 'دج' : 'DZD';
+    const currencyLabel = i18n.language === 'ar' ? 'دج' : 'DZ';
 
     return (
         <div className="w-full">
@@ -228,7 +228,7 @@ export default function RecentProducts() {
                                         key={sale.id}
                                         id={sale.id}
                                         timestamp={new Date(sale.sale_date || sale.created_at).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
-                                        amount={formatCurrency(sale.total).replace('DZD', '').replace('دج', '').trim()}
+                                        amount={formatCurrency(sale.total, false)}
                                         currency={currencyLabel}
                                         itemsCount={(sale as any).item_count ?? 0}
                                         cashierName={sale.user_name || authUser?.full_name || 'Admin'}

@@ -12,7 +12,7 @@ import {
     AlertCircle,
     CheckCircle2,
     Clock,
-    DollarSign,
+    Banknote,
     Users
 } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
@@ -265,7 +265,7 @@ function PaymentModal({ customer, onClose, onSuccess }: { customer: Customer, on
                             <p className="text-sm font-medium text-zinc-400">for {customer.full_name}</p>
                         </div>
                         <div className="p-3 bg-white rounded-xl shadow-sm">
-                            <DollarSign size={24} className="text-emerald-500" />
+                            <Banknote size={24} className="text-emerald-500" />
                         </div>
                     </div>
 
@@ -279,7 +279,7 @@ function PaymentModal({ customer, onClose, onSuccess }: { customer: Customer, on
                             <div className="space-y-2">
                                 <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 ml-1">Payment Amount</label>
                                 <div className="relative">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-zinc-400">$</span>
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-zinc-400">DZ</span>
                                     <input
                                         type="number"
                                         step="0.01"

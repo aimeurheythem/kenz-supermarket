@@ -37,9 +37,8 @@ export default function FlashDealsPromotions({
         }, 1000);
     };
 
-    const promoProducts = products.slice(0, 8);
-
-    if (promoProducts.length === 0) return null;
+    // Temporarily disabled products from Flash Deals as requested
+    const promoProducts: Product[] = [];
 
     return (
         <div className="space-y-6">
@@ -121,10 +120,10 @@ export default function FlashDealsPromotions({
                                             <p className="text-[10px] text-black uppercase tracking-[0.2em] mb-2">{t('pos.flash_deals.special_price')}</p>
                                             <div className="flex items-baseline gap-2">
                                                 <span className="text-4xl text-black/90 tracking-tighter">
-                                                    {formatCurrency(product.selling_price * 0.8).replace('DZD', '').replace('دج', '').trim()}
+                                                    {formatCurrency(product.selling_price * 0.8, false)}
                                                 </span>
                                                 <span className="text-xs text-emerald-500 uppercase">
-                                                    {i18n.language === 'ar' ? 'دج' : 'DZD'}
+                                                    {i18n.language === 'ar' ? 'دج' : 'DZ'}
                                                 </span>
                                             </div>
                                         </div>

@@ -241,7 +241,8 @@
             "pay_cash": "نقد",
             "pay_card": "بطاقة",
             "pay_mobile": "دفع إلكتروني",
-            "coming_soon": "قريباً"
+            "coming_soon": "قريباً",
+            "empty_alert_hint": "يرجى إضافة منتجات إلى السلة قبل إتمام الطلب."
         },
         "simulation": {
             "printing": "طباعة الفاتورة",
@@ -281,7 +282,9 @@
         "inventory": {
             "title": "المخزون المتاح",
             "quick_select": "تحديد سريع",
-            "products_available": "{{count}} منتجات متاحة"
+            "products_available": "{{count}} منتجات متاحة",
+            "low_stock": "مخزون منخفض",
+            "only_units_available": "يتوفر فقط {{count}} وحدات من \"{{name}}\" في المخزون."
         }
     },
     "common": {
@@ -289,7 +292,9 @@
         "english": "الإنجليزية",
         "french": "الفرنسية",
         "arabic": "العربية",
-        "customer": "العميل"
+        "customer": "العميل",
+        "add_products": "إضافة منتجات",
+        "close": "حسناً"
     },
     "footer": {
         "copyright": "© 2024 تطبيق SuperMarket. جميع الحقوق محفوظة.",

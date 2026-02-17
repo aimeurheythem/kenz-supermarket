@@ -10,7 +10,7 @@ import {
     ArrowRight,
     ChevronRight,
     Globe,
-    DollarSign,
+    Banknote,
     Receipt
 } from 'lucide-react';
 import { useSettingsStore } from '@/stores/useSettingsStore';
@@ -52,8 +52,8 @@ export default function Onboarding() {
         adminConfirmPassword: '',
 
         // Preferences
-        currencySymbol: '$',
-        currencyPosition: 'prefix', // prefix or suffix
+        currencySymbol: 'DZ',
+        currencyPosition: 'suffix', // prefix or suffix
         taxRate: '0',
         taxName: 'Tax',
     });
@@ -375,7 +375,7 @@ export default function Onboarding() {
                                                 value={formData.currencySymbol}
                                                 onChange={(e) => setFormData({ ...formData, currencySymbol: e.target.value })}
                                                 className="w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium"
-                                                placeholder="$"
+                                                placeholder="DZ"
                                             />
                                         </div>
                                         <div>
@@ -388,7 +388,7 @@ export default function Onboarding() {
                                                         formData.currencyPosition === 'prefix' ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
                                                     )}
                                                 >
-                                                    $100
+                                                    DZ 100
                                                 </button>
                                                 <button
                                                     onClick={() => setFormData({ ...formData, currencyPosition: 'suffix' })}
@@ -397,7 +397,7 @@ export default function Onboarding() {
                                                         formData.currencyPosition === 'suffix' ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
                                                     )}
                                                 >
-                                                    100$
+                                                    100 DZ
                                                 </button>
                                             </div>
                                         </div>

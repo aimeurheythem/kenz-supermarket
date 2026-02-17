@@ -21,6 +21,10 @@ interface SaleStore {
 
     // Checkout
     checkout: (payment: { method: string; customer_name?: string; customer_id?: number | null; tax_rate?: number; discount?: number }, userId?: number, sessionId?: number) => Promise<Sale>;
+
+    // Stock error handling
+    stockError: { productName: string; available: number } | null;
+    clearStockError: () => void;
 }
 
 export const useSaleStore = create<SaleStore>((set, get) => ({
@@ -28,6 +32,7 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
     recentSales: [],
     todayStats: { revenue: 0, orders: 0, profit: 0 },
     cart: [],
+    stockError: null,
 
     loadSales: async (filters) => {
         const sales = await SaleRepo.getAll(filters);
@@ -47,6 +52,13 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
     addToCart: (item: CartItem) => {
         const { cart } = get();
         const existing = cart.find((c) => c.product.id === item.product.id);
+        const currentQty = existing ? existing.quantity : 0;
+
+        if (currentQty + item.quantity > item.product.stock_quantity) {
+            set({ stockError: { productName: item.product.name, available: item.product.stock_quantity } });
+            return;
+        }
+
         if (existing) {
             set({
                 cart: cart.map((c) =>
@@ -62,6 +74,14 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
 
     updateCartItem: (productId: number, quantity: number) => {
         const { cart } = get();
+        const item = cart.find((c) => c.product.id === productId);
+        if (!item) return;
+
+        if (quantity > item.product.stock_quantity) {
+            set({ stockError: { productName: item.product.name, available: item.product.stock_quantity } });
+            return;
+        }
+
         if (quantity <= 0) {
             set({ cart: cart.filter((c) => c.product.id !== productId) });
         } else {
@@ -97,4 +117,6 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
         await get().loadTodayStats();
         return sale;
     },
+
+    clearStockError: () => set({ stockError: null }),
 }));

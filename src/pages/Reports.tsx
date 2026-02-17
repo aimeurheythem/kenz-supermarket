@@ -6,7 +6,7 @@ import {
     PieChart as PieChartIcon,
     Download,
     Users,
-    DollarSign,
+    Banknote,
     Clock,
     Calendar,
     Filter,
@@ -238,7 +238,7 @@ export default function Reports() {
                                     fontSize={12}
                                     tickLine={false}
                                     axisLine={false}
-                                    tickFormatter={(val) => `$${val}`}
+                                    tickFormatter={(val) => formatCurrency(Number(val))}
                                 />
                                 <Tooltip
                                     contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px' }}
@@ -360,7 +360,7 @@ export default function Reports() {
                         <div className="p-5 rounded-xl bg-neutral-800 border border-neutral-700">
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="p-2 rounded-lg bg-emerald-500/10">
-                                    <DollarSign size={20} className="text-emerald-500" />
+                                    <Banknote size={20} className="text-emerald-500" />
                                 </div>
                                 <p className="text-sm font-medium text-zinc-400">Cashier Sales</p>
                             </div>
@@ -410,7 +410,7 @@ export default function Reports() {
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={cashierPerformance} layout="vertical">
                                 <CartesianGrid strokeDasharray="3 3" stroke="#27272a" horizontal={true} vertical={false} />
-                                <XAxis type="number" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
+                                <XAxis type="number" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => formatCurrency(Number(val))} />
                                 <YAxis type="category" dataKey="cashier_name" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} width={100} />
                                 <Tooltip
                                     contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px' }}

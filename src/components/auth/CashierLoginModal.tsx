@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { UserRepo } from '../../../database';
 import type { User } from '@/lib/types';
-import { Users, Lock, ArrowRight, X } from 'lucide-react';
+import { Users, Lock, ArrowRight, X, Banknote } from 'lucide-react';
 import Portal from '../common/Portal';
 
 interface CashierLoginModalProps {
@@ -242,7 +242,7 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
                             <form onSubmit={handleCashSubmit}>
                                 <div className="text-center mb-6">
                                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white mx-auto mb-3">
-                                        <span className="text-2xl font-bold">$</span>
+                                        <Banknote size={32} />
                                     </div>
                                     <h3 className="text-lg font-semibold text-gray-800">Opening Cash</h3>
                                     <p className="text-sm text-gray-500">Enter the cash amount in your drawer</p>
@@ -250,17 +250,17 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
 
                                 <div className="mb-4">
                                     <div className="relative">
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">$</span>
                                         <input
                                             type="number"
                                             step="0.01"
                                             min="0"
                                             value={openingCash}
                                             onChange={(e) => setOpeningCash(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:outline-none text-center text-2xl text-gray-900"
-                                            placeholder="0.00"
+                                            className="w-full pl-4 pr-12 py-3 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:outline-none text-center text-2xl text-gray-900"
+                                            placeholder="0,00"
                                             autoFocus
                                         />
+                                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">DZ</span>
                                     </div>
                                 </div>
 

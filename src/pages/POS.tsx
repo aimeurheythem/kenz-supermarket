@@ -38,11 +38,18 @@ import CheckoutSimulation from '@/components/POS/CheckoutSimulation';
 import ReceiptPreview from '@/components/POS/ReceiptPreview';
 import CustomerSelector from '@/components/POS/CustomerSelector';
 import type { Sale, SaleItem, Customer } from '@/lib/types';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
 
 export default function POS() {
     const { t, i18n } = useTranslation();
     const { products, loadProducts, getByBarcode } = useProductStore();
-    const { cart, addToCart, updateCartItem, removeFromCart, clearCart, getCartTotal, checkout } = useSaleStore();
+    const { cart, addToCart, updateCartItem, removeFromCart, clearCart, getCartTotal, checkout, stockError, clearStockError } = useSaleStore();
     const { user, currentSession, getCurrentSessionId, closeCashierSession } = useAuthStore();
     const { items: quickAccessItems, fetchItems, addItem, updateItem, deleteItem } = useQuickAccessStore();
 
@@ -57,6 +64,7 @@ export default function POS() {
     const [lastSaleItems, setLastSaleItems] = useState<SaleItem[]>([]);
     const [printReceipt, setPrintReceipt] = useState(true);
     const [showScanner, setShowScanner] = useState(false);
+    const [showEmptyCartAlert, setShowEmptyCartAlert] = useState(false);
 
     const [currentTime, setCurrentTime] = useState(new Date());
     useEffect(() => {
@@ -100,7 +108,16 @@ export default function POS() {
     useEffect(() => {
         loadProducts();
         fetchItems();
-    }, []);
+
+        // Refresh products when window becomes visible
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                loadProducts();
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, [loadProducts, fetchItems]);
 
     const filteredProducts = products.filter((p) =>
         !searchQuery ||
@@ -130,7 +147,10 @@ export default function POS() {
     };
 
     const handleBeforeCheckout = useCallback(() => {
-        if (cart.length === 0) return;
+        if (cart.length === 0) {
+            setShowEmptyCartAlert(true);
+            return;
+        }
         handleFinalizeCheckout();
     }, [cart.length, printReceipt]);
 
@@ -311,18 +331,20 @@ export default function POS() {
                                     const inCart = cart.find((c) => c.product.id === product.id);
                                     const isOutOfStock = product.stock_quantity <= 0;
                                     const style = getProductStyle(product.id);
+                                    const isAtLimit = inCart && inCart.quantity >= product.stock_quantity;
 
                                     return (
                                         <motion.button
                                             key={product.id}
                                             onClick={() => handleAddProduct(product)}
                                             disabled={isOutOfStock}
-                                            whileHover={{ scale: 0.98 }}
-                                            whileTap={{ scale: 0.95 }}
+                                            whileHover={{ scale: isOutOfStock ? 1 : 0.98 }}
+                                            whileTap={{ scale: isOutOfStock ? 1 : 0.95 }}
                                             className={cn(
                                                 "group relative flex flex-col p-8 rounded-[3rem] text-left transition-all duration-300 border-0 shadow-none overflow-hidden",
                                                 style.bg,
-                                                isOutOfStock ? "opacity-30 grayscale cursor-not-allowed" : "cursor-pointer"
+                                                isOutOfStock ? "opacity-30 grayscale cursor-not-allowed" : "cursor-pointer",
+                                                !isOutOfStock && isAtLimit && "opacity-60"
                                             )}
                                         >
                                             {inCart && (
@@ -508,14 +530,11 @@ export default function POS() {
 
                     <motion.button
                         onClick={handleBeforeCheckout}
-                        disabled={cart.length === 0}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className={cn(
                             "w-full py-6 rounded-[2.5rem] font-black text-sm uppercase tracking-[0.3em] transition-all",
-                            cart.length > 0
-                                ? "bg-yellow-400 text-black hover:bg-yellow-300 shadow-xl shadow-yellow-400/20"
-                                : "bg-zinc-100 text-zinc-300 cursor-not-allowed"
+                            "bg-yellow-400 text-black hover:bg-yellow-300 shadow-xl shadow-yellow-400/20"
                         )}
                     >
                         {t('pos.cart.checkout')}
@@ -559,7 +578,104 @@ export default function POS() {
                     title={t('pos.scan_product', 'Scan Product')}
                 />
             )}
+
+            <StockErrorDialog
+                error={stockError}
+                onClose={clearStockError}
+            />
+
+            <EmptyCartDialog
+                isOpen={showEmptyCartAlert}
+                onClose={() => setShowEmptyCartAlert(false)}
+            />
         </div>
+    );
+}
+
+function EmptyCartDialog({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
+    const { t } = useTranslation();
+
+    return (
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="max-w-[320px] border-0 p-8 bg-white rounded-[2.5rem] shadow-none overflow-hidden">
+                {/* Minimal Grid Background */}
+                <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
+                    style={{
+                        backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 1px, transparent 1px)`,
+                        backgroundSize: '20px 20px',
+                    }}
+                />
+
+                <DialogHeader className="relative z-10 space-y-3">
+                    <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-black/20" />
+                        <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-[0.3em]">{t('pos.cart.title', 'Cart')}</span>
+                    </div>
+
+                    <DialogTitle className="text-xl font-black text-black tracking-tighter uppercase leading-tight">
+                        {t('pos.cart.empty')}
+                    </DialogTitle>
+
+                    <DialogDescription className="text-black/60 text-[12px] font-medium tracking-tight leading-relaxed">
+                        {t('pos.cart.empty_alert_hint')}
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div className="mt-8 relative z-10">
+                    <button
+                        onClick={onClose}
+                        className="w-full py-4 bg-black text-white rounded-xl text-[9px] font-black uppercase tracking-[0.3em] transition-all active:scale-[0.98] hover:bg-zinc-800"
+                    >
+                        {t('common.add_products')}
+                    </button>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+function StockErrorDialog({ error, onClose }: { error: { productName: string, available: number } | null, onClose: () => void }) {
+    const { t } = useTranslation();
+
+    return (
+        <Dialog open={!!error} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="max-w-[320px] border-0 p-8 bg-white rounded-[2.5rem] shadow-none overflow-hidden">
+                {/* Minimal Grid Background */}
+                <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
+                    style={{
+                        backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 1px, transparent 1px)`,
+                        backgroundSize: '20px 20px',
+                    }}
+                />
+
+                <DialogHeader className="relative z-10 space-y-3">
+                    <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-black/20" />
+                        <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-[0.3em]">{t('pos.inventory.title', 'Inventory')}</span>
+                    </div>
+
+                    <DialogTitle className="text-xl font-black text-black tracking-tighter uppercase leading-tight">
+                        {t('pos.inventory.low_stock')}
+                    </DialogTitle>
+
+                    <DialogDescription className="text-black/60 text-[12px] font-medium tracking-tight leading-relaxed">
+                        {t('pos.inventory.only_units_available', {
+                            count: error?.available,
+                            name: error?.productName
+                        })}
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div className="mt-8 relative z-10">
+                    <button
+                        onClick={onClose}
+                        className="w-full py-4 bg-black text-white rounded-xl text-[9px] font-black uppercase tracking-[0.3em] transition-all active:scale-[0.98] hover:bg-zinc-800"
+                    >
+                        {t('common.close')}
+                    </button>
+                </div>
+            </DialogContent>
+        </Dialog>
     );
 }
 

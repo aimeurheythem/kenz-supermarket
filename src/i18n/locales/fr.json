@@ -238,7 +238,8 @@
             "pay_cash": "Espèces",
             "pay_card": "Carte",
             "pay_mobile": "E-Paiement",
-            "coming_soon": "Bientôt\ndispo"
+            "coming_soon": "Bientôt\ndispo",
+            "empty_alert_hint": "Veuillez ajouter des produits au panier avant de valider."
         },
         "simulation": {
             "printing": "Impression du Ticket",
@@ -278,7 +279,9 @@
         "inventory": {
             "title": "Inventaire en Stock",
             "quick_select": "Sélection rapide",
-            "products_available": "{{count}} Produits Disponibles"
+            "products_available": "{{count}} Produits Disponibles",
+            "low_stock": "Stock Faible",
+            "only_units_available": "Seulement {{count}} unités de \"{{name}}\" en stock."
         }
     },
     "common": {
@@ -286,7 +289,9 @@
         "english": "Anglais",
         "french": "Français",
         "arabic": "Arabe",
-        "customer": "Client"
+        "customer": "Client",
+        "add_products": "Ajouter des Produits",
+        "close": "D'accord"
     },
     "footer": {
         "copyright": "© 2024 SuperMarket App. Tous droits réservés.",

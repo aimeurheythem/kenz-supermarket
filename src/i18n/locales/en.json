@@ -241,7 +241,8 @@
             "pay_cash": "Cash",
             "pay_card": "Card",
             "pay_mobile": "E-Pay",
-            "coming_soon": "Coming\nsoon"
+            "coming_soon": "Coming\nsoon",
+            "empty_alert_hint": "Please add products to the cart before checking out."
         },
         "simulation": {
             "printing": "Printing Bill",
@@ -281,7 +282,9 @@
         "inventory": {
             "title": "In-Stock Inventory",
             "quick_select": "Quick select",
-            "products_available": "{{count}} Products Available"
+            "products_available": "{{count}} Products Available",
+            "low_stock": "Low Stock",
+            "only_units_available": "Only {{count}} units of \"{{name}}\" in stock."
         }
     },
     "common": {
@@ -289,7 +292,9 @@
         "english": "English",
         "french": "French",
         "arabic": "Arabic",
-        "customer": "Customer"
+        "customer": "Customer",
+        "add_products": "Add Products",
+        "close": "Got it"
     },
     "footer": {
         "copyright": "© 2024 SuperMarket App. All rights reserved.",

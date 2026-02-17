@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, DollarSign, Calendar, Tag, CreditCard } from 'lucide-react';
+import { X, Banknote, Calendar, Tag, CreditCard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '@/components/common/Button';
 import { useExpenseStore } from '@/stores/useExpenseStore';
@@ -85,7 +85,7 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
                                     </label>
                                     <div className="relative">
                                         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400">
-                                            <DollarSign size={20} />
+                                            <Banknote size={20} />
                                         </div>
                                         <input
                                             type="number"
@@ -162,8 +162,8 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
                                                 type="button"
                                                 onClick={() => setFormData({ ...formData, payment_method: method })}
                                                 className={`flex-1 h-10 rounded-lg text-xs font-bold uppercase tracking-wide border transition-all ${formData.payment_method === method
-                                                        ? 'bg-black text-white border-black'
-                                                        : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-300'
+                                                    ? 'bg-black text-white border-black'
+                                                    : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-300'
                                                     }`}
                                             >
                                                 {method.replace('_', ' ')}

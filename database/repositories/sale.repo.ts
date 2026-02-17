@@ -129,14 +129,19 @@ export const SaleRepo = {
                     [saleId, item.product.id, item.product.name, item.quantity, item.product.selling_price, item.discount, itemTotal]
                 );
 
-                // Update stock
-                const previousStock = item.product.stock_quantity;
-                const newStock = previousStock - item.quantity;
+                // Get current stock to ensure accuracy and for movement logging
+                const product = await get<{ stock_quantity: number }>(
+                    "SELECT stock_quantity FROM products WHERE id = ?",
+                    [item.product.id]
+                );
+                const previousStock = product?.stock_quantity || 0;
+                const newStock = Math.max(0, previousStock - item.quantity);
 
-                await executeNoSave("UPDATE products SET stock_quantity = ?, updated_at = datetime('now') WHERE id = ?", [
-                    newStock,
-                    item.product.id,
-                ]);
+                // Update stock atomically
+                await executeNoSave(
+                    "UPDATE products SET stock_quantity = ?, updated_at = datetime('now') WHERE id = ?",
+                    [newStock, item.product.id]
+                );
 
                 // Create stock movement
                 await executeNoSave(

@@ -8,9 +8,9 @@ export function cn(...inputs: ClassValue[]) {
 
 import { useSettingsStore } from '@/stores/useSettingsStore';
 
-export function formatCurrency(amount: number) {
+export function formatCurrency(amount: number, includeSymbol = true) {
     const settings = useSettingsStore.getState().settings;
-    const symbol = settings['currency.symbol'] || 'DZD';
+    const symbol = settings['currency.symbol'] || 'DZ';
     const position = settings['currency.position'] || 'suffix';
 
     // Format number with spaces for thousands
@@ -18,6 +18,8 @@ export function formatCurrency(amount: number) {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     }).format(amount);
+
+    if (!includeSymbol) return formattedNumber;
 
     if (position === 'prefix') {
         return `${symbol} ${formattedNumber}`;

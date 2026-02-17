@@ -11,7 +11,7 @@ import {
     User,
     Save,
     CreditCard,
-    DollarSign,
+    Banknote,
 } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useSupplierStore } from '@/stores/useSupplierStore';
@@ -313,13 +313,13 @@ export default function Suppliers() {
                     <div className="p-4 bg-zinc-50 rounded-3xl border-2 border-zinc-300 space-y-1">
                         <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Current Balance</span>
                         <div className="text-xl font-black text-black">
-                            {selectedSupplierForPayment ? formatCurrency(selectedSupplierForPayment.balance) : '$0.00'}
+                            {selectedSupplierForPayment ? formatCurrency(selectedSupplierForPayment.balance) : '0,00 DZ'}
                         </div>
                     </div>
                     <div>
-                        <label className={labelClass}>Payment Amount ($)</label>
+                        <label className={labelClass}>Payment Amount (DZ)</label>
                         <div className="relative border-2 border-zinc-300 rounded-3xl">
-                            <DollarSign size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" strokeWidth={1.5} />
+                            <Banknote size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" strokeWidth={1.5} />
                             <input
                                 type="number"
                                 step="0.01"

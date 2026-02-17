@@ -369,7 +369,7 @@ export default function Inventory() {
                                             setSearch('');
                                             setLowStockOnly(false);
                                         }}
-                                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 border-2 border-red-200 text-red-500 hover:bg-red-100 hover:border-red-300 transition-all font-bold text-[10px] uppercase tracking-widest"
+                                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-all font-bold text-[10px] uppercase tracking-widest"
                                     >
                                         <X size={14} strokeWidth={3} />
                                         <span>{t('inventory.filters.clear')}</span>

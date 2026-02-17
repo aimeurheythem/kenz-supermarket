@@ -3,8 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { useProductStore } from '@/stores/useProductStore';
 import { BarcodeCanvas } from '@/components/barcodes/BarcodeCanvas';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
     Select,
     SelectContent,
@@ -13,7 +11,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Printer, Trash2, Plus, GripVertical, Check } from 'lucide-react';
+import { Search, Printer, Trash2, Plus, X, Barcode, ShoppingBag, Settings2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn, formatCurrency } from '@/lib/utils';
 import type { Product } from '@/lib/types';
@@ -85,185 +83,219 @@ export default function BarcodeLabels() {
     const labelArray = queue.flatMap(item => Array(item.quantity).fill(item.originalProduct));
 
     return (
-        <div className="h-full flex flex-col gap-6 p-6 max-w-[1600px] mx-auto">
-            {/* Header - Hidden on print */}
-            <div className="flex items-center justify-between print:hidden">
-                <div>
-                    <h1 className="text-3xl font-black text-zinc-900 tracking-tight">Label Printing</h1>
-                    <p className="text-zinc-500 mt-1">Generate and print product barcode labels</p>
+        <div className="relative flex flex-col h-full gap-8 p-6 lg:p-8 animate-fadeIn mt-4 min-h-[85vh]">
+            {/* Grid Background (Matching Dashboard/POS) */}
+            <div className="absolute inset-0 rounded-[3rem] pointer-events-none opacity-[0.15]"
+                style={{
+                    backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 1px, transparent 1px)`,
+                    backgroundSize: '32px 32px',
+                    maskImage: 'radial-gradient(circle at top center, black, transparent 90%)',
+                    WebkitMaskImage: 'radial-gradient(circle at top center, black, transparent 90%)'
+                }}
+            />
+
+            {/* Header Section */}
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
+                <div className="flex flex-col gap-1">
+                    <span className="text-[12px] text-zinc-400 tracking-[0.3em] font-bold uppercase">Label Management</span>
+                    <h1 className="text-4xl font-black text-black tracking-tighter uppercase">Barcode Generator</h1>
                 </div>
-                <Button onClick={handlePrint} size="lg" className="bg-black text-white hover:bg-zinc-800 rounded-full gap-2">
-                    <Printer size={18} />
-                    Print Labels
+                <Button
+                    onClick={handlePrint}
+                    disabled={queue.length === 0}
+                    className="flex items-center gap-2 px-6 py-6 bg-black text-white hover:bg-zinc-800 rounded-[3rem] font-black uppercase tracking-widest text-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <Printer size={18} strokeWidth={3} />
+                    <span>Print Labels ({totalLabels})</span>
                 </Button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 print:hidden">
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8 print:hidden flex-1 min-h-0">
                 {/* Left Column: Product Selection & Queue */}
-                <div className="lg:col-span-1 space-y-6">
-                    {/* Unused space filler for cleaner layout if needed, or just more content */}
+                <div className="lg:col-span-1 flex flex-col gap-6 min-h-0">
 
-                    <Card className="border-zinc-200 shadow-sm rounded-[1.5rem] overflow-hidden">
-                        <CardHeader className="bg-zinc-50 border-b border-zinc-100 pb-4">
-                            <CardTitle className="text-lg font-bold">Add Products</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-4 space-y-4">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-                                <Input
-                                    placeholder="Search by name or barcode..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10 h-10 bg-white border-zinc-200 rounded-xl"
-                                />
+                    {/* Add Products Card */}
+                    <div className="bg-white/80 rounded-[3rem] p-6 border-2 border-gray-200">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-3">
+                                <Search size={20} />
                             </div>
+                            <h2 className="text-lg font-black uppercase tracking-tight">Add Products</h2>
+                        </div>
 
-                            {/* Search Results */}
+                        <div className="relative group">
+                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-black transition-colors" size={20} />
+                            <input
+                                placeholder="Search by name or barcode..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-14 pr-4 py-4 bg-gray-100 border-2 border-transparent focus:border-black/10 focus:bg-white rounded-[2rem] font-bold text-sm transition-all outline-none placeholder:text-zinc-400"
+                            />
+                        </div>
+
+                        {/* Search Results */}
+                        <AnimatePresence>
                             {searchQuery && (
-                                <div className="space-y-1 max-h-[300px] overflow-y-auto">
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="mt-4 space-y-2"
+                                >
                                     {filteredProducts.map(product => (
                                         <div
                                             key={product.id}
                                             onClick={() => addToQueue(product)}
-                                            className="flex items-center justify-between p-3 bg-white hover:bg-zinc-50 border border-zinc-100 rounded-xl cursor-pointer transition-colors group"
+                                            className="group flex items-center justify-between p-4 bg-white hover:bg-blue-100 border border-zinc-100 hover:border-blue-100 rounded-[1.5rem] cursor-pointer transition-all active:scale-[0.98]"
                                         >
-                                            <div className="flex flex-col">
-                                                <span className="font-medium text-sm text-zinc-900 group-hover:text-black">{product.name}</span>
-                                                <span className="text-xs text-zinc-500 font-mono">{product.barcode || 'NO BARCODE'}</span>
+                                            <div className="flex flex-col min-w-0">
+                                                <span className="font-bold text-sm text-zinc-900 group-hover:text-blue-900 uppercase tracking-tight truncate">{product.name}</span>
+                                                <span className="text-[10px] text-zinc-400 font-mono font-bold">{product.barcode || 'NO BARCODE'}</span>
                                             </div>
-                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-zinc-400 group-hover:text-zinc-900">
-                                                <Plus size={16} />
-                                            </Button>
+                                            <div className="h-8 w-8 rounded-full bg-zinc-100 group-hover:bg-blue-200 flex items-center justify-center transition-colors">
+                                                <Plus size={16} className="text-zinc-400 group-hover:text-blue-600" strokeWidth={3} />
+                                            </div>
                                         </div>
                                     ))}
                                     {filteredProducts.length === 0 && (
-                                        <div className="text-center py-4 text-zinc-400 text-sm">No products found</div>
+                                        <div className="text-center py-8 text-zinc-400 text-xs font-bold uppercase tracking-wider">No products found</div>
                                     )}
-                                </div>
+                                </motion.div>
                             )}
-                        </CardContent>
-                    </Card>
+                        </AnimatePresence>
+                    </div>
 
                     {/* Print Queue */}
-                    <Card className="border-zinc-200 shadow-sm rounded-[1.5rem] overflow-hidden flex-1">
-                        <CardHeader className="bg-zinc-50 border-b border-zinc-100 pb-4 flex flex-row items-center justify-between">
-                            <CardTitle className="text-lg font-bold">Print Queue</CardTitle>
-                            <span className="text-xs font-bold bg-zinc-200 text-zinc-600 px-2 py-1 rounded-full">{totalLabels} Labels</span>
-                        </CardHeader>
-                        <CardContent className="p-0 overflow-hidden">
-                            <div className="max-h-[500px] overflow-y-auto p-4 space-y-2">
-                                <AnimatePresence initial={false}>
-                                    {queue.map(item => (
-                                        <motion.div
-                                            key={item.id}
-                                            initial={{ opacity: 0, height: 0 }}
-                                            animate={{ opacity: 1, height: 'auto' }}
-                                            exit={{ opacity: 0, height: 0 }}
-                                            className="flex items-center gap-3 p-3 bg-white border border-zinc-100 rounded-xl shadow-sm"
-                                        >
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-medium text-sm text-zinc-900 truncate">{item.originalProduct.name}</p>
-                                                <p className="text-xs text-zinc-500 font-mono">{item.originalProduct.barcode}</p>
-                                            </div>
-
-                                            <div className="flex items-center gap-2 bg-zinc-50 rounded-lg p-1 border border-zinc-100">
-                                                <button
-                                                    onClick={() => updateQuantity(item.id, -1)}
-                                                    className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm text-zinc-500 transition-all font-bold"
-                                                >
-                                                    -
-                                                </button>
-                                                <span className="w-6 text-center text-sm font-semibold">{item.quantity}</span>
-                                                <button
-                                                    onClick={() => updateQuantity(item.id, 1)}
-                                                    className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm text-zinc-500 transition-all font-bold"
-                                                >
-                                                    +
-                                                </button>
-                                            </div>
-
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50"
-                                                onClick={() => removeFromQueue(item.id)}
-                                            >
-                                                <Trash2 size={16} />
-                                            </Button>
-                                        </motion.div>
-                                    ))}
-                                    {queue.length === 0 && (
-                                        <div className="text-center py-12 text-zinc-400">
-                                            <Printer size={32} className="mx-auto mb-3 opacity-20" />
-                                            <p className="text-sm">Queue is empty</p>
-                                            <p className="text-xs opacity-60">Add products to start printing</p>
-                                        </div>
-                                    )}
-                                </AnimatePresence>
+                    <div className="flex-1 bg-white rounded-[3rem] p-6 border-2 border-gray-200 flex flex-col min-h-0">
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3">
+                                    <ShoppingBag size={20} />
+                                </div>
+                                <h2 className="text-lg font-black uppercase tracking-tight">Queue</h2>
                             </div>
-                        </CardContent>
-                    </Card>
+                            <span className="px-3 py-1 bg-yellow-400 rounded-full text-[10px] font-black uppercase tracking-wider text-blue-600">
+                                {queue.length} Items
+                            </span>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
+                            <AnimatePresence initial={false}>
+                                {queue.map(item => (
+                                    <motion.div
+                                        key={item.id}
+                                        initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                                        animate={{ opacity: 1, height: 'auto', marginBottom: 12 }}
+                                        exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                                        className="flex items-center gap-3 p-3 bg-white border-2 border-zinc-200 rounded-[1.5rem]"
+                                    >
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-bold text-xs text-zinc-900 uppercase tracking-tight truncate">{item.originalProduct.name}</p>
+                                            <p className="text-[10px] text-zinc-400 font-mono font-bold">{item.originalProduct.barcode}</p>
+                                        </div>
+
+                                        <div className="flex items-center gap-1 bg-zinc-100 rounded-xl p-1 border border-zinc-200">
+                                            <button
+                                                onClick={() => updateQuantity(item.id, -1)}
+                                                className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-zinc-400 hover:text-black transition-all font-bold"
+                                            >
+                                                -
+                                            </button>
+                                            <span className="w-6 text-center text-xs font-black">{item.quantity}</span>
+                                            <button
+                                                onClick={() => updateQuantity(item.id, 1)}
+                                                className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-zinc-400 hover:text-black transition-all font-bold"
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+
+                                        <button
+                                            className="h-9 w-9 flex items-center justify-center rounded-xl bg-red-50 text-red-400 hover:text-white hover:bg-red-500 transition-all ml-1"
+                                            onClick={() => removeFromQueue(item.id)}
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </motion.div>
+                                ))}
+                                {queue.length === 0 && (
+                                    <div className="text-center py-12 flex flex-col items-center justify-center h-full">
+                                        <div className="h-16 w-16 bg-zinc-50 rounded-full flex items-center justify-center mb-4">
+                                            <Barcode size={32} className="text-zinc-300" />
+                                        </div>
+                                        <p className="text-sm font-black text-zinc-300 uppercase tracking-widest">Queue is empty</p>
+                                    </div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Right Column: Configuration & Preview */}
-                <div className="lg:col-span-2 space-y-6">
+                <div className="lg:col-span-2 flex flex-col gap-6 min-h-0">
                     {/* Configuration Panel */}
-                    <Card className="border-zinc-200 shadow-sm rounded-[1.5rem] overflow-hidden">
-                        <CardHeader className="bg-zinc-50 border-b border-zinc-100 pb-4">
-                            <CardTitle className="text-lg font-bold">Label Settings</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Format</label>
-                                    <Select value={labelFormat} onValueChange={(v: string) => setLabelFormat(v as LabelFormat)}>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="5160">Avery 5160 (30/Sheet)</SelectItem>
-                                            <SelectItem value="thermal_50x30">Thermal 50x30mm</SelectItem>
-                                            <SelectItem value="thermal_40x25">Thermal 40x25mm</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                    <div className="bg-white rounded-[2.5rem] p-6 border-2 border-gray-200">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-3">
+                                <Settings2 size={20} />
+                            </div>
+                            <h2 className="text-lg font-black uppercase tracking-tight">Settings</h2>
+                        </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Barcode Type</label>
-                                    <Select value={barcodeType} onValueChange={(v: string) => setBarcodeType(v as 'CODE128' | 'EAN13')}>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="CODE128">Code 128 (Standard)</SelectItem>
-                                            <SelectItem value="EAN13">EAN-13 (Retail)</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">Paper Format</label>
+                                <Select value={labelFormat} onValueChange={(v: string) => setLabelFormat(v as LabelFormat)}>
+                                    <SelectTrigger className="w-full h-12 rounded-[2rem] border-2 border-zinc-200 bg-zinc-50 font-bold focus:ring-0">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-white border-2 border-zinc-200 rounded-[1.5rem]">
+                                        <SelectItem value="5160">Avery 5160 (30/Sheet)</SelectItem>
+                                        <SelectItem value="thermal_50x30">Thermal 50x30mm</SelectItem>
+                                        <SelectItem value="thermal_40x25">Thermal 40x25mm</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
 
-                                <div className="space-y-4 pt-6">
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox id="showPrice" checked={showPrice} onCheckedChange={(c: boolean | 'indeterminate') => setShowPrice(c === true)} />
-                                        <label htmlFor="showPrice" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                            Show Price
-                                        </label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox id="showName" checked={showName} onCheckedChange={(c: boolean | 'indeterminate') => setShowName(c === true)} />
-                                        <label htmlFor="showName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                            Show Product Name
-                                        </label>
-                                    </div>
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">Barcode Type</label>
+                                <Select value={barcodeType} onValueChange={(v: string) => setBarcodeType(v as 'CODE128' | 'EAN13')}>
+                                    <SelectTrigger className="w-full h-12 rounded-[2rem] border-2 border-zinc-200 bg-zinc-50 font-bold focus:ring-0">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-white border-2 border-zinc-200 rounded-[1.5rem]">
+                                        <SelectItem value="CODE128">Code 128 (Standard)</SelectItem>
+                                        <SelectItem value="EAN13">EAN-13 (Retail)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-4 pt-8">
+                                <div className="flex items-center space-x-3">
+                                    <Checkbox id="showPrice" checked={showPrice} onCheckedChange={(c: boolean | 'indeterminate') => setShowPrice(c === true)}
+                                        className="h-6 w-6 rounded-lg border-2 border-zinc-300 data-[state=checked]:bg-yellow-400 data-[state=checked]:border-yellow-400"
+                                    />
+                                    <label htmlFor="showPrice" className="text-sm font-bold leading-none cursor-pointer select-none">
+                                        Show Price
+                                    </label>
+                                </div>
+                                <div className="flex items-center space-x-3">
+                                    <Checkbox id="showName" checked={showName} onCheckedChange={(c: boolean | 'indeterminate') => setShowName(c === true)}
+                                        className="h-6 w-6 rounded-lg border-2 border-zinc-300 data-[state=checked]:bg-yellow-400 data-[state=checked]:border-yellow-400"
+                                    />
+                                    <label htmlFor="showName" className="text-sm font-bold leading-none cursor-pointer select-none">
+                                        Show Product Name
+                                    </label>
                                 </div>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
                     {/* Preview Area */}
-                    <div className="bg-zinc-100 border border-zinc-200 rounded-[1.5rem] p-8 min-h-[500px] overflow-auto flex justify-center items-start shadow-inner">
+                    <div className="flex-1 bg-zinc-100 rounded-[3rem] border-3 border-dashed border-zinc-200 p-8 min-h-[400px] overflow-auto flex justify-center items-start shadow-inner">
                         <div
                             className={cn(
-                                "bg-white shadow-xl transition-all duration-300 origin-top",
+                                "bg-white shadow-2xl transition-all duration-300 origin-top",
                                 labelFormat === '5160' ? "w-[215.9mm] min-h-[279.4mm] p-[10mm]" :
                                     labelFormat === 'thermal_50x30' ? "w-[50mm] min-h-[30mm] p-1" :
                                         "w-[40mm] min-h-[25mm] p-1"
@@ -286,7 +318,7 @@ export default function BarcodeLabels() {
                                         )}
                                     >
                                         {showName && (
-                                            <p className="text-[10px] font-bold leading-tight truncate w-full mb-0.5">
+                                            <p className={cn("font-bold leading-tight truncate w-full shrink-0", labelFormat === '5160' ? "text-[9px] mb-[1px]" : "text-[10px] mb-0.5")}>
                                                 {product.name}
                                             </p>
                                         )}
@@ -294,15 +326,20 @@ export default function BarcodeLabels() {
                                         <BarcodeCanvas
                                             value={product.barcode || '00000000'}
                                             format={barcodeType}
-                                            height={labelFormat === '5160' ? 30 : 25}
-                                            width={1.2}
-                                            fontSize={10}
+                                            height={labelFormat === '5160' ? 14 : 25}
+                                            width={labelFormat === '5160' ? 1 : 1.2}
+                                            fontSize={labelFormat === '5160' ? 9 : 10}
+                                            marginTop={labelFormat === '5160' ? 0 : 10}
+                                            marginBottom={labelFormat === '5160' ? 0 : 10}
+                                            marginLeft={labelFormat === '5160' ? 0 : 10}
+                                            marginRight={labelFormat === '5160' ? 0 : 10}
+                                            textMargin={labelFormat === '5160' ? 0 : 2}
                                             displayValue={true}
-                                            className="w-full max-w-[90%]"
+                                            className={cn("object-contain", labelFormat === '5160' ? "max-w-full max-h-[14mm]" : "w-full max-w-[95%]")}
                                         />
 
                                         {showPrice && (
-                                            <p className="text-[11px] font-black mt-0.5">
+                                            <p className={cn("font-black shrink-0", labelFormat === '5160' ? "text-[10px] mt-[1px]" : "text-[11px] mt-0.5")}>
                                                 {formatCurrency(product.selling_price)}
                                             </p>
                                         )}
@@ -333,7 +370,7 @@ export default function BarcodeLabels() {
                             )}
                         >
                             {showName && (
-                                <p className="text-[10px] font-bold leading-tight truncate w-full mb-0.5">
+                                <p className={cn("font-bold leading-tight truncate w-full shrink-0", labelFormat === '5160' ? "text-[9px] mb-[1px]" : "text-[10px] mb-0.5")}>
                                     {product.name}
                                 </p>
                             )}
@@ -341,15 +378,20 @@ export default function BarcodeLabels() {
                             <BarcodeCanvas
                                 value={product.barcode || '00000000'}
                                 format={barcodeType}
-                                height={labelFormat === '5160' ? 30 : 25}
-                                width={1.5}
-                                fontSize={10}
+                                height={labelFormat === '5160' ? 14 : 25}
+                                width={labelFormat === '5160' ? 1 : 1.5}
+                                fontSize={labelFormat === '5160' ? 9 : 10}
+                                marginTop={labelFormat === '5160' ? 0 : 10}
+                                marginBottom={labelFormat === '5160' ? 0 : 10}
+                                marginLeft={labelFormat === '5160' ? 0 : 10}
+                                marginRight={labelFormat === '5160' ? 0 : 10}
+                                textMargin={labelFormat === '5160' ? 0 : 2}
                                 displayValue={true}
-                                className="w-full max-w-[90%]"
+                                className={cn("object-contain", labelFormat === '5160' ? "max-w-full max-h-[14mm]" : "w-full max-w-[95%]")}
                             />
 
                             {showPrice && (
-                                <p className="text-[11px] font-black mt-0.5">
+                                <p className={cn("font-black shrink-0", labelFormat === '5160' ? "text-[10px] mt-[1px]" : "text-[11px] mt-0.5")}>
                                     {formatCurrency(product.selling_price)}
                                 </p>
                             )}

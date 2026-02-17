@@ -200,27 +200,27 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                         <div className={inputWrapperClass}>
                             <label className={labelClass}>{t('inventory.form.labels.cost')}</label>
                             <div className="relative">
-                                <DollarSign size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400" strokeWidth={1.5} />
                                 <input
                                     type="number"
                                     step="0.01"
                                     value={form.cost_price}
                                     onChange={(e) => setForm({ ...form, cost_price: parseFloat(e.target.value) || 0 })}
-                                    className={inputClass + " pl-10"}
+                                    className={inputClass + " pr-12"}
                                 />
+                                <span className="absolute right-5 top-1/2 -translate-y-1/2 text-zinc-400 font-black text-[10px]">DZ</span>
                             </div>
                         </div>
                         <div className={inputWrapperClass}>
                             <label className={labelClass}>{t('inventory.form.labels.selling')}</label>
                             <div className="relative">
-                                <DollarSign size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-500" strokeWidth={2} />
                                 <input
                                     type="number"
                                     step="0.01"
                                     value={form.selling_price}
                                     onChange={(e) => setForm({ ...form, selling_price: parseFloat(e.target.value) || 0 })}
-                                    className={inputClass + " pl-10 bg-zinc-200/50"}
+                                    className={inputClass + " bg-zinc-200/50 pr-12"}
                                 />
+                                <span className="absolute right-5 top-1/2 -translate-y-1/2 text-zinc-500 font-black text-[10px]">DZ</span>
                             </div>
                         </div>
                     </div>

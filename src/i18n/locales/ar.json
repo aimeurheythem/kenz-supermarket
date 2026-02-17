@@ -397,5 +397,31 @@
             "box": "صندوق",
             "pack": "عبوة"
         }
+    },
+    "barcode_labels": {
+        "label_management": "إدارة الملصقات",
+        "title": "مولد الباركود",
+        "print_labels": "طباعة الملصقات",
+        "add_products": "إضافة منتجات",
+        "search_placeholder": "البحث بالاسم أو الباركود...",
+        "no_products_found": "لا توجد منتجات",
+        "queue": "قائمة الانتظار",
+        "items": "عناصر",
+        "queue_empty": "القائمة فارغة",
+        "settings": "الإعدادات",
+        "paper_format": "تنسيق الورق",
+        "barcode_type": "نوع الباركود",
+        "show_price": "إظهار السعر",
+        "show_product_name": "إظهار اسم المنتج",
+        "formats": {
+            "avery_5160": "Avery 5160 (30/ورقة)",
+            "thermal_50x30": "حراري 50x30مم",
+            "thermal_40x25": "حراري 40x25مم"
+        },
+        "types": {
+            "code128": "Code 128 (قياسي)",
+            "ean13": "EAN-13 (تجزئة)"
+        },
+        "no_barcode": "لا يوجد باركود"
     }
 }

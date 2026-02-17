@@ -397,5 +397,31 @@
             "box": "Box",
             "pack": "Pack"
         }
+    },
+    "barcode_labels": {
+        "label_management": "Label Management",
+        "title": "Barcode Generator",
+        "print_labels": "Print Labels",
+        "add_products": "Add Products",
+        "search_placeholder": "Search by name or barcode...",
+        "no_products_found": "No products found",
+        "queue": "Queue",
+        "items": "Items",
+        "queue_empty": "Queue is empty",
+        "settings": "Settings",
+        "paper_format": "Paper Format",
+        "barcode_type": "Barcode Type",
+        "show_price": "Show Price",
+        "show_product_name": "Show Product Name",
+        "formats": {
+            "avery_5160": "Avery 5160 (30/Sheet)",
+            "thermal_50x30": "Thermal 50x30mm",
+            "thermal_40x25": "Thermal 40x25mm"
+        },
+        "types": {
+            "code128": "Code 128 (Standard)",
+            "ean13": "EAN-13 (Retail)"
+        },
+        "no_barcode": "NO BARCODE"
     }
 }

@@ -394,5 +394,31 @@
             "box": "Boîte",
             "pack": "Paquet"
         }
+    },
+    "barcode_labels": {
+        "label_management": "Gestion des Étiquettes",
+        "title": "Générateur de Code-barres",
+        "print_labels": "Imprimer Étiquettes",
+        "add_products": "Ajouter Produits",
+        "search_placeholder": "Rechercher par nom ou code-barres...",
+        "no_products_found": "Aucun produit trouvé",
+        "queue": "File d'attente",
+        "items": "Articles",
+        "queue_empty": "La file est vide",
+        "settings": "Paramètres",
+        "paper_format": "Format Papier",
+        "barcode_type": "Type de Code-barres",
+        "show_price": "Afficher Prix",
+        "show_product_name": "Afficher Nom Produit",
+        "formats": {
+            "avery_5160": "Avery 5160 (30/Feuille)",
+            "thermal_50x30": "Thermique 50x30mm",
+            "thermal_40x25": "Thermique 40x25mm"
+        },
+        "types": {
+            "code128": "Code 128 (Standard)",
+            "ean13": "EAN-13 (Détail)"
+        },
+        "no_barcode": "PAS DE CODE-BARRES"
     }
 }

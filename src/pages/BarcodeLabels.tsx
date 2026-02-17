@@ -13,7 +13,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Printer, Trash2, Plus, X, Barcode, ShoppingBag, Settings2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type { Product } from '@/lib/types';
 
 interface PrintItem {
@@ -82,6 +82,13 @@ export default function BarcodeLabels() {
     // Generate label array for preview
     const labelArray = queue.flatMap(item => Array(item.quantity).fill(item.originalProduct));
 
+    const formatPrice = (price: number) => {
+        return new Intl.NumberFormat('fr-FR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(price) + ' DZ';
+    };
+
     return (
         <div className="relative flex flex-col h-full gap-8 p-6 lg:p-8 animate-fadeIn mt-4 min-h-[85vh]">
             {/* Grid Background (Matching Dashboard/POS) */}
@@ -97,8 +104,8 @@ export default function BarcodeLabels() {
             {/* Header Section */}
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
                 <div className="flex flex-col gap-1">
-                    <span className="text-[12px] text-zinc-400 tracking-[0.3em] font-bold uppercase">Label Management</span>
-                    <h1 className="text-4xl font-black text-black tracking-tighter uppercase">Barcode Generator</h1>
+                    <span className="text-[12px] text-zinc-400 tracking-[0.3em] font-bold uppercase">{t('barcode_labels.label_management')}</span>
+                    <h1 className="text-4xl font-black text-black tracking-tighter uppercase">{t('barcode_labels.title')}</h1>
                 </div>
                 <Button
                     onClick={handlePrint}
@@ -106,7 +113,7 @@ export default function BarcodeLabels() {
                     className="flex items-center gap-2 px-6 py-6 bg-black text-white hover:bg-zinc-800 rounded-[3rem] font-black uppercase tracking-widest text-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <Printer size={18} strokeWidth={3} />
-                    <span>Print Labels ({totalLabels})</span>
+                    <span>{t('barcode_labels.print_labels')} ({totalLabels})</span>
                 </Button>
             </div>
 
@@ -120,13 +127,13 @@ export default function BarcodeLabels() {
                             <div className="p-3">
                                 <Search size={20} />
                             </div>
-                            <h2 className="text-lg font-black uppercase tracking-tight">Add Products</h2>
+                            <h2 className="text-lg font-black uppercase tracking-tight">{t('barcode_labels.add_products')}</h2>
                         </div>
 
                         <div className="relative group">
                             <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-black transition-colors" size={20} />
                             <input
-                                placeholder="Search by name or barcode..."
+                                placeholder={t('barcode_labels.search_placeholder')}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full pl-14 pr-4 py-4 bg-gray-100 border-2 border-transparent focus:border-black/10 focus:bg-white rounded-[2rem] font-bold text-sm transition-all outline-none placeholder:text-zinc-400"
@@ -150,7 +157,7 @@ export default function BarcodeLabels() {
                                         >
                                             <div className="flex flex-col min-w-0">
                                                 <span className="font-bold text-sm text-zinc-900 group-hover:text-blue-900 uppercase tracking-tight truncate">{product.name}</span>
-                                                <span className="text-[10px] text-zinc-400 font-mono font-bold">{product.barcode || 'NO BARCODE'}</span>
+                                                <span className="text-[10px] text-zinc-400 font-mono font-bold">{product.barcode || t('barcode_labels.no_barcode')}</span>
                                             </div>
                                             <div className="h-8 w-8 rounded-full bg-zinc-100 group-hover:bg-blue-200 flex items-center justify-center transition-colors">
                                                 <Plus size={16} className="text-zinc-400 group-hover:text-blue-600" strokeWidth={3} />
@@ -158,7 +165,7 @@ export default function BarcodeLabels() {
                                         </div>
                                     ))}
                                     {filteredProducts.length === 0 && (
-                                        <div className="text-center py-8 text-zinc-400 text-xs font-bold uppercase tracking-wider">No products found</div>
+                                        <div className="text-center py-8 text-zinc-400 text-xs font-bold uppercase tracking-wider">{t('barcode_labels.no_products_found')}</div>
                                     )}
                                 </motion.div>
                             )}
@@ -172,10 +179,10 @@ export default function BarcodeLabels() {
                                 <div className="p-3">
                                     <ShoppingBag size={20} />
                                 </div>
-                                <h2 className="text-lg font-black uppercase tracking-tight">Queue</h2>
+                                <h2 className="text-lg font-black uppercase tracking-tight">{t('barcode_labels.queue')}</h2>
                             </div>
                             <span className="px-3 py-1 bg-yellow-400 rounded-full text-[10px] font-black uppercase tracking-wider text-blue-600">
-                                {queue.length} Items
+                                {queue.length} {t('barcode_labels.items')}
                             </span>
                         </div>
 
@@ -223,7 +230,7 @@ export default function BarcodeLabels() {
                                         <div className="h-16 w-16 bg-zinc-50 rounded-full flex items-center justify-center mb-4">
                                             <Barcode size={32} className="text-zinc-300" />
                                         </div>
-                                        <p className="text-sm font-black text-zinc-300 uppercase tracking-widest">Queue is empty</p>
+                                        <p className="text-sm font-black text-zinc-300 uppercase tracking-widest">{t('barcode_labels.queue_empty')}</p>
                                     </div>
                                 )}
                             </AnimatePresence>
@@ -239,33 +246,33 @@ export default function BarcodeLabels() {
                             <div className="p-3">
                                 <Settings2 size={20} />
                             </div>
-                            <h2 className="text-lg font-black uppercase tracking-tight">Settings</h2>
+                            <h2 className="text-lg font-black uppercase tracking-tight">{t('barcode_labels.settings')}</h2>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="space-y-3">
-                                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">Paper Format</label>
+                                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">{t('barcode_labels.paper_format')}</label>
                                 <Select value={labelFormat} onValueChange={(v: string) => setLabelFormat(v as LabelFormat)}>
                                     <SelectTrigger className="w-full h-12 rounded-[2rem] border-2 border-zinc-200 bg-zinc-50 font-bold focus:ring-0">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent className="bg-white border-2 border-zinc-200 rounded-[1.5rem]">
-                                        <SelectItem value="5160">Avery 5160 (30/Sheet)</SelectItem>
-                                        <SelectItem value="thermal_50x30">Thermal 50x30mm</SelectItem>
-                                        <SelectItem value="thermal_40x25">Thermal 40x25mm</SelectItem>
+                                        <SelectItem value="5160">{t('barcode_labels.formats.avery_5160')}</SelectItem>
+                                        <SelectItem value="thermal_50x30">{t('barcode_labels.formats.thermal_50x30')}</SelectItem>
+                                        <SelectItem value="thermal_40x25">{t('barcode_labels.formats.thermal_40x25')}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
 
                             <div className="space-y-3">
-                                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">Barcode Type</label>
+                                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">{t('barcode_labels.barcode_type')}</label>
                                 <Select value={barcodeType} onValueChange={(v: string) => setBarcodeType(v as 'CODE128' | 'EAN13')}>
                                     <SelectTrigger className="w-full h-12 rounded-[2rem] border-2 border-zinc-200 bg-zinc-50 font-bold focus:ring-0">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent className="bg-white border-2 border-zinc-200 rounded-[1.5rem]">
-                                        <SelectItem value="CODE128">Code 128 (Standard)</SelectItem>
-                                        <SelectItem value="EAN13">EAN-13 (Retail)</SelectItem>
+                                        <SelectItem value="CODE128">{t('barcode_labels.types.code128')}</SelectItem>
+                                        <SelectItem value="EAN13">{t('barcode_labels.types.ean13')}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -276,7 +283,7 @@ export default function BarcodeLabels() {
                                         className="h-6 w-6 rounded-lg border-2 border-zinc-300 data-[state=checked]:bg-yellow-400 data-[state=checked]:border-yellow-400"
                                     />
                                     <label htmlFor="showPrice" className="text-sm font-bold leading-none cursor-pointer select-none">
-                                        Show Price
+                                        {t('barcode_labels.show_price')}
                                     </label>
                                 </div>
                                 <div className="flex items-center space-x-3">
@@ -284,7 +291,7 @@ export default function BarcodeLabels() {
                                         className="h-6 w-6 rounded-lg border-2 border-zinc-300 data-[state=checked]:bg-yellow-400 data-[state=checked]:border-yellow-400"
                                     />
                                     <label htmlFor="showName" className="text-sm font-bold leading-none cursor-pointer select-none">
-                                        Show Product Name
+                                        {t('barcode_labels.show_product_name')}
                                     </label>
                                 </div>
                             </div>
@@ -340,7 +347,7 @@ export default function BarcodeLabels() {
 
                                         {showPrice && (
                                             <p className={cn("font-black shrink-0", labelFormat === '5160' ? "text-[10px] mt-[1px]" : "text-[11px] mt-0.5")}>
-                                                {formatCurrency(product.selling_price)}
+                                                {formatPrice(product.selling_price)}
                                             </p>
                                         )}
                                     </div>
@@ -392,7 +399,7 @@ export default function BarcodeLabels() {
 
                             {showPrice && (
                                 <p className={cn("font-black shrink-0", labelFormat === '5160' ? "text-[10px] mt-[1px]" : "text-[11px] mt-0.5")}>
-                                    {formatCurrency(product.selling_price)}
+                                    {formatPrice(product.selling_price)}
                                 </p>
                             )}
                         </div>

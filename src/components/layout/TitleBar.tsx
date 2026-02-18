@@ -26,6 +26,15 @@ export default function TitleBar() {
             '/reports': t('sidebar.reports'),
             '/users': t('sidebar.users'),
             '/settings': t('sidebar.settings'),
+            '/barcodes': t('sidebar.barcodes'),
+            '/credit': t('sidebar.credit'),
+            '/expenses': t('sidebar.expenses'),
+            '/transactions': t('sidebar.transactions'),
+            '/audit-logs': t('sidebar.audit_logs'),
+            '/customers': t('sidebar.customers'),
+            '/help': t('sidebar.help'),
+            '/terms': t('sidebar.terms'),
+            '/onboarding': t('sidebar.onboarding'),
         };
 
         if (pathMap[path]) {

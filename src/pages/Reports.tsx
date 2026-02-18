@@ -113,19 +113,19 @@ export default function Reports() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Analytics & Reports</h1>
-                    <p className="text-sm text-zinc-400 mt-1">
+                    <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Analytics & Reports</h1>
+                    <p className="text-sm text-[var(--color-text-muted)] mt-1">
                         Performance metrics and sales insights
                     </p>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="flex bg-neutral-800 rounded-lg p-1 border border-neutral-700">
+                    <div className="flex bg-[var(--color-bg-secondary)] rounded-lg p-1 border border-[var(--color-border)]">
                         <button
                             onClick={() => setActiveTab('overview')}
                             className={cn(
                                 "px-4 py-2 text-sm font-medium rounded-md transition-all",
-                                activeTab === 'overview' ? "bg-neutral-700 text-white" : "text-zinc-400 hover:text-white"
+                                activeTab === 'overview' ? "bg-[var(--color-bg-card)] text-[var(--color-text-primary)] shadow-sm" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
                             )}
                         >
                             Overview
@@ -134,7 +134,7 @@ export default function Reports() {
                             onClick={() => setActiveTab('cashiers')}
                             className={cn(
                                 "px-4 py-2 text-sm font-medium rounded-md transition-all",
-                                activeTab === 'cashiers' ? "bg-neutral-700 text-white" : "text-zinc-400 hover:text-white"
+                                activeTab === 'cashiers' ? "bg-[var(--color-bg-card)] text-[var(--color-text-primary)] shadow-sm" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
                             )}
                         >
                             Cashiers
@@ -143,27 +143,27 @@ export default function Reports() {
                     </div>
 
                     {/* Period Selectors ... (Keep as is) */}
-                    <div className="flex bg-neutral-800 rounded-lg p-1 border border-neutral-700">
+                    <div className="flex bg-[var(--color-bg-secondary)] rounded-lg p-1 border border-[var(--color-border)]">
                         <button
                             onClick={() => setPeriod('7days')}
-                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${period === '7days' ? 'bg-neutral-700 text-white' : 'text-zinc-400 hover:text-white'}`}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${period === '7days' ? 'bg-[var(--color-bg-card)] text-[var(--color-text-primary)] shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'}`}
                         >
                             7 Days
                         </button>
                         <button
                             onClick={() => setPeriod('30days')}
-                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${period === '30days' ? 'bg-neutral-700 text-white' : 'text-zinc-400 hover:text-white'}`}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${period === '30days' ? 'bg-[var(--color-bg-card)] text-[var(--color-text-primary)] shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'}`}
                         >
                             30 Days
                         </button>
                         <button
                             onClick={() => setPeriod('year')}
-                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${period === 'year' ? 'bg-neutral-700 text-white' : 'text-zinc-400 hover:text-white'}`}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${period === 'year' ? 'bg-[var(--color-bg-card)] text-[var(--color-text-primary)] shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'}`}
                         >
                             Year
                         </button>
                     </div>
-                    <Button variant="secondary" icon={<Download size={16} />} onClick={activeTab === 'cashiers' ? handleExportCashierReport : handleExport}>
+                    <Button className="btn-page-action" icon={<Download size={16} />} onClick={activeTab === 'cashiers' ? handleExportCashierReport : handleExport}>
                         Export
                     </Button>
                 </div>
@@ -174,43 +174,43 @@ export default function Reports() {
                 <>
                     {/* KPI Cards ... (Keep as is) */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="p-5 rounded-xl bg-neutral-800 border border-neutral-700">
+                        <div className="p-5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="p-2 rounded-lg bg-orange-500/10">
                                     <TrendingUp size={20} className="text-orange-500" />
                                 </div>
-                                <p className="text-sm font-medium text-zinc-400">Total Revenue</p>
+                                <p className="text-sm font-medium text-[var(--color-text-muted)]">Total Revenue</p>
                             </div>
-                            <p className="text-2xl font-bold text-white">{formatCurrency(totalRevenue)}</p>
-                            <p className="text-xs text-zinc-500 mt-1">in selected period</p>
+                            <p className="text-2xl font-bold text-[var(--color-text-primary)]">{formatCurrency(totalRevenue)}</p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-1">in selected period</p>
                         </div>
 
-                        <div className="p-5 rounded-xl bg-neutral-800 border border-neutral-700">
+                        <div className="p-5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="p-2 rounded-lg bg-emerald-500/10">
                                     <BarChart3 size={20} className="text-emerald-500" />
                                 </div>
-                                <p className="text-sm font-medium text-zinc-400">Total Orders</p>
+                                <p className="text-sm font-medium text-[var(--color-text-muted)]">Total Orders</p>
                             </div>
-                            <p className="text-2xl font-bold text-white">{totalOrders}</p>
-                            <p className="text-xs text-zinc-500 mt-1">transactions processed</p>
+                            <p className="text-2xl font-bold text-[var(--color-text-primary)]">{totalOrders}</p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-1">transactions processed</p>
                         </div>
 
-                        <div className="p-5 rounded-xl bg-neutral-800 border border-neutral-700">
+                        <div className="p-5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="p-2 rounded-lg bg-blue-500/10">
                                     <CreditCard size={20} className="text-blue-500" />
                                 </div>
-                                <p className="text-sm font-medium text-zinc-400">Avg. Order Value</p>
+                                <p className="text-sm font-medium text-[var(--color-text-muted)]">Avg. Order Value</p>
                             </div>
-                            <p className="text-2xl font-bold text-white">{formatCurrency(avgOrderValue)}</p>
-                            <p className="text-xs text-zinc-500 mt-1">per transaction</p>
+                            <p className="text-2xl font-bold text-[var(--color-text-primary)]">{formatCurrency(avgOrderValue)}</p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-1">per transaction</p>
                         </div>
                     </div>
 
                     {/* Main Chart */}
-                    <div className="p-6 rounded-xl bg-neutral-800 border border-neutral-700 h-[400px]">
-                        <h3 className="text-sm font-semibold text-white mb-6">Revenue Trend</h3>
+                    <div className="p-6 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)] h-[400px]">
+                        <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-6">Revenue Trend</h3>
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={salesData}>
                                 <defs>
@@ -219,10 +219,10 @@ export default function Reports() {
                                         <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-default)" vertical={false} />
                                 <XAxis
                                     dataKey="date"
-                                    stroke="#71717a"
+                                    stroke="var(--text-muted)"
                                     fontSize={12}
                                     tickLine={false}
                                     axisLine={false}
@@ -234,15 +234,15 @@ export default function Reports() {
                                     }}
                                 />
                                 <YAxis
-                                    stroke="#71717a"
+                                    stroke="var(--text-muted)"
                                     fontSize={12}
                                     tickLine={false}
                                     axisLine={false}
                                     tickFormatter={(val) => formatCurrency(Number(val))}
                                 />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px' }}
-                                    itemStyle={{ color: '#fff' }}
+                                    contentStyle={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-default)', borderRadius: '8px' }}
+                                    itemStyle={{ color: 'var(--text-primary)' }}
                                     formatter={(value: any) => [formatCurrency(value || 0), 'Revenue']}
                                 />
                                 <Area
@@ -259,24 +259,24 @@ export default function Reports() {
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Top Products */}
-                        <div className="p-6 rounded-xl bg-neutral-800 border border-neutral-700">
-                            <h3 className="text-sm font-semibold text-white mb-4">Top Selling Products</h3>
+                        <div className="p-6 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
+                            <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Top Selling Products</h3>
                             <div className="flex flex-col gap-4">
                                 {topProducts.length === 0 ? (
-                                    <p className="text-sm text-zinc-500">No sales data yet.</p>
+                                    <p className="text-sm text-[var(--color-text-muted)]">No sales data yet.</p>
                                 ) : (
                                     topProducts.map((product, i) => (
                                         <div key={product.id} className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-neutral-700 text-xs font-bold text-zinc-400">
+                                                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[var(--color-bg-tertiary)] text-xs font-bold text-[var(--color-text-muted)]">
                                                     {i + 1}
                                                 </span>
                                                 <div>
-                                                    <p className="text-sm font-medium text-white">{product.name}</p>
-                                                    <p className="text-xs text-zinc-500">{product.quantity_sold} units sold</p>
+                                                    <p className="text-sm font-medium text-[var(--color-text-primary)]">{product.name}</p>
+                                                    <p className="text-xs text-[var(--color-text-muted)]">{product.quantity_sold} units sold</p>
                                                 </div>
                                             </div>
-                                            <span className="text-sm font-semibold text-white">
+                                            <span className="text-sm font-semibold text-[var(--color-text-primary)]">
                                                 {formatCurrency(product.revenue)}
                                             </span>
                                         </div>
@@ -286,8 +286,8 @@ export default function Reports() {
                         </div>
 
                         {/* Category Performance */}
-                        <div className="p-6 rounded-xl bg-neutral-800 border border-neutral-700">
-                            <h3 className="text-sm font-semibold text-white mb-4">Sales by Category</h3>
+                        <div className="p-6 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
+                            <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Sales by Category</h3>
                             <div className="h-[250px]">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
@@ -305,8 +305,8 @@ export default function Reports() {
                                             ))}
                                         </Pie>
                                         <Tooltip
-                                            contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px' }}
-                                            itemStyle={{ color: '#fff' }}
+                                            contentStyle={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-default)', borderRadius: '8px' }}
+                                            itemStyle={{ color: 'var(--text-primary)' }}
                                         />
                                     </PieChart>
                                 </ResponsiveContainer>
@@ -316,7 +316,7 @@ export default function Reports() {
                                 {categoryData.map((entry, index) => (
                                     <div key={index} className="flex items-center gap-1.5 text-xs">
                                         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                                        <span className="text-zinc-400">{entry.name}</span>
+                                        <span className="text-[var(--color-text-muted)]">{entry.name}</span>
                                     </div>
                                 ))}
                             </div>
@@ -330,13 +330,13 @@ export default function Reports() {
                 <>
                     {/* ... (Keep Cashiers content) ... */}
                     {/* Cashier Filter */}
-                    <div className="flex items-center gap-3 p-4 bg-neutral-800 rounded-xl border border-neutral-700">
-                        <Filter size={18} className="text-zinc-400" />
-                        <span className="text-sm text-zinc-400">Filter by Cashier:</span>
+                    <div className="flex items-center gap-3 p-4 bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)]">
+                        <Filter size={18} className="text-[var(--color-text-muted)]" />
+                        <span className="text-sm text-[var(--color-text-muted)]">Filter by Cashier:</span>
                         <select
                             value={selectedCashier || ''}
                             onChange={(e) => setSelectedCashier(e.target.value ? parseInt(e.target.value) : null)}
-                            className="bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-orange-500"
+                            className="bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)]"
                         >
                             <option value="">All Cashiers</option>
                             {cashiers.map((cashier) => (
@@ -348,7 +348,7 @@ export default function Reports() {
                         {selectedCashier && (
                             <button
                                 onClick={() => setSelectedCashier(null)}
-                                className="text-xs text-zinc-400 hover:text-white underline"
+                                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] underline"
                             >
                                 Clear filter
                             </button>
@@ -357,64 +357,64 @@ export default function Reports() {
 
                     {/* Cashier KPI Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div className="p-5 rounded-xl bg-neutral-800 border border-neutral-700">
+                        <div className="p-5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="p-2 rounded-lg bg-emerald-500/10">
                                     <Banknote size={20} className="text-emerald-500" />
                                 </div>
-                                <p className="text-sm font-medium text-zinc-400">Cashier Sales</p>
+                                <p className="text-sm font-medium text-[var(--color-text-muted)]">Cashier Sales</p>
                             </div>
-                            <p className="text-2xl font-bold text-white">{formatCurrency(totalCashierSales)}</p>
-                            <p className="text-xs text-zinc-500 mt-1">from {cashierPerformance.length} cashiers</p>
+                            <p className="text-2xl font-bold text-[var(--color-text-primary)]">{formatCurrency(totalCashierSales)}</p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-1">from {cashierPerformance.length} cashiers</p>
                         </div>
-                        <div className="p-5 rounded-xl bg-neutral-800 border border-neutral-700">
+                        <div className="p-5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="p-2 rounded-lg bg-blue-500/10">
                                     <BarChart3 size={20} className="text-blue-500" />
                                 </div>
-                                <p className="text-sm font-medium text-zinc-400">Transactions</p>
+                                <p className="text-sm font-medium text-[var(--color-text-muted)]">Transactions</p>
                             </div>
-                            <p className="text-2xl font-bold text-white">{totalCashierTransactions}</p>
-                            <p className="text-xs text-zinc-500 mt-1">processed</p>
+                            <p className="text-2xl font-bold text-[var(--color-text-primary)]">{totalCashierTransactions}</p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-1">processed</p>
                         </div>
-                        <div className="p-5 rounded-xl bg-neutral-800 border border-neutral-700">
+                        <div className="p-5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="p-2 rounded-lg bg-purple-500/10">
                                     <Users size={20} className="text-purple-500" />
                                 </div>
-                                <p className="text-sm font-medium text-zinc-400">Top Performer</p>
+                                <p className="text-sm font-medium text-[var(--color-text-muted)]">Top Performer</p>
                             </div>
-                            <p className="text-lg font-bold text-white truncate">
+                            <p className="text-lg font-bold text-[var(--color-text-primary)] truncate">
                                 {topCashier?.cashier_name || 'N/A'}
                             </p>
-                            <p className="text-xs text-zinc-500 mt-1">
+                            <p className="text-xs text-[var(--color-text-muted)] mt-1">
                                 {topCashier ? formatCurrency(topCashier.total_sales) : 'No sales'}
                             </p>
                         </div>
-                        <div className="p-5 rounded-xl bg-neutral-800 border border-neutral-700">
+                        <div className="p-5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="p-2 rounded-lg bg-orange-500/10">
                                     <Clock size={20} className="text-orange-500" />
                                 </div>
-                                <p className="text-sm font-medium text-zinc-400">Total Sessions</p>
+                                <p className="text-sm font-medium text-[var(--color-text-muted)]">Total Sessions</p>
                             </div>
-                            <p className="text-2xl font-bold text-white">
+                            <p className="text-2xl font-bold text-[var(--color-text-primary)]">
                                 {sessionReports.length}
                             </p>
-                            <p className="text-xs text-zinc-500 mt-1">shifts completed</p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-1">shifts completed</p>
                         </div>
                     </div>
                     {/* ... Charts and Leaderboard for Cashiers (Keep as is) */}
-                    <div className="p-6 rounded-xl bg-neutral-800 border border-neutral-700 h-[350px]">
-                        <h3 className="text-sm font-semibold text-white mb-6">Cashier Performance Comparison</h3>
+                    <div className="p-6 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)] h-[350px]">
+                        <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-6">Cashier Performance Comparison</h3>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={cashierPerformance} layout="vertical">
-                                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" horizontal={true} vertical={false} />
-                                <XAxis type="number" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => formatCurrency(Number(val))} />
-                                <YAxis type="category" dataKey="cashier_name" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} width={100} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-default)" horizontal={true} vertical={false} />
+                                <XAxis type="number" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => formatCurrency(Number(val))} />
+                                <YAxis type="category" dataKey="cashier_name" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} width={100} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px' }}
-                                    itemStyle={{ color: '#fff' }}
+                                    contentStyle={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-default)', borderRadius: '8px' }}
+                                    itemStyle={{ color: 'var(--text-primary)' }}
                                     formatter={(value: any) => [formatCurrency(value || 0), 'Sales']}
                                 />
                                 <Bar dataKey="total_sales" fill="#f97316" radius={[0, 4, 4, 0]} />
@@ -423,24 +423,24 @@ export default function Reports() {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div className="p-6 rounded-xl bg-neutral-800 border border-neutral-700">
-                            <h3 className="text-sm font-semibold text-white mb-4">Cashier Leaderboard</h3>
+                        <div className="p-6 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
+                            <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Cashier Leaderboard</h3>
                             <div className="flex flex-col gap-3">
                                 {cashierPerformance.length === 0 ? (
-                                    <p className="text-sm text-zinc-500">No cashier sales data yet.</p>
+                                    <p className="text-sm text-[var(--color-text-muted)]">No cashier sales data yet.</p>
                                 ) : (
                                     cashierPerformance.map((cashier, i) => (
-                                        <div key={cashier.cashier_id} className="flex items-center justify-between p-3 bg-neutral-700/50 rounded-lg">
+                                        <div key={cashier.cashier_id} className="flex items-center justify-between p-3 bg-[var(--color-bg-secondary)] rounded-lg">
                                             <div className="flex items-center gap-3">
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${i === 0 ? 'bg-yellow-500/20 text-yellow-500' : i === 1 ? 'bg-zinc-400/20 text-zinc-400' : i === 2 ? 'bg-orange-600/20 text-orange-600' : 'bg-neutral-600 text-zinc-400'}`}>{i + 1}</div>
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${i === 0 ? 'bg-yellow-500/20 text-yellow-500' : i === 1 ? 'bg-zinc-400/20 text-zinc-400' : i === 2 ? 'bg-orange-600/20 text-orange-600' : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-muted)]'}`}>{i + 1}</div>
                                                 <div>
-                                                    <p className="text-sm font-medium text-white">{cashier.cashier_name}</p>
-                                                    <p className="text-xs text-zinc-500">{cashier.total_transactions} transactions • {cashier.total_sessions} sessions</p>
+                                                    <p className="text-sm font-medium text-[var(--color-text-primary)]">{cashier.cashier_name}</p>
+                                                    <p className="text-xs text-[var(--color-text-muted)]">{cashier.total_transactions} transactions • {cashier.total_sessions} sessions</p>
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-sm font-bold text-white">{formatCurrency(cashier.total_sales)}</p>
-                                                <p className="text-xs text-zinc-500">Avg: {formatCurrency(cashier.average_order)}</p>
+                                                <p className="text-sm font-bold text-[var(--color-text-primary)]">{formatCurrency(cashier.total_sales)}</p>
+                                                <p className="text-xs text-[var(--color-text-muted)]">Avg: {formatCurrency(cashier.average_order)}</p>
                                             </div>
                                         </div>
                                     ))
@@ -448,20 +448,20 @@ export default function Reports() {
                             </div>
                         </div>
 
-                        <div className="p-6 rounded-xl bg-neutral-800 border border-neutral-700">
-                            <h3 className="text-sm font-semibold text-white mb-4">Recent Sessions</h3>
+                        <div className="p-6 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
+                            <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Recent Sessions</h3>
                             <div className="space-y-2 max-h-[300px] overflow-y-auto">
                                 {sessionReports.length === 0 ? (
-                                    <p className="text-sm text-zinc-500">No sessions recorded.</p>
+                                    <p className="text-sm text-[var(--color-text-muted)]">No sessions recorded.</p>
                                 ) : (
                                     sessionReports.slice(0, 10).map((session) => (
-                                        <div key={session.session_id} className="flex items-center justify-between p-3 bg-neutral-700/50 rounded-lg">
+                                        <div key={session.session_id} className="flex items-center justify-between p-3 bg-[var(--color-bg-secondary)] rounded-lg">
                                             <div>
-                                                <p className="text-sm font-medium text-white">{session.cashier_name}</p>
-                                                <p className="text-xs text-zinc-500">{formatDate(session.login_time)}</p>
+                                                <p className="text-sm font-medium text-[var(--color-text-primary)]">{session.cashier_name}</p>
+                                                <p className="text-xs text-[var(--color-text-muted)]">{formatDate(session.login_time)}</p>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-sm font-bold text-white">{formatCurrency(session.total_sales)}</p>
+                                                <p className="text-sm font-bold text-[var(--color-text-primary)]">{formatCurrency(session.total_sales)}</p>
                                                 <p className={`text-xs ${session.cash_difference === 0 ? 'text-emerald-400' : session.cash_difference && session.cash_difference > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                                                     {session.status === 'active' ? 'Active' : session.cash_difference !== null ? `Diff: ${formatCurrency(session.cash_difference)}` : 'Closed'}
                                                 </p>

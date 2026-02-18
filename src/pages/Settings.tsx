@@ -5,6 +5,8 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
 import { backupDatabase, restoreDatabase, resetAllData, triggerSave } from '../../database/db';
 import { cn, validatePassword } from '@/lib/utils';
+import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 
 export default function Settings() {
     const { user, updateProfile, changePassword } = useAuthStore();
@@ -14,6 +16,7 @@ export default function Settings() {
     // Local state for password change
     const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
     const [deletePassword, setDeletePassword] = useState('');
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
     const [deleteError, setDeleteError] = useState('');
@@ -53,26 +56,26 @@ export default function Settings() {
             });
         }
 
-        alert('Settings saved successfully!');
+        toast.success('Settings saved successfully!');
     };
 
     const handlePasswordChange = async () => {
         if (passwords.new !== passwords.confirm) {
-            alert('New passwords do not match');
+            toast.error('New passwords do not match');
             return;
         }
         const validation = validatePassword(passwords.new);
         if (!validation.valid) {
-            alert(validation.message);
+            toast.error(validation.message);
             return;
         }
 
         const success = await changePassword(passwords.current, passwords.new);
         if (success) {
-            alert('Password changed successfully');
+            toast.success('Password changed successfully');
             setPasswords({ current: '', new: '', confirm: '' });
         } else {
-            alert('Failed to change password. Check current password.');
+            toast.error('Failed to change password. Check current password.');
         }
     };
 
@@ -81,21 +84,22 @@ export default function Settings() {
             await backupDatabase();
         } catch (e) {
             console.error(e);
-            alert('Failed to create backup.');
+            toast.error('Failed to create backup.');
         }
     };
 
     const handleRestore = async () => {
-        if (!confirm('WARNING: This will overwrite the current database with the backup. All current data will be lost. Continue?')) {
-            return;
-        }
+        setShowRestoreConfirm(true);
+    };
 
+    const confirmRestore = async () => {
+        setShowRestoreConfirm(false);
         try {
             await restoreDatabase();
             window.location.reload();
         } catch (err) {
             console.error(err);
-            alert('Failed to restore database. Invalid file format.');
+            toast.error('Failed to restore database. Invalid file format.');
         }
     };
 
@@ -214,7 +218,7 @@ export default function Settings() {
                                     </div>
                                 </div>
                                 <div className="mt-4 flex justify-end">
-                                    <Button onClick={handleSave} icon={<Save size={16} />}>Update Profile</Button>
+                                    <Button className="btn-page-action" onClick={handleSave} icon={<Save size={16} />}>Update Profile</Button>
                                 </div>
                             </div>
 
@@ -313,7 +317,7 @@ export default function Settings() {
                                             </button>
                                             <button
                                                 onClick={() => { setShowDeleteConfirm(false); setDeletePassword(''); setDeleteConfirmText(''); setDeleteError(''); }}
-                                                className="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-semibold rounded-lg transition-colors"
+                                                className="px-5 py-2.5 bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-hover)] text-[var(--color-text-secondary)] text-sm font-semibold rounded-lg transition-colors"
                                             >
                                                 Cancel
                                             </button>
@@ -379,7 +383,7 @@ export default function Settings() {
                                 </div>
                             </div>
                             <div className="mt-6 flex justify-end">
-                                <Button onClick={handleSave} icon={<Save size={16} />}>Save Changes</Button>
+                                <Button className="btn-page-action" onClick={handleSave} icon={<Save size={16} />}>Save Changes</Button>
                             </div>
                         </div>
                     )}
@@ -416,7 +420,7 @@ export default function Settings() {
                                 </div>
                             </div>
                             <div className="mt-6 flex justify-end">
-                                <Button onClick={handleSave} icon={<Save size={16} />}>Save Changes</Button>
+                                <Button className="btn-page-action" onClick={handleSave} icon={<Save size={16} />}>Save Changes</Button>
                             </div>
                         </div>
                     )}
@@ -454,7 +458,7 @@ export default function Settings() {
                                 </div>
                             </div>
                             <div className="mt-6 flex justify-end">
-                                <Button onClick={handleSave} icon={<Save size={16} />}>Save Changes</Button>
+                                <Button className="btn-page-action" onClick={handleSave} icon={<Save size={16} />}>Save Changes</Button>
                             </div>
                         </div>
                     )}
@@ -495,13 +499,13 @@ export default function Settings() {
                                         id="showLogo"
                                         checked={formData['receipt.showLogo'] === 'true'}
                                         onChange={e => handleChange('receipt.showLogo', String(e.target.checked))}
-                                        className="rounded border-gray-300 text-orange-500 focus:ring-orange-500"
+                                        className="rounded border-[var(--color-border)] text-orange-500 focus:ring-orange-500"
                                     />
                                     <label htmlFor="showLogo" className="text-sm text-[var(--color-text-primary)]">Show Store Logo on Receipt</label>
                                 </div>
                             </div>
                             <div className="mt-6 flex justify-end">
-                                <Button onClick={handleSave} icon={<Save size={16} />}>Save Changes</Button>
+                                <Button className="btn-page-action" onClick={handleSave} icon={<Save size={16} />}>Save Changes</Button>
                             </div>
                         </div>
                     )}
@@ -533,6 +537,16 @@ export default function Settings() {
                     )}
                 </div>
             </div>
+
+            <ConfirmDialog
+                isOpen={showRestoreConfirm}
+                onClose={() => setShowRestoreConfirm(false)}
+                onConfirm={confirmRestore}
+                title="Restore Database"
+                description="WARNING: This will overwrite the current database with the backup. All current data will be lost. Continue?"
+                confirmLabel="Restore"
+                variant="danger"
+            />
         </div>
     );
 }

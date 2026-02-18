@@ -1,9 +1,17 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { Eye, EyeOff, CheckSquare, Square, Users, Shield, Store } from 'lucide-react';
+import { Eye, EyeOff, CheckSquare, Square, Users, Shield, Store, KeyRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import CashierLoginModal from '@/components/auth/CashierLoginModal';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from '@/components/ui/dialog';
+import { toast } from 'sonner';
 
 export default function Login() {
     const { login } = useAuthStore();
@@ -18,6 +26,7 @@ export default function Login() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showCashierLogin, setShowCashierLogin] = useState(false);
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
     const { t } = useTranslation();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -56,8 +65,7 @@ export default function Login() {
     return (
         <div className="min-h-screen w-full flex bg-white font-sans overflow-hidden">
             {/* LEFT SIDE - FORM */}
-            <div className="w-full lg:w-[55%] relative z-10 flex flex-col justify-center px-12 sm:px-24 lg:px-32 xl:px-40 bg-white"
-                style={{ clipPath: 'polygon(0 0, 100% 0, 85% 100%, 0% 100%)' }}>
+            <div className="w-full lg:w-[55%] relative z-10 flex flex-col justify-center px-12 sm:px-24 lg:px-32 xl:px-40 bg-white lg:[clip-path:polygon(0_0,100%_0,85%_100%,0%_100%)] [clip-path:none]">
 
                 <div className="max-w-md w-full animate-fadeIn">
                     {/* Header */}
@@ -144,9 +152,13 @@ export default function Login() {
                                 </div>
                                 <span className="text-[#475569] text-sm font-semibold select-none">{t('login.remember_me', 'Remember me')}</span>
                             </label>
-                            <a href="#" className="text-[#475569] text-sm font-bold hover:text-orange-500 transition-colors">
+                            <button
+                                type="button"
+                                onClick={() => setShowForgotPassword(true)}
+                                className="text-[#475569] text-sm font-bold hover:text-orange-500 transition-colors"
+                            >
                                 {t('login.forgot_password', 'Forgot password?')}
-                            </a>
+                            </button>
                         </div>
 
                         {/* Error Message */}
@@ -173,11 +185,20 @@ export default function Login() {
             </div>
 
             {/* RIGHT SIDE - VISUAL */}
-            <div className="absolute top-0 right-0 w-[60%] h-full bg-cover bg-center"
+            <div className="absolute top-0 right-0 w-[60%] h-full hidden lg:block"
                 style={{
-                    backgroundImage: 'url("https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop")',
+                    background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 40%, #1e3a5f 70%, #0f172a 100%)',
                 }}>
-                <div className="absolute inset-0 bg-black/10"></div>
+                {/* Decorative grid overlay */}
+                <div className="absolute inset-0 opacity-10"
+                    style={{
+                        backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+                        backgroundSize: '40px 40px',
+                    }}
+                />
+                {/* Orange accent glow */}
+                <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl" />
+                <div className="absolute bottom-1/3 left-1/4 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
 
                 {/* Logo Overlay */}
                 <div className="absolute top-1/2 left-[20%] transform -translate-y-1/2 flex items-center gap-4">
@@ -207,27 +228,51 @@ export default function Login() {
                 </div>
             </div>
 
-            {/* Mobile/Responsive Correction */}
-            <style>{`
-                @media (max-width: 1024px) {
-                    .lg\\:w-\\[55\\%\\] {
-                        width: 100% !important;
-                        clip-path: none !important;
-                        background: rgba(255,255,255,0.95);
-                    }
-                    .absolute.top-0.right-0 {
-                        width: 100%;
-                        z-index: -1;
-                    }
-                }
-            `}</style>
-
             {/* Cashier Login Modal */}
             <CashierLoginModal
                 isOpen={showCashierLogin}
                 onClose={() => setShowCashierLogin(false)}
                 onSuccess={handleCashierSuccess}
             />
+
+            {/* Forgot Password Dialog */}
+            <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <KeyRound className="w-5 h-5 text-orange-500" />
+                            {t('login.forgot_password', 'Forgot password?')}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {t('login.forgot_password_desc', 'Password reset is handled by the system administrator.')}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 pt-2">
+                        <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 space-y-2">
+                            <p className="text-sm font-semibold text-orange-800">
+                                {t('login.forgot_password_steps_title', 'To reset your password:')}
+                            </p>
+                            <ol className="text-sm text-orange-700 space-y-1 list-decimal list-inside">
+                                <li>{t('login.forgot_step_1', 'Contact the store owner or system administrator')}</li>
+                                <li>{t('login.forgot_step_2', 'They can reset your password from the Users management page')}</li>
+                                <li>{t('login.forgot_step_3', 'Log in with the new password provided')}</li>
+                            </ol>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                            {t('login.forgot_password_note', 'For security reasons, passwords can only be reset by an administrator with owner-level access.')}
+                        </p>
+                        <button
+                            onClick={() => {
+                                setShowForgotPassword(false);
+                                toast.info(t('login.forgot_password_toast', 'Please contact your administrator to reset your password.'));
+                            }}
+                            className="w-full py-3 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-bold text-sm rounded-xl transition-all"
+                        >
+                            {t('common.understood', 'Understood')}
+                        </button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

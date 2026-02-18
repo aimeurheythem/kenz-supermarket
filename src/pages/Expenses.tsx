@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { TableSkeletonRows } from '@/components/common/TableSkeleton';
 import {
     Plus,
     Search,
@@ -15,8 +16,11 @@ import {
     Wallet
 } from 'lucide-react';
 import Button from '@/components/common/Button';
+import { DeleteConfirmModal } from '@/components/common/DeleteConfirmModal';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useExpenseStore } from '@/stores/useExpenseStore';
+import { exportToCsv } from '@/lib/csv';
+import { toast } from 'sonner';
 import ExpenseModal from '@/components/expenses/ExpenseModal';
 
 export default function Expenses() {
@@ -24,6 +28,9 @@ export default function Expenses() {
     const { expenses, stats, isLoading, loadExpenses, loadStats, deleteExpense } = useExpenseStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+    const [filterCategory, setFilterCategory] = useState<string>('all');
+    const [showFilter, setShowFilter] = useState(false);
 
     useEffect(() => {
         loadExpenses();
@@ -33,7 +40,22 @@ export default function Expenses() {
     const filteredExpenses = expenses.filter(e =>
         e.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         e.category.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    ).filter(e => filterCategory === 'all' || e.category === filterCategory);
+
+    const uniqueCategories = [...new Set(expenses.map(e => e.category))];
+
+    const handleExportExpenses = () => {
+        const headers = [
+            { key: 'id', label: 'ID' },
+            { key: 'description', label: 'Description' },
+            { key: 'category', label: 'Category' },
+            { key: 'amount', label: 'Amount' },
+            { key: 'date', label: 'Date' },
+            { key: 'payment_method', label: 'Payment Method' },
+        ];
+        exportToCsv(headers, filteredExpenses as unknown as Record<string, unknown>[], `expenses_${new Date().toISOString().split('T')[0]}.csv`);
+        toast.success(`Exported ${filteredExpenses.length} expenses`);
+    };
 
     return (
         <div className="space-y-8 animate-fadeIn pb-10">
@@ -44,7 +66,7 @@ export default function Expenses() {
                     <p className="text-zinc-500 font-medium mt-1">Track and manage your operational costs.</p>
                 </div>
                 <Button
-                    className="bg-black text-white hover:bg-zinc-800 shadow-lg shadow-black/10"
+                    className="btn-page-action"
                     icon={<Plus size={18} />}
                     onClick={() => setIsModalOpen(true)}
                 >
@@ -126,8 +148,37 @@ export default function Expenses() {
                         />
                     </div>
                     <div className="flex items-center gap-3">
-                        <Button variant="secondary" icon={<Filter size={18} />}>Filter</Button>
-                        <Button variant="secondary" icon={<Download size={18} />}>Export</Button>
+                        <div className="relative">
+                            <Button variant="secondary" icon={<Filter size={18} />} onClick={() => setShowFilter(!showFilter)}>
+                                {filterCategory === 'all' ? 'Filter' : filterCategory}
+                            </Button>
+                            {showFilter && (
+                                <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl border border-zinc-100 shadow-xl z-50 p-2">
+                                    <button
+                                        onClick={() => { setFilterCategory('all'); setShowFilter(false); }}
+                                        className={cn(
+                                            "w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-colors",
+                                            filterCategory === 'all' ? "bg-black text-white" : "text-zinc-600 hover:bg-zinc-50"
+                                        )}
+                                    >
+                                        All Categories
+                                    </button>
+                                    {uniqueCategories.map(cat => (
+                                        <button
+                                            key={cat}
+                                            onClick={() => { setFilterCategory(cat); setShowFilter(false); }}
+                                            className={cn(
+                                                "w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-colors",
+                                                filterCategory === cat ? "bg-black text-white" : "text-zinc-600 hover:bg-zinc-50"
+                                            )}
+                                        >
+                                            {cat}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <Button variant="secondary" icon={<Download size={18} />} onClick={handleExportExpenses}>Export</Button>
                     </div>
                 </div>
 
@@ -146,11 +197,7 @@ export default function Expenses() {
                             </thead>
                             <tbody className="divide-y divide-zinc-50">
                                 {isLoading ? (
-                                    <tr>
-                                        <td colSpan={5} className="py-20 text-center text-zinc-400 font-medium animate-pulse">
-                                            Loading expenses...
-                                        </td>
-                                    </tr>
+                                    <TableSkeletonRows columns={5} rows={5} />
                                 ) : filteredExpenses.length === 0 ? (
                                     <tr>
                                         <td colSpan={5} className="py-20 text-center">
@@ -185,9 +232,7 @@ export default function Expenses() {
                                             </td>
                                             <td className="py-6 pr-4 text-right">
                                                 <button
-                                                    onClick={() => {
-                                                        if (confirm('Delete this expense?')) deleteExpense(expense.id);
-                                                    }}
+                                                    onClick={() => setDeleteTarget(expense.id)}
                                                     className="text-zinc-400 hover:text-red-500 font-bold text-xs uppercase tracking-wide transition-colors"
                                                 >
                                                     Delete
@@ -203,6 +248,17 @@ export default function Expenses() {
             </div>
 
             <ExpenseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
+            <DeleteConfirmModal
+                isOpen={deleteTarget !== null}
+                onClose={() => setDeleteTarget(null)}
+                onConfirm={() => {
+                    if (deleteTarget !== null) deleteExpense(deleteTarget);
+                    setDeleteTarget(null);
+                }}
+                title="Delete Expense"
+                description="Are you sure you want to delete this expense? This action cannot be undone."
+            />
         </div>
     );
 }

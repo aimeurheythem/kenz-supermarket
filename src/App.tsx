@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { UserRepo } from '../database/repositories/user.repo';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Toaster } from 'sonner';
 import AppShell from './components/layout/AppShell';
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
@@ -302,6 +303,17 @@ export default function App() {
                     setShowCashierLogin(false);
                     // Navigate to POS after successful session creation
                     console.log('Session created from App.tsx modal, navigating to POS...');
+                }}
+            />
+
+            <Toaster
+                position="top-right"
+                richColors
+                toastOptions={{
+                    style: {
+                        borderRadius: '1rem',
+                        fontWeight: 600,
+                    },
                 }}
             />
         </>

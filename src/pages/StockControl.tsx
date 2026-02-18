@@ -13,7 +13,12 @@ import { cn, formatCurrency } from '@/lib/utils';
 import { useProductStore } from '@/stores/useProductStore';
 import SearchInput from '@/components/common/SearchInput';
 import Button from '@/components/common/Button';
-import Modal from '@/components/common/Modal';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import type { Product } from '@/lib/types';
 import { StockRepo } from '../../database/repositories/stock.repo';
 import type { StockMovement } from '@/lib/types';
@@ -242,11 +247,11 @@ export default function StockControl() {
 
             {/* Adjust Stock Modal */}
             {adjustModal && (
-                <Modal
-                    isOpen={true}
-                    onClose={() => { setAdjustModal(null); setAdjustQty(0); setAdjustReason(''); }}
-                    title={`${adjustModal.type === 'add' ? 'Add' : 'Remove'} Stock — ${adjustModal.product.name}`}
-                >
+                <Dialog open={true} onOpenChange={(open) => { if (!open) { setAdjustModal(null); setAdjustQty(0); setAdjustReason(''); } }}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>{adjustModal.type === 'add' ? 'Add' : 'Remove'} Stock — {adjustModal.product.name}</DialogTitle>
+                    </DialogHeader>
                     <div className="space-y-4">
                         <div className="flex items-center gap-3 p-3 rounded-[var(--radius-md)] bg-[var(--color-bg-hover)]">
                             <Package size={18} className="text-[var(--color-accent)]" />
@@ -287,7 +292,8 @@ export default function StockControl() {
                             </Button>
                         </div>
                     </div>
-                </Modal>
+                </DialogContent>
+                </Dialog>
             )}
         </div>
     );

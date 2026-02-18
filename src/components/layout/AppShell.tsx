@@ -17,7 +17,6 @@ export default function AppShell({ children }: AppShellProps) {
         <div
             className="h-screen w-screen flex overflow-hidden bg-secondary text-secondary selection:bg-accent-light app-drag-region"
         >
-            {/*ltr:rounded-tl-[2rem] ltr:rounded-bl-[2rem] rtl:rounded-tr-[2rem] rtl:rounded-br-[2rem]border border-gray-100 m-2 shadow-md*/}
             <LanguageTransition />
             <Sidebar />
             <div className="flex-1 flex flex-col min-w-0 bg-primary overflow-hidden animate-fadeIn relative">
@@ -30,7 +29,7 @@ export default function AppShell({ children }: AppShellProps) {
                 </main>
 
                 {/* Smooth Bottom Fade */}
-                <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none z-20" />
+                <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[var(--color-bg-primary)] to-transparent pointer-events-none z-20" />
             </div>
         </div>
     );

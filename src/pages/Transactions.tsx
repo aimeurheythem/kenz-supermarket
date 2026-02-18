@@ -7,6 +7,7 @@ import Button from '@/components/common/Button';
 import { Filter, Search, ArrowUpRight, ArrowDownLeft, Clock } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { cn } from '@/lib/utils';
+import { TableSkeletonRows } from '@/components/common/TableSkeleton';
 
 export default function Transactions() {
     const { t } = useTranslation();
@@ -34,14 +35,14 @@ export default function Transactions() {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-white tracking-tight">Transactions</h1>
-                    <p className="text-zinc-400 text-sm mt-1">
+                    <h1 className="text-2xl font-bold text-[var(--color-text-primary)] tracking-tight">Transactions</h1>
+                    <p className="text-[var(--color-text-muted)] text-sm mt-1">
                         View and manage your sales history, refunds, and voids.
                     </p>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="flex items-center bg-neutral-800 rounded-lg p-1 border border-neutral-700">
+                    <div className="flex items-center bg-[var(--color-bg-secondary)] rounded-lg p-1 border border-[var(--color-border)]">
                         {(['today', '7days', '30days', 'year'] as const).map((p) => (
                             <button
                                 key={p}
@@ -49,8 +50,8 @@ export default function Transactions() {
                                 className={cn(
                                     "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
                                     period === p
-                                        ? "bg-neutral-700 text-white shadow-sm"
-                                        : "text-zinc-400 hover:text-white hover:bg-neutral-700/50"
+                                        ? "bg-[var(--color-bg-card)] text-[var(--color-text-primary)] shadow-sm"
+                                        : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)]"
                                 )}
                             >
                                 {p === 'today' ? 'Today' :
@@ -64,55 +65,55 @@ export default function Transactions() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-neutral-800/50 border border-neutral-800 rounded-xl p-5 hover:border-neutral-700 transition-colors">
+                <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl p-5 hover:border-[var(--color-border-hover)] transition-colors">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
                             <ArrowUpRight size={18} />
                         </div>
-                        <span className="text-zinc-400 text-sm font-medium">Total Revenue</span>
+                        <span className="text-[var(--color-text-muted)] text-sm font-medium">Total Revenue</span>
                     </div>
-                    <div className="text-2xl font-bold text-white tracking-tight">
+                    <div className="text-2xl font-bold text-[var(--color-text-primary)] tracking-tight">
                         {formatCurrency(totalRevenue)}
                     </div>
                 </div>
 
-                <div className="bg-neutral-800/50 border border-neutral-800 rounded-xl p-5 hover:border-neutral-700 transition-colors">
+                <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl p-5 hover:border-[var(--color-border-hover)] transition-colors">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
                             <Clock size={18} />
                         </div>
-                        <span className="text-zinc-400 text-sm font-medium">Transactions</span>
+                        <span className="text-[var(--color-text-muted)] text-sm font-medium">Transactions</span>
                     </div>
-                    <div className="text-2xl font-bold text-white tracking-tight">
+                    <div className="text-2xl font-bold text-[var(--color-text-primary)] tracking-tight">
                         {totalTransactions}
                     </div>
                 </div>
 
-                <div className="bg-neutral-800/50 border border-neutral-800 rounded-xl p-5 hover:border-neutral-700 transition-colors">
+                <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl p-5 hover:border-[var(--color-border-hover)] transition-colors">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 rounded-lg bg-red-500/10 text-red-500">
                             <ArrowDownLeft size={18} />
                         </div>
-                        <span className="text-zinc-400 text-sm font-medium">Refunded / Voided</span>
+                        <span className="text-[var(--color-text-muted)] text-sm font-medium">Refunded / Voided</span>
                     </div>
-                    <div className="text-2xl font-bold text-white tracking-tight">
+                    <div className="text-2xl font-bold text-[var(--color-text-primary)] tracking-tight">
                         {refundedCount}
                     </div>
                 </div>
             </div>
 
             {/* Transactions Table Card */}
-            <div className="bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden shadow-sm">
+            <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl overflow-hidden shadow-sm">
                 {/* Table Header / Toolbar */}
-                <div className="p-4 border-b border-neutral-800 flex flex-col sm:flex-row gap-4 justify-between items-center bg-neutral-900/50">
+                <div className="p-4 border-b border-[var(--color-border)] flex flex-col sm:flex-row gap-4 justify-between items-center bg-[var(--color-bg-secondary)]">
                     <div className="relative w-full sm:w-64">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={14} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" size={14} />
                         <input
                             type="text"
                             placeholder="Search ID or Customer..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-neutral-600 transition-colors"
+                            className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg pl-9 pr-3 py-2 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-placeholder)] focus:outline-none focus:border-[var(--color-border-hover)] transition-colors"
                         />
                     </div>
                     <Button variant="secondary" size="sm" onClick={() => loadSales()} icon={<Filter size={14} className="mr-1" />}>
@@ -123,7 +124,7 @@ export default function Transactions() {
                 {/* Table Content */}
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
-                        <thead className="bg-neutral-800/50 text-zinc-400 border-b border-neutral-800">
+                        <thead className="bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] border-b border-[var(--color-border)]">
                             <tr>
                                 <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">ID</th>
                                 <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">Date</th>
@@ -135,16 +136,12 @@ export default function Transactions() {
                                 <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-neutral-800/50">
+                        <tbody className="divide-y divide-[var(--color-border)]">
                             {isLoadingSales ? (
-                                <tr>
-                                    <td colSpan={8} className="px-6 py-12 text-center text-zinc-500">
-                                        Loading transactions...
-                                    </td>
-                                </tr>
+                                <TableSkeletonRows columns={8} rows={6} />
                             ) : filteredSales.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="px-6 py-12 text-center text-zinc-500">
+                                    <td colSpan={8} className="px-6 py-12 text-center text-[var(--color-text-muted)]">
                                         No transactions found matching your criteria.
                                     </td>
                                 </tr>
@@ -152,30 +149,30 @@ export default function Transactions() {
                                 filteredSales.map((sale) => (
                                     <tr
                                         key={sale.id}
-                                        className="group hover:bg-neutral-800/50 transition-colors cursor-pointer"
+                                        className="group hover:bg-[var(--color-bg-hover)] transition-colors cursor-pointer"
                                         onClick={() => setSelectedSale(sale)}
                                     >
-                                        <td className="px-6 py-4 font-mono text-zinc-500 group-hover:text-zinc-300 transition-colors">#{sale.id}</td>
-                                        <td className="px-6 py-4 text-zinc-300">
+                                        <td className="px-6 py-4 font-mono text-[var(--color-text-muted)] group-hover:text-[var(--color-text-secondary)] transition-colors">#{sale.id}</td>
+                                        <td className="px-6 py-4 text-[var(--color-text-secondary)]">
                                             <div className="flex flex-col">
-                                                <span className="text-white font-medium">{new Date(sale.sale_date).toLocaleDateString()}</span>
-                                                <span className="text-zinc-600 text-xs">{new Date(sale.sale_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                <span className="text-[var(--color-text-primary)] font-medium">{new Date(sale.sale_date).toLocaleDateString()}</span>
+                                                <span className="text-[var(--color-text-muted)] text-xs">{new Date(sale.sale_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-zinc-300">
+                                        <td className="px-6 py-4 text-[var(--color-text-secondary)]">
                                             {sale.customer_name ? (
-                                                <span className="text-white">{sale.customer_name}</span>
+                                                <span className="text-[var(--color-text-primary)]">{sale.customer_name}</span>
                                             ) : (
-                                                <span className="text-zinc-600 italic">Walk-in</span>
+                                                <span className="text-[var(--color-text-muted)] italic">Walk-in</span>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 text-zinc-400 capitalize">
-                                            <span className="px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-700 text-xs">
+                                        <td className="px-6 py-4 text-[var(--color-text-muted)] capitalize">
+                                            <span className="px-2 py-0.5 rounded-md bg-[var(--color-bg-secondary)] border border-[var(--color-border)] text-xs">
                                                 {sale.payment_method}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-zinc-400 text-xs">{sale.user_name || 'N/A'}</td>
-                                        <td className="px-6 py-4 text-right font-bold text-white font-mono">
+                                        <td className="px-6 py-4 text-[var(--color-text-muted)] text-xs">{sale.user_name || 'N/A'}</td>
+                                        <td className="px-6 py-4 text-right font-bold text-[var(--color-text-primary)] font-mono">
                                             {formatCurrency(sale.total)}
                                         </td>
                                         <td className="px-6 py-4 text-center">
@@ -194,7 +191,7 @@ export default function Transactions() {
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                className="h-8 w-8 p-0 text-zinc-400 hover:text-white"
+                                                className="h-8 w-8 p-0 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     setSelectedSale(sale);
@@ -211,7 +208,7 @@ export default function Transactions() {
                 </div>
 
                 {/* Footer / Pagination (Placeholder) */}
-                <div className="p-4 border-t border-neutral-800 bg-neutral-900/50 flex justify-between items-center text-xs text-zinc-500">
+                <div className="p-4 border-t border-[var(--color-border)] bg-[var(--color-bg-secondary)] flex justify-between items-center text-xs text-[var(--color-text-muted)]">
                     <span>Showing {filteredSales.length} transactions</span>
                     <span>Most recent 100 records</span>
                 </div>

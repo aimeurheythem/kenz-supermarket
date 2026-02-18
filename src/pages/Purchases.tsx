@@ -14,7 +14,12 @@ import { usePurchaseStore } from '@/stores/usePurchaseStore';
 import { useSupplierStore } from '@/stores/useSupplierStore';
 import { useProductStore } from '@/stores/useProductStore';
 import Button from '@/components/common/Button';
-import Modal from '@/components/common/Modal';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import SearchInput from '@/components/common/SearchInput';
 import type { Product } from '@/lib/types';
 
@@ -107,7 +112,7 @@ export default function Purchases() {
                     <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Purchase Orders</h1>
                     <p className="text-sm text-[var(--color-text-muted)] mt-1">Manage supplier orders and restocking</p>
                 </div>
-                <Button onClick={() => setIsNewOrderOpen(true)} icon={<Plus size={16} />}>
+                <Button className="btn-page-action" onClick={() => setIsNewOrderOpen(true)} icon={<Plus size={16} />}>
                     New Purchase Order
                 </Button>
             </div>
@@ -174,12 +179,11 @@ export default function Purchases() {
             </div>
 
             {/* New Order Modal */}
-            <Modal
-                isOpen={isNewOrderOpen}
-                onClose={() => { setIsNewOrderOpen(false); resetForm(); }}
-                title="Create Purchase Order"
-                maxWidth="max-w-4xl"
-            >
+            <Dialog open={isNewOrderOpen} onOpenChange={(open) => { if (!open) { setIsNewOrderOpen(false); resetForm(); } }}>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>Create Purchase Order</DialogTitle>
+                    </DialogHeader>
                 <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -293,11 +297,16 @@ export default function Purchases() {
                         <Button onClick={handleSubmitOrder} disabled={!selectedSupplier || orderItems.length === 0}>Create Order</Button>
                     </div>
                 </div>
-            </Modal>
+                </DialogContent>
+            </Dialog>
 
             {/* View Order Modal */}
             {viewedOrder && activeOrder && (
-                <Modal isOpen={true} onClose={() => setViewedOrder(null)} title={`Order Details: PO-${activeOrder.id}`} maxWidth="max-w-3xl">
+                <Dialog open={true} onOpenChange={(open) => { if (!open) setViewedOrder(null); }}>
+                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>Order Details: PO-{activeOrder.id}</DialogTitle>
+                    </DialogHeader>
                     <div className="space-y-6">
                         <div className="flex justify-between items-start p-4 bg-[var(--color-bg-secondary)] rounded-[var(--radius-md)]">
                             <div>
@@ -359,7 +368,8 @@ export default function Purchases() {
                             )}
                         </div>
                     </div>
-                </Modal>
+                </DialogContent>
+                </Dialog>
             )}
         </div>
     );

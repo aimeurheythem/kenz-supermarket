@@ -17,7 +17,6 @@ import { cn, formatCurrency } from '@/lib/utils';
 import { useSupplierStore } from '@/stores/useSupplierStore';
 import SearchInput from '@/components/common/SearchInput';
 import Button from '@/components/common/Button';
-import Modal from '@/components/common/Modal';
 import { FormModal } from '@/components/common/FormModal';
 import { DeleteConfirmModal } from '@/components/common/DeleteConfirmModal';
 import type { Supplier, SupplierInput } from '@/lib/types';
@@ -121,7 +120,7 @@ export default function Suppliers() {
     };
 
     const inputClass = cn(
-        'w-full h-14 px-5 rounded-3xl bg-zinc-100/50 border-none font-bold text-black outline-none ring-0 focus:ring-0 focus-visible:ring-0 focus:outline-none transition-all placeholder:text-zinc-300'
+        'w-full h-14 px-5 rounded-3xl bg-zinc-100/50 border border-zinc-200 font-bold text-black outline-none transition-all placeholder:text-zinc-300'
     );
     const labelClass = "text-[10px] font-black text-zinc-400 uppercase tracking-[0.15em] ml-1 mb-1.5 block";
 
@@ -135,7 +134,7 @@ export default function Suppliers() {
                         {suppliers.length} supplier{suppliers.length !== 1 ? 's' : ''} registered
                     </p>
                 </div>
-                <Button onClick={() => setIsFormOpen(true)} icon={<Plus size={16} />}>
+                <Button className='bg-yellow-300 border-none rounded-[3rem] hover:bg-yellow-300' onClick={() => setIsFormOpen(true)} icon={<Plus size={16} />}>
                     Add Supplier
                 </Button>
             </div>
@@ -259,13 +258,13 @@ export default function Suppliers() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
                         <label className={labelClass}>Company Name *</label>
-                        <div className="relative border-2 border-zinc-300 rounded-3xl overflow-hidden">
+                        <div className="relative">
                             <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Fresh Farms Inc." className={inputClass} required autoFocus />
                         </div>
                     </div>
                     <div>
                         <label className={labelClass}>Contact Person</label>
-                        <div className="relative border-2 border-zinc-300 rounded-3xl">
+                        <div className="relative">
                             <User size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" strokeWidth={1.5} />
                             <input type="text" value={form.contact_person || ''} onChange={(e) => setForm({ ...form, contact_person: e.target.value })} placeholder="e.g. John Miller" className={inputClass + " pl-12"} />
                         </div>
@@ -273,14 +272,14 @@ export default function Suppliers() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className={labelClass}>Phone Number</label>
-                            <div className="relative border-2 border-zinc-300 rounded-3xl overflow-hidden">
+                            <div className="relative">
                                 <Phone size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" strokeWidth={1.5} />
                                 <input type="tel" value={form.phone || ''} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+1-555-0101" className={inputClass + " pl-12"} />
                             </div>
                         </div>
                         <div>
                             <label className={labelClass}>Email Address</label>
-                            <div className="relative border-2 border-zinc-300 rounded-3xl overflow-hidden">
+                            <div className="relative">
                                 <Mail size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" strokeWidth={1.5} />
                                 <input type="email" value={form.email || ''} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="contact@company.com" className={inputClass + " pl-12"} />
                             </div>
@@ -288,14 +287,14 @@ export default function Suppliers() {
                     </div>
                     <div>
                         <label className={labelClass}>Physical Address</label>
-                        <div className="relative border-2 border-zinc-300 rounded-3xl overflow-hidden">
+                        <div className="relative">
                             <MapPin size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" strokeWidth={1.5} />
                             <input type="text" value={form.address || ''} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="123 Commerce St, City" className={inputClass + " pl-12"} />
                         </div>
                     </div>
                     <div className="flex items-center justify-end gap-4 pt-6 mt-6 border-t border-zinc-100">
                         <Button variant="ghost" onClick={handleCloseForm} className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-xs transition-all hover:bg-zinc-100 text-zinc-400 hover:text-black">Cancel</Button>
-                        <Button type="submit" icon={<Save size={18} />} className="flex-[2] h-14 rounded-2xl bg-black text-white font-black uppercase tracking-widest text-xs transition-all hover:bg-zinc-800 flex items-center justify-center gap-2 shadow-xl shadow-black/10 border-none">{editingSupplier ? 'Update' : 'Add Supplier'}</Button>
+                        <Button type="submit" icon={<Save size={18} />} className="flex-[2] h-14 rounded-2xl bg-yellow-400 text-black font-black uppercase tracking-widest text-xs transition-all hover:bg-yellow-500 flex items-center justify-center gap-2 shadow-xl shadow-yellow-400/10 border-none">{editingSupplier ? 'Update' : 'Add Supplier'}</Button>
                     </div>
                 </form>
             </FormModal>
@@ -310,7 +309,7 @@ export default function Suppliers() {
                 maxWidth="max-w-md"
             >
                 <form onSubmit={handlePaymentSubmit} className="space-y-6">
-                    <div className="p-4 bg-zinc-50 rounded-3xl border-2 border-zinc-300 space-y-1">
+                    <div className="p-4 bg-zinc-50 rounded-3xl border border-zinc-200 space-y-1">
                         <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Current Balance</span>
                         <div className="text-xl font-black text-black">
                             {selectedSupplierForPayment ? formatCurrency(selectedSupplierForPayment.balance) : '0,00 DZ'}
@@ -318,7 +317,7 @@ export default function Suppliers() {
                     </div>
                     <div>
                         <label className={labelClass}>Payment Amount (DZ)</label>
-                        <div className="relative border-2 border-zinc-300 rounded-3xl">
+                        <div className="relative">
                             <Banknote size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" strokeWidth={1.5} />
                             <input
                                 type="number"
@@ -335,7 +334,7 @@ export default function Suppliers() {
                     </div>
                     <div className="flex items-center justify-end gap-3 pt-6 border-t border-zinc-100">
                         <Button variant="ghost" onClick={() => setIsPaymentOpen(false)} className="flex-1 h-12 rounded-xl text-zinc-400 font-bold uppercase text-[10px] tracking-widest">Cancel</Button>
-                        <Button type="submit" icon={<CreditCard size={15} />} className="flex-[2] h-12 rounded-xl bg-black text-white font-bold uppercase text-[10px] tracking-widest shadow-lg shadow-black/10 border-none">Confirm Payment</Button>
+                        <Button type="submit" icon={<CreditCard size={15} />} className="flex-[2] h-12 rounded-xl bg-yellow-400 text-black font-bold uppercase text-[10px] tracking-widest shadow-lg shadow-yellow-400/10 border-none">Confirm Payment</Button>
                     </div>
                 </form>
             </FormModal>

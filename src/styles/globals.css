@@ -5,6 +5,19 @@
 @theme {
   --font-sans: "Josefin Sans", "Cairo", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-heading: "Josefin Sans", sans-serif;
+
+  /* Accent & status colors — enables bg-accent, text-success, etc. */
+  --color-accent: #FACC15;
+  --color-accent-hover: #EAB308;
+  --color-accent-light: #FEF9C3;
+  --color-success: #10B981;
+  --color-success-light: #D1FAE5;
+  --color-danger: #EF4444;
+  --color-danger-light: #FEE2E2;
+  --color-warning: #F59E0B;
+  --color-warning-light: #FEF3C7;
+  --color-info: #3B82F6;
+  --color-info-light: #DBEAFE;
 }
 
 :root {
@@ -41,22 +54,22 @@
   /* Text Colors */
   --text-primary: #111827;
   /* Near black for headings */
-  --text-secondary: #374151;
+  --text-secondary: #474141;
   /* Dark gray for body */
   --text-muted: #6B7280;
   /* Medium gray for secondary text */
   --text-placeholder: #9CA3AF;
   /* Light gray for placeholders */
 
-  /* Accent Colors - OpenAI Green */
-  --accent: #10A37F;
-  /* OpenAI signature green */
-  --accent-hover: #0D8C6D;
-  /* Darker green for hover */
-  --accent-light: #D1FAE5;
-  /* Very light green bg */
-  --accent-text: #FFFFFF;
-  /* White text on accent */
+  /* Accent Colors - Yellow */
+  --accent: #FACC15;
+  /* Signature yellow */
+  --accent-hover: #EAB308;
+  /* Darker yellow for hover */
+  --accent-light: #FEF9C3;
+  /* Very light yellow bg */
+  --accent-text: #000000;
+  /* Black text on accent */
 
   /* Status Colors */
   --success: #10B981;
@@ -154,6 +167,34 @@
 
   /* Sidebar */
   --sidebar-width: 240px;
+
+  /* =============================================
+     SEMANTIC COLOR ALIASES
+     Used via Tailwind arbitrary values: bg-[var(--color-*)]
+     ============================================= */
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-bg-input: var(--bg-input);
+  --color-bg-card: var(--bg-primary);
+  --color-bg-hover: var(--bg-secondary);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-placeholder: var(--text-placeholder);
+  --color-border: var(--border-default);
+  --color-border-hover: var(--border-hover);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
+  --color-success: var(--success);
+  --color-success-muted: var(--success-bg);
+  --color-danger: var(--danger);
+  --color-danger-muted: var(--danger-bg);
+  --color-warning: var(--warning);
+  --color-warning-muted: var(--warning-bg);
+  --color-info: #3B82F6;
+  --color-info-muted: #DBEAFE;
 }
 
 /* =============================================
@@ -483,20 +524,6 @@ body,
   box-shadow: var(--shadow-md);
 }
 
-/* Scrollbar Overlay */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--border-default);
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--border-hover);
-}
-
 /* =============================================
    UTILITY CLASSES
    ============================================= */
@@ -659,17 +686,31 @@ body,
 }
 
 /* =============================================
-   FOCUS STATES
+   PAGE ACTION BUTTONS  (top-right CTA per page)
    ============================================= */
-/* Allow browser default focus for mouse/touch, show ring for keyboard */
-*:focus {
-  outline: none;
+.btn-page-action {
+  background-color: #fde047 !important;
+  color: #000 !important;
+  border-color: #fde047 !important;
+}
+.btn-page-action:hover {
+  background-color: #facc15 !important;
 }
 
+/* =============================================
+   FOCUS STATES
+   ============================================= */
+*:focus,
 *:focus-visible {
-  outline: 1px solid var(--accent);
-  outline-offset: 1px;
-  border-radius: 30px;
+  outline: none !important;
+}
+
+/* Yellow focus ring on all form inputs */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 1px var(--accent) !important;
 }
 
 /* =============================================

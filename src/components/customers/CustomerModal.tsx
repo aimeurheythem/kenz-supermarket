@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Loader2, Save } from 'lucide-react';
+import { Loader2, Save } from 'lucide-react';
 import Button from '@/components/common/Button';
 import { useCustomerStore } from '@/stores/useCustomerStore';
+import { toast } from 'sonner';
 import type { Customer, CustomerInput } from '@/lib/types';
-import { cn } from '@/lib/utils'; // Assuming you have this utility
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 
 interface CustomerModalProps {
     customer?: Customer | null;
@@ -58,107 +63,94 @@ export default function CustomerModal({ customer, isOpen, onClose }: CustomerMod
             onClose();
         } catch (error) {
             console.error(error);
-            alert('Failed to save customer');
+            toast.error('Failed to save customer');
         } finally {
             setIsLoading(false);
         }
     };
 
-    if (!isOpen) return null;
+    const inputClass = "w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-hover)] focus:ring-1 focus:ring-[var(--color-border-hover)] transition-all placeholder:text-[var(--color-text-placeholder)]";
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]"
-            >
-                <div className="flex items-center justify-between p-6 border-b border-neutral-800">
-                    <h2 className="text-xl font-bold text-white">
-                        {customer ? 'Edit Customer' : 'New Customer'}
-                    </h2>
-                    <button onClick={onClose} className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-neutral-800 transition-colors">
-                        <X size={20} />
-                    </button>
-                </div>
+        <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+            <DialogContent className="max-w-lg">
+                <DialogHeader>
+                    <DialogTitle>{customer ? 'Edit Customer' : 'New Customer'}</DialogTitle>
+                </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
-                    <div className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Name Input */}
+                    <div>
+                        <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">Full Name *</label>
+                        <input
+                            required
+                            type="text"
+                            value={formData.full_name}
+                            onChange={e => setFormData({ ...formData, full_name: e.target.value })}
+                            className={inputClass}
+                            placeholder="e.g. John Doe"
+                        />
+                    </div>
 
-                        {/* Name Input */}
+                    {/* Contact Info Group */}
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-zinc-400 mb-1">Full Name *</label>
+                            <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">Phone</label>
                             <input
-                                required
-                                type="text"
-                                value={formData.full_name}
-                                onChange={e => setFormData({ ...formData, full_name: e.target.value })}
-                                className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-neutral-600 focus:ring-1 focus:ring-neutral-600 transition-all placeholder:text-zinc-600"
-                                placeholder="e.g. John Doe"
+                                type="tel"
+                                value={formData.phone}
+                                onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                className={inputClass}
+                                placeholder="+1 234 567 890"
                             />
                         </div>
-
-                        {/* Contact Info Group */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-zinc-400 mb-1">Phone</label>
-                                <input
-                                    type="tel"
-                                    value={formData.phone}
-                                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                                    className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-neutral-600 focus:ring-1 focus:ring-neutral-600 transition-all placeholder:text-zinc-600"
-                                    placeholder="+1 234 567 890"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-zinc-400 mb-1">Email</label>
-                                <input
-                                    type="email"
-                                    value={formData.email}
-                                    onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-neutral-600 focus:ring-1 focus:ring-neutral-600 transition-all placeholder:text-zinc-600"
-                                    placeholder="john@example.com"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Address Input */}
                         <div>
-                            <label className="block text-sm font-medium text-zinc-400 mb-1">Address</label>
+                            <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">Email</label>
                             <input
-                                type="text"
-                                value={formData.address || ''}
-                                onChange={e => setFormData({ ...formData, address: e.target.value })}
-                                className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-neutral-600 focus:ring-1 focus:ring-neutral-600 transition-all placeholder:text-zinc-600"
-                                placeholder="Street, City, Zip"
-                            />
-                        </div>
-
-                        {/* Loyalty Points */}
-                        <div>
-                            <label className="block text-sm font-medium text-zinc-400 mb-1">Loyalty Points</label>
-                            <input
-                                type="number"
-                                value={formData.loyalty_points}
-                                onChange={e => setFormData({ ...formData, loyalty_points: parseInt(e.target.value) || 0 })}
-                                className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-neutral-600 focus:ring-1 focus:ring-neutral-600 transition-all placeholder:text-zinc-600"
-                            />
-                        </div>
-
-                        {/* Notes */}
-                        <div>
-                            <label className="block text-sm font-medium text-zinc-400 mb-1">Notes</label>
-                            <textarea
-                                value={formData.notes || ''}
-                                onChange={e => setFormData({ ...formData, notes: e.target.value })}
-                                className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-neutral-600 focus:ring-1 focus:ring-neutral-600 transition-all placeholder:text-zinc-600 min-h-[80px] resize-none"
-                                placeholder="Internal notes about this customer..."
+                                type="email"
+                                value={formData.email}
+                                onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                className={inputClass}
+                                placeholder="john@example.com"
                             />
                         </div>
                     </div>
 
-                    <div className="pt-4 border-t border-neutral-800 flex justify-end gap-3">
+                    {/* Address Input */}
+                    <div>
+                        <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">Address</label>
+                        <input
+                            type="text"
+                            value={formData.address || ''}
+                            onChange={e => setFormData({ ...formData, address: e.target.value })}
+                            className={inputClass}
+                            placeholder="Street, City, Zip"
+                        />
+                    </div>
+
+                    {/* Loyalty Points */}
+                    <div>
+                        <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">Loyalty Points</label>
+                        <input
+                            type="number"
+                            value={formData.loyalty_points}
+                            onChange={e => setFormData({ ...formData, loyalty_points: parseInt(e.target.value) || 0 })}
+                            className={inputClass}
+                        />
+                    </div>
+
+                    {/* Notes */}
+                    <div>
+                        <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">Notes</label>
+                        <textarea
+                            value={formData.notes || ''}
+                            onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                            className={`${inputClass} min-h-[80px] resize-none`}
+                            placeholder="Internal notes about this customer..."
+                        />
+                    </div>
+
+                    <div className="pt-4 border-t border-[var(--color-border)] flex justify-end gap-3">
                         <Button type="button" variant="secondary" onClick={onClose} disabled={isLoading}>
                             Cancel
                         </Button>
@@ -172,7 +164,7 @@ export default function CustomerModal({ customer, isOpen, onClose }: CustomerMod
                         </Button>
                     </div>
                 </form>
-            </motion.div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 }

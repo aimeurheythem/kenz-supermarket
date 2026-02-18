@@ -36,7 +36,11 @@ import { SaleRepo } from '../../../database/repositories/sale.repo';
 
 type TimeRange = 'hourly' | 'daily' | 'monthly';
 
-export default function SalesAnalytics() {
+interface SalesAnalyticsProps {
+    userId?: number;
+}
+
+export default function SalesAnalytics({ userId }: SalesAnalyticsProps) {
     const { t, i18n } = useTranslation();
     const [timeRange, setTimeRange] = useState<TimeRange>('hourly');
 
@@ -46,15 +50,15 @@ export default function SalesAnalytics() {
     const [monthlyData, setMonthlyData] = useState<{ month: string; revenue: number }[]>([]);
     const [peakHoursData, setPeakHoursData] = useState<{ hour: string; density: number }[]>([]);
 
-    // Fetch all analytics data on mount
+    // Fetch all analytics data on mount and when userId changes
     useEffect(() => {
         const loadAnalytics = async () => {
             try {
                 const [hourly, daily, monthly, peaks] = await Promise.all([
-                    SaleRepo.getHourlyRevenue(),
-                    SaleRepo.getDailyRevenue(),
-                    SaleRepo.getMonthlyRevenue(),
-                    SaleRepo.getPeakHours(),
+                    SaleRepo.getHourlyRevenue(userId),
+                    SaleRepo.getDailyRevenue(userId),
+                    SaleRepo.getMonthlyRevenue(userId),
+                    SaleRepo.getPeakHours(userId),
                 ]);
                 setHourlyData(hourly);
                 setDailyData(daily);
@@ -65,7 +69,7 @@ export default function SalesAnalytics() {
             }
         };
         loadAnalytics();
-    }, []);
+    }, [userId]);
 
     const chartConfig = {
         revenue: {

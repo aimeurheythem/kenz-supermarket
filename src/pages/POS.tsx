@@ -45,11 +45,13 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { toast } from 'sonner';
 
 export default function POS() {
     const { t, i18n } = useTranslation();
     const { products, loadProducts, getByBarcode } = useProductStore();
-    const { cart, addToCart, updateCartItem, removeFromCart, clearCart, checkout, stockError, clearStockError } = useSaleStore();
+    const { cart, addToCart, updateCartItem, removeFromCart, clearCart, checkout, stockError, clearStockError, isLoading: isCheckingOut } = useSaleStore();
     const cartTotal = useSaleStore(selectCartTotal);
     const { user, currentSession, getCurrentSessionId, closeCashierSession } = useAuthStore();
     const { items: quickAccessItems, fetchItems, addItem, updateItem, deleteItem } = useQuickAccessStore();
@@ -66,6 +68,7 @@ export default function POS() {
     const [printReceipt, setPrintReceipt] = useState(true);
     const [showScanner, setShowScanner] = useState(false);
     const [showEmptyCartAlert, setShowEmptyCartAlert] = useState(false);
+    const [showEndShiftConfirm, setShowEndShiftConfirm] = useState(false);
 
     const [currentTime, setCurrentTime] = useState(new Date());
     useEffect(() => {
@@ -190,15 +193,18 @@ export default function POS() {
             loadProducts();
         } catch (err: any) {
             console.error('Checkout failed:', err);
-            alert('Checkout error: ' + (err.message || 'Unknown error'));
+            toast.error('Checkout error: ' + (err.message || 'Unknown error'));
             setShowSimulation(false);
         }
     }, [checkout, paymentMethod, selectedCustomer, getCurrentSessionId, loadProducts, cart]);
 
     const handleEndShift = () => {
-        if (confirm('Are you sure you want to end your shift?')) {
-            closeCashierSession(0, 'Shift ended by cashier');
-        }
+        setShowEndShiftConfirm(true);
+    };
+
+    const confirmEndShift = () => {
+        closeCashierSession(0, 'Shift ended by cashier');
+        setShowEndShiftConfirm(false);
     };
 
     const handleScan = async (code: string) => {
@@ -207,7 +213,7 @@ export default function POS() {
             await addToCart({ product, quantity: 1, discount: 0 });
             setShowScanner(false);
         } else {
-            alert(t('pos.scan.not_found', 'Product not found with barcode: ') + code);
+            toast.warning(t('pos.scan.not_found', 'Product not found with barcode: ') + code);
         }
     };
 
@@ -472,20 +478,19 @@ export default function POS() {
 
                     <div className="flex gap-4">
                         {[
-                            { key: 'cash' as const, icon: Banknote, label: 'Cash', comingSoon: false },
-                            { key: 'card' as const, icon: CreditCard, label: 'Card', comingSoon: true },
-                            { key: 'mobile' as const, icon: Smartphone, label: 'E-Pay', comingSoon: true },
-                            { key: 'credit' as const, icon: Wallet, label: 'Credit', comingSoon: false },
+                            { key: 'cash' as const, icon: Banknote, label: 'Cash' },
+                            { key: 'card' as const, icon: CreditCard, label: 'Card' },
+                            { key: 'mobile' as const, icon: Smartphone, label: 'E-Pay' },
+                            { key: 'credit' as const, icon: Wallet, label: 'Credit' },
                         ].map((method) => (
                             <button
                                 key={method.key}
-                                onClick={() => !method.comingSoon && setPaymentMethod(method.key)}
+                                onClick={() => setPaymentMethod(method.key)}
                                 className={cn(
                                     "flex-1 flex flex-col items-center gap-3 py-5 rounded-[2rem] transition-all duration-300 relative group overflow-hidden",
                                     paymentMethod === method.key
                                         ? "bg-yellow-400 text-black"
-                                        : "bg-zinc-100 text-zinc-400 hover:bg-zinc-200",
-                                    method.comingSoon && "cursor-not-allowed opacity-50"
+                                        : "bg-zinc-100 text-zinc-400 hover:bg-zinc-200"
                                 )}
                             >
                                 <method.icon size={24} strokeWidth={paymentMethod === method.key ? 3 : 2.5} />
@@ -493,13 +498,6 @@ export default function POS() {
                                     "text-[10px] font-black uppercase tracking-widest transition-opacity",
                                     paymentMethod === method.key ? "opacity-100" : "opacity-60"
                                 )}>{t(method.label === 'Cash' ? 'pos.cart.pay_cash' : method.label === 'Card' ? 'pos.cart.pay_card' : method.label === 'Credit' ? 'Credit' : 'pos.cart.pay_mobile')}</span>
-                                {method.comingSoon && (
-                                    <div className="absolute inset-0 bg-white/95 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                        <span className="text-[8px] font-black uppercase tracking-tighter text-black leading-none px-2 text-center whitespace-pre-line">
-                                            {t('pos.cart.coming_soon')}
-                                        </span>
-                                    </div>
-                                )}
                             </button>
                         ))}
                     </div>
@@ -529,14 +527,17 @@ export default function POS() {
 
                     <motion.button
                         onClick={handleBeforeCheckout}
+                        disabled={isCheckingOut || cart.length === 0}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className={cn(
                             "w-full py-6 rounded-[2.5rem] font-black text-sm uppercase tracking-[0.3em] transition-all",
-                            "bg-yellow-400 text-black hover:bg-yellow-300 shadow-xl shadow-yellow-400/20"
+                            isCheckingOut || cart.length === 0
+                                ? "bg-zinc-200 text-zinc-400 cursor-not-allowed shadow-none"
+                                : "bg-yellow-400 text-black hover:bg-yellow-300 shadow-xl shadow-yellow-400/20"
                         )}
                     >
-                        {t('pos.cart.checkout')}
+                        {isCheckingOut ? t('pos.cart.processing', 'Processing...') : t('pos.cart.checkout')}
                     </motion.button>
                 </div>
             </div>
@@ -586,6 +587,16 @@ export default function POS() {
             <EmptyCartDialog
                 isOpen={showEmptyCartAlert}
                 onClose={() => setShowEmptyCartAlert(false)}
+            />
+
+            <ConfirmDialog
+                isOpen={showEndShiftConfirm}
+                onClose={() => setShowEndShiftConfirm(false)}
+                onConfirm={confirmEndShift}
+                title="End Shift"
+                description="Are you sure you want to end your shift?"
+                confirmLabel="End Shift"
+                variant="warning"
             />
         </div>
     );

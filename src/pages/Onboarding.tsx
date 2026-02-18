@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import {
     Store,
     User,
@@ -119,7 +120,7 @@ export default function Onboarding() {
             }
         } catch (error) {
             console.error('Setup failed:', error);
-            alert('Setup failed. Please try again.');
+            toast.error('Setup failed. Please try again.');
         } finally {
             setLoading(false);
         }

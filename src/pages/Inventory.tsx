@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
+import { exportToCsv, parseCsvFile } from '@/lib/csv';
 import {
     Plus,
     Edit2,
@@ -63,6 +65,8 @@ export default function Inventory() {
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+    const [isImporting, setIsImporting] = useState(false);
+    const csvInputRef = useRef<HTMLInputElement>(null);
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -168,6 +172,82 @@ export default function Inventory() {
         setEditingProduct(null);
     };
 
+    const handleExportCsv = () => {
+        const headers = [
+            { key: 'id', label: 'ID' },
+            { key: 'barcode', label: 'Barcode' },
+            { key: 'name', label: 'Name' },
+            { key: 'category_name', label: 'Category' },
+            { key: 'cost_price', label: 'Cost Price' },
+            { key: 'selling_price', label: 'Selling Price' },
+            { key: 'stock_quantity', label: 'Stock Quantity' },
+            { key: 'reorder_level', label: 'Reorder Level' },
+            { key: 'unit', label: 'Unit' },
+            { key: 'created_at', label: 'Created At' },
+        ];
+        exportToCsv(headers, products as unknown as Record<string, unknown>[], `inventory_${new Date().toISOString().split('T')[0]}.csv`);
+        toast.success(t('inventory.export_success', `Exported ${products.length} products`));
+    };
+
+    const handleExportLowStock = () => {
+        const headers = [
+            { key: 'id', label: 'ID' },
+            { key: 'barcode', label: 'Barcode' },
+            { key: 'name', label: 'Name' },
+            { key: 'category_name', label: 'Category' },
+            { key: 'stock_quantity', label: 'Stock Quantity' },
+            { key: 'reorder_level', label: 'Reorder Level' },
+        ];
+        exportToCsv(headers, lowStockProducts as unknown as Record<string, unknown>[], `low_stock_${new Date().toISOString().split('T')[0]}.csv`);
+        toast.success(t('inventory.export_low_stock_success', `Exported ${lowStockProducts.length} low stock items`));
+    };
+
+    const handleImportCsv = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setIsImporting(true);
+        try {
+            const rows = await parseCsvFile(file);
+            if (rows.length === 0) {
+                toast.error('CSV file is empty or invalid');
+                return;
+            }
+            let imported = 0;
+            let skipped = 0;
+            for (const row of rows) {
+                const name = row['Name'] || row['name'];
+                const costPrice = parseFloat(row['Cost Price'] || row['cost_price'] || '0');
+                const sellingPrice = parseFloat(row['Selling Price'] || row['selling_price'] || '0');
+                if (!name || isNaN(costPrice) || isNaN(sellingPrice)) {
+                    skipped++;
+                    continue;
+                }
+                try {
+                    await addProduct({
+                        name,
+                        barcode: row['Barcode'] || row['barcode'] || undefined,
+                        cost_price: costPrice,
+                        selling_price: sellingPrice,
+                        stock_quantity: parseInt(row['Stock Quantity'] || row['stock_quantity'] || '0', 10) || 0,
+                        reorder_level: parseInt(row['Reorder Level'] || row['reorder_level'] || '10', 10) || 10,
+                        unit: row['Unit'] || row['unit'] || 'piece',
+                    });
+                    imported++;
+                } catch {
+                    skipped++;
+                }
+            }
+            await loadProducts();
+            await loadLowStock();
+            toast.success(`Imported ${imported} products${skipped > 0 ? `, ${skipped} skipped` : ''}`);
+        } catch {
+            toast.error('Failed to parse CSV file');
+        } finally {
+            setIsImporting(false);
+            if (csvInputRef.current) csvInputRef.current.value = '';
+        }
+    };
+
     // Calculations for stats
     const totalValue = products.reduce((sum, p) => sum + p.selling_price * p.stock_quantity, 0);
 
@@ -214,13 +294,23 @@ export default function Inventory() {
                         <h2 className="text-4xl font-black text-black tracking-tighter uppercase">{t('inventory.title')}</h2>
                     </div>
                     <div className="flex gap-3">
+                        <input
+                            ref={csvInputRef}
+                            type="file"
+                            accept=".csv"
+                            className="hidden"
+                            onChange={handleImportCsv}
+                        />
                         <button
-                            className="flex items-center gap-2 px-5 py-3 bg-black text-white hover:bg-zinc-800 rounded-[3rem] font-black uppercase tracking-widest text-xs transition-all"
+                            onClick={() => csvInputRef.current?.click()}
+                            disabled={isImporting}
+                            className="flex items-center gap-2 px-5 py-3 bg-black text-white hover:bg-zinc-800 rounded-[3rem] font-black uppercase tracking-widest text-xs transition-all disabled:opacity-50"
                         >
                             <Upload size={18} strokeWidth={3} />
-                            <span>{t('inventory.import')}</span>
+                            <span>{isImporting ? 'Importing...' : t('inventory.import')}</span>
                         </button>
                         <button
+                            onClick={handleExportCsv}
                             className="flex items-center gap-2 px-5 py-3 bg-black text-white hover:bg-zinc-800 rounded-[3rem] font-black uppercase tracking-widest text-xs transition-all"
                         >
                             <Download size={18} strokeWidth={3} />
@@ -330,6 +420,7 @@ export default function Inventory() {
 
                         {/* Export Low Stock Button */}
                         <button
+                            onClick={handleExportLowStock}
                             className="flex items-center gap-3 px-6 py-4.5 text-black/30 hover:text-white hover:bg-black rounded-[2.5rem] font-bold transition-all duration-300 ease-in-out hover:border-black border-2 border-black/30 whitespace-nowrap"
                         >
                             <Download size={20} />

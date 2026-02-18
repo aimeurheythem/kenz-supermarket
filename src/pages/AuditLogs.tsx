@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { TableSkeletonCells } from '@/components/common/TableSkeleton';
 import { Search, Filter, Eye, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -55,7 +56,7 @@ export default function AuditLogs() {
                     <h1 className="text-3xl font-black text-zinc-900 tracking-tight">Audit Logs</h1>
                     <p className="text-zinc-500">Track system changes and user actions</p>
                 </div>
-                <Button variant="outline" onClick={loadLogs}>Refresh</Button>
+                <Button variant="outline" className="btn-page-action" onClick={loadLogs}>Refresh</Button>
             </div>
 
             <Card className="border-zinc-200 shadow-sm rounded-xl">
@@ -113,11 +114,7 @@ export default function AuditLogs() {
                             </TableHeader>
                             <TableBody>
                                 {loading ? (
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="text-center py-8 text-zinc-500">
-                                            Loading logs...
-                                        </TableCell>
-                                    </TableRow>
+                                    <TableSkeletonCells columns={6} rows={6} />
                                 ) : logs.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={6} className="text-center py-8 text-zinc-500">

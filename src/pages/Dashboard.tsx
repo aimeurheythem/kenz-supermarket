@@ -53,10 +53,14 @@ export default function Dashboard() {
 
     // Real Top Products by Profit
     const [topProducts, setTopProducts] = useState<{ name: string; profit: number; total_sold: number }[]>([]);
+    // Local today stats for cashier filtering
+    const [localTodayStats, setLocalTodayStats] = useState<{ revenue: number; orders: number; profit: number } | null>(null);
+
+    const cashierUserId = selectedCashier?.id;
 
     useEffect(() => {
-        SaleRepo.getTopProductsByProfit(5).then(setTopProducts).catch(console.error);
-    }, []);
+        SaleRepo.getTopProductsByProfit(5, cashierUserId).then(setTopProducts).catch(console.error);
+    }, [cashierUserId]);
 
     useEffect(() => {
         if (topProducts.length === 0) return;
@@ -75,9 +79,19 @@ export default function Dashboard() {
         loadExpenseStats(today, today);
     }, []);
 
-    // Data for Stats
-    const totalRevenue = todayStats.revenue;
-    const netProfit = todayStats.profit - expenseStats.total;
+    // Refetch today stats when cashier changes
+    useEffect(() => {
+        if (cashierUserId) {
+            SaleRepo.getTodayStats(cashierUserId).then(setLocalTodayStats).catch(console.error);
+        } else {
+            setLocalTodayStats(null);
+        }
+    }, [cashierUserId]);
+
+    // Data for Stats — use cashier-filtered stats when a cashier is selected
+    const effectiveStats = localTodayStats || todayStats;
+    const totalRevenue = effectiveStats.revenue;
+    const netProfit = effectiveStats.profit - (localTodayStats ? 0 : expenseStats.total);
     const totalProducts = products.length;
 
     // Data for Shortcuts
@@ -112,7 +126,13 @@ export default function Dashboard() {
                 />
 
                 <div className="relative z-10 flex flex-col gap-1">
-                    <span className="text-[15px] text-black uppercase tracking-[0.3em] mb-1">{t('dashboard.decorative_label')}</span>
+                    <div className="flex items-center gap-3">
+                        <span className="text-[15px] text-black uppercase tracking-[0.3em] mb-1">{t('dashboard.decorative_label')}</span>
+                        <CashierSelector
+                            selectedCashier={selectedCashier}
+                            onSelect={setSelectedCashier}
+                        />
+                    </div>
                     <h2 className="text-3xl font-bold text-black tracking-tight font-sans flex items-center gap-3">
                         {getGreeting()}, {displayUser?.full_name || 'User'}!
                         <div className="bg-yellow-100 p-2 rounded-full transform hover:rotate-12 transition-transform duration-300">
@@ -185,7 +205,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* 2. Sales Analytics Section */}
-                    <SalesAnalytics />
+                    <SalesAnalytics userId={cashierUserId} />
 
 
                 </div>

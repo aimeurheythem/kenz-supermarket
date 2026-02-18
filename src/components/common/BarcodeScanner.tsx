@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from 'html5-qrcode';
-import { X, Camera, RefreshCw } from 'lucide-react';
+import { Camera, RefreshCw } from 'lucide-react';
 import Button from '@/components/common/Button';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 
 interface BarcodeScannerProps {
     onScan: (code: string) => void;
@@ -76,29 +82,24 @@ export default function BarcodeScanner({ onScan, onClose, title = 'Scan Barcode'
         };
     }, [onScan]);
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fadeIn">
-            <div className="bg-[var(--color-bg-card)] w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-[var(--color-border)] mx-4">
+    const handleClose = () => {
+        if (scannerRef.current) scannerRef.current.clear();
+        onClose();
+    };
 
+    return (
+        <Dialog open={true} onOpenChange={(open) => { if (!open) handleClose(); }}>
+            <DialogContent className="max-w-lg p-0 overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-[var(--color-border)]">
-                    <h3 className="text-lg font-bold flex items-center gap-2">
+                <DialogHeader className="p-4 pb-2">
+                    <DialogTitle className="flex items-center gap-2">
                         <Camera size={20} className="text-blue-500" />
                         {title}
-                    </h3>
-                    <button
-                        onClick={() => {
-                            if (scannerRef.current) scannerRef.current.clear();
-                            onClose();
-                        }}
-                        className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
-                    >
-                        <X size={20} />
-                    </button>
-                </div>
+                    </DialogTitle>
+                </DialogHeader>
 
                 {/* Scanner Area */}
-                <div className="p-6 bg-black relative min-h-[400px] flex flex-col items-center justify-center">
+                <div className="px-4 bg-black relative min-h-[400px] flex flex-col items-center justify-center rounded-lg mx-4">
                     <div id="reader" className="w-full h-full" />
 
                     {/* Instructions Overlay */}
@@ -108,33 +109,33 @@ export default function BarcodeScanner({ onScan, onClose, title = 'Scan Barcode'
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 bg-[var(--color-bg-subtle)] flex justify-between items-center text-sm text-[var(--color-text-muted)]">
+                <div className="p-4 flex justify-between items-center text-sm text-[var(--color-text-muted)]">
                     <span>Supports EAN, UPC, Code 128</span>
                     <Button variant="secondary" size="sm" onClick={() => window.location.reload()} icon={<RefreshCw size={14} />}>
                         Reset Camera
                     </Button>
                 </div>
-            </div>
 
-            <style>{`
-                #reader__scan_region {
-                    background: rgba(0,0,0,0.5);
-                }
-                #reader__dashboard_section_csr button {
-                    background: white;
-                    color: black;
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    border: none;
-                    font-weight: 600;
-                    margin-top: 10px;
-                    cursor: pointer;
-                }
-                #reader video {
-                    object-fit: cover;
-                    border-radius: 8px;
-                }
-            `}</style>
-        </div>
+                <style>{`
+                    #reader__scan_region {
+                        background: rgba(0,0,0,0.5);
+                    }
+                    #reader__dashboard_section_csr button {
+                        background: white;
+                        color: black;
+                        padding: 8px 16px;
+                        border-radius: 6px;
+                        border: none;
+                        font-weight: 600;
+                        margin-top: 10px;
+                        cursor: pointer;
+                    }
+                    #reader video {
+                        object-fit: cover;
+                        border-radius: 8px;
+                    }
+                `}</style>
+            </DialogContent>
+        </Dialog>
     );
 }

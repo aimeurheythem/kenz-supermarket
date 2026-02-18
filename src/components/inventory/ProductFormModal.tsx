@@ -258,7 +258,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                     </Button>
                     <Button
                         type="submit"
-                        className="flex-[2] h-16 rounded-2xl bg-black text-white font-black uppercase tracking-widest text-xs transition-all hover:bg-black/90 flex items-center justify-center gap-2 shadow-none border-none"
+                        className="flex-[2] h-16 rounded-2xl bg-yellow-400 text-black font-black uppercase tracking-widest text-xs transition-all hover:bg-yellow-500 flex items-center justify-center gap-2 shadow-xl shadow-yellow-400/10 border-none"
                     >
                         <Save size={18} />
                         {isEditing ? t('inventory.form.buttons.save') : t('inventory.form.buttons.create')}

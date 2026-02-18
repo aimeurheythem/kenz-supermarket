@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TableSkeletonRows } from '@/components/common/TableSkeleton';
 import {
     Wallet,
     ArrowUpRight,
@@ -17,6 +18,8 @@ import {
 } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useCustomerStore } from '@/stores/useCustomerStore';
+import { toast } from 'sonner';
+import { exportToCsv } from '@/lib/csv';
 import type { Customer } from '@/lib/types';
 import Button from '@/components/common/Button';
 import Portal from '@/components/common/Portal';
@@ -31,6 +34,8 @@ export default function Credit() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedDebtor, setSelectedDebtor] = useState<Customer | null>(null);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [filterStatus, setFilterStatus] = useState<'all' | 'high' | 'low'>('all');
+    const [showFilter, setShowFilter] = useState(false);
 
     // Initial Load
     useEffect(() => {
@@ -55,7 +60,23 @@ export default function Credit() {
     const filteredDebtors = debtors.filter(c =>
         c.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.phone?.includes(searchQuery)
-    );
+    ).filter(c => {
+        if (filterStatus === 'high') return c.total_debt >= 10000;
+        if (filterStatus === 'low') return c.total_debt < 10000;
+        return true;
+    });
+
+    const handleExport = () => {
+        const headers = [
+            { key: 'id', label: 'ID' },
+            { key: 'full_name', label: 'Customer Name' },
+            { key: 'phone', label: 'Phone' },
+            { key: 'email', label: 'Email' },
+            { key: 'total_debt', label: 'Total Debt' },
+        ];
+        exportToCsv(headers, filteredDebtors as unknown as Record<string, unknown>[], `credit_report_${new Date().toISOString().split('T')[0]}.csv`);
+        toast.success(`Exported ${filteredDebtors.length} debtor records`);
+    };
 
     return (
         <div className="space-y-8 animate-fadeIn pb-10">
@@ -118,13 +139,37 @@ export default function Credit() {
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search (Coming Soon)..."
+                            placeholder="Search debtors..."
                             className="w-full h-14 pl-14 pr-6 bg-zinc-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-black/5 transition-all font-bold placeholder:font-medium placeholder:text-zinc-400"
                         />
                     </div>
                     <div className="flex items-center gap-3">
-                        <Button variant="secondary" icon={<Filter size={18} />}>Filter</Button>
-                        <Button variant="secondary" icon={<Download size={18} />}>Export</Button>
+                        <div className="relative">
+                            <Button variant="secondary" icon={<Filter size={18} />} onClick={() => setShowFilter(!showFilter)}>
+                                {filterStatus === 'all' ? 'Filter' : filterStatus === 'high' ? 'High Debt' : 'Low Debt'}
+                            </Button>
+                            {showFilter && (
+                                <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl border border-zinc-100 shadow-xl z-50 p-2">
+                                    {[
+                                        { key: 'all' as const, label: 'All Debtors' },
+                                        { key: 'high' as const, label: 'High Debt (≥10k)' },
+                                        { key: 'low' as const, label: 'Low Debt (<10k)' },
+                                    ].map(opt => (
+                                        <button
+                                            key={opt.key}
+                                            onClick={() => { setFilterStatus(opt.key); setShowFilter(false); }}
+                                            className={cn(
+                                                "w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-colors",
+                                                filterStatus === opt.key ? "bg-black text-white" : "text-zinc-600 hover:bg-zinc-50"
+                                            )}
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <Button variant="secondary" icon={<Download size={18} />} onClick={handleExport}>Export</Button>
                     </div>
                 </div>
 
@@ -143,11 +188,7 @@ export default function Credit() {
                             </thead>
                             <tbody className="divide-y divide-zinc-50">
                                 {isLoading ? (
-                                    <tr>
-                                        <td colSpan={5} className="py-20 text-center text-zinc-400 font-medium animate-pulse">
-                                            Loading debtors ledger...
-                                        </td>
-                                    </tr>
+                                    <TableSkeletonRows columns={5} rows={5} />
                                 ) : filteredDebtors.length === 0 ? (
                                     <tr>
                                         <td colSpan={5} className="py-20 text-center">
@@ -244,7 +285,7 @@ function PaymentModal({ customer, onClose, onSuccess }: { customer: Customer, on
             onSuccess();
         } catch (error) {
             console.error(error);
-            alert('Payment failed');
+            toast.error('Payment failed');
         } finally {
             setIsLoading(false);
         }
@@ -295,7 +336,7 @@ function PaymentModal({ customer, onClose, onSuccess }: { customer: Customer, on
                             <Button type="button" variant="secondary" onClick={onClose} disabled={isLoading} className="flex-1">
                                 Cancel
                             </Button>
-                            <Button type="submit" disabled={isLoading} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white border-none shadow-lg shadow-emerald-500/20">
+                            <Button type="submit" disabled={isLoading} className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black border-none shadow-lg shadow-yellow-400/20">
                                 {isLoading ? 'Processing...' : 'Confirm Payment'}
                             </Button>
                         </div>

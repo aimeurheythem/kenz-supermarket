@@ -2,8 +2,14 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { UserRepo } from '../../../database';
 import type { User } from '@/lib/types';
-import { Users, Lock, ArrowRight, X, Banknote } from 'lucide-react';
-import Portal from '../common/Portal';
+import { Users, Lock, ArrowRight, Banknote } from 'lucide-react';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from '@/components/ui/dialog';
 
 interface CashierLoginModalProps {
     isOpen: boolean;
@@ -50,8 +56,6 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
             setError('');
         }
     }, [isOpen]);
-
-    if (!isOpen) return null;
 
     const handleCashierSelect = (cashier: User) => {
         console.log('Cashier selected:', cashier.full_name, 'ID:', cashier.id);
@@ -144,23 +148,24 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
     };
 
     return (
-        <Portal>
-            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-scaleIn">
-                    {/* Header */}
-                    <div className="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-4 flex justify-between items-center">
-                        <h2 className="text-white text-xl font-bold flex items-center gap-2">
+        <Dialog open={isOpen} onOpenChange={(open) => { if (!open) handleClose(); }}>
+            <DialogContent className="max-w-md p-0 overflow-hidden">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-4">
+                    <DialogHeader>
+                        <DialogTitle className="text-white text-xl font-bold flex items-center gap-2">
                             <Users className="w-5 h-5" />
                             Cashier Login
-                        </h2>
-                        <button onClick={handleClose} className="text-white/80 hover:text-white">
-                            <X className="w-5 h-5" />
-                        </button>
-                    </div>
+                        </DialogTitle>
+                        <DialogDescription className="text-white/70 text-sm">
+                            {step === 'select' ? 'Select your name to start' : step === 'pin' ? 'Enter your PIN' : 'Enter opening cash'}
+                        </DialogDescription>
+                    </DialogHeader>
+                </div>
 
-                    {/* Content */}
-                    <div className="p-6">
-                        {step === 'select' && (
+                {/* Content */}
+                <div className="p-6">
+                    {step === 'select' && (
                             <div>
                                 <p className="text-gray-600 mb-4">Select your name to start your shift:</p>
                                 <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -279,7 +284,7 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
                                     <button
                                         type="submit"
                                         disabled={!openingCash || isLoading}
-                                        className="flex-1 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex-1 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-black rounded-lg font-semibold hover:from-yellow-500 hover:to-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {isLoading ? 'Starting...' : 'Start Shift'}
                                     </button>
@@ -287,8 +292,7 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
                             </form>
                         )}
                     </div>
-                </div>
-            </div>
-        </Portal>
+                </DialogContent>
+            </Dialog>
     );
 }

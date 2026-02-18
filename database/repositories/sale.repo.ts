@@ -268,11 +268,15 @@ export const SaleRepo = {
         }
     },
 
-    async getTodayStats(): Promise<{ revenue: number; orders: number; profit: number }> {
+    async getTodayStats(userId?: number): Promise<{ revenue: number; orders: number; profit: number }> {
+        const userFilter = userId ? ' AND user_id = ?' : '';
+        const userParams = userId ? [userId] : [];
+
         const revenueResult = await get<{ revenue: number; orders: number }>(
             `SELECT COALESCE(SUM(total), 0) as revenue, COUNT(*) as orders
        FROM sales
-       WHERE date(sale_date) = date('now') AND status = 'completed'`
+       WHERE date(sale_date) = date('now') AND status = 'completed'${userFilter}`,
+            userParams
         );
 
         const cogsResult = await get<{ cogs: number }>(
@@ -280,7 +284,8 @@ export const SaleRepo = {
              FROM sale_items si
              JOIN sales s ON si.sale_id = s.id
              JOIN products p ON si.product_id = p.id
-             WHERE date(s.sale_date) = date('now') AND s.status = 'completed'`
+             WHERE date(s.sale_date) = date('now') AND s.status = 'completed'${userId ? ' AND s.user_id = ?' : ''}`,
+            userId ? [userId] : []
         );
 
         const revenue = revenueResult?.revenue || 0;
@@ -300,17 +305,19 @@ export const SaleRepo = {
     /**
      * Revenue grouped by hour for today.
      */
-    async getHourlyRevenue(): Promise<{ time: string; revenue: number }[]> {
+    async getHourlyRevenue(userId?: number): Promise<{ time: string; revenue: number }[]> {
         const today = new Date().toISOString().split('T')[0];
+        const userFilter = userId ? ' AND user_id = ?' : '';
+        const params = userId ? [today, userId] : [today];
         const rows = await query<{ hour: string; revenue: number }>(
             `SELECT 
                 printf('%02d:00', CAST(strftime('%H', sale_date) AS INTEGER)) as hour,
                 COALESCE(SUM(total), 0) as revenue
              FROM sales
-             WHERE date(sale_date) = ? AND status = 'completed'
+             WHERE date(sale_date) = ? AND status = 'completed'${userFilter}
              GROUP BY strftime('%H', sale_date)
              ORDER BY hour`,
-            [today]
+            params
         );
 
         // Fill in missing hours (08:00 to 22:00)
@@ -326,7 +333,9 @@ export const SaleRepo = {
     /**
      * Revenue grouped by day for the last 7 days.
      */
-    async getDailyRevenue(): Promise<{ day: string; revenue: number }[]> {
+    async getDailyRevenue(userId?: number): Promise<{ day: string; revenue: number }[]> {
+        const userFilter = userId ? ' AND user_id = ?' : '';
+        const params = userId ? [userId] : [];
         const rows = await query<{ day_label: string; revenue: number }>(
             `SELECT 
                 CASE CAST(strftime('%w', sale_date) AS INTEGER)
@@ -337,10 +346,10 @@ export const SaleRepo = {
                 date(sale_date) as sale_day,
                 COALESCE(SUM(total), 0) as revenue
              FROM sales
-             WHERE date(sale_date) >= date('now', '-6 days') AND status = 'completed'
+             WHERE date(sale_date) >= date('now', '-6 days') AND status = 'completed'${userFilter}
              GROUP BY date(sale_date)
              ORDER BY sale_day`,
-            []
+            params
         );
 
         // Fill in missing days
@@ -360,7 +369,9 @@ export const SaleRepo = {
     /**
      * Revenue grouped by month for the last 6 months.
      */
-    async getMonthlyRevenue(): Promise<{ month: string; revenue: number }[]> {
+    async getMonthlyRevenue(userId?: number): Promise<{ month: string; revenue: number }[]> {
+        const userFilter = userId ? ' AND user_id = ?' : '';
+        const params = userId ? [userId] : [];
         const rows = await query<{ month_label: string; month_key: string; revenue: number }>(
             `SELECT 
                 CASE CAST(strftime('%m', sale_date) AS INTEGER)
@@ -372,10 +383,10 @@ export const SaleRepo = {
                 strftime('%Y-%m', sale_date) as month_key,
                 COALESCE(SUM(total), 0) as revenue
              FROM sales
-             WHERE date(sale_date) >= date('now', '-5 months', 'start of month') AND status = 'completed'
+             WHERE date(sale_date) >= date('now', '-5 months', 'start of month') AND status = 'completed'${userFilter}
              GROUP BY strftime('%Y-%m', sale_date)
              ORDER BY month_key`,
-            []
+            params
         );
 
         // Fill in missing months
@@ -395,17 +406,19 @@ export const SaleRepo = {
     /**
      * Peak hours: number of sales per 2-hour block today.
      */
-    async getPeakHours(): Promise<{ hour: string; density: number }[]> {
+    async getPeakHours(userId?: number): Promise<{ hour: string; density: number }[]> {
         const today = new Date().toISOString().split('T')[0];
+        const userFilter = userId ? ' AND user_id = ?' : '';
+        const params = userId ? [today, userId] : [today];
         const rows = await query<{ hour_block: number; sale_count: number }>(
             `SELECT 
                 (CAST(strftime('%H', sale_date) AS INTEGER) / 2) * 2 as hour_block,
                 COUNT(*) as sale_count
              FROM sales
-             WHERE date(sale_date) = ? AND status = 'completed'
+             WHERE date(sale_date) = ? AND status = 'completed'${userFilter}
              GROUP BY hour_block
              ORDER BY hour_block`,
-            [today]
+            params
         );
 
         // Fill all 2-hour blocks from 8 to 22
@@ -421,7 +434,9 @@ export const SaleRepo = {
     /**
      * Top N products by total profit margin this month.
      */
-    async getTopProductsByProfit(limit: number = 5): Promise<{ name: string; profit: number; total_sold: number }[]> {
+    async getTopProductsByProfit(limit: number = 5, userId?: number): Promise<{ name: string; profit: number; total_sold: number }[]> {
+        const userFilter = userId ? ' AND s.user_id = ?' : '';
+        const params: (number)[] = userId ? [userId, limit] : [limit];
         return query<{ name: string; profit: number; total_sold: number }>(
             `SELECT 
                 p.name,
@@ -431,11 +446,11 @@ export const SaleRepo = {
              JOIN products p ON si.product_id = p.id
              JOIN sales s ON si.sale_id = s.id
              WHERE s.status = 'completed'
-               AND date(s.sale_date) >= date('now', 'start of month')
+               AND date(s.sale_date) >= date('now', 'start of month')${userFilter}
              GROUP BY si.product_id
              ORDER BY profit DESC
              LIMIT ?`,
-            [limit]
+            params
         );
     },
 };

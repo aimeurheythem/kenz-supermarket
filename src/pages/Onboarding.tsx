@@ -16,7 +16,7 @@ import {
 import { useSettingsStore } from '@/stores/useSettingsStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { UserRepo } from '../../database/repositories/user.repo';
-import { cn } from '@/lib/utils';
+import { cn, validatePassword } from '@/lib/utils';
 import Button from '@/components/common/Button';
 
 // Step definitions
@@ -139,7 +139,7 @@ export default function Onboarding() {
             case 2:
                 return formData.adminName.length > 0 &&
                     formData.adminUsername.length > 0 &&
-                    formData.adminPassword.length >= 4 &&
+                    validatePassword(formData.adminPassword).valid &&
                     formData.adminPassword === formData.adminConfirmPassword;
             case 3: return true; // Defaults provided
             default: return false;
@@ -336,9 +336,15 @@ export default function Onboarding() {
                                                 type="password"
                                                 value={formData.adminPassword}
                                                 onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
-                                                className="w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium"
-                                                placeholder="••••••"
+                                                className={cn(
+                                                    "w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium",
+                                                    formData.adminPassword && !validatePassword(formData.adminPassword).valid && "border-red-500 focus:border-red-500"
+                                                )}
+                                                placeholder="Min 8 chars, upper+lower+digit"
                                             />
+                                            {formData.adminPassword && !validatePassword(formData.adminPassword).valid && (
+                                                <p className="text-xs text-red-500 mt-1 ml-1">{validatePassword(formData.adminPassword).message}</p>
+                                            )}
                                         </div>
                                         <div>
                                             <label className="block text-sm font-bold mb-1.5 ml-1">Confirm</label>

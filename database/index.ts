@@ -2,7 +2,7 @@
  * Database barrel export — single import point for the entire database layer.
  */
 
-export { initDatabase, getDatabase, triggerSave, query, execute, executeNoSave, backupDatabase, restoreDatabase } from './db';
+export { initDatabase, getDatabase, triggerSave, query, execute, executeNoSave, backupDatabase, restoreDatabase, resetAllData } from './db';
 export { seedDatabase } from './seed';
 export { CategoryRepo } from './repositories/category.repo';
 export { ProductRepo } from './repositories/product.repo';

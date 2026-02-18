@@ -81,6 +81,7 @@ export const CustomerRepo = {
         referenceId?: number,
         description?: string
     ): Promise<void> {
+        // Verify customer exists and read current debt for the transaction log
         const customer = await this.getById(customerId);
         if (!customer) throw new Error('Customer not found');
 
@@ -93,9 +94,10 @@ export const CustomerRepo = {
             [customerId, type, amount, newBalance, referenceType || null, referenceId || null, description || null]
         );
 
+        // Atomic debt update — avoids race if two transactions hit the same customer
         await execute(
-            'UPDATE customers SET total_debt = ?, updated_at = datetime("now") WHERE id = ?',
-            [newBalance, customerId]
+            'UPDATE customers SET total_debt = total_debt + ?, updated_at = datetime("now") WHERE id = ?',
+            [balanceChange, customerId]
         );
     },
 

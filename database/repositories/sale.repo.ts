@@ -96,26 +96,23 @@ export const SaleRepo = {
                     throw new Error('Credit sales require a linked customer.');
                 }
 
-                // Get current debt to calculate new balance
-                const customer = await get<{ total_debt: number }>(
-                    'SELECT total_debt FROM customers WHERE id = ?',
-                    [payment.customer_id]
+                // Atomic debt increment — no read-compute-write gap
+                await executeNoSave(
+                    'UPDATE customers SET total_debt = total_debt + ?, updated_at = datetime("now") WHERE id = ?',
+                    [total, payment.customer_id]
                 );
 
-                const currentDebt = customer?.total_debt || 0;
-                const newDebt = currentDebt + total;
-
-                // Update Customer Debt
-                await executeNoSave(
-                    'UPDATE customers SET total_debt = ?, updated_at = datetime("now") WHERE id = ?',
-                    [newDebt, payment.customer_id]
+                // Read updated balance for the transaction log
+                const updatedCustomer = await get<{ total_debt: number }>(
+                    'SELECT total_debt FROM customers WHERE id = ?',
+                    [payment.customer_id]
                 );
 
                 // Add Transaction Record
                 await executeNoSave(
                     `INSERT INTO customer_transactions (customer_id, type, amount, balance_after, reference_type, reference_id, description)
                      VALUES (?, 'debt', ?, ?, 'sale', ?, 'Credit Sale')`,
-                    [payment.customer_id, total, newDebt, saleId]
+                    [payment.customer_id, total, updatedCustomer?.total_debt ?? total, saleId]
                 );
             }
 
@@ -129,19 +126,19 @@ export const SaleRepo = {
                     [saleId, item.product.id, item.product.name, item.quantity, item.product.selling_price, item.discount, itemTotal]
                 );
 
-                // Get current stock to ensure accuracy and for movement logging
+                // Read previous stock for movement log
                 const product = await get<{ stock_quantity: number }>(
                     "SELECT stock_quantity FROM products WHERE id = ?",
                     [item.product.id]
                 );
                 const previousStock = product?.stock_quantity || 0;
-                const newStock = Math.max(0, previousStock - item.quantity);
 
-                // Update stock atomically
+                // Atomic stock decrement — no gap between read and write
                 await executeNoSave(
-                    "UPDATE products SET stock_quantity = ?, updated_at = datetime('now') WHERE id = ?",
-                    [newStock, item.product.id]
+                    "UPDATE products SET stock_quantity = MAX(0, stock_quantity - ?), updated_at = datetime('now') WHERE id = ?",
+                    [item.quantity, item.product.id]
                 );
+                const newStock = Math.max(0, previousStock - item.quantity);
 
                 // Create stock movement
                 await executeNoSave(
@@ -213,25 +210,26 @@ export const SaleRepo = {
 
             // 2. Restore Stock
             for (const item of items) {
-                // Get current product to ensure valid stock update
+                // Read current stock for movement log
                 const product = await get<{ stock_quantity: number }>(
                     'SELECT stock_quantity FROM products WHERE id = ?',
                     [item.product_id]
                 );
 
                 if (product) { // Only if product still exists
-                    const newStock = product.stock_quantity + item.quantity;
+                    const previousStock = product.stock_quantity;
 
+                    // Atomic stock increment
                     await executeNoSave(
-                        "UPDATE products SET stock_quantity = ?, updated_at = datetime('now') WHERE id = ?",
-                        [newStock, item.product_id]
+                        "UPDATE products SET stock_quantity = stock_quantity + ?, updated_at = datetime('now') WHERE id = ?",
+                        [item.quantity, item.product_id]
                     );
 
                     // 3. Log Movement
                     await executeNoSave(
                         `INSERT INTO stock_movements (product_id, type, quantity, previous_stock, new_stock, reason, reference_id, reference_type)
                          VALUES (?, 'return', ?, ?, ?, ?, ?, 'sale')`,
-                        [item.product_id, item.quantity, product.stock_quantity, newStock, reason, saleId]
+                        [item.product_id, item.quantity, previousStock, previousStock + item.quantity, reason, saleId]
                     );
                 }
             }

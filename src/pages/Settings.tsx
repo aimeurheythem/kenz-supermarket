@@ -3,8 +3,8 @@ import { Save, Database, Upload, Download, Settings as SettingsIcon, Globe, Rece
 import Button from '@/components/common/Button';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
-import { backupDatabase, restoreDatabase, triggerSave } from '../../database/db';
-import { cn } from '@/lib/utils';
+import { backupDatabase, restoreDatabase, resetAllData, triggerSave } from '../../database/db';
+import { cn, validatePassword } from '@/lib/utils';
 
 export default function Settings() {
     const { user, updateProfile, changePassword } = useAuthStore();
@@ -15,6 +15,7 @@ export default function Settings() {
     const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deletePassword, setDeletePassword] = useState('');
+    const [deleteConfirmText, setDeleteConfirmText] = useState('');
     const [deleteError, setDeleteError] = useState('');
     const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -60,8 +61,9 @@ export default function Settings() {
             alert('New passwords do not match');
             return;
         }
-        if (passwords.new.length < 4) {
-            alert('Password must be at least 4 characters');
+        const validation = validatePassword(passwords.new);
+        if (!validation.valid) {
+            alert(validation.message);
             return;
         }
 
@@ -102,6 +104,10 @@ export default function Settings() {
             setDeleteError('Please enter your password');
             return;
         }
+        if (deleteConfirmText !== 'DELETE') {
+            setDeleteError('Please type DELETE to confirm');
+            return;
+        }
 
         setDeleteLoading(true);
         setDeleteError('');
@@ -115,41 +121,9 @@ export default function Settings() {
             return;
         }
 
-        // Final confirmation
-        if (!confirm('⚠️ LAST WARNING: All data will be permanently deleted. This cannot be undone. Proceed?')) {
-            setDeleteLoading(false);
-            return;
-        }
-
         try {
-            const { execute } = await import('../../database/db');
-            // Delete all data from all tables (child tables first for FK constraints)
-            const tables = [
-                'sale_items',
-                'sales',
-                'cashier_sessions',
-                'purchase_order_items',
-                'purchase_orders',
-                'stock_movements',
-                'product_batches',
-                'pos_quick_access',
-                'products',
-                'categories',
-                'suppliers',
-                'customer_transactions',
-                'customers',
-                'expenses',
-                'audit_logs',
-                'app_settings',
-                'users',
-            ];
-            for (const table of tables) {
-                try { await execute(`DELETE FROM ${table}`); } catch (_) { /* table may not exist */ }
-            }
-
-            // Force persist to disk BEFORE reloading (execute uses debounced save which won't complete in time)
-            const { saveDatabaseImmediate } = await import('../../database/db');
-            await saveDatabaseImmediate();
+            // Use the safe, transactional resetAllData function
+            await resetAllData(user!.id, user!.full_name);
 
             // Clear auth state and reload — triggers onboarding
             localStorage.removeItem('auth-storage');
@@ -317,20 +291,28 @@ export default function Settings() {
                                             className="w-full px-3 py-2.5 rounded-lg bg-white border border-red-300 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all text-sm"
                                             autoFocus
                                         />
+                                        <p className="text-sm font-semibold text-red-700">Type <span className="font-mono bg-red-100 px-1.5 py-0.5 rounded">DELETE</span> to confirm:</p>
+                                        <input
+                                            type="text"
+                                            value={deleteConfirmText}
+                                            onChange={e => { setDeleteConfirmText(e.target.value.toUpperCase()); setDeleteError(''); }}
+                                            placeholder="Type DELETE"
+                                            className="w-full px-3 py-2.5 rounded-lg bg-white border border-red-300 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all text-sm font-mono"
+                                        />
                                         {deleteError && (
                                             <p className="text-sm text-red-600 font-medium">{deleteError}</p>
                                         )}
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={handleDeleteAccount}
-                                                disabled={deleteLoading}
+                                                disabled={deleteLoading || deleteConfirmText !== 'DELETE'}
                                                 className="px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
                                             >
                                                 <Trash2 size={16} />
                                                 {deleteLoading ? 'Deleting...' : 'Confirm Delete'}
                                             </button>
                                             <button
-                                                onClick={() => { setShowDeleteConfirm(false); setDeletePassword(''); setDeleteError(''); }}
+                                                onClick={() => { setShowDeleteConfirm(false); setDeletePassword(''); setDeleteConfirmText(''); setDeleteError(''); }}
                                                 className="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-semibold rounded-lg transition-colors"
                                             >
                                                 Cancel

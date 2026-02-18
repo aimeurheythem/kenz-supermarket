@@ -661,13 +661,15 @@ body,
 /* =============================================
    FOCUS STATES
    ============================================= */
-/* Global focus suppression */
+/* Allow browser default focus for mouse/touch, show ring for keyboard */
 *:focus {
-  outline: none !important;
+  outline: none;
 }
 
 *:focus-visible {
-  outline: none !important;
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+  border-radius: 30px;
 }
 
 /* =============================================

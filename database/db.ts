@@ -419,6 +419,64 @@ export function resetDatabase(): void {
 }
 
 /**
+ * Safely delete ALL data from all tables, wrapped in a single transaction.
+ * Logs an audit entry before wiping, then persists immediately.
+ * Tables are deleted in FK-safe order (children first).
+ */
+export async function resetAllData(userId?: number, userName?: string): Promise<void> {
+    if (!isInitialized) {
+        await initDatabase();
+    }
+    if (!sqlJsDb) throw new Error('Database not initialized');
+
+    // FK-safe deletion order: children before parents
+    const tables = [
+        'sale_items',
+        'sales',
+        'cashier_sessions',
+        'purchase_order_items',
+        'purchase_orders',
+        'stock_movements',
+        'product_batches',
+        'pos_quick_access',
+        'products',
+        'categories',
+        'suppliers',
+        'customer_transactions',
+        'customers',
+        'expenses',
+        'app_settings',
+        'users',
+    ];
+
+    try {
+        sqlJsDb.run('BEGIN TRANSACTION;');
+
+        // Log the wipe as the very first operation (before audit_logs itself is cleared)
+        sqlJsDb.run(
+            `INSERT INTO audit_logs (user_id, user_name, action, entity, entity_id, details) VALUES (?, ?, ?, ?, ?, ?)`,
+            [userId ?? null, userName ?? null, 'DATA_WIPE', 'system', null, 'Full data reset initiated by admin'] as any
+        );
+
+        for (const table of tables) {
+            sqlJsDb.run(`DELETE FROM ${table};`);
+        }
+
+        // Also clear audit_logs last (after logging the wipe entry)
+        sqlJsDb.run('DELETE FROM audit_logs;');
+
+        sqlJsDb.run('COMMIT;');
+        queryCache.clear();
+
+        // Persist immediately so the wipe survives app reload
+        await saveDatabaseImmediate();
+    } catch (error) {
+        sqlJsDb.run('ROLLBACK;');
+        throw error;
+    }
+}
+
+/**
  * Get the file path where the database is stored (Electron only).
  * Returns null if running in browser mode.
  */

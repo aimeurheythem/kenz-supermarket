@@ -13,7 +13,7 @@ import {
     DollarSign,
     BarChart3,
 } from 'lucide-react';
-import { cn, formatDate, formatCurrency } from '@/lib/utils';
+import { cn, formatDate, formatCurrency, validatePassword, validatePin } from '@/lib/utils';
 import { useUserStore } from '@/stores/useUserStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import SearchInput from '@/components/common/SearchInput';
@@ -60,7 +60,7 @@ export default function Users() {
             password: '', // Don't fill password
             full_name: user.full_name,
             role: user.role,
-            pin_code: user.pin_code || '',
+            pin_code: '',
         });
         setIsFormOpen(true);
     };
@@ -80,6 +80,18 @@ export default function Users() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!form.username || !form.full_name) return;
+
+        // Validate password when provided
+        if (form.password) {
+            const pwResult = validatePassword(form.password);
+            if (!pwResult.valid) return alert(pwResult.message);
+        }
+
+        // Validate PIN when provided
+        if (form.pin_code) {
+            const pinResult = validatePin(form.pin_code);
+            if (!pinResult.valid) return alert(pinResult.message);
+        }
 
         if (editingUser) {
             // If password is empty, don't update it
@@ -237,7 +249,7 @@ export default function Users() {
                                         <div className="flex items-center gap-2">
                                             <Lock size={14} className="text-zinc-500" />
                                             <span className="text-sm text-zinc-400">
-                                                {user.pin_code ? '••••' : 'No PIN'}
+                                                {user.has_pin ? '••••' : 'No PIN'}
                                             </span>
                                         </div>
                                     ) : (

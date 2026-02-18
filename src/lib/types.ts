@@ -203,14 +203,16 @@ export interface StockMovement {
 export interface User {
     id: number;
     username: string;
-    password_hash: string;
-    pin_code: string | null;
     full_name: string;
     role: 'admin' | 'manager' | 'cashier';
     is_active: number;
+    has_pin?: number;  // 1 if a PIN is set, 0 otherwise (safe computed field)
     last_login: string | null;
     created_at: string;
     updated_at: string;
+    // Sensitive fields — only present in internal/full queries, never sent to UI
+    password_hash?: string;
+    pin_code?: string | null;
 }
 
 export type UserInput = Pick<User, 'username' | 'full_name' | 'role'> & { password: string; pin_code?: string };

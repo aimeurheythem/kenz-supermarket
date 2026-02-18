@@ -34,3 +34,33 @@ export function formatDate(date: string | Date) {
         year: "numeric",
     }).format(new Date(date))
 }
+
+// ============================================
+// PASSWORD & PIN VALIDATION
+// ============================================
+
+export function validatePassword(password: string): { valid: boolean; message: string } {
+    if (password.length < 8) {
+        return { valid: false, message: 'Password must be at least 8 characters' };
+    }
+    if (!/[a-z]/.test(password)) {
+        return { valid: false, message: 'Password must contain at least one lowercase letter' };
+    }
+    if (!/[A-Z]/.test(password)) {
+        return { valid: false, message: 'Password must contain at least one uppercase letter' };
+    }
+    if (!/[0-9]/.test(password)) {
+        return { valid: false, message: 'Password must contain at least one digit' };
+    }
+    return { valid: true, message: '' };
+}
+
+export function validatePin(pin: string): { valid: boolean; message: string } {
+    if (pin.length < 4 || pin.length > 6) {
+        return { valid: false, message: 'PIN must be 4-6 digits' };
+    }
+    if (!/^\d+$/.test(pin)) {
+        return { valid: false, message: 'PIN must contain only digits' };
+    }
+    return { valid: true, message: '' };
+}

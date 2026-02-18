@@ -13,9 +13,13 @@ interface ReportStore {
     salesList: Sale[];
     period: 'today' | '7days' | '30days' | 'year';
     selectedCashier: number | null;
-    isLoading: boolean;
-    setPeriod: (period: 'today' | '7days' | '30days' | 'year') => void;
-    setSelectedCashier: (cashierId: number | null) => void;
+    isLoadingReports: boolean;
+    isLoadingCashier: boolean;
+    isLoadingSales: boolean;
+    error: string | null;
+    clearError: () => void;
+    setPeriod: (period: 'today' | '7days' | '30days' | 'year') => Promise<void>;
+    setSelectedCashier: (cashierId: number | null) => Promise<void>;
     loadReports: () => Promise<void>;
     loadCashierReports: () => Promise<void>;
     loadSales: () => Promise<void>;
@@ -33,76 +37,111 @@ export const useReportStore = create<ReportStore>((set, get) => ({
     salesList: [],
     period: 'today',
     selectedCashier: null,
-    isLoading: false,
+    isLoadingReports: false,
+    isLoadingCashier: false,
+    isLoadingSales: false,
+    error: null,
 
-    setPeriod: (period) => {
+    clearError: () => set({ error: null }),
+
+    setPeriod: async (period) => {
         set({ period });
-        get().loadReports();
-        get().loadCashierReports();
-        get().loadSales();
+        await Promise.all([
+            get().loadReports(),
+            get().loadCashierReports(),
+            get().loadSales(),
+        ]);
     },
 
-    setSelectedCashier: (cashierId) => {
+    setSelectedCashier: async (cashierId) => {
         set({ selectedCashier: cashierId });
-        get().loadCashierReports();
-        get().loadSales();
+        await Promise.all([
+            get().loadCashierReports(),
+            get().loadSales(),
+        ]);
     },
 
     loadReports: async () => {
-        set({ isLoading: true });
-        const { period } = get();
-        const salesData = await ReportRepo.getSalesChart(period);
-        const topProducts = await ReportRepo.getTopProducts(10);
-        const categoryData = await ReportRepo.getCategoryPerformance();
-
-        set({ salesData, topProducts, categoryData, isLoading: false });
+        try {
+            set({ isLoadingReports: true, error: null });
+            const { period } = get();
+            const salesData = await ReportRepo.getSalesChart(period);
+            const topProducts = await ReportRepo.getTopProducts(10);
+            const categoryData = await ReportRepo.getCategoryPerformance();
+            set({ salesData, topProducts, categoryData });
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        } finally {
+            set({ isLoadingReports: false });
+        }
     },
 
     loadCashierReports: async () => {
-        set({ isLoading: true });
-        const { period, selectedCashier } = get();
-        const cashierPerformance = await ReportRepo.getCashierPerformance(period, selectedCashier || undefined);
-        const cashierDailyPerformance = await ReportRepo.getCashierDailyPerformance(period, selectedCashier || undefined);
-        const sessionReports = await ReportRepo.getSessionReports(period, selectedCashier || undefined);
-
-        set({ cashierPerformance, cashierDailyPerformance, sessionReports, isLoading: false });
+        try {
+            set({ isLoadingCashier: true, error: null });
+            const { period, selectedCashier } = get();
+            const cashierPerformance = await ReportRepo.getCashierPerformance(period, selectedCashier || undefined);
+            const cashierDailyPerformance = await ReportRepo.getCashierDailyPerformance(period, selectedCashier || undefined);
+            const sessionReports = await ReportRepo.getSessionReports(period, selectedCashier || undefined);
+            set({ cashierPerformance, cashierDailyPerformance, sessionReports });
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        } finally {
+            set({ isLoadingCashier: false });
+        }
     },
 
     loadSales: async () => {
-        set({ isLoading: true });
-        const { period, selectedCashier } = get();
-        // Calculate date range based on period
-        const now = new Date();
-        const past = new Date();
-        if (period === 'today') past.setHours(0, 0, 0, 0);
-        else if (period === '7days') past.setDate(now.getDate() - 7);
-        else if (period === '30days') past.setDate(now.getDate() - 30);
-        else if (period === 'year') past.setFullYear(now.getFullYear() - 1);
+        try {
+            set({ isLoadingSales: true, error: null });
+            const { period } = get();
+            const now = new Date();
+            const past = new Date();
+            if (period === 'today') past.setHours(0, 0, 0, 0);
+            else if (period === '7days') past.setDate(now.getDate() - 7);
+            else if (period === '30days') past.setDate(now.getDate() - 30);
+            else if (period === 'year') past.setFullYear(now.getFullYear() - 1);
 
-        const filters = {
-            from: past.toISOString(), // Include time for precise filtering
-            to: now.toISOString(),     // Include time to capture sales up to now
-            limit: 100 // Cap at 100 for now to avoid performance issues
-        };
+            const filters = {
+                from: past.toISOString(),
+                to: now.toISOString(),
+                limit: 100
+            };
 
-        const salesList = await SaleRepo.getAll(filters);
-        // Client-side filter for cashier if needed, or update getSales to support filter
-        // Currently getAll supports from/to/status/limit. It doesn't support user_id (cashier).
-        // I should stick to DATE filtering for now.
-
-        set({ salesList, isLoading: false });
+            const salesList = await SaleRepo.getAll(filters);
+            set({ salesList });
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        } finally {
+            set({ isLoadingSales: false });
+        }
     },
 
     refundSale: async (saleId, reason) => {
-        await SaleRepo.refundSale(saleId, reason);
-        get().loadSales();
-        get().loadReports();
+        try {
+            set({ error: null });
+            await SaleRepo.refundSale(saleId, reason);
+            get().loadSales();
+            get().loadReports();
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        }
     },
 
     voidSale: async (saleId, reason) => {
-        await SaleRepo.voidSale(saleId, reason);
-        get().loadSales();
-        get().loadReports();
+        try {
+            set({ error: null });
+            await SaleRepo.voidSale(saleId, reason);
+            get().loadSales();
+            get().loadReports();
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        }
     }
 }));
 

@@ -5,6 +5,8 @@ import { CategoryRepo } from '../../database/repositories/category.repo';
 interface CategoryStore {
     categories: Category[];
     isLoading: boolean;
+    error: string | null;
+    clearError: () => void;
     loadCategories: () => Promise<void>;
     addCategory: (input: CategoryInput) => Promise<Category>;
     updateCategory: (id: number, input: Partial<CategoryInput>) => Promise<Category>;
@@ -14,27 +16,55 @@ interface CategoryStore {
 export const useCategoryStore = create<CategoryStore>((set, get) => ({
     categories: [],
     isLoading: false,
+    error: null,
+
+    clearError: () => set({ error: null }),
 
     loadCategories: async () => {
-        set({ isLoading: true });
-        const categories = await CategoryRepo.getAll();
-        set({ categories, isLoading: false });
+        try {
+            set({ isLoading: true, error: null });
+            const categories = await CategoryRepo.getAll();
+            set({ categories });
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        } finally {
+            set({ isLoading: false });
+        }
     },
 
     addCategory: async (input: CategoryInput) => {
-        const category = await CategoryRepo.create(input);
-        await get().loadCategories();
-        return category;
+        try {
+            set({ error: null });
+            const category = await CategoryRepo.create(input);
+            await get().loadCategories();
+            return category;
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        }
     },
 
     updateCategory: async (id: number, input: Partial<CategoryInput>) => {
-        const category = await CategoryRepo.update(id, input);
-        await get().loadCategories();
-        return category;
+        try {
+            set({ error: null });
+            const category = await CategoryRepo.update(id, input);
+            await get().loadCategories();
+            return category;
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        }
     },
 
     deleteCategory: async (id: number) => {
-        await CategoryRepo.delete(id);
-        await get().loadCategories();
+        try {
+            set({ error: null });
+            await CategoryRepo.delete(id);
+            await get().loadCategories();
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        }
     },
 }));

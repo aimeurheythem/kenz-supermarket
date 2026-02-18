@@ -4,46 +4,71 @@ import { SettingsRepo, type AppSettings } from '../../database/repositories/sett
 interface SettingsStore {
     settings: AppSettings;
     isLoading: boolean;
+    error: string | null;
+    clearError: () => void;
     loadSettings: () => Promise<void>;
     updateSetting: (key: string, value: string) => Promise<void>;
     updateSettings: (newSettings: AppSettings) => Promise<void>;
-    getSetting: (key: string, defaultValue?: string) => string;
 }
 
 export const useSettingsStore = create<SettingsStore>((set, get) => ({
-    settings: {}, // Initialize with empty object, will be populated on load
+    settings: {},
     isLoading: false,
+    error: null,
+
+    clearError: () => set({ error: null }),
 
     loadSettings: async () => {
-        set({ isLoading: true });
         try {
+            set({ isLoading: true, error: null });
             const settings = await SettingsRepo.getAll();
-            // Merge with existing state to avoid wiping optimistic updates if any
-            // But usually meaningful defaults should be handled by getSetting
-            set({ settings, isLoading: false });
-        } catch (error) {
-            console.error('Failed to load settings:', error);
+            set({ settings });
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        } finally {
             set({ isLoading: false });
         }
     },
 
     updateSetting: async (key, value) => {
-        // Optimistic update
-        set(state => ({
-            settings: { ...state.settings, [key]: value }
-        }));
-        await SettingsRepo.set(key, value);
+        const previousSettings = { ...get().settings };
+        try {
+            set({ error: null });
+            // Optimistic update
+            set(state => ({
+                settings: { ...state.settings, [key]: value }
+            }));
+            await SettingsRepo.set(key, value);
+        } catch (e) {
+            // Rollback on failure
+            set({ settings: previousSettings, error: (e as Error).message });
+            throw e;
+        }
     },
 
     updateSettings: async (newSettings) => {
-        // Optimistic update
-        set(state => ({
-            settings: { ...state.settings, ...newSettings }
-        }));
-        await SettingsRepo.setMany(newSettings);
+        const previousSettings = { ...get().settings };
+        try {
+            set({ error: null });
+            // Optimistic update
+            set(state => ({
+                settings: { ...state.settings, ...newSettings }
+            }));
+            await SettingsRepo.setMany(newSettings);
+        } catch (e) {
+            // Rollback on failure
+            set({ settings: previousSettings, error: (e as Error).message });
+            throw e;
+        }
     },
-
-    getSetting: (key, defaultValue = '') => {
-        return get().settings[key] ?? defaultValue;
-    }
 }));
+
+/** Standalone selector — use as `useSettingsStore(selectSetting('key', 'default'))` */
+export const selectSetting = (key: string, defaultValue = '') =>
+    (state: SettingsStore) => state.settings[key] ?? defaultValue;
+
+/** Direct getter for non-reactive access — use as `getSetting('key', 'default')` */
+export const getSetting = (key: string, defaultValue = '') =>
+    useSettingsStore.getState().settings[key] ?? defaultValue;
+

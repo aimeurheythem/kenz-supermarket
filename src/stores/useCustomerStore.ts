@@ -4,15 +4,16 @@ import type { Customer, CustomerInput, CustomerTransaction } from '@/lib/types';
 
 interface CustomerStore {
     customers: Customer[];
-    isLoading: boolean;
+    transactions: CustomerTransaction[];
+    isLoadingCustomers: boolean;
+    isLoadingTransactions: boolean;
+    error: string | null;
+    clearError: () => void;
     loadCustomers: () => Promise<void>;
     searchCustomers: (query: string) => Promise<Customer[]>;
     addCustomer: (customer: CustomerInput) => Promise<void>;
     updateCustomer: (id: number, customer: Partial<Customer>) => Promise<void>;
     deleteCustomer: (id: number) => Promise<void>;
-
-    // Credit System
-    transactions: CustomerTransaction[];
     loadTransactions: (customerId: number) => Promise<void>;
     makePayment: (customerId: number, amount: number) => Promise<void>;
     getDebtors: () => Promise<Customer[]>;
@@ -20,17 +21,23 @@ interface CustomerStore {
 
 export const useCustomerStore = create<CustomerStore>((set, get) => ({
     customers: [],
-    isLoading: false,
     transactions: [],
+    isLoadingCustomers: false,
+    isLoadingTransactions: false,
+    error: null,
+
+    clearError: () => set({ error: null }),
 
     loadCustomers: async () => {
-        set({ isLoading: true });
         try {
+            set({ isLoadingCustomers: true, error: null });
             const customers = await CustomerRepo.getAll();
-            set({ customers, isLoading: false });
-        } catch (error) {
-            console.error('Failed to load customers:', error);
-            set({ isLoading: false });
+            set({ customers });
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        } finally {
+            set({ isLoadingCustomers: false });
         }
     },
 
@@ -40,69 +47,62 @@ export const useCustomerStore = create<CustomerStore>((set, get) => ({
     },
 
     addCustomer: async (customer) => {
-        set({ isLoading: true });
         try {
+            set({ error: null });
             await CustomerRepo.create(customer);
             await get().loadCustomers();
-        } catch (error) {
-            console.error('Failed to add customer:', error);
-            throw error;
-        } finally {
-            set({ isLoading: false });
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
         }
     },
 
     updateCustomer: async (id, customer) => {
-        set({ isLoading: true });
         try {
+            set({ error: null });
             await CustomerRepo.update(id, customer);
             await get().loadCustomers();
-        } catch (error) {
-            console.error('Failed to update customer:', error);
-            throw error;
-        } finally {
-            set({ isLoading: false });
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
         }
     },
 
     deleteCustomer: async (id) => {
-        set({ isLoading: true });
         try {
+            set({ error: null });
             await CustomerRepo.delete(id);
             await get().loadCustomers();
-        } catch (error) {
-            console.error('Failed to delete customer:', error);
-            throw error;
-        } finally {
-            set({ isLoading: false });
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
         }
     },
 
-    // Credit System Actions
     loadTransactions: async (customerId) => {
-        set({ isLoading: true });
         try {
+            set({ isLoadingTransactions: true, error: null });
             const transactions = await CustomerRepo.getTransactions(customerId);
-            set({ transactions, isLoading: false });
-        } catch (error) {
-            console.error('Failed to load transactions:', error);
-            set({ isLoading: false });
+            set({ transactions });
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        } finally {
+            set({ isLoadingTransactions: false });
         }
     },
 
     makePayment: async (customerId, amount) => {
-        set({ isLoading: true });
         try {
+            set({ isLoadingTransactions: true, error: null });
             await CustomerRepo.addTransaction(customerId, 'payment', amount, undefined, undefined, 'Manual Payment');
-            // Refresh customer to update debt
             await get().loadCustomers();
-            // Refresh transactions if viewing this customer
             await get().loadTransactions(customerId);
-        } catch (error) {
-            console.error('Failed to make payment:', error);
-            throw error;
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
         } finally {
-            set({ isLoading: false });
+            set({ isLoadingTransactions: false });
         }
     },
 

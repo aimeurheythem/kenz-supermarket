@@ -22,9 +22,11 @@ export const useQuickAccessStore = create<QuickAccessState>((set, get) => ({
         try {
             const { QuickAccessRepo } = await import('../../database/repositories/quick_access.repo');
             const items = await QuickAccessRepo.getAll();
-            set({ items, loading: false });
+            set({ items });
         } catch (err) {
-            set({ error: (err as Error).message, loading: false });
+            set({ error: (err as Error).message });
+        } finally {
+            set({ loading: false });
         }
     },
 

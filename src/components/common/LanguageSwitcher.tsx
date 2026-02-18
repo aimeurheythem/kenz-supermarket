@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe, Check, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useSystemStore } from '@/stores/useSystemStore';
+import { useLayoutStore } from '@/stores/useLayoutStore';
 
 interface LanguageSwitcherProps {
     collapsed?: boolean;
@@ -11,7 +11,7 @@ interface LanguageSwitcherProps {
 export default function LanguageSwitcher({ collapsed = false }: LanguageSwitcherProps) {
     const { i18n, t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
-    const setLanguageSwitching = useSystemStore(state => state.setLanguageSwitching);
+    const setLanguageSwitching = useLayoutStore(state => state.setLanguageSwitching);
     const menuRef = useRef<HTMLDivElement>(null);
 
     const languages = [

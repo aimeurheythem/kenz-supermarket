@@ -1,11 +1,11 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { useSystemStore } from '@/stores/useSystemStore';
+import { useLayoutStore } from '@/stores/useLayoutStore';
 import { useEffect } from 'react';
 
 export default function LanguageTransition() {
     const { t, i18n } = useTranslation();
-    const { isLanguageSwitching } = useSystemStore();
+    const { isLanguageSwitching } = useLayoutStore();
 
     // Inject translations dynamically to ensure they are available
     useEffect(() => {

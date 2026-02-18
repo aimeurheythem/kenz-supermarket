@@ -26,11 +26,11 @@ export default function QuickAccess({
     const { t, i18n } = useTranslation();
     const [addedItems, setAddedItems] = useState<Record<string, boolean>>({});
 
-    const handleAdd = (item: QuickAccessItem, opt: any, optIdx: number) => {
+    const handleAdd = async (item: QuickAccessItem, opt: any, optIdx: number) => {
         if (!item.product_id) return;
         const prod = products.find(p => p.id === item.product_id);
         if (prod) {
-            addToCart({
+            await addToCart({
                 product: { ...prod, selling_price: opt.price / opt.qty },
                 quantity: opt.qty,
                 discount: 0

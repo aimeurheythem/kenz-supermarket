@@ -25,7 +25,6 @@ import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useTranslation } from 'react-i18next';
 import { useLayoutStore } from '@/stores/useLayoutStore';
-import { useSystemStore } from '@/stores/useSystemStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     DropdownMenu,
@@ -54,7 +53,7 @@ export default function Sidebar() {
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isLanguagesOpen, setIsLanguagesOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
-    const setLanguageSwitching = useSystemStore(state => state.setLanguageSwitching);
+    const setLanguageSwitching = useLayoutStore(state => state.setLanguageSwitching);
 
     const languages = [
         { code: 'en', label: 'English', flag: 'EN' },
@@ -486,7 +485,9 @@ export default function Sidebar() {
                                         Cancel
                                     </button>
                                     <button
-                                        onClick={logout}
+                                        onClick={async () => {
+                                            await logout();
+                                        }}
                                         className="flex-1 py-2.5 bg-red-500 text-white font-bold rounded-xl transition-all hover:bg-red-600"
                                     >
                                         Sign out

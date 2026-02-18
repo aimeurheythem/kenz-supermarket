@@ -1,23 +1,26 @@
 import { create } from 'zustand';
 import type { Sale, CartItem } from '@/lib/types';
 import { SaleRepo } from '../../database/repositories/sale.repo';
+import { ProductRepo } from '../../database/repositories/product.repo';
 
 interface SaleStore {
     sales: Sale[];
     recentSales: Sale[];
     todayStats: { revenue: number; orders: number; profit: number };
     cart: CartItem[];
+    isLoading: boolean;
+    error: string | null;
 
+    clearError: () => void;
     loadSales: (filters?: { from?: string; to?: string }) => Promise<void>;
     loadRecent: () => Promise<void>;
     loadTodayStats: () => Promise<void>;
 
     // Cart operations
-    addToCart: (item: CartItem) => void;
-    updateCartItem: (productId: number, quantity: number) => void;
+    addToCart: (item: CartItem) => Promise<void>;
+    updateCartItem: (productId: number, quantity: number) => Promise<void>;
     removeFromCart: (productId: number) => void;
     clearCart: () => void;
-    getCartTotal: () => number;
 
     // Checkout
     checkout: (payment: { method: string; customer_name?: string; customer_id?: number | null; tax_rate?: number; discount?: number }, userId?: number, sessionId?: number) => Promise<Sale>;
@@ -32,30 +35,58 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
     recentSales: [],
     todayStats: { revenue: 0, orders: 0, profit: 0 },
     cart: [],
+    isLoading: false,
+    error: null,
     stockError: null,
 
+    clearError: () => set({ error: null }),
+
     loadSales: async (filters) => {
-        const sales = await SaleRepo.getAll(filters);
-        set({ sales });
+        try {
+            set({ isLoading: true, error: null });
+            const sales = await SaleRepo.getAll(filters);
+            set({ sales });
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        } finally {
+            set({ isLoading: false });
+        }
     },
 
     loadRecent: async () => {
-        const recentSales = await SaleRepo.getRecentSales(10);
-        set({ recentSales });
+        try {
+            set({ error: null });
+            const recentSales = await SaleRepo.getRecentSales(10);
+            set({ recentSales });
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        }
     },
 
     loadTodayStats: async () => {
-        const todayStats = await SaleRepo.getTodayStats();
-        set({ todayStats });
+        try {
+            set({ error: null });
+            const todayStats = await SaleRepo.getTodayStats();
+            set({ todayStats });
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        }
     },
 
-    addToCart: (item: CartItem) => {
+    addToCart: async (item: CartItem) => {
         const { cart } = get();
         const existing = cart.find((c) => c.product.id === item.product.id);
         const currentQty = existing ? existing.quantity : 0;
 
-        if (currentQty + item.quantity > item.product.stock_quantity) {
-            set({ stockError: { productName: item.product.name, available: item.product.stock_quantity } });
+        // Fetch fresh stock from DB to avoid stale data
+        const freshProduct = await ProductRepo.getById(item.product.id);
+        const availableStock = freshProduct?.stock_quantity ?? item.product.stock_quantity;
+
+        if (currentQty + item.quantity > availableStock) {
+            set({ stockError: { productName: item.product.name, available: availableStock } });
             return;
         }
 
@@ -72,13 +103,17 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
         }
     },
 
-    updateCartItem: (productId: number, quantity: number) => {
+    updateCartItem: async (productId: number, quantity: number) => {
         const { cart } = get();
         const item = cart.find((c) => c.product.id === productId);
         if (!item) return;
 
-        if (quantity > item.product.stock_quantity) {
-            set({ stockError: { productName: item.product.name, available: item.product.stock_quantity } });
+        // Fetch fresh stock from DB to avoid stale data
+        const freshProduct = await ProductRepo.getById(productId);
+        const availableStock = freshProduct?.stock_quantity ?? item.product.stock_quantity;
+
+        if (quantity > availableStock) {
+            set({ stockError: { productName: item.product.name, available: availableStock } });
             return;
         }
 
@@ -99,24 +134,32 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
 
     clearCart: () => set({ cart: [] }),
 
-    getCartTotal: () => {
-        return get().cart.reduce(
-            (sum, item) => sum + item.product.selling_price * item.quantity - item.discount,
-            0
-        );
-    },
-
     checkout: async (payment, userId, sessionId) => {
         const { cart } = get();
         if (cart.length === 0) throw new Error('Cart is empty');
 
-        const sale = await SaleRepo.createFromCart(cart, payment, userId, sessionId);
-        set({ cart: [] });
-        await get().loadSales();
-        await get().loadRecent();
-        await get().loadTodayStats();
-        return sale;
+        try {
+            set({ isLoading: true, error: null });
+            const sale = await SaleRepo.createFromCart(cart, payment, userId, sessionId);
+            set({ cart: [] });
+            await get().loadSales();
+            await get().loadRecent();
+            await get().loadTodayStats();
+            return sale;
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        } finally {
+            set({ isLoading: false });
+        }
     },
 
     clearStockError: () => set({ stockError: null }),
 }));
+
+/** Derived selector — computes cart total from current cart state */
+export const selectCartTotal = (state: SaleStore) =>
+    state.cart.reduce(
+        (sum, item) => sum + item.product.selling_price * item.quantity - item.discount,
+        0
+    );

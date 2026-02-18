@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 
 export default function Transactions() {
     const { t } = useTranslation();
-    const { salesList, loadSales, refundSale, voidSale, period, setPeriod, isLoading } = useReportStore();
+    const { salesList, loadSales, refundSale, voidSale, period, setPeriod, isLoadingSales } = useReportStore();
     const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -136,7 +136,7 @@ export default function Transactions() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-neutral-800/50">
-                            {isLoading ? (
+                            {isLoadingSales ? (
                                 <tr>
                                     <td colSpan={8} className="px-6 py-12 text-center text-zinc-500">
                                         Loading transactions...

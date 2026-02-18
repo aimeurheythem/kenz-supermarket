@@ -23,8 +23,7 @@ interface AuthStore {
     closeCashierSession: (closingCash: number, notes?: string) => Promise<void>;
     updateProfile: (data: Partial<User>) => Promise<boolean>;
     changePassword: (current: string, newPass: string) => Promise<boolean>;
-    logout: () => void;
-    checkAuth: () => boolean;
+    logout: () => Promise<void>;
     hasPermission: (permission: Permission) => boolean;
 
     // Getters
@@ -78,14 +77,16 @@ export const useAuthStore = create<AuthStore>()(
                 try {
                     const user = await UserRepo.authenticate(username, password);
                     if (user) {
-                        set({ user, isAuthenticated: true, currentSession: null, isLoading: false });
+                        set({ user, isAuthenticated: true, currentSession: null });
                         return true;
                     }
-                    set({ error: 'Invalid username or password', isLoading: false });
+                    set({ error: 'Invalid username or password' });
                     return false;
                 } catch (error: any) {
-                    set({ error: error.message || 'Login failed', isLoading: false });
+                    set({ error: error.message || 'Login failed' });
                     return false;
+                } finally {
+                    set({ isLoading: false });
                 }
             },
 
@@ -94,14 +95,16 @@ export const useAuthStore = create<AuthStore>()(
                 try {
                     const user = await UserRepo.authenticateWithPin(cashierId, pinCode);
                     if (user) {
-                        set({ user, isAuthenticated: true, isLoading: false });
+                        set({ user, isAuthenticated: true });
                         return true;
                     }
-                    set({ error: 'Invalid PIN code', isLoading: false });
+                    set({ error: 'Invalid PIN code' });
                     return false;
                 } catch (error: any) {
-                    set({ error: error.message || 'Login failed', isLoading: false });
+                    set({ error: error.message || 'Login failed' });
                     return false;
+                } finally {
+                    set({ isLoading: false });
                 }
             },
 
@@ -141,11 +144,11 @@ export const useAuthStore = create<AuthStore>()(
                 }
             },
 
-            logout: () => {
+            logout: async () => {
                 // Close session if active
                 const { currentSession } = get();
                 if (currentSession) {
-                    get().closeCashierSession(0, 'Auto-closed on logout');
+                    await get().closeCashierSession(0, 'Auto-closed on logout');
                 }
                 set({ user: null, isAuthenticated: false, currentSession: null, error: null });
             },
@@ -178,10 +181,6 @@ export const useAuthStore = create<AuthStore>()(
                 }
             },
 
-            checkAuth: () => {
-                return get().isAuthenticated;
-            },
-
             hasPermission: (permission: Permission) => {
                 const { user } = get();
                 if (!user) return false;
@@ -207,18 +206,3 @@ export const useAuthStore = create<AuthStore>()(
         }
     )
 );
-
-// Navigation items with required permissions
-export const NAV_ITEMS = [
-    { path: '/', label: 'Dashboard', icon: 'LayoutDashboard', permission: 'view_dashboard' as Permission },
-    { path: '/pos', label: 'POS', icon: 'ShoppingCart', permission: 'use_pos' as Permission },
-    { path: '/inventory', label: 'Inventory', icon: 'Package', permission: 'view_inventory' as Permission },
-    { path: '/stock', label: 'Stock Control', icon: 'ClipboardList', permission: 'view_inventory' as Permission },
-    { path: '/suppliers', label: 'Suppliers', icon: 'Truck', permission: 'view_suppliers' as Permission },
-    { path: '/purchases', label: 'Purchases', icon: 'FileText', permission: 'view_suppliers' as Permission },
-    { path: '/reports', label: 'Reports', icon: 'BarChart3', permission: 'view_reports' as Permission },
-    { path: '/users', label: 'Users', icon: 'Users', permission: 'view_users' as Permission },
-    { path: '/credit', label: 'Credit', icon: 'CreditCard', permission: 'view_reports' as Permission },
-    { path: '/settings', label: 'Settings', icon: 'Settings', permission: 'view_settings' as Permission },
-    { path: '/help', label: 'Help', icon: 'HelpCircle', permission: null }, // No permission needed
-];

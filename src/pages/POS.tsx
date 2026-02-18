@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useProductStore } from '@/stores/useProductStore';
-import { useSaleStore } from '@/stores/useSaleStore';
+import { useSaleStore, selectCartTotal } from '@/stores/useSaleStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useQuickAccessStore } from '@/stores/useQuickAccessStore';
 import Portal from '@/components/common/Portal';
@@ -49,7 +49,8 @@ import {
 export default function POS() {
     const { t, i18n } = useTranslation();
     const { products, loadProducts, getByBarcode } = useProductStore();
-    const { cart, addToCart, updateCartItem, removeFromCart, clearCart, getCartTotal, checkout, stockError, clearStockError } = useSaleStore();
+    const { cart, addToCart, updateCartItem, removeFromCart, clearCart, checkout, stockError, clearStockError } = useSaleStore();
+    const cartTotal = useSaleStore(selectCartTotal);
     const { user, currentSession, getCurrentSessionId, closeCashierSession } = useAuthStore();
     const { items: quickAccessItems, fetchItems, addItem, updateItem, deleteItem } = useQuickAccessStore();
 
@@ -86,7 +87,7 @@ export default function POS() {
             barcodeBuffer.current = '';
             const product = await getByBarcode(barcode);
             if (product) {
-                addToCart({ product, quantity: 1, discount: 0 });
+                await addToCart({ product, quantity: 1, discount: 0 });
             }
             return;
         }
@@ -141,9 +142,9 @@ export default function POS() {
         return productStyles[index % productStyles.length];
     };
 
-    const handleAddProduct = (product: Product) => {
+    const handleAddProduct = async (product: Product) => {
         if (product.stock_quantity <= 0) return;
-        addToCart({ product, quantity: 1, discount: 0 });
+        await addToCart({ product, quantity: 1, discount: 0 });
     };
 
     const handleBeforeCheckout = useCallback(() => {
@@ -203,14 +204,12 @@ export default function POS() {
     const handleScan = async (code: string) => {
         const product = await getByBarcode(code);
         if (product) {
-            addToCart({ product, quantity: 1, discount: 0 });
+            await addToCart({ product, quantity: 1, discount: 0 });
             setShowScanner(false);
         } else {
             alert(t('pos.scan.not_found', 'Product not found with barcode: ') + code);
         }
     };
-
-    const cartTotal = getCartTotal();
 
     return (
         <div className="relative flex flex-col lg:flex-row items-start gap-8 p-6 lg:p-8 animate-fadeIn mt-4">

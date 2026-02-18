@@ -6,7 +6,7 @@ import Button from '@/components/common/Button';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import type { Sale, SaleItem } from '@/lib/types';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { useSettingsStore } from '@/stores/useSettingsStore';
+import { useSettingsStore, selectSetting } from '@/stores/useSettingsStore';
 
 interface ReceiptPreviewProps {
     sale: Sale;
@@ -18,7 +18,13 @@ interface ReceiptPreviewProps {
 export default function ReceiptPreview({ sale, items, onClose, onPrint }: ReceiptPreviewProps) {
     const { t } = useTranslation();
     const { user } = useAuthStore();
-    const { getSetting } = useSettingsStore();
+    const storeName = useSettingsStore(selectSetting('store.name', 'SuperMarket Pro'));
+    const storeAddress = useSettingsStore(selectSetting('store.address', 'Store Address'));
+    const storePhone = useSettingsStore(selectSetting('store.phone', ''));
+    const storeEmail = useSettingsStore(selectSetting('store.email', ''));
+    const receiptHeader = useSettingsStore(selectSetting('receipt.header', ''));
+    const receiptFooter = useSettingsStore(selectSetting('receipt.footer', 'Thank you for your visit!'));
+    const receiptShowLogo = useSettingsStore(selectSetting('receipt.showLogo', 'false'));
     const receiptRef = useRef<HTMLDivElement>(null);
 
     const handlePrint = () => {
@@ -28,13 +34,13 @@ export default function ReceiptPreview({ sale, items, onClose, onPrint }: Receip
 
     // Store settings from store
     const storeInfo = {
-        name: getSetting('store.name', 'SuperMarket Pro'),
-        address: getSetting('store.address', 'Store Address'),
-        phone: getSetting('store.phone', ''),
-        email: getSetting('store.email', ''),
-        header: getSetting('receipt.header', ''),
-        footer: getSetting('receipt.footer', 'Thank you for your visit!'),
-        showLogo: getSetting('receipt.showLogo', 'false') === 'true'
+        name: storeName,
+        address: storeAddress,
+        phone: storePhone,
+        email: storeEmail,
+        header: receiptHeader,
+        footer: receiptFooter,
+        showLogo: receiptShowLogo === 'true'
     };
 
     return (

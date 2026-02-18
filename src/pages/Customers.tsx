@@ -9,7 +9,7 @@ import type { Customer } from '@/lib/types';
 
 export default function Customers() {
     const { t } = useTranslation();
-    const { customers, loadCustomers, deleteCustomer, isLoading } = useCustomerStore();
+    const { customers, loadCustomers, deleteCustomer, isLoadingCustomers } = useCustomerStore();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -78,7 +78,7 @@ export default function Customers() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-neutral-800/50">
-                            {isLoading ? (
+                            {isLoadingCustomers ? (
                                 <tr>
                                     <td colSpan={4} className="px-6 py-12 text-center text-zinc-500">
                                         Loading customers...

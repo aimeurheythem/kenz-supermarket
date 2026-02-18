@@ -6,7 +6,10 @@ import { CashierSessionRepo } from '../../database';
 interface UserStore {
     users: User[];
     cashierSessions: CashierSession[];
-    isLoading: boolean;
+    isLoadingUsers: boolean;
+    isLoadingSessions: boolean;
+    error: string | null;
+    clearError: () => void;
     loadUsers: () => Promise<void>;
     addUser: (input: UserInput) => Promise<void>;
     updateUser: (id: number, input: Partial<UserInput & { is_active?: number }>) => Promise<void>;
@@ -24,36 +27,78 @@ interface UserStore {
 export const useUserStore = create<UserStore>((set, get) => ({
     users: [],
     cashierSessions: [],
-    isLoading: false,
+    isLoadingUsers: false,
+    isLoadingSessions: false,
+    error: null,
+
+    clearError: () => set({ error: null }),
 
     loadUsers: async () => {
-        set({ isLoading: true });
-        const users = await UserRepo.getAll();
-        set({ users, isLoading: false });
+        try {
+            set({ isLoadingUsers: true, error: null });
+            const users = await UserRepo.getAll();
+            set({ users });
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        } finally {
+            set({ isLoadingUsers: false });
+        }
     },
 
     addUser: async (input) => {
-        await UserRepo.create(input);
-        await get().loadUsers();
+        try {
+            set({ error: null });
+            await UserRepo.create(input);
+            await get().loadUsers();
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        }
     },
 
     updateUser: async (id, input) => {
-        await UserRepo.update(id, input);
-        await get().loadUsers();
+        try {
+            set({ error: null });
+            await UserRepo.update(id, input);
+            await get().loadUsers();
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        }
     },
 
     deleteUser: async (id) => {
-        await UserRepo.delete(id); // This is soft delete (is_active = 0)
-        await get().loadUsers();
+        try {
+            set({ error: null });
+            await UserRepo.delete(id);
+            await get().loadUsers();
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        }
     },
 
     loadCashierSessions: async (cashierId) => {
-        set({ isLoading: true });
-        const sessions = await CashierSessionRepo.getAll(cashierId ? { cashier_id: cashierId } : undefined);
-        set({ cashierSessions: sessions, isLoading: false });
+        try {
+            set({ isLoadingSessions: true, error: null });
+            const sessions = await CashierSessionRepo.getAll(cashierId ? { cashier_id: cashierId } : undefined);
+            set({ cashierSessions: sessions });
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        } finally {
+            set({ isLoadingSessions: false });
+        }
     },
 
     getCashierPerformance: async (cashierId) => {
-        return await CashierSessionRepo.getCashierPerformance(cashierId);
+        try {
+            set({ error: null });
+            return await CashierSessionRepo.getCashierPerformance(cashierId);
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        }
     }
 }));

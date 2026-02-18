@@ -12,95 +12,99 @@ interface ProductStore {
     products: Product[];
     lowStockProducts: Product[];
     isLoading: boolean;
+    error: string | null;
     filters: ProductFilters;
 
+    clearError: () => void;
     loadProducts: () => Promise<void>;
     loadLowStock: () => Promise<void>;
-    setFilters: (filters: ProductFilters) => void;
+    setFilters: (filters: ProductFilters) => Promise<void>;
     addProduct: (input: ProductInput) => Promise<Product>;
     updateProduct: (id: number, input: Partial<ProductInput>) => Promise<Product>;
     deleteProduct: (id: number) => Promise<void>;
     getByBarcode: (barcode: string) => Promise<Product | undefined>;
 }
 
-// Cross-window synchronization using storage events (more reliable in some Electron versions)
-if (typeof window !== 'undefined') {
-    window.addEventListener('storage', (event) => {
-        if (event.key === 'product-update-signal') {
-            useProductStore.getState().loadProducts();
-            useProductStore.getState().loadLowStock();
-        }
-    });
-
-    // Refresh when window becomes visible
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-            useProductStore.getState().loadProducts();
-            useProductStore.getState().loadLowStock();
-        }
-    });
-}
-
-export const useProductStore = create<ProductStore>((set, get) => {
-    const notifyOtherWindows = () => {
-        if (typeof window !== 'undefined') {
-            window.localStorage.setItem('product-update-signal', Date.now().toString());
-        }
-    };
-
-    return {
+export const useProductStore = create<ProductStore>((set, get) => ({
         products: [],
         lowStockProducts: [],
         isLoading: false,
+        error: null,
         filters: { active_only: true },
 
+        clearError: () => set({ error: null }),
+
         loadProducts: async () => {
-            set({ isLoading: true });
             try {
+                set({ isLoading: true, error: null });
                 const products = await ProductRepo.getAll(get().filters);
                 set({ products });
+            } catch (e) {
+                set({ error: (e as Error).message });
+                throw e;
             } finally {
                 set({ isLoading: false });
             }
         },
 
         loadLowStock: async () => {
-            const products = await ProductRepo.getAll({ low_stock: true });
-            set({ lowStockProducts: products });
+            try {
+                set({ error: null });
+                const products = await ProductRepo.getAll({ low_stock: true });
+                set({ lowStockProducts: products });
+            } catch (e) {
+                set({ error: (e as Error).message });
+                throw e;
+            }
         },
 
-        setFilters: (filters) => {
+        setFilters: async (filters) => {
             set({ filters: { ...get().filters, ...filters } });
-            get().loadProducts();
+            await get().loadProducts();
         },
 
         addProduct: async (input) => {
-            const product = await ProductRepo.create(input);
-            // Optimistic update: Add to list immediately
-            set(state => ({
-                products: [product, ...state.products],
-                filters: { ...state.filters, search: undefined, category_id: undefined } // Reset filters in store
-            }));
-            await get().loadProducts();
-            notifyOtherWindows();
-            return product;
+            try {
+                set({ error: null });
+                const product = await ProductRepo.create(input);
+                await get().loadProducts();
+                return product;
+            } catch (e) {
+                set({ error: (e as Error).message });
+                throw e;
+            }
         },
 
         updateProduct: async (id, input) => {
-            const product = await ProductRepo.update(id, input);
-            await get().loadProducts();
-            notifyOtherWindows();
-            return product;
+            try {
+                set({ error: null });
+                const product = await ProductRepo.update(id, input);
+                await get().loadProducts();
+                return product;
+            } catch (e) {
+                set({ error: (e as Error).message });
+                throw e;
+            }
         },
 
         deleteProduct: async (id) => {
-            await ProductRepo.delete(id);
-            await get().loadProducts();
-            notifyOtherWindows();
+            try {
+                set({ error: null });
+                await ProductRepo.delete(id);
+                await get().loadProducts();
+            } catch (e) {
+                set({ error: (e as Error).message });
+                throw e;
+            }
         },
 
         getByBarcode: async (barcode) => {
-            return ProductRepo.getByBarcode(barcode);
+            try {
+                set({ error: null });
+                return await ProductRepo.getByBarcode(barcode);
+            } catch (e) {
+                set({ error: (e as Error).message });
+                throw e;
+            }
         },
-    };
-});
+}));

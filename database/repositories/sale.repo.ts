@@ -121,18 +121,24 @@ export const SaleRepo = {
             for (const item of cart) {
                 const itemTotal = item.product.selling_price * item.quantity - item.discount;
 
+                // Validate stock inside the transaction — reject if insufficient
+                const product = await get<{ stock_quantity: number; name: string }>(
+                    "SELECT stock_quantity, name FROM products WHERE id = ?",
+                    [item.product.id]
+                );
+                const previousStock = product?.stock_quantity ?? 0;
+
+                if (previousStock < item.quantity) {
+                    throw new Error(
+                        `Insufficient stock for "${product?.name || item.product.name}": requested ${item.quantity}, available ${previousStock}`
+                    );
+                }
+
                 await executeNoSave(
                     `INSERT INTO sale_items (sale_id, product_id, product_name, quantity, unit_price, discount, total)
                      VALUES (?, ?, ?, ?, ?, ?, ?)`,
                     [saleId, item.product.id, item.product.name, item.quantity, item.product.selling_price, item.discount, itemTotal]
                 );
-
-                // Read previous stock for movement log
-                const product = await get<{ stock_quantity: number }>(
-                    "SELECT stock_quantity FROM products WHERE id = ?",
-                    [item.product.id]
-                );
-                const previousStock = product?.stock_quantity || 0;
 
                 // Atomic stock decrement — no gap between read and write
                 await executeNoSave(

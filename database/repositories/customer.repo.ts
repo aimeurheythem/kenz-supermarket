@@ -1,4 +1,4 @@
-import { query, execute, get, lastInsertId } from '../db';
+import { query, execute, executeNoSave, triggerSave, get, lastInsertId } from '../db';
 import type { Customer, CustomerInput } from '../../src/lib/types';
 
 export const CustomerRepo = {
@@ -88,17 +88,27 @@ export const CustomerRepo = {
         const balanceChange = type === 'debt' ? amount : -amount;
         const newBalance = (customer.total_debt || 0) + balanceChange;
 
-        await execute(
-            `INSERT INTO customer_transactions (customer_id, type, amount, balance_after, reference_type, reference_id, description)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [customerId, type, amount, newBalance, referenceType || null, referenceId || null, description || null]
-        );
+        try {
+            await executeNoSave('BEGIN TRANSACTION;');
 
-        // Atomic debt update — avoids race if two transactions hit the same customer
-        await execute(
-            'UPDATE customers SET total_debt = total_debt + ?, updated_at = datetime("now") WHERE id = ?',
-            [balanceChange, customerId]
-        );
+            await executeNoSave(
+                `INSERT INTO customer_transactions (customer_id, type, amount, balance_after, reference_type, reference_id, description)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                [customerId, type, amount, newBalance, referenceType || null, referenceId || null, description || null]
+            );
+
+            // Atomic debt update
+            await executeNoSave(
+                'UPDATE customers SET total_debt = total_debt + ?, updated_at = datetime("now") WHERE id = ?',
+                [balanceChange, customerId]
+            );
+
+            await executeNoSave('COMMIT;');
+            triggerSave();
+        } catch (error) {
+            await executeNoSave('ROLLBACK;');
+            throw error;
+        }
     },
 
     async getTransactions(customerId: number): Promise<any[]> {

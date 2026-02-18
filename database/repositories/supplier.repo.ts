@@ -1,5 +1,6 @@
 import { query, execute, lastInsertId, get } from '../db';
 import type { Supplier, SupplierInput } from '../../src/lib/types';
+import { AuditLogRepo } from './audit-log.repo';
 
 export const SupplierRepo = {
     async getAll(filters?: { search?: string; active_only?: boolean }): Promise<Supplier[]> {
@@ -28,6 +29,9 @@ export const SupplierRepo = {
             [input.name, input.contact_person || '', input.phone || '', input.email || '', input.address || '']
         );
         const id = await lastInsertId();
+
+        AuditLogRepo.log('CREATE', 'SUPPLIER', id, `Created supplier: ${input.name}`, null, { name: input.name, phone: input.phone, email: input.email });
+
         return this.getById(id) as Promise<Supplier>;
     },
 
@@ -44,7 +48,11 @@ export const SupplierRepo = {
         fields.push("updated_at = datetime('now')");
         values.push(id);
 
+        const oldSupplier = await this.getById(id);
         await execute(`UPDATE suppliers SET ${fields.join(', ')} WHERE id = ?`, values);
+
+        AuditLogRepo.log('UPDATE', 'SUPPLIER', id, `Updated supplier #${id}`, oldSupplier, input);
+
         return this.getById(id) as Promise<Supplier>;
     },
 
@@ -53,7 +61,10 @@ export const SupplierRepo = {
     },
 
     async delete(id: number): Promise<void> {
+        const supplier = await this.getById(id);
         await execute('UPDATE suppliers SET is_active = 0 WHERE id = ?', [id]);
+
+        AuditLogRepo.log('DELETE', 'SUPPLIER', id, `Deactivated supplier: ${supplier?.name || id}`, { is_active: 1 }, { is_active: 0 });
     },
 
     async count(): Promise<number> {

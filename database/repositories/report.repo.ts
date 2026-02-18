@@ -60,22 +60,17 @@ export const ReportRepo = {
 
     async getSalesChart(period: 'today' | '7days' | '30days' | 'year'): Promise<SalesChartData[]> {
         const { start, end } = this.getSalesParams(period);
-        // SQLite doesn't natively support easy date generation for filling gaps, 
-        // so we'll just query existing data and let frontend fill gaps or just show available points.
-        // For 'year' we might group by month.
 
-        const groupBy = period === 'year' ? '%Y-%m' : '%Y-%m-%d';
+        // Use static SQL strings — never interpolate into SQL
+        const sql = period === 'year'
+            ? `SELECT strftime('%Y-%m', sale_date) as date, SUM(total) as revenue, COUNT(id) as orders
+               FROM sales WHERE sale_date BETWEEN ? AND ? AND status = 'completed'
+               GROUP BY date ORDER BY date ASC`
+            : `SELECT strftime('%Y-%m-%d', sale_date) as date, SUM(total) as revenue, COUNT(id) as orders
+               FROM sales WHERE sale_date BETWEEN ? AND ? AND status = 'completed'
+               GROUP BY date ORDER BY date ASC`;
 
-        return query<SalesChartData>(`
-            SELECT 
-                strftime('${groupBy}', sale_date) as date, 
-                SUM(total) as revenue, 
-                COUNT(id) as orders
-            FROM sales 
-            WHERE sale_date BETWEEN ? AND ? AND status = 'completed'
-            GROUP BY date
-            ORDER BY date ASC
-        `, [start, end]);
+        return query<SalesChartData>(sql, [start, end]);
     },
 
     async getTopProducts(limit: number = 5): Promise<TopProductData[]> {

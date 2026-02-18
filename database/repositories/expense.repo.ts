@@ -1,5 +1,6 @@
 import { execute, get, query, lastInsertId } from '../db';
 import type { Expense, ExpenseInput } from '@/lib/types';
+import { AuditLogRepo } from './audit-log.repo';
 
 export class ExpenseRepo {
     static async create(expense: ExpenseInput): Promise<number> {
@@ -15,7 +16,16 @@ export class ExpenseRepo {
                 expense.user_id || null
             ]
         );
-        return await lastInsertId();
+        const id = await lastInsertId();
+
+        AuditLogRepo.log('CREATE', 'EXPENSE', id,
+            `Expense: ${expense.description} — ${expense.amount}`,
+            null,
+            { description: expense.description, amount: expense.amount, category: expense.category },
+            expense.user_id || null
+        );
+
+        return id;
     }
 
     static async getAll(filters?: { startDate?: string; endDate?: string; category?: string }): Promise<Expense[]> {
@@ -43,7 +53,14 @@ export class ExpenseRepo {
     }
 
     static async delete(id: number): Promise<void> {
+        const expense = await get<Expense>('SELECT * FROM expenses WHERE id = ?', [id]);
         await execute('DELETE FROM expenses WHERE id = ?', [id]);
+
+        AuditLogRepo.log('DELETE', 'EXPENSE', id,
+            `Deleted expense: ${expense?.description || id}`,
+            expense ? { description: expense.description, amount: expense.amount, category: expense.category } : null,
+            null
+        );
     }
 
     static async getStats(startDate?: string, endDate?: string): Promise<{ total: number; byCategory: { category: string; total: number }[] }> {

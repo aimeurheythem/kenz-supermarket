@@ -40,22 +40,30 @@ export const SettingsRepo = {
         const oldSettings = await this.getAll();
         const changes: { key: string, old: string | null, new: string }[] = [];
 
-        // Use executeNoSave for batch updates to avoid multiple IO writes
-        const entries = Object.entries(settings);
-        for (const [key, value] of entries) {
-            if (oldSettings[key] !== value) {
-                changes.push({ key, old: oldSettings[key] || null, new: value });
-                await executeNoSave(
-                    `INSERT INTO app_settings (key, value, updated_at) 
-                     VALUES (?, ?, datetime('now')) 
-                     ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = datetime('now')`,
-                    [key, value, value]
-                );
-            }
-        }
-        await triggerSave();
+        try {
+            await executeNoSave('BEGIN TRANSACTION;');
 
-        // Batch Log
+            const entries = Object.entries(settings);
+            for (const [key, value] of entries) {
+                if (oldSettings[key] !== value) {
+                    changes.push({ key, old: oldSettings[key] || null, new: value });
+                    await executeNoSave(
+                        `INSERT INTO app_settings (key, value, updated_at) 
+                         VALUES (?, ?, datetime('now')) 
+                         ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = datetime('now')`,
+                        [key, value, value]
+                    );
+                }
+            }
+
+            await executeNoSave('COMMIT;');
+            triggerSave();
+        } catch (error) {
+            await executeNoSave('ROLLBACK;');
+            throw error;
+        }
+
+        // Batch Log (outside transaction — non-critical)
         if (changes.length > 0) {
             await AuditLogRepo.log('UPDATE_BATCH', 'SETTINGS', 'BATCH', `Updated ${changes.length} settings`, changes.map(c => ({ key: c.key, value: c.old })), changes.map(c => ({ key: c.key, value: c.new })));
         }

@@ -113,13 +113,15 @@ export const AuditLogRepo = {
 
         const logs = await query<AuditLog>(sql, params);
 
-        // Parse JSON fields
+        // Parse JSON fields defensively
         return {
-            logs: logs.map(log => ({
-                ...log,
-                old_value: log.old_value ? JSON.parse(log.old_value) : null,
-                new_value: log.new_value ? JSON.parse(log.new_value) : null
-            })),
+            logs: logs.map(log => {
+                let old_value = log.old_value;
+                let new_value = log.new_value;
+                try { old_value = old_value ? JSON.parse(old_value) : null; } catch { /* keep raw string */ }
+                try { new_value = new_value ? JSON.parse(new_value) : null; } catch { /* keep raw string */ }
+                return { ...log, old_value, new_value };
+            }),
             total
         };
     }

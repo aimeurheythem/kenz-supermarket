@@ -10,10 +10,11 @@ export const QuickAccessRepo = {
             ORDER BY qa.created_at DESC
         `;
         const results = await query<any>(sql);
-        return results.map(row => ({
-            ...row,
-            options: JSON.parse(row.options || '[]')
-        }));
+        return results.map(row => {
+            let options = [];
+            try { options = JSON.parse(row.options || '[]'); } catch { /* default to empty array */ }
+            return { ...row, options };
+        });
     },
 
     async getById(id: number): Promise<QuickAccessItem | undefined> {
@@ -26,10 +27,9 @@ export const QuickAccessRepo = {
         const result = await get<any>(sql, [id]);
         if (!result) return undefined;
 
-        return {
-            ...result,
-            options: JSON.parse(result.options || '[]')
-        };
+        let options = [];
+        try { options = JSON.parse(result.options || '[]'); } catch { /* default to empty array */ }
+        return { ...result, options };
     },
 
     async create(input: QuickAccessItemInput): Promise<QuickAccessItem> {

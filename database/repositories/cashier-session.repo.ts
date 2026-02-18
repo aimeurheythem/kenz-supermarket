@@ -1,4 +1,4 @@
-import { query, execute, lastInsertId, get } from '../db';
+import { query, execute, executeNoSave, triggerSave, lastInsertId, get } from '../db';
 import type { CashierSession, CashierSessionInput, SessionCloseInput } from '../../src/lib/types';
 
 export const CashierSessionRepo = {
@@ -79,19 +79,17 @@ export const CashierSessionRepo = {
                 return null;
             }
 
+            await executeNoSave('BEGIN TRANSACTION;');
+
             // Close any existing active sessions for this cashier first
-            try {
-                await execute(`
-                    UPDATE cashier_sessions 
-                    SET status = 'force_closed', logout_time = datetime('now'), notes = 'Auto-closed: new session started'
-                    WHERE cashier_id = ? AND status = 'active'
-                `, [input.cashier_id]);
-            } catch (e) {
-                // No existing sessions to close — non-critical
-            }
+            await executeNoSave(`
+                UPDATE cashier_sessions 
+                SET status = 'force_closed', logout_time = datetime('now'), notes = 'Auto-closed: new session started'
+                WHERE cashier_id = ? AND status = 'active'
+            `, [input.cashier_id]);
 
             // Insert new session
-            await execute(
+            await executeNoSave(
                 'INSERT INTO cashier_sessions (cashier_id, opening_cash, status) VALUES (?, ?, ?)',
                 [input.cashier_id, input.opening_cash, 'active']
             );
@@ -106,11 +104,15 @@ export const CashierSessionRepo = {
             }
 
             if (!newSessionId || newSessionId === 0) {
+                await executeNoSave('ROLLBACK;');
                 console.error('Invalid session ID after insert');
                 return null;
             }
 
-            // Retrieve the created session
+            await executeNoSave('COMMIT;');
+            triggerSave();
+
+            // Retrieve the created session (after commit so it's visible)
             const session = await this.getById(newSessionId);
             if (!session || !session.id) {
                 console.error('Failed to retrieve created session');
@@ -119,6 +121,7 @@ export const CashierSessionRepo = {
 
             return session;
         } catch (error) {
+            try { await executeNoSave('ROLLBACK;'); } catch (_) { /* already rolled back */ }
             console.error('Error starting cashier session:', error);
             return null;
         }

@@ -65,21 +65,21 @@
 
 > **Why:** Race conditions in the data layer can cause lost stock updates, incorrect debt balances, and corrupted purchase orders.
 
-### 2.1 Fix Race Conditions with Atomic SQL
+### 2.1 Fix Race Conditions with Atomic SQL ✅
 
-- [ ] `database/repositories/stock.repo.ts` — `addStock()`: replace read-compute-write with `UPDATE products SET stock_quantity = stock_quantity + ? WHERE id = ?`
-- [ ] `stock.repo.ts` — `removeStock()`: use `UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?` + add CHECK for negative stock
-- [ ] `stock.repo.ts` — `adjustStock()`: use atomic `UPDATE ... SET stock_quantity = ?` within a transaction
-- [ ] `database/repositories/customer.repo.ts` — `addTransaction()`: replace JS balance computation with `UPDATE customers SET total_debt = total_debt + ? WHERE id = ?`
-- [ ] `database/repositories/sale.repo.ts` — credit sale balance update (L82-95): use atomic SQL `total_debt = total_debt + ?`
+- [x] `database/repositories/stock.repo.ts` — `addStock()`: replace read-compute-write with `UPDATE products SET stock_quantity = stock_quantity + ? WHERE id = ?`
+- [x] `stock.repo.ts` — `removeStock()`: use `UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?` + add CHECK for negative stock
+- [x] `stock.repo.ts` — `adjustStock()`: use atomic `UPDATE ... SET stock_quantity = ?` within a transaction
+- [x] `database/repositories/customer.repo.ts` — `addTransaction()`: replace JS balance computation with `UPDATE customers SET total_debt = total_debt + ? WHERE id = ?`
+- [x] `database/repositories/sale.repo.ts` — credit sale balance update (L82-95): use atomic SQL `total_debt = total_debt + ?`
 
-### 2.2 Wrap Multi-Step Operations in Transactions
+### 2.2 Wrap Multi-Step Operations in Transactions ✅
 
-- [ ] `database/repositories/purchase.repo.ts` — `create()`: wrap PO + items + total update in `BEGIN/COMMIT/ROLLBACK`
-- [ ] `purchase.repo.ts` — `receive()`: wrap stock updates + item received_quantity updates in transaction
-- [ ] `database/repositories/settings.repo.ts` — `setMany()`: wrap batch settings in transaction
-- [ ] `database/repositories/cashier-session.repo.ts` — `startSession()`: wrap force-close + INSERT + SELECT in transaction
-- [ ] Audit all repos: any method with 2+ write operations must use transactions
+- [x] `database/repositories/purchase.repo.ts` — `create()`: wrap PO + items + total update in `BEGIN/COMMIT/ROLLBACK`
+- [x] `purchase.repo.ts` — `receive()`: wrap stock updates + item received_quantity updates in transaction
+- [x] `database/repositories/settings.repo.ts` — `setMany()`: wrap batch settings in transaction
+- [x] `database/repositories/cashier-session.repo.ts` — `startSession()`: wrap force-close + INSERT + SELECT in transaction
+- [x] Audit all repos: any method with 2+ write operations must use transactions (stock.repo.ts 3 methods + customer.repo.ts addTransaction)
 
 ### 2.3 Add Defensive JSON Parsing
 

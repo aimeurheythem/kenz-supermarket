@@ -1,5 +1,6 @@
 import { query, execute, lastInsertId, get, transactionOperations, executeNoSave, triggerSave } from '../db';
 import type { Sale, SaleItem, CartItem } from '../../src/lib/types';
+import { AuditLogRepo } from './audit-log.repo';
 
 export const SaleRepo = {
     async getAll(filters?: { from?: string; to?: string; status?: string; limit?: number }): Promise<Sale[]> {
@@ -157,6 +158,16 @@ export const SaleRepo = {
             // Return the created sale
             const sale = await this.getById(saleId);
             if (!sale) throw new Error(`Failed to retrieve created sale with ID ${saleId}`);
+
+            // Audit log (non-critical — outside transaction)
+            AuditLogRepo.log(
+                'CREATE', 'SALE', saleId,
+                `Sale #${saleId} — ${cart.length} items, total ${total}, payment: ${payment.method}`,
+                null,
+                { total, items: cart.length, payment_method: payment.method, customer_id: payment.customer_id || null },
+                userId || null
+            );
+
             return sale;
         } catch (error) {
             // Rollback on error
@@ -236,6 +247,14 @@ export const SaleRepo = {
 
             await executeNoSave('COMMIT;');
             triggerSave();
+
+            // Audit log (non-critical — outside transaction)
+            AuditLogRepo.log(
+                newStatus === 'refunded' ? 'REFUND' : 'VOID', 'SALE', saleId,
+                `Sale #${saleId} ${newStatus} — ${reason}`,
+                { status: sale.status, total: sale.total },
+                { status: newStatus, total: sale.total, items_restored: items.length }
+            );
         } catch (error) {
             await executeNoSave('ROLLBACK;');
             console.error(`Failed to ${newStatus} sale ${saleId}:`, error);

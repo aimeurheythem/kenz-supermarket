@@ -49,7 +49,7 @@ function legacyVerify(password: string, hash: string): boolean {
 }
 
 // Safe column list — never expose password_hash or pin_code to frontend
-const USER_SAFE_COLUMNS = 'id, username, full_name, role, is_active, (CASE WHEN pin_code IS NOT NULL AND pin_code != \'\' THEN 1 ELSE 0 END) as has_pin, last_login, created_at, updated_at';
+const USER_SAFE_COLUMNS = 'id, username, full_name, role, is_active, (CASE WHEN pin_code IS NOT NULL AND pin_code != \'\' THEN 1 ELSE 0 END) as has_pin, pin_length, last_login, created_at, updated_at';
 
 // Internal column list — includes secrets for auth verification only
 const USER_ALL_COLUMNS = 'id, username, password_hash, pin_code, full_name, role, is_active, last_login, created_at, updated_at';
@@ -94,9 +94,10 @@ export const UserRepo = {
     async create(input: UserInput): Promise<User> {
         const passwordHash = await hashPassword(input.password);
         const pinCode = input.pin_code ? await hashPin(input.pin_code) : null;
+        const pinLength = input.pin_code ? input.pin_code.length : 4;
         await execute(
-            'INSERT INTO users (username, password_hash, pin_code, full_name, role) VALUES (?, ?, ?, ?, ?)',
-            [input.username, passwordHash, pinCode, input.full_name, input.role]
+            'INSERT INTO users (username, password_hash, pin_code, pin_length, full_name, role) VALUES (?, ?, ?, ?, ?, ?)',
+            [input.username, passwordHash, pinCode, pinLength, input.full_name, input.role]
         );
         const id = await lastInsertId();
         return this.getById(id) as Promise<User>;
@@ -168,6 +169,8 @@ export const UserRepo = {
             const hashedPin = input.pin_code ? await hashPin(input.pin_code) : null;
             fields.push('pin_code = ?');
             values.push(hashedPin);
+            fields.push('pin_length = ?');
+            values.push(input.pin_code ? input.pin_code.length : 4);
         }
         if (input.is_active !== undefined) { fields.push('is_active = ?'); values.push(input.is_active); }
 

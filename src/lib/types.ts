@@ -207,6 +207,7 @@ export interface User {
     role: 'admin' | 'manager' | 'cashier';
     is_active: number;
     has_pin?: number;  // 1 if a PIN is set, 0 otherwise (safe computed field)
+    pin_length?: number; // Original PIN digit count (4–8)
     last_login: string | null;
     created_at: string;
     updated_at: string;

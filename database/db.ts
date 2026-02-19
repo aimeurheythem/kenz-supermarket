@@ -203,6 +203,9 @@ async function initDatabaseInternal(): Promise<void> {
     // Apply schema (CREATE IF NOT EXISTS — safe to run every time)
     sqlJsDb.run(SCHEMA_SQL);
 
+    // Column migrations — ALTER TABLE is safe to run every time (no-op if column exists)
+    try { sqlJsDb.run("ALTER TABLE users ADD COLUMN pin_length INTEGER DEFAULT 4"); } catch (_) { /* already exists */ }
+
     // Enable foreign keys
     try {
         sqlJsDb.run('PRAGMA foreign_keys = ON;');

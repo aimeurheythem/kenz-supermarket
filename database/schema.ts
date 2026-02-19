@@ -186,6 +186,7 @@ CREATE TABLE IF NOT EXISTS users (
   username TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   pin_code TEXT, -- For quick cashier login (4-6 digits)
+  pin_length INTEGER DEFAULT 4, -- Original PIN digit count (stored separately since pin_code is bcrypt-hashed)
   full_name TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'cashier', -- 'admin', 'manager', 'cashier'
   is_active INTEGER DEFAULT 1,

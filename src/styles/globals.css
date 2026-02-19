@@ -26,7 +26,7 @@
 
 
   /* =============================================
-     OPENAI CODEX INSPIRED COLOR PALETTE (LIGHT)
+      OPENAI CODEX INSPIRED COLOR PALETTE (LIGHT)
      ============================================= */
 
   /* Background Colors */
@@ -711,6 +711,24 @@ select:focus,
 textarea:focus {
   border-color: var(--accent) !important;
   box-shadow: 0 0 0 1px var(--accent) !important;
+}
+
+/* Suppress inner ring for inputs sitting inside a styled container that already shows a ring */
+.no-inner-ring:focus {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* =============================================
+   MARQUEE ANIMATIONS
+   ============================================= */
+@keyframes marquee-left {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes marquee-right {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
 }
 
 /* =============================================

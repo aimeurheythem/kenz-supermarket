@@ -136,7 +136,7 @@ export default function Purchases() {
                         {orders.length === 0 ? (
                             <tr>
                                 <td colSpan={6} className="px-4 py-12 text-center text-[var(--color-text-muted)]">
-                                    No purchase orders found.
+                                    {t('purchases.no_orders')}
                                 </td>
                             </tr>
                         ) : (
@@ -158,7 +158,7 @@ export default function Purchases() {
                                             <button
                                                 onClick={() => setViewedOrder(order.id)}
                                                 className="p-1.5 rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-active)] hover:text-[var(--color-text-primary)]"
-                                                title="View Details"
+                                                title={t('purchases.view_details')}
                                             >
                                                 <Eye size={16} />
                                             </button>
@@ -166,7 +166,7 @@ export default function Purchases() {
                                                 <button
                                                     onClick={() => receiveOrder(order.id)}
                                                     className="p-1.5 rounded-[var(--radius-sm)] text-[var(--color-success)] hover:bg-[var(--color-success-muted)]"
-                                                    title="Receive Items"
+                                                    title={t('purchases.receive_items')}
                                                 >
                                                     <CheckCircle size={16} />
                                                 </button>
@@ -312,15 +312,15 @@ export default function Purchases() {
                     <div className="space-y-6">
                         <div className="flex justify-between items-start p-4 bg-[var(--color-bg-secondary)] rounded-[var(--radius-md)]">
                             <div>
-                                <p className="text-xs text-[var(--color-text-muted)] uppercase">Supplier</p>
+                                <p className="text-xs text-[var(--color-text-muted)] uppercase">{t('purchases.label_supplier')}</p>
                                 <p className="font-semibold text-lg">{activeOrder.supplier_name}</p>
                             </div>
                             <div className="text-right">
-                                <p className="text-xs text-[var(--color-text-muted)] uppercase">Date</p>
+                                <p className="text-xs text-[var(--color-text-muted)] uppercase">{t('purchases.col_date')}</p>
                                 <p className="font-semibold">{formatDate(activeOrder.order_date)}</p>
                             </div>
                             <div className="text-right">
-                                <p className="text-xs text-[var(--color-text-muted)] uppercase">Status</p>
+                                <p className="text-xs text-[var(--color-text-muted)] uppercase">{t('purchases.col_status')}</p>
                                 <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium capitalize", getStatusColor(activeOrder.status))}>
                                     {activeOrder.status}
                                 </span>
@@ -332,10 +332,10 @@ export default function Purchases() {
                             <table className="w-full">
                                 <thead>
                                     <tr className="border-b border-[var(--color-border)]">
-                                        <th className="text-left py-2 text-xs font-medium text-[var(--color-text-muted)]">Product</th>
-                                        <th className="text-right py-2 text-xs font-medium text-[var(--color-text-muted)]">Quantity</th>
-                                        <th className="text-right py-2 text-xs font-medium text-[var(--color-text-muted)]">Cost</th>
-                                        <th className="text-right py-2 text-xs font-medium text-[var(--color-text-muted)]">Total</th>
+                                        <th className="text-left py-2 text-xs font-medium text-[var(--color-text-muted)]">{t('purchases.col_product')}</th>
+                                        <th className="text-right py-2 text-xs font-medium text-[var(--color-text-muted)]">{t('purchases.col_quantity')}</th>
+                                        <th className="text-right py-2 text-xs font-medium text-[var(--color-text-muted)]">{t('purchases.col_unit_cost')}</th>
+                                        <th className="text-right py-2 text-xs font-medium text-[var(--color-text-muted)]">{t('purchases.col_line_total')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-[var(--color-border)]">

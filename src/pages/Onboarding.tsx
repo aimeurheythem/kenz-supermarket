@@ -22,10 +22,10 @@ import Button from '@/components/common/Button';
 
 // Step definitions
 const STEPS = [
-    { id: 'welcome', title: 'Welcome', icon: Globe },
-    { id: 'store', title: 'Store Info', icon: Store },
-    { id: 'admin', title: 'Admin Account', icon: User },
-    { id: 'preferences', title: 'Preferences', icon: SettingsIcon },
+    { id: 'welcome', title: 'onboarding.step_welcome', icon: Globe },
+    { id: 'store', title: 'onboarding.step_store', icon: Store },
+    { id: 'admin', title: 'onboarding.step_admin', icon: User },
+    { id: 'preferences', title: 'onboarding.step_preferences', icon: SettingsIcon },
 ];
 
 export default function Onboarding() {
@@ -120,7 +120,7 @@ export default function Onboarding() {
             }
         } catch (error) {
             console.error('Setup failed:', error);
-            toast.error('Setup failed. Please try again.');
+            toast.error(t('onboarding.setup_failed'));
         } finally {
             setLoading(false);
         }
@@ -173,7 +173,7 @@ export default function Onboarding() {
                     <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
                         <div className="w-4 h-4 border-2 border-white rotate-45" />
                     </div>
-                    <span className="font-bold tracking-tight text-lg">Kenzy Setup</span>
+                    <span className="font-bold tracking-tight text-lg">{t('onboarding.app_name')}</span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -218,8 +218,8 @@ export default function Onboarding() {
                         {currentStep === 0 && (
                             <div className="space-y-8 text-center">
                                 <div className="space-y-2">
-                                    <h1 className="text-4xl font-extrabold tracking-tight">Welcome to Kenzy</h1>
-                                    <p className="text-zinc-500 text-lg">Let's set up your store in a few minutes.</p>
+                                    <h1 className="text-4xl font-extrabold tracking-tight">{t('onboarding.welcome_title')}</h1>
+                                    <p className="text-zinc-500 text-lg">{t('onboarding.welcome_subtitle')}</p>
                                 </div>
 
                                 <div className="grid grid-cols-3 gap-4 pt-4">
@@ -250,51 +250,51 @@ export default function Onboarding() {
                         {currentStep === 1 && (
                             <div className="space-y-6">
                                 <div className="text-center mb-8">
-                                    <h2 className="text-3xl font-bold mb-2">Store Profile</h2>
-                                    <p className="text-zinc-500">How should your store appear on receipts?</p>
+                                    <h2 className="text-3xl font-bold mb-2">{t('onboarding.store_title')}</h2>
+                                    <p className="text-zinc-500">{t('onboarding.store_subtitle')}</p>
                                 </div>
 
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-bold mb-1.5 ml-1">Store Name</label>
+                                        <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_store_name')}</label>
                                         <input
                                             type="text"
                                             value={formData.storeName}
                                             onChange={(e) => setFormData({ ...formData, storeName: e.target.value })}
                                             className="w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium"
-                                            placeholder="e.g. My Supermarket"
+                                            placeholder={t('onboarding.placeholder_store_name')}
                                             autoFocus
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-bold mb-1.5 ml-1">Phone</label>
+                                            <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_phone')}</label>
                                             <input
                                                 type="tel"
                                                 value={formData.storePhone}
                                                 onChange={(e) => setFormData({ ...formData, storePhone: e.target.value })}
                                                 className="w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium"
-                                                placeholder="+1 234..."
+                                                placeholder={t('onboarding.placeholder_phone')}
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-bold mb-1.5 ml-1">Email</label>
+                                            <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_email')}</label>
                                             <input
                                                 type="email"
                                                 value={formData.storeEmail}
                                                 onChange={(e) => setFormData({ ...formData, storeEmail: e.target.value })}
                                                 className="w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium"
-                                                placeholder="store@email.com"
+                                                placeholder={t('onboarding.placeholder_email')}
                                             />
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-bold mb-1.5 ml-1">Address</label>
+                                        <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_address')}</label>
                                         <textarea
                                             value={formData.storeAddress}
                                             onChange={(e) => setFormData({ ...formData, storeAddress: e.target.value })}
                                             className="w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium resize-none h-24"
-                                            placeholder="123 Main St, City..."
+                                            placeholder={t('onboarding.placeholder_address')}
                                         />
                                     </div>
                                 </div>
@@ -305,34 +305,34 @@ export default function Onboarding() {
                         {currentStep === 2 && (
                             <div className="space-y-6">
                                 <div className="text-center mb-8">
-                                    <h2 className="text-3xl font-bold mb-2">Admin Access</h2>
-                                    <p className="text-zinc-500">Create your master administrator account.</p>
+                                    <h2 className="text-3xl font-bold mb-2">{t('onboarding.admin_title')}</h2>
+                                    <p className="text-zinc-500">{t('onboarding.admin_subtitle')}</p>
                                 </div>
 
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-bold mb-1.5 ml-1">Full Name</label>
+                                        <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_full_name')}</label>
                                         <input
                                             type="text"
                                             value={formData.adminName}
                                             onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
                                             className="w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium"
-                                            placeholder="John Doe"
+                                            placeholder={t('onboarding.placeholder_full_name')}
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-bold mb-1.5 ml-1">Username</label>
+                                        <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_username')}</label>
                                         <input
                                             type="text"
                                             value={formData.adminUsername}
                                             onChange={(e) => setFormData({ ...formData, adminUsername: e.target.value })}
                                             className="w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium"
-                                            placeholder="admin"
+                                            placeholder={t('onboarding.placeholder_username')}
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-bold mb-1.5 ml-1">Password</label>
+                                            <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_password')}</label>
                                             <input
                                                 type="password"
                                                 value={formData.adminPassword}
@@ -341,14 +341,14 @@ export default function Onboarding() {
                                                     "w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium",
                                                     formData.adminPassword && !validatePassword(formData.adminPassword).valid && "border-red-500 focus:border-red-500"
                                                 )}
-                                                placeholder="Min 8 chars, upper+lower+digit"
+                                                placeholder={t('onboarding.placeholder_password')}
                                             />
                                             {formData.adminPassword && !validatePassword(formData.adminPassword).valid && (
                                                 <p className="text-xs text-red-500 mt-1 ml-1">{validatePassword(formData.adminPassword).message}</p>
                                             )}
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-bold mb-1.5 ml-1">Confirm</label>
+                                            <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_confirm')}</label>
                                             <input
                                                 type="password"
                                                 value={formData.adminConfirmPassword}
@@ -357,7 +357,7 @@ export default function Onboarding() {
                                                     "w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium",
                                                     formData.adminConfirmPassword && formData.adminPassword !== formData.adminConfirmPassword && "border-red-500 focus:border-red-500"
                                                 )}
-                                                placeholder="••••••"
+                                                placeholder={t('onboarding.placeholder_confirm')}
                                             />
                                         </div>
                                     </div>
@@ -369,14 +369,14 @@ export default function Onboarding() {
                         {currentStep === 3 && (
                             <div className="space-y-6">
                                 <div className="text-center mb-8">
-                                    <h2 className="text-3xl font-bold mb-2">Regional Settings</h2>
-                                    <p className="text-zinc-500">Configure currency and tax defaults.</p>
+                                    <h2 className="text-3xl font-bold mb-2">{t('onboarding.preferences_title')}</h2>
+                                    <p className="text-zinc-500">{t('onboarding.preferences_subtitle')}</p>
                                 </div>
 
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-bold mb-1.5 ml-1">Currency Symbol</label>
+                                            <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_currency_symbol')}</label>
                                             <input
                                                 type="text"
                                                 value={formData.currencySymbol}
@@ -386,7 +386,7 @@ export default function Onboarding() {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-bold mb-1.5 ml-1">Position</label>
+                                            <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_position')}</label>
                                             <div className="grid grid-cols-2 gap-2 h-[58px]">
                                                 <button
                                                     onClick={() => setFormData({ ...formData, currencyPosition: 'prefix' })}
@@ -412,7 +412,7 @@ export default function Onboarding() {
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-bold mb-1.5 ml-1">Tax Name</label>
+                                            <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_tax_name')}</label>
                                             <input
                                                 type="text"
                                                 value={formData.taxName}
@@ -422,7 +422,7 @@ export default function Onboarding() {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-bold mb-1.5 ml-1">Default Rate (%)</label>
+                                            <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_tax_rate')}</label>
                                             <input
                                                 type="number"
                                                 value={formData.taxRate}
@@ -449,7 +449,7 @@ export default function Onboarding() {
                         "px-6 py-3 rounded-xl font-bold text-zinc-500 hover:text-black hover:bg-zinc-50 transition-all disabled:opacity-0"
                     )}
                 >
-                    Back
+                    {t('onboarding.back')}
                 </button>
 
                 <button
@@ -460,10 +460,10 @@ export default function Onboarding() {
                     )}
                 >
                     {loading ? (
-                        <span>Setting up...</span>
+                        <span>{t('onboarding.setting_up')}</span>
                     ) : (
                         <>
-                            <span>{currentStep === STEPS.length - 1 ? 'Finish & Launch' : 'Continue'}</span>
+                            <span>{currentStep === STEPS.length - 1 ? t('onboarding.finish') : t('onboarding.continue')}</span>
                             <ArrowRight size={18} />
                         </>
                     )}

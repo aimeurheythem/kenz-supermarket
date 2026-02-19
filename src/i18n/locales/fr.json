@@ -1,18 +1,41 @@
 {
     "login": {
-        "title": "Gestion des Spécifications d'Actifs",
-        "welcome": "Bienvenue, veuillez vous connecter à",
+        "title": "Connectez-vous à votre compte",
+        "welcome": "Bon retour",
         "account": "votre compte",
+        "username": "Nom d'utilisateur",
         "email": "Adresse e-mail",
-        "email_placeholder": "nom@entreprise.com",
+        "email_placeholder": "Entrez votre nom d'utilisateur",
         "password": "Mot de passe",
-        "password_placeholder": "••••••••••••",
+        "password_placeholder": "Entrez votre mot de passe",
         "remember_me": "Se souvenir de moi",
         "forgot_password": "Mot de passe oublié ?",
-        "login_button": "Connexion",
+        "forgot_password_desc": "La réinitialisation du mot de passe est gérée par l'administrateur système.",
+        "forgot_password_steps_title": "Pour réinitialiser votre mot de passe :",
+        "forgot_step_1": "Contactez le propriétaire du magasin ou l'administrateur système",
+        "forgot_step_2": "Il peut réinitialiser votre mot de passe depuis la page Gestion des Utilisateurs",
+        "forgot_step_3": "Connectez-vous avec le nouveau mot de passe fourni",
+        "forgot_password_note": "Pour des raisons de sécurité, les mots de passe ne peuvent être réinitialisés que par un administrateur avec un accès propriétaire.",
+        "forgot_password_toast": "Veuillez contacter votre administrateur pour réinitialiser votre mot de passe.",
+        "login_button": "Se Connecter",
         "logging_in": "Connexion en cours...",
+        "owner": "Propriétaire",
+        "cashier": "Caissier",
+        "select_name": "Sélectionnez votre nom",
+        "no_cashiers": "Aucun caissier trouvé",
+        "change": "Changer",
+        "pin_code": "Code PIN",
+        "verifying": "Vérification...",
+        "verify_pin": "Vérifier le PIN",
+        "opening_cash": "Montant de la Caisse d'Ouverture",
+        "opening_session": "Ouverture de la session...",
+        "open_session": "Ouvrir la Session & Aller au PDV",
         "errors": {
             "invalid_credentials": "Identifiants invalides",
+            "invalid_pin": "Code PIN invalide",
+            "invalid_amount": "Veuillez entrer un montant valide",
+            "session_failed": "Échec du démarrage de la session. Veuillez réessayer.",
+            "unknown": "Erreur inconnue",
             "system_error": "Erreur système"
         }
     },
@@ -40,7 +63,10 @@
         "operations": "Opérations",
         "supply_chain": "Chaîne d'Approvisionnement",
         "management": "Gestion",
-        "support": "Support"
+        "support": "Support",
+        "signout_title": "Se déconnecter ?",
+        "signout_desc": "Vous devrez vous reconnecter pour accéder à votre tableau de bord.",
+        "signout_confirm": "Se déconnecter"
     },
     "dashboard": {
         "title": "Tableau de bord",
@@ -76,6 +102,9 @@
             "suppliers": "Fournisseurs",
             "reports": "Rapports"
         },
+        "contact_support": "Contacter le Support",
+        "faq": "Questions Fréquemment Posées",
+        "documentation": "Documentation",
         "recent_sales": {
             "title": "Ventes Récentes",
             "view_all": "Voir Tout",
@@ -557,7 +586,9 @@
         "col_status": "Statut",
         "col_actions": "Actions",
         "no_transactions": "Aucune transaction trouvée.",
-        "walk_in": "Client direct"
+        "walk_in": "Client direct",
+        "showing": "Affichage de {{count}} transactions",
+        "recent_records": "100 enregistrements les plus récents"
     },
     "purchases": {
         "title": "Bons de Commande",
@@ -618,7 +649,24 @@
         "cashier_sessions": "Sessions",
         "cashier_top": "Meilleur Performeur",
         "cashier_revenue": "Revenus",
-        "cashier_label": "Revenus"
+        "cashier_label": "Revenus",
+        "filter_by_cashier": "Filtrer par Caissier :",
+        "all_cashiers": "Tous les Caissiers",
+        "clear_filter": "Effacer le filtre",
+        "from_cashiers": "de {{count}} caissiers",
+        "processed": "traitées",
+        "no_sales": "Aucune vente",
+        "shifts_completed": "services terminés",
+        "cashier_comparison": "Comparaison des Performances des Caissiers",
+        "cashier_leaderboard": "Classement des Caissiers",
+        "no_cashier_data": "Aucune donnée de vente des caissiers.",
+        "avg_prefix": "Moy :",
+        "recent_sessions": "Sessions Récentes",
+        "no_sessions": "Aucune session enregistrée.",
+        "session_active": "Active",
+        "session_closed": "Fermée",
+        "session_diff": "Diff :",
+        "sales_tooltip": "Ventes"
     },
     "settings": {
         "title": "Paramètres",
@@ -743,7 +791,12 @@
         "payment_for": "Paiement pour {{name}}",
         "payment_label": "Montant du Paiement",
         "payment_placeholder": "0.00",
-        "confirm_payment": "Confirmer le Paiement"
+        "confirm_payment": "Confirmer le paiement",
+        "cancel": "Annuler",
+        "form_edit_description": "Mettre à jour les informations du fournisseur",
+        "form_add_description": "Enregistrer un nouveau fournisseur",
+        "current_balance": "Solde actuel",
+        "payment_description": "Enregistrer un paiement effectué à ce fournisseur"
     },
     "users": {
         "title": "Gestion des Utilisateurs",
@@ -858,6 +911,155 @@
         "arabic": "Arabe",
         "customer": "Client",
         "add_products": "Ajouter des Produits",
-        "na": "N/D"
+        "na": "N/D",
+        "understood": "Compris"
+    },
+    "cashier_login": {
+        "title": "Connexion Caissier",
+        "step_select": "Sélectionnez votre nom pour commencer",
+        "step_pin": "Entrez votre PIN",
+        "step_cash": "Entrez la caisse d'ouverture",
+        "select_prompt": "Sélectionnez votre nom pour commencer votre service :",
+        "no_cashiers": "Aucun caissier actif trouvé. Veuillez contacter le responsable.",
+        "enter_pin": "Entrez votre code PIN",
+        "back": "Retour",
+        "verifying": "Vérification...",
+        "continue": "Continuer",
+        "opening_cash": "Caisse d'Ouverture",
+        "cash_prompt": "Entrez le montant en espèces dans votre tiroir",
+        "currency": "DZ",
+        "starting": "Démarrage...",
+        "start_shift": "Commencer le Service",
+        "invalid_pin": "Code PIN invalide",
+        "invalid_amount": "Veuillez entrer un montant valide",
+        "session_creating": "Création de la session... Veuillez patienter.",
+        "session_failed": "Échec du démarrage de la session. Vérifiez la console (F12).",
+        "load_failed": "Échec du chargement des caissiers"
+    },
+    "error_boundary": {
+        "title": "Une Erreur s'est Produite",
+        "message": "Une erreur inattendue s'est produite. Veuillez rafraîchir l'application.",
+        "reload": "Recharger l'Application"
+    },
+    "db_init": {
+        "initializing": "Initialisation du Système...",
+        "please_wait": "Veuillez patienter pendant la préparation de la base de données sécurisée et des ressources système essentielles.",
+        "version": "SuperMarket Pro v1.0"
+    },
+    "customer_modal": {
+        "edit_title": "Modifier le Client",
+        "new_title": "Nouveau Client",
+        "label_name": "Nom Complet *",
+        "label_phone": "Téléphone",
+        "label_email": "Email",
+        "label_address": "Adresse",
+        "label_loyalty": "Points de Fidélité",
+        "label_notes": "Notes",
+        "placeholder_name": "ex. Jean Dupont",
+        "placeholder_phone": "+33 1 23 45 67 89",
+        "placeholder_email": "jean@exemple.com",
+        "placeholder_address": "Rue, Ville, Code Postal",
+        "placeholder_notes": "Notes internes sur ce client...",
+        "cancel": "Annuler",
+        "update": "Mettre à Jour le Client",
+        "create": "Créer le Client",
+        "save_failed": "Échec de l'enregistrement du client"
+    },
+    "expense_modal": {
+        "title": "Ajouter une Dépense",
+        "label_amount": "Montant",
+        "label_description": "Description",
+        "label_category": "Catégorie",
+        "label_date": "Date",
+        "label_payment_method": "Méthode de Paiement",
+        "placeholder_amount": "0.00",
+        "placeholder_description": "ex. Loyer du Bureau, Salaire du Personnel",
+        "cancel": "Annuler",
+        "saving": "Enregistrement...",
+        "add": "Ajouter la Dépense",
+        "cat_rent": "Loyer",
+        "cat_salaries": "Salaires",
+        "cat_utilities": "Services Publics",
+        "cat_maintenance": "Maintenance",
+        "cat_marketing": "Marketing",
+        "cat_inventory": "Inventaire",
+        "cat_other": "Autre",
+        "pm_cash": "Espèces",
+        "pm_card": "Carte",
+        "pm_bank_transfer": "Virement Bancaire"
+    },
+    "sale_detail": {
+        "title": "Vente #{{id}}",
+        "col_item": "Article",
+        "col_qty": "Qté",
+        "col_price": "Prix",
+        "col_total": "Total",
+        "subtotal": "Sous-total",
+        "tax": "Taxe",
+        "discount": "Remise",
+        "total": "Total",
+        "void_transaction": "Annuler la Transaction",
+        "refund_sale": "Rembourser la Vente",
+        "close": "Fermer",
+        "confirm_void_title": "Annuler la Transaction",
+        "confirm_refund_title": "Rembourser la Vente",
+        "confirm_description": "Êtes-vous sûr de vouloir {{action}} cette vente ? Cette action est irréversible.",
+        "void_btn": "Annuler",
+        "refund_btn": "Rembourser",
+        "action_failed": "Échec de l'action {{action}} sur la vente"
+    },
+    "help": {
+        "title": "Aide & Contact",
+        "subtitle": "Besoin d'aide avec votre station de travail ? Nous sommes là pour vous aider à tirer le meilleur parti de votre système de gestion.",
+        "contact": {
+            "email_support": "Support par Email",
+            "phone_support": "Support Téléphonique",
+            "live_chat": "Chat en Direct",
+            "available_hours": "Disponible de 9h à 18h"
+        },
+        "faq": {
+            "title": "Questions Fréquentes",
+            "q1": "Comment ajouter un nouveau produit à l'inventaire ?",
+            "a1": "Allez sur la page Inventaire, cliquez sur le bouton \"Ajouter un Produit\" et remplissez les détails du produit : nom, code-barres, prix et quantité en stock. Vous pouvez aussi importer des produits en masse via un fichier CSV avec le bouton Importer.",
+            "q2": "Comment traiter un remboursement ou un retour ?",
+            "a2": "Allez dans Rapports → Ventes, trouvez la transaction à rembourser et cliquez dessus pour voir les détails. Utilisez l'option de remboursement pour traiter un retour partiel ou total. Le stock sera automatiquement mis à jour.",
+            "q3": "Comment créer un compte caissier ?",
+            "a3": "Allez sur la page Utilisateurs depuis le menu latéral, cliquez sur \"Ajouter un Utilisateur\", entrez le nom du caissier et créez un code PIN. Le caissier pourra ensuite se connecter via l'option Connexion Caissier sur l'écran de connexion.",
+            "q4": "Comment consulter les rapports de ventes quotidiens ?",
+            "a4": "Allez sur la page Rapports pour voir les données de ventes détaillées. Vous pouvez filtrer par période, mode de paiement et caissier. Le Tableau de Bord affiche aussi le chiffre d'affaires, le bénéfice et les analyses de ventes du jour.",
+            "q5": "Comment gérer les alertes de stock bas ?",
+            "a5": "Chaque produit a un champ \"Niveau de Réapprovisionnement\". Quand le stock descend en dessous de ce seuil, le produit apparaît dans la section Stock Bas de la page Inventaire. Vous pouvez aussi exporter un rapport de stock bas en CSV.",
+            "q6": "Comment utiliser le lecteur de codes-barres ?",
+            "a6": "Sur la page PDV, cliquez sur l'icône code-barres ou appuyez sur le raccourci de scan. Pointez votre lecteur sur le code-barres du produit — il sera automatiquement ajouté au panier. Vous pouvez aussi générer et imprimer des étiquettes depuis la page Étiquettes Codes-Barres."
+        }
+    },
+    "terms": {
+        "title": "Conditions d'Utilisation",
+        "subtitle": "Veuillez consulter nos directives professionnelles pour l'utilisation de cette station de travail.",
+        "version": "Dernière mise à jour : Fév 2026",
+        "sections": {
+            "general": {
+                "title": "Utilisation Générale",
+                "content": "Ces conditions régissent votre utilisation du système de gestion SuperMarket. En accédant à la station de travail, vous acceptez de respecter nos normes professionnelles et nos politiques de traitement des données."
+            },
+            "privacy": {
+                "title": "Confidentialité des Données",
+                "content": "Nous prenons vos données au sérieux. Tous les enregistrements de transactions et les informations clients sont cryptés et traités conformément aux réglementations locales de protection des données."
+            },
+            "license": {
+                "title": "Licence Logicielle",
+                "content": "Le logiciel est fourni \"en l'état\" à des fins de gestion interne. La redistribution ou la modification du code source sans autorisation explicite est strictement interdite."
+            }
+        },
+        "footer": {
+            "title": "Des questions sur ces conditions ?",
+            "subtitle": "Contactez notre département juridique et de conformité."
+        },
+        "contact_title": "Contacter le Service Juridique",
+        "contact_desc": "Contactez notre équipe pour toute question sur les conditions, la confidentialité ou les licences.",
+        "chat_hours": "Disponible de 9h à 18h",
+        "contact_toast": "Vous pouvez nous joindre via l'un des canaux ci-dessus.",
+        "contact_us": "Nous Contacter",
+        "close": "Fermer"
     }
 }

@@ -8,13 +8,32 @@ export function cn(...inputs: ClassValue[]) {
 
 import { useSettingsStore } from '@/stores/useSettingsStore';
 
+// Map i18n language codes to Intl locale strings
+function getIntlLocale(): string {
+    switch (i18n.language) {
+        case 'ar': return 'ar-DZ';
+        case 'fr': return 'fr-FR';
+        default: return 'en-US';
+    }
+}
+
+/**
+ * Get the currency symbol based on settings + current language.
+ * Settings take priority; falls back to locale-aware default.
+ */
+export function getCurrencySymbol(): string {
+    const settings = useSettingsStore.getState().settings;
+    const stored = settings['currency.symbol'];
+    if (stored) return stored;
+    return i18n.language === 'ar' ? 'د.ج' : 'DZ';
+}
+
 export function formatCurrency(amount: number, includeSymbol = true) {
     const settings = useSettingsStore.getState().settings;
-    const symbol = settings['currency.symbol'] || 'DZ';
+    const symbol = getCurrencySymbol();
     const position = settings['currency.position'] || 'suffix';
 
-    // Format number with spaces for thousands
-    const formattedNumber = new Intl.NumberFormat('fr-FR', {
+    const formattedNumber = new Intl.NumberFormat(getIntlLocale(), {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     }).format(amount);

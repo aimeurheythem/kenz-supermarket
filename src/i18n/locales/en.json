@@ -1,18 +1,41 @@
 {
     "login": {
-        "title": "Asset Spec Management",
-        "welcome": "Welcome Back, Please login to",
+        "title": "Log into your Account",
+        "welcome": "Welcome back",
         "account": "your account",
+        "username": "Username",
         "email": "Email address",
-        "email_placeholder": "name@company.com",
+        "email_placeholder": "Enter your username",
         "password": "Password",
-        "password_placeholder": "••••••••••••",
+        "password_placeholder": "Enter your password",
         "remember_me": "Remember me",
         "forgot_password": "Forgot password?",
-        "login_button": "Login",
-        "logging_in": "Logging In...",
+        "forgot_password_desc": "Password reset is handled by the system administrator.",
+        "forgot_password_steps_title": "To reset your password:",
+        "forgot_step_1": "Contact the store owner or system administrator",
+        "forgot_step_2": "They can reset your password from the Users management page",
+        "forgot_step_3": "Log in with the new password provided",
+        "forgot_password_note": "For security reasons, passwords can only be reset by an administrator with owner-level access.",
+        "forgot_password_toast": "Please contact your administrator to reset your password.",
+        "login_button": "Log In",
+        "logging_in": "Signing in...",
+        "owner": "Owner",
+        "cashier": "Cashier",
+        "select_name": "Select your name",
+        "no_cashiers": "No cashiers found",
+        "change": "Change",
+        "pin_code": "PIN Code",
+        "verifying": "Verifying...",
+        "verify_pin": "Verify PIN",
+        "opening_cash": "Opening Cash Amount",
+        "opening_session": "Opening session...",
+        "open_session": "Open Session & Go to POS",
         "errors": {
             "invalid_credentials": "Invalid credentials",
+            "invalid_pin": "Invalid PIN code",
+            "invalid_amount": "Please enter a valid amount",
+            "session_failed": "Failed to start session. Please try again.",
+            "unknown": "Unknown error",
             "system_error": "System error"
         }
     },
@@ -40,7 +63,10 @@
         "operations": "Operations",
         "supply_chain": "Supply Chain",
         "management": "Management",
-        "support": "Support"
+        "support": "Support",
+        "signout_title": "Sign out?",
+        "signout_desc": "You'll need to sign in again to access your account dashboard.",
+        "signout_confirm": "Sign out"
     },
     "dashboard": {
         "title": "Dashboard",
@@ -560,7 +586,9 @@
         "col_status": "Status",
         "col_actions": "Actions",
         "no_transactions": "No transactions found matching your criteria.",
-        "walk_in": "Walk-in"
+        "walk_in": "Walk-in",
+        "showing": "Showing {{count}} transactions",
+        "recent_records": "Most recent 100 records"
     },
     "purchases": {
         "title": "Purchase Orders",
@@ -621,7 +649,24 @@
         "cashier_sessions": "Sessions",
         "cashier_top": "Top Performer",
         "cashier_revenue": "Revenue",
-        "cashier_label": "Revenue"
+        "cashier_label": "Revenue",
+        "filter_by_cashier": "Filter by Cashier:",
+        "all_cashiers": "All Cashiers",
+        "clear_filter": "Clear filter",
+        "from_cashiers": "from {{count}} cashiers",
+        "processed": "processed",
+        "no_sales": "No sales",
+        "shifts_completed": "shifts completed",
+        "cashier_comparison": "Cashier Performance Comparison",
+        "cashier_leaderboard": "Cashier Leaderboard",
+        "no_cashier_data": "No cashier sales data yet.",
+        "avg_prefix": "Avg:",
+        "recent_sessions": "Recent Sessions",
+        "no_sessions": "No sessions recorded.",
+        "session_active": "Active",
+        "session_closed": "Closed",
+        "session_diff": "Diff:",
+        "sales_tooltip": "Sales"
     },
     "settings": {
         "title": "Settings",
@@ -746,7 +791,12 @@
         "payment_for": "Payment for {{name}}",
         "payment_label": "Payment Amount",
         "payment_placeholder": "0.00",
-        "confirm_payment": "Confirm Payment"
+        "confirm_payment": "Confirm Payment",
+        "cancel": "Cancel",
+        "form_edit_description": "Update supplier information",
+        "form_add_description": "Register a new supplier",
+        "current_balance": "Current Balance",
+        "payment_description": "Record a payment made to this supplier"
     },
     "users": {
         "title": "User Management",
@@ -861,6 +911,155 @@
         "arabic": "Arabic",
         "customer": "Customer",
         "add_products": "Add Products",
-        "na": "N/A"
+        "na": "N/A",
+        "understood": "Understood"
+    },
+    "cashier_login": {
+        "title": "Cashier Login",
+        "step_select": "Select your name to start",
+        "step_pin": "Enter your PIN",
+        "step_cash": "Enter opening cash",
+        "select_prompt": "Select your name to start your shift:",
+        "no_cashiers": "No active cashiers found. Please contact the owner.",
+        "enter_pin": "Enter your PIN code",
+        "back": "Back",
+        "verifying": "Verifying...",
+        "continue": "Continue",
+        "opening_cash": "Opening Cash",
+        "cash_prompt": "Enter the cash amount in your drawer",
+        "currency": "DZ",
+        "starting": "Starting...",
+        "start_shift": "Start Shift",
+        "invalid_pin": "Invalid PIN code",
+        "invalid_amount": "Please enter a valid amount",
+        "session_creating": "Creating session... Please wait.",
+        "session_failed": "Failed to start session. Check console for details (F12).",
+        "load_failed": "Failed to load cashiers"
+    },
+    "error_boundary": {
+        "title": "Something Went Wrong",
+        "message": "An unexpected error occurred. Please try refreshing the application.",
+        "reload": "Reload Application"
+    },
+    "db_init": {
+        "initializing": "Initializing System...",
+        "please_wait": "Please wait while we prepare the secure database and essential system resources.",
+        "version": "SuperMarket Pro v1.0"
+    },
+    "customer_modal": {
+        "edit_title": "Edit Customer",
+        "new_title": "New Customer",
+        "label_name": "Full Name *",
+        "label_phone": "Phone",
+        "label_email": "Email",
+        "label_address": "Address",
+        "label_loyalty": "Loyalty Points",
+        "label_notes": "Notes",
+        "placeholder_name": "e.g. John Doe",
+        "placeholder_phone": "+1 234 567 890",
+        "placeholder_email": "john@example.com",
+        "placeholder_address": "Street, City, Zip",
+        "placeholder_notes": "Internal notes about this customer...",
+        "cancel": "Cancel",
+        "update": "Update Customer",
+        "create": "Create Customer",
+        "save_failed": "Failed to save customer"
+    },
+    "expense_modal": {
+        "title": "Add New Expense",
+        "label_amount": "Amount",
+        "label_description": "Description",
+        "label_category": "Category",
+        "label_date": "Date",
+        "label_payment_method": "Payment Method",
+        "placeholder_amount": "0.00",
+        "placeholder_description": "e.g., Office Rent, Staff Salary",
+        "cancel": "Cancel",
+        "saving": "Saving...",
+        "add": "Add Expense",
+        "cat_rent": "Rent",
+        "cat_salaries": "Salaries",
+        "cat_utilities": "Utilities",
+        "cat_maintenance": "Maintenance",
+        "cat_marketing": "Marketing",
+        "cat_inventory": "Inventory",
+        "cat_other": "Other",
+        "pm_cash": "Cash",
+        "pm_card": "Card",
+        "pm_bank_transfer": "Bank Transfer"
+    },
+    "sale_detail": {
+        "title": "Sale #{{id}}",
+        "col_item": "Item",
+        "col_qty": "Qty",
+        "col_price": "Price",
+        "col_total": "Total",
+        "subtotal": "Subtotal",
+        "tax": "Tax",
+        "discount": "Discount",
+        "total": "Total",
+        "void_transaction": "Void Transaction",
+        "refund_sale": "Refund Sale",
+        "close": "Close",
+        "confirm_void_title": "Void Transaction",
+        "confirm_refund_title": "Refund Sale",
+        "confirm_description": "Are you sure you want to {{action}} this sale? This action cannot be undone.",
+        "void_btn": "Void",
+        "refund_btn": "Refund",
+        "action_failed": "Failed to {{action}} sale"
+    },
+    "help": {
+        "title": "Help & Contact",
+        "subtitle": "Need assistance with your workstation? We are here to help you get the most out of your management system.",
+        "contact": {
+            "email_support": "Email Support",
+            "phone_support": "Phone Support",
+            "live_chat": "Live Chat",
+            "available_hours": "Available 9AM - 6PM"
+        },
+        "faq": {
+            "title": "Common Questions",
+            "q1": "How do I add a new product to the inventory?",
+            "a1": "Go to the Inventory page, click the \"Add Product\" button, and fill in the product details including name, barcode, price, and stock quantity. You can also import products in bulk using a CSV file via the Import button.",
+            "q2": "How do I process a refund or return?",
+            "a2": "Navigate to Reports → Sales, find the transaction you want to refund, and click on it to view details. Use the refund option to process a partial or full return. The stock will be automatically updated.",
+            "q3": "How do I set up a new cashier account?",
+            "a3": "Go to Users page from the sidebar, click \"Add User\", enter the cashier's name and create a PIN code. The cashier can then log in using the Cashier Login option on the login screen.",
+            "q4": "How do I view daily sales reports?",
+            "a4": "Go to the Reports page to see detailed sales data. You can filter by date range, payment method, and cashier. The Dashboard also shows today's revenue, profit, and sales analytics at a glance.",
+            "q5": "How do I manage low stock alerts?",
+            "a5": "Each product has a \"Reorder Level\" field. When stock falls below this threshold, the product appears in the Low Stock section on the Inventory page. You can also export a low stock report as CSV.",
+            "q6": "How do I use the barcode scanner?",
+            "a6": "On the POS page, click the barcode icon or press the scan shortcut. Point your scanner at the product barcode — it will automatically add the item to the cart. You can also generate and print barcode labels from the Barcode Labels page."
+        }
+    },
+    "terms": {
+        "title": "Terms of Use",
+        "subtitle": "Please review our professional guidelines for using this workstation.",
+        "version": "Last Updated: Feb 2026",
+        "sections": {
+            "general": {
+                "title": "General Usage",
+                "content": "These terms govern your use of the SuperMarket Management System. By accessing the workstation, you agree to comply with our professional standards and data handling policies."
+            },
+            "privacy": {
+                "title": "Data Privacy",
+                "content": "We take your data seriously. All transaction records and customer information are encrypted and handled in accordance with local data protection regulations."
+            },
+            "license": {
+                "title": "Software License",
+                "content": "The software is provided \"as is\" for internal management purposes. Redistribution or modification of the source code without explicit permission is strictly prohibited."
+            }
+        },
+        "footer": {
+            "title": "Questions about these terms?",
+            "subtitle": "Contact our legal and compliance department."
+        },
+        "contact_title": "Contact Legal & Compliance",
+        "contact_desc": "Reach out to our team for questions about terms, privacy, or licensing.",
+        "chat_hours": "Available 9AM - 6PM",
+        "contact_toast": "You can reach us via any of the channels above.",
+        "contact_us": "Contact Us",
+        "close": "Close"
     }
 }

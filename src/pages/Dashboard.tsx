@@ -18,7 +18,7 @@ import {
     Award,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn, formatCurrency, getCurrencySymbol } from '@/lib/utils';
 import { useProductStore } from '@/stores/useProductStore';
 import { useSaleStore } from '@/stores/useSaleStore';
 import { useExpenseStore } from '@/stores/useExpenseStore';
@@ -229,7 +229,7 @@ export default function Dashboard() {
                                         {formatCurrency(totalRevenue, false)}
                                     </span>
                                     <span className="text-[10px] font-bold text-zinc-400 uppercase">
-                                        {i18n.language === 'ar' ? 'دج' : 'DZ'}
+                                        {getCurrencySymbol()}
                                     </span>
                                 </div>
                             </div>
@@ -254,7 +254,7 @@ export default function Dashboard() {
                                         {formatCurrency(netProfit, false)}
                                     </span>
                                     <span className="text-[10px] font-bold text-zinc-500 uppercase">
-                                        {i18n.language === 'ar' ? 'دج' : 'DZ'}
+                                        {getCurrencySymbol()}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2 mt-1">
@@ -339,7 +339,7 @@ export default function Dashboard() {
                                         <div className="flex flex-col items-center gap-2">
                                             <div className="px-6 py-2">
                                                 <span className="text-3xl text-black">
-                                                    +{formatCurrency(product.profit, false)} {i18n.language === 'ar' ? 'دج' : 'DZ'}
+                                                    +{formatCurrency(product.profit, false)} {getCurrencySymbol()}
                                                 </span>
                                             </div>
                                             <span className="text-xs text-black/50 uppercase tracking-widest mt-2">{t('dashboard.top_performance.monthly_profit')}</span>

@@ -16,6 +16,18 @@
         "label": "off",
         "select-name": "off"
       }
+    ],
+    "compat-api/css": [
+      "default",
+      {
+        "ignore": [
+          "scrollbar-width",
+          "scrollbar-width: thin",
+          "scrollbar-color",
+          "-webkit-app-region",
+          "scrollbar-width: none"
+        ]
+      }
     ]
   }
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Plus,
     Edit2,
@@ -31,6 +32,7 @@ const defaultForm: SupplierInput = {
 
 export default function Suppliers() {
     const { suppliers, loadSuppliers, addSupplier, updateSupplier, deleteSupplier, addPayment } = useSupplierStore();
+    const { t } = useTranslation();
     const [search, setSearch] = useState('');
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
@@ -129,25 +131,25 @@ export default function Suppliers() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Suppliers</h1>
+                    <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">{t('suppliers.title')}</h1>
                     <p className="text-sm text-[var(--color-text-muted)] mt-1">
-                        {suppliers.length} supplier{suppliers.length !== 1 ? 's' : ''} registered
+                        {t('suppliers.registered_count', { count: suppliers.length })}
                     </p>
                 </div>
                 <Button className='bg-yellow-300 border-none rounded-[3rem] hover:bg-yellow-300' onClick={() => setIsFormOpen(true)} icon={<Plus size={16} />}>
-                    Add Supplier
+                    {t('suppliers.add_supplier')}
                 </Button>
             </div>
 
             {/* Search */}
-            <SearchInput value={search} onChange={setSearch} placeholder="Search suppliers..." className="w-72" />
+            <SearchInput value={search} onChange={setSearch} placeholder={t('suppliers.search_placeholder')} className="w-72" />
 
             {/* Supplier Cards Grid */}
             {filtered.length === 0 ? (
                 <div className="text-center py-16">
                     <Truck size={48} className="mx-auto text-[var(--color-text-muted)] mb-3" />
                     <p className="text-sm text-[var(--color-text-muted)]">
-                        {search ? 'No suppliers match your search' : 'No suppliers yet. Add your first supplier!'}
+                        {search ? t('suppliers.no_match') : t('suppliers.no_suppliers')}
                     </p>
                 </div>
             ) : (
@@ -191,19 +193,19 @@ export default function Suppliers() {
                                                 onClick={() => handleOpenPayment(supplier)}
                                                 className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)] transition-colors"
                                             >
-                                                <CreditCard size={13} /> Pay
+                                                <CreditCard size={13} /> {t('suppliers.menu_pay')}
                                             </button>
                                             <button
                                                 onClick={() => handleEdit(supplier)}
                                                 className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)] transition-colors"
                                             >
-                                                <Edit2 size={13} /> Edit
+                                                <Edit2 size={13} /> {t('suppliers.menu_edit')}
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(supplier.id)}
                                                 className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-danger)] hover:bg-[var(--color-danger-muted)] transition-colors"
                                             >
-                                                <Trash2 size={13} /> Delete
+                                                <Trash2 size={13} /> {t('suppliers.menu_delete')}
                                             </button>
                                         </div>
                                     )}
@@ -231,7 +233,7 @@ export default function Suppliers() {
                                     </div>
                                 )}
                                 <div className="pt-2 mt-2 border-t border-[var(--color-border)] flex justify-between items-center">
-                                    <span className="text-xs text-[var(--color-text-muted)]">Balance</span>
+                                    <span className="text-xs text-[var(--color-text-muted)]">{t('suppliers.balance')}</span>
                                     <span className={cn("text-sm font-medium", supplier.balance > 0 ? "text-[var(--color-danger)]" : "text-[var(--color-success)]")}>
                                         {formatCurrency(supplier.balance)}
                                     </span>
@@ -251,50 +253,50 @@ export default function Suppliers() {
             <FormModal
                 isOpen={isFormOpen}
                 onClose={handleCloseForm}
-                title={editingSupplier ? 'Edit Supplier' : 'New Supplier'}
-                description={editingSupplier ? 'Update supplier information' : 'Register a new supplier'}
+                title={editingSupplier ? t('suppliers.form_edit_title') : t('suppliers.form_add_title')}
+                description={editingSupplier ? t('suppliers.form_edit_description') : t('suppliers.form_add_description')}
                 icon={<Truck size={24} strokeWidth={1.5} />}
             >
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label className={labelClass}>Company Name *</label>
+                        <label className={labelClass}>{t('suppliers.label_name')} *</label>
                         <div className="relative">
-                            <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Fresh Farms Inc." className={inputClass} required autoFocus />
+                            <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t('suppliers.placeholder_name')} className={inputClass} required autoFocus />
                         </div>
                     </div>
                     <div>
-                        <label className={labelClass}>Contact Person</label>
+                        <label className={labelClass}>{t('suppliers.label_contact')}</label>
                         <div className="relative">
                             <User size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" strokeWidth={1.5} />
-                            <input type="text" value={form.contact_person || ''} onChange={(e) => setForm({ ...form, contact_person: e.target.value })} placeholder="e.g. John Miller" className={inputClass + " pl-12"} />
+                            <input type="text" value={form.contact_person || ''} onChange={(e) => setForm({ ...form, contact_person: e.target.value })} placeholder={t('suppliers.placeholder_contact')} className={inputClass + " pl-12"} />
                         </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className={labelClass}>Phone Number</label>
+                            <label className={labelClass}>{t('suppliers.label_phone')}</label>
                             <div className="relative">
                                 <Phone size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" strokeWidth={1.5} />
-                                <input type="tel" value={form.phone || ''} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+1-555-0101" className={inputClass + " pl-12"} />
+                                <input type="tel" value={form.phone || ''} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder={t('suppliers.placeholder_phone')} className={inputClass + " pl-12"} />
                             </div>
                         </div>
                         <div>
-                            <label className={labelClass}>Email Address</label>
+                            <label className={labelClass}>{t('suppliers.label_email')}</label>
                             <div className="relative">
                                 <Mail size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" strokeWidth={1.5} />
-                                <input type="email" value={form.email || ''} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="contact@company.com" className={inputClass + " pl-12"} />
+                                <input type="email" value={form.email || ''} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder={t('suppliers.placeholder_email')} className={inputClass + " pl-12"} />
                             </div>
                         </div>
                     </div>
                     <div>
-                        <label className={labelClass}>Physical Address</label>
+                        <label className={labelClass}>{t('suppliers.label_address')}</label>
                         <div className="relative">
                             <MapPin size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" strokeWidth={1.5} />
-                            <input type="text" value={form.address || ''} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="123 Commerce St, City" className={inputClass + " pl-12"} />
+                            <input type="text" value={form.address || ''} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder={t('suppliers.placeholder_address')} className={inputClass + " pl-12"} />
                         </div>
                     </div>
                     <div className="flex items-center justify-end gap-4 pt-6 mt-6 border-t border-zinc-100">
-                        <Button variant="ghost" onClick={handleCloseForm} className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-xs transition-all hover:bg-zinc-100 text-zinc-400 hover:text-black">Cancel</Button>
-                        <Button type="submit" icon={<Save size={18} />} className="flex-[2] h-14 rounded-2xl bg-yellow-400 text-black font-black uppercase tracking-widest text-xs transition-all hover:bg-yellow-500 flex items-center justify-center gap-2 shadow-xl shadow-yellow-400/10 border-none">{editingSupplier ? 'Update' : 'Add Supplier'}</Button>
+                        <Button variant="ghost" onClick={handleCloseForm} className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-xs transition-all hover:bg-zinc-100 text-zinc-400 hover:text-black">{t('suppliers.cancel')}</Button>
+                        <Button type="submit" icon={<Save size={18} />} className="flex-[2] h-14 rounded-2xl bg-yellow-400 text-black font-black uppercase tracking-widest text-xs transition-all hover:bg-yellow-500 flex items-center justify-center gap-2 shadow-xl shadow-yellow-400/10 border-none">{editingSupplier ? t('suppliers.update_supplier') : t('suppliers.save_supplier')}</Button>
                     </div>
                 </form>
             </FormModal>
@@ -303,20 +305,20 @@ export default function Suppliers() {
             <FormModal
                 isOpen={isPaymentOpen}
                 onClose={() => setIsPaymentOpen(false)}
-                title="Register Payment"
-                description="Record a payment made to this supplier"
+                title={t('suppliers.payment_title')}
+                description={t('suppliers.payment_description')}
                 icon={<CreditCard size={24} strokeWidth={1.5} />}
                 maxWidth="max-w-md"
             >
                 <form onSubmit={handlePaymentSubmit} className="space-y-6">
                     <div className="p-4 bg-zinc-50 rounded-3xl border border-zinc-200 space-y-1">
-                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Current Balance</span>
+                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{t('suppliers.current_balance')}</span>
                         <div className="text-xl font-black text-black">
-                            {selectedSupplierForPayment ? formatCurrency(selectedSupplierForPayment.balance) : '0,00 DZ'}
+                            {selectedSupplierForPayment ? formatCurrency(selectedSupplierForPayment.balance) : formatCurrency(0)}
                         </div>
                     </div>
                     <div>
-                        <label className={labelClass}>Payment Amount (DZ)</label>
+                        <label className={labelClass}>{t('suppliers.payment_label')}</label>
                         <div className="relative">
                             <Banknote size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" strokeWidth={1.5} />
                             <input
@@ -333,8 +335,8 @@ export default function Suppliers() {
                         </div>
                     </div>
                     <div className="flex items-center justify-end gap-3 pt-6 border-t border-zinc-100">
-                        <Button variant="ghost" onClick={() => setIsPaymentOpen(false)} className="flex-1 h-12 rounded-xl text-zinc-400 font-bold uppercase text-[10px] tracking-widest">Cancel</Button>
-                        <Button type="submit" icon={<CreditCard size={15} />} className="flex-[2] h-12 rounded-xl bg-yellow-400 text-black font-bold uppercase text-[10px] tracking-widest shadow-lg shadow-yellow-400/10 border-none">Confirm Payment</Button>
+                        <Button variant="ghost" onClick={() => setIsPaymentOpen(false)} className="flex-1 h-12 rounded-xl text-zinc-400 font-bold uppercase text-[10px] tracking-widest">{t('suppliers.cancel')}</Button>
+                        <Button type="submit" icon={<CreditCard size={15} />} className="flex-[2] h-12 rounded-xl bg-yellow-400 text-black font-bold uppercase text-[10px] tracking-widest shadow-lg shadow-yellow-400/10 border-none">{t('suppliers.confirm_payment')}</Button>
                     </div>
                 </form>
             </FormModal>
@@ -347,8 +349,8 @@ export default function Suppliers() {
                     setSupplierToDelete(null);
                 }}
                 onConfirm={confirmDelete}
-                title="Delete Supplier"
-                description="Are you sure you want to remove this supplier? This will also remove their transaction history."
+                title={t('suppliers.delete_title')}
+                description={t('suppliers.delete_description', { name: supplierToDelete?.name })}
                 itemName={supplierToDelete?.name}
             />
         </div>

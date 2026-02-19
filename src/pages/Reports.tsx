@@ -91,7 +91,7 @@ export default function Reports() {
     };
 
     const handleExportCashierReport = () => {
-        const headers = ['Cashier', 'Total Sales', 'Transactions', 'Avg Order', 'Sessions'];
+        const headers = [t('reports.tab_cashiers'), t('reports.cashier_total_sales'), t('reports.cashier_transactions'), t('reports.cashier_avg_order'), t('reports.cashier_sessions')];
         const rows = cashierPerformance.map(c => [
             c.cashier_name,
             c.total_sales,
@@ -245,7 +245,7 @@ export default function Reports() {
                                 <Tooltip
                                     contentStyle={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-default)', borderRadius: '8px' }}
                                     itemStyle={{ color: 'var(--text-primary)' }}
-                                    formatter={(value: any) => [formatCurrency(value || 0), 'Revenue']}
+                                    formatter={(value: any) => [formatCurrency(value || 0), t('reports.cashier_revenue')]}
                                 />
                                 <Area
                                     type="monotone"
@@ -334,13 +334,13 @@ export default function Reports() {
                     {/* Cashier Filter */}
                     <div className="flex items-center gap-3 p-4 bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)]">
                         <Filter size={18} className="text-[var(--color-text-muted)]" />
-                        <span className="text-sm text-[var(--color-text-muted)]">Filter by Cashier:</span>
+                        <span className="text-sm text-[var(--color-text-muted)]">{t('reports.filter_by_cashier')}</span>
                         <select
                             value={selectedCashier || ''}
                             onChange={(e) => setSelectedCashier(e.target.value ? parseInt(e.target.value) : null)}
                             className="bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)]"
                         >
-                            <option value="">All Cashiers</option>
+                            <option value="">{t('reports.all_cashiers')}</option>
                             {cashiers.map((cashier) => (
                                 <option key={cashier.id} value={cashier.id}>
                                     {cashier.full_name}
@@ -352,7 +352,7 @@ export default function Reports() {
                                 onClick={() => setSelectedCashier(null)}
                                 className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] underline"
                             >
-                                Clear filter
+                                {t('reports.clear_filter')}
                             </button>
                         )}
                     </div>
@@ -367,7 +367,7 @@ export default function Reports() {
                                 <p className="text-sm font-medium text-[var(--color-text-muted)]">{t('reports.cashier_total_sales')}</p>
                             </div>
                             <p className="text-2xl font-bold text-[var(--color-text-primary)]">{formatCurrency(totalCashierSales)}</p>
-                            <p className="text-xs text-[var(--color-text-muted)] mt-1">from {cashierPerformance.length} cashiers</p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-1">{t('reports.from_cashiers', { count: cashierPerformance.length })}</p>
                         </div>
                         <div className="p-5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
                             <div className="flex items-center gap-3 mb-3">
@@ -377,7 +377,7 @@ export default function Reports() {
                                 <p className="text-sm font-medium text-[var(--color-text-muted)]">{t('reports.cashier_transactions')}</p>
                             </div>
                             <p className="text-2xl font-bold text-[var(--color-text-primary)]">{totalCashierTransactions}</p>
-                            <p className="text-xs text-[var(--color-text-muted)] mt-1">processed</p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-1">{t('reports.processed')}</p>
                         </div>
                         <div className="p-5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
                             <div className="flex items-center gap-3 mb-3">
@@ -390,7 +390,7 @@ export default function Reports() {
                                 {topCashier?.cashier_name || t('common.na')}
                             </p>
                             <p className="text-xs text-[var(--color-text-muted)] mt-1">
-                                {topCashier ? formatCurrency(topCashier.total_sales) : 'No sales'}
+                                {topCashier ? formatCurrency(topCashier.total_sales) : t('reports.no_sales')}
                             </p>
                         </div>
                         <div className="p-5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
@@ -403,12 +403,12 @@ export default function Reports() {
                             <p className="text-2xl font-bold text-[var(--color-text-primary)]">
                                 {sessionReports.length}
                             </p>
-                            <p className="text-xs text-[var(--color-text-muted)] mt-1">shifts completed</p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-1">{t('reports.shifts_completed')}</p>
                         </div>
                     </div>
                     {/* ... Charts and Leaderboard for Cashiers (Keep as is) */}
                     <div className="p-6 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)] h-[350px]">
-                        <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-6">Cashier Performance Comparison</h3>
+                        <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-6">{t('reports.cashier_comparison')}</h3>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={cashierPerformance} layout="vertical">
                                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-default)" horizontal={true} vertical={false} />
@@ -417,7 +417,7 @@ export default function Reports() {
                                 <Tooltip
                                     contentStyle={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-default)', borderRadius: '8px' }}
                                     itemStyle={{ color: 'var(--text-primary)' }}
-                                    formatter={(value: any) => [formatCurrency(value || 0), 'Sales']}
+                                    formatter={(value: any) => [formatCurrency(value || 0), t('reports.sales_tooltip')]}
                                 />
                                 <Bar dataKey="total_sales" fill="#f97316" radius={[0, 4, 4, 0]} />
                             </BarChart>
@@ -426,10 +426,10 @@ export default function Reports() {
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div className="p-6 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
-                            <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Cashier Leaderboard</h3>
+                            <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">{t('reports.cashier_leaderboard')}</h3>
                             <div className="flex flex-col gap-3">
                                 {cashierPerformance.length === 0 ? (
-                                    <p className="text-sm text-[var(--color-text-muted)]">No cashier sales data yet.</p>
+                                    <p className="text-sm text-[var(--color-text-muted)]">{t('reports.no_cashier_data')}</p>
                                 ) : (
                                     cashierPerformance.map((cashier, i) => (
                                         <div key={cashier.cashier_id} className="flex items-center justify-between p-3 bg-[var(--color-bg-secondary)] rounded-lg">
@@ -442,7 +442,7 @@ export default function Reports() {
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-sm font-bold text-[var(--color-text-primary)]">{formatCurrency(cashier.total_sales)}</p>
-                                                <p className="text-xs text-[var(--color-text-muted)]">Avg: {formatCurrency(cashier.average_order)}</p>
+                                                <p className="text-xs text-[var(--color-text-muted)]">{t('reports.avg_prefix')} {formatCurrency(cashier.average_order)}</p>
                                             </div>
                                         </div>
                                     ))
@@ -451,10 +451,10 @@ export default function Reports() {
                         </div>
 
                         <div className="p-6 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
-                            <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Recent Sessions</h3>
+                            <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">{t('reports.recent_sessions')}</h3>
                             <div className="space-y-2 max-h-[300px] overflow-y-auto">
                                 {sessionReports.length === 0 ? (
-                                    <p className="text-sm text-[var(--color-text-muted)]">No sessions recorded.</p>
+                                    <p className="text-sm text-[var(--color-text-muted)]">{t('reports.no_sessions')}</p>
                                 ) : (
                                     sessionReports.slice(0, 10).map((session) => (
                                         <div key={session.session_id} className="flex items-center justify-between p-3 bg-[var(--color-bg-secondary)] rounded-lg">
@@ -465,7 +465,7 @@ export default function Reports() {
                                             <div className="text-right">
                                                 <p className="text-sm font-bold text-[var(--color-text-primary)]">{formatCurrency(session.total_sales)}</p>
                                                 <p className={`text-xs ${session.cash_difference === 0 ? 'text-emerald-400' : session.cash_difference && session.cash_difference > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                                    {session.status === 'active' ? 'Active' : session.cash_difference !== null ? `Diff: ${formatCurrency(session.cash_difference)}` : 'Closed'}
+                                                    {session.status === 'active' ? t('reports.session_active') : session.cash_difference !== null ? `${t('reports.session_diff')} ${formatCurrency(session.cash_difference)}` : t('reports.session_closed')}
                                                 </p>
                                             </div>
                                         </div>

@@ -2,8 +2,7 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 export default function DatabaseInitialization({ error }: { error?: string | null }) {
-    const { t, i18n } = useTranslation();
-    const isArabic = i18n.language === 'ar';
+    const { t } = useTranslation();
 
     return (
         <motion.div
@@ -71,12 +70,10 @@ export default function DatabaseInitialization({ error }: { error?: string | nul
                 className="mt-12 text-center space-y-3"
             >
                 <h2 className="text-xl font-medium tracking-tight text-black">
-                    {isArabic ? 'جاري تهيئة النظام...' : 'Initializing System...'}
+                    {t('db_init.initializing')}
                 </h2>
                 <p className="text-sm text-black font-light max-w-xs mx-auto leading-relaxed">
-                    {isArabic
-                        ? 'يرجى الانتظار بينما نقوم بإعداد قاعدة البيانات والبيانات الأساسية.'
-                        : 'Please wait while we prepare the secure database and essential system resources.'}
+                    {t('db_init.please_wait')}
                 </p>
 
                 {error && (
@@ -94,7 +91,7 @@ export default function DatabaseInitialization({ error }: { error?: string | nul
             <div className="absolute bottom-12 flex flex-col items-center gap-2">
                 <div className="h-[1px] w-8 bg-black/10" />
                 <span className="text-[10px] uppercase tracking-[0.2em] text-black/20 font-medium">
-                    SuperMarket Pro v1.0
+                    {t('db_init.version')}
                 </span>
             </div>
         </motion.div>

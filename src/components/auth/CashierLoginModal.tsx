@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { UserRepo } from '../../../database';
 import type { User } from '@/lib/types';
@@ -27,6 +28,7 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
     const [isLoading, setIsLoading] = useState(false);
 
     const { loginCashier, startCashierSession } = useAuthStore();
+    const { t } = useTranslation();
 
     // Load cashiers when modal opens
     useEffect(() => {
@@ -41,7 +43,7 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
             setCashiers(activeCashiers);
         } catch (err) {
             console.error('Failed to load cashiers:', err);
-            setError('Failed to load cashiers');
+            setError(t('cashier_login.load_failed'));
         }
     };
 
@@ -81,7 +83,7 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
             setError('');
         } else {
             console.log('PIN rejected');
-            setError('Invalid PIN code');
+            setError(t('cashier_login.invalid_pin'));
         }
     };
 
@@ -91,7 +93,7 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
 
         const cash = parseFloat(openingCash);
         if (isNaN(cash) || cash < 0) {
-            setError('Please enter a valid amount');
+            setError(t('cashier_login.invalid_amount'));
             return;
         }
 
@@ -101,7 +103,7 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
             console.log('Opening Cash:', cash);
             console.log('Cashier Name:', selectedCashier.full_name);
 
-            setError('Creating session... Please wait.');
+            setError(t('cashier_login.session_creating'));
             setIsLoading(true);
 
             const session = await startCashierSession(selectedCashier.id, cash);
@@ -125,7 +127,7 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
                 onSuccess();
             } else {
                 console.error('✗ Session creation failed - invalid session object');
-                setError('Failed to start session. Check console for details (F12).');
+                setError(t('cashier_login.session_failed'));
             }
         } catch (err) {
             setIsLoading(false);
@@ -155,10 +157,10 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
                     <DialogHeader>
                         <DialogTitle className="text-white text-xl font-bold flex items-center gap-2">
                             <Users className="w-5 h-5" />
-                            Cashier Login
+                            {t('cashier_login.title')}
                         </DialogTitle>
                         <DialogDescription className="text-white/70 text-sm">
-                            {step === 'select' ? 'Select your name to start' : step === 'pin' ? 'Enter your PIN' : 'Enter opening cash'}
+                            {step === 'select' ? t('cashier_login.step_select') : step === 'pin' ? t('cashier_login.step_pin') : t('cashier_login.step_cash')}
                         </DialogDescription>
                     </DialogHeader>
                 </div>
@@ -167,7 +169,7 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
                 <div className="p-6">
                     {step === 'select' && (
                             <div>
-                                <p className="text-gray-600 mb-4">Select your name to start your shift:</p>
+                                <p className="text-gray-600 mb-4">{t('cashier_login.select_prompt')}</p>
                                 <div className="space-y-2 max-h-64 overflow-y-auto">
                                     {cashiers.map((cashier) => (
                                         <button
@@ -188,7 +190,7 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
                                 </div>
                                 {cashiers.length === 0 && (
                                     <p className="text-center text-gray-500 py-8">
-                                        No active cashiers found. Please contact the owner.
+                                        {t('cashier_login.no_cashiers')}
                                     </p>
                                 )}
                             </div>
@@ -201,7 +203,7 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
                                         {selectedCashier.full_name.charAt(0).toUpperCase()}
                                     </div>
                                     <h3 className="text-lg font-semibold text-gray-800">{selectedCashier.full_name}</h3>
-                                    <p className="text-sm text-gray-500">Enter your PIN code</p>
+                                    <p className="text-sm text-gray-500">{t('cashier_login.enter_pin')}</p>
                                 </div>
 
                                 <div className="mb-4">
@@ -230,14 +232,14 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
                                         onClick={() => setStep('select')}
                                         className="flex-1 py-3 border-2 border-gray-200 rounded-lg font-semibold text-gray-600 hover:bg-gray-50"
                                     >
-                                        Back
+                                        {t('cashier_login.back')}
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={pinCode.length < 4 || isLoading}
                                         className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        {isLoading ? 'Verifying...' : 'Continue'}
+                                        {isLoading ? t('cashier_login.verifying') : t('cashier_login.continue')}
                                     </button>
                                 </div>
                             </form>
@@ -249,8 +251,8 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
                                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white mx-auto mb-3">
                                         <Banknote size={32} />
                                     </div>
-                                    <h3 className="text-lg font-semibold text-gray-800">Opening Cash</h3>
-                                    <p className="text-sm text-gray-500">Enter the cash amount in your drawer</p>
+                                    <h3 className="text-lg font-semibold text-gray-800">{t('cashier_login.opening_cash')}</h3>
+                                    <p className="text-sm text-gray-500">{t('cashier_login.cash_prompt')}</p>
                                 </div>
 
                                 <div className="mb-4">
@@ -265,7 +267,7 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
                                             placeholder="0,00"
                                             autoFocus
                                         />
-                                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">DZ</span>
+                                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">{t('cashier_login.currency')}</span>
                                     </div>
                                 </div>
 
@@ -279,14 +281,14 @@ export default function CashierLoginModal({ isOpen, onClose, onSuccess }: Cashie
                                         onClick={() => setStep('pin')}
                                         className="flex-1 py-3 border-2 border-gray-200 rounded-lg font-semibold text-gray-600 hover:bg-gray-50"
                                     >
-                                        Back
+                                        {t('cashier_login.back')}
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={!openingCash || isLoading}
                                         className="flex-1 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-black rounded-lg font-semibold hover:from-yellow-500 hover:to-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        {isLoading ? 'Starting...' : 'Start Shift'}
+                                        {isLoading ? t('cashier_login.starting') : t('cashier_login.start_shift')}
                                     </button>
                                 </div>
                             </form>

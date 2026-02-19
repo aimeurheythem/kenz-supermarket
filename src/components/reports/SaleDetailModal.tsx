@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { RefreshCcw, Ban, Loader2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import type { Sale, SaleItem } from '@/lib/types';
@@ -26,6 +27,7 @@ export default function SaleDetailModal({ sale, onClose, onRefund, onVoid }: Sal
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
     const [pendingAction, setPendingAction] = useState<'refund' | 'void' | null>(null);
+    const { t } = useTranslation();
 
     useEffect(() => {
         loadItems();
@@ -57,7 +59,7 @@ export default function SaleDetailModal({ sale, onClose, onRefund, onVoid }: Sal
             else await onVoid(sale.id);
             onClose();
         } catch (error) {
-            toast.error(`Failed to ${action} sale: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            toast.error(t('sale_detail.action_failed', { action }));
         } finally {
             setProcessing(false);
         }
@@ -75,7 +77,7 @@ export default function SaleDetailModal({ sale, onClose, onRefund, onVoid }: Sal
                 {/* Header */}
                 <DialogHeader className="p-6 pb-4">
                     <div className="flex items-center gap-3">
-                        <DialogTitle className="text-xl font-bold">Sale #{sale.id}</DialogTitle>
+                        <DialogTitle className="text-xl font-bold">{t('sale_detail.title', { id: sale.id })}</DialogTitle>
                         <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${statusColors[sale.status]}`}>
                             {sale.status}
                         </span>
@@ -97,10 +99,10 @@ export default function SaleDetailModal({ sale, onClose, onRefund, onVoid }: Sal
                             <table className="w-full text-left text-sm">
                                 <thead>
                                     <tr className="text-[var(--color-text-muted)] border-b border-[var(--color-border)]">
-                                        <th className="pb-3 font-medium">Item</th>
-                                        <th className="pb-3 font-medium text-right">Qty</th>
-                                        <th className="pb-3 font-medium text-right">Price</th>
-                                        <th className="pb-3 font-medium text-right">Total</th>
+                                        <th className="pb-3 font-medium">{t('sale_detail.col_item')}</th>
+                                        <th className="pb-3 font-medium text-right">{t('sale_detail.col_qty')}</th>
+                                        <th className="pb-3 font-medium text-right">{t('sale_detail.col_price')}</th>
+                                        <th className="pb-3 font-medium text-right">{t('sale_detail.col_total')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-[var(--color-border)]">
@@ -120,21 +122,21 @@ export default function SaleDetailModal({ sale, onClose, onRefund, onVoid }: Sal
                             {/* Summary */}
                             <div className="bg-[var(--color-bg-secondary)] rounded-xl p-4 space-y-2">
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-[var(--color-text-muted)]">Subtotal</span>
+                                    <span className="text-[var(--color-text-muted)]">{t('sale_detail.subtotal')}</span>
                                     <span className="text-[var(--color-text-primary)]">{formatCurrency(sale.subtotal)}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-[var(--color-text-muted)]">Tax</span>
+                                    <span className="text-[var(--color-text-muted)]">{t('sale_detail.tax')}</span>
                                     <span className="text-[var(--color-text-primary)]">{formatCurrency(sale.tax_amount)}</span>
                                 </div>
                                 {sale.discount_amount > 0 && (
                                     <div className="flex justify-between text-sm text-emerald-500">
-                                        <span>Discount</span>
+                                        <span>{t('sale_detail.discount')}</span>
                                         <span>-{formatCurrency(sale.discount_amount)}</span>
                                     </div>
                                 )}
                                 <div className="pt-2 mt-2 border-t border-[var(--color-border)] flex justify-between items-center">
-                                    <span className="font-bold text-[var(--color-text-primary)]">Total</span>
+                                    <span className="font-bold text-[var(--color-text-primary)]">{t('sale_detail.total')}</span>
                                     <span className="text-xl font-bold text-[var(--color-text-primary)]">{formatCurrency(sale.total)}</span>
                                 </div>
                             </div>
@@ -153,7 +155,7 @@ export default function SaleDetailModal({ sale, onClose, onRefund, onVoid }: Sal
                                 onClick={() => handleAction('void')}
                                 disabled={processing}
                             >
-                                Void Transaction
+                                {t('sale_detail.void_transaction')}
                             </Button>
                             <Button
                                 variant="secondary"
@@ -162,12 +164,12 @@ export default function SaleDetailModal({ sale, onClose, onRefund, onVoid }: Sal
                                 disabled={processing}
                                 className="bg-blue-600/10 text-blue-500 hover:bg-blue-600/20 border-blue-600/20"
                             >
-                                Refund Sale
+                                {t('sale_detail.refund_sale')}
                             </Button>
                         </>
                     )}
                     <Button variant="secondary" onClick={onClose} disabled={processing}>
-                        Close
+                        {t('sale_detail.close')}
                     </Button>
                 </div>
 
@@ -175,9 +177,9 @@ export default function SaleDetailModal({ sale, onClose, onRefund, onVoid }: Sal
                     isOpen={pendingAction !== null}
                     onClose={() => setPendingAction(null)}
                     onConfirm={confirmAction}
-                    title={pendingAction === 'void' ? 'Void Transaction' : 'Refund Sale'}
-                    description={`Are you sure you want to ${pendingAction} this sale? This action cannot be undone.`}
-                    confirmLabel={pendingAction === 'void' ? 'Void' : 'Refund'}
+                    title={pendingAction === 'void' ? t('sale_detail.confirm_void_title') : t('sale_detail.confirm_refund_title')}
+                    description={t('sale_detail.confirm_description', { action: pendingAction })}
+                    confirmLabel={pendingAction === 'void' ? t('sale_detail.void_btn') : t('sale_detail.refund_btn')}
                     variant="danger"
                     loading={processing}
                 />

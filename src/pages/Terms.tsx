@@ -76,7 +76,7 @@ export default function Terms() {
                     onClick={() => setShowContact(true)}
                     className="px-6 py-3 bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)] rounded-2xl font-bold text-sm transition-all active:scale-95 uppercase tracking-widest"
                 >
-                    {t('common.contact', 'Contact Us')}
+                    {t('terms.contact_us', 'Contact Us')}
                 </button>
             </div>
 
@@ -123,7 +123,7 @@ export default function Terms() {
                             }}
                             className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm rounded-xl transition-all"
                         >
-                            {t('common.close', 'Close')}
+                            {t('terms.close', 'Close')}
                         </button>
                     </div>
                 </DialogContent>

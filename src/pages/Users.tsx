@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Users as UsersIcon,
     UserPlus,
@@ -39,6 +40,7 @@ const defaultForm: UserInput & { pin_code?: string } = {
 export default function Users() {
     const { users, loadUsers, addUser, updateUser, deleteUser, loadCashierSessions, cashierSessions, getCashierPerformance } = useUserStore();
     const { user: currentUser } = useAuthStore();
+    const { t } = useTranslation();
     const [search, setSearch] = useState('');
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -149,8 +151,8 @@ export default function Users() {
         return (
             <div className="flex flex-col items-center justify-center h-full text-[var(--color-text-muted)]">
                 <Shield size={64} className="mb-4 opacity-50" />
-                <h2 className="text-xl font-semibold text-[var(--color-text-primary)]">Access Denied</h2>
-                <p>Only administrators can manage users.</p>
+                <h2 className="text-xl font-semibold text-[var(--color-text-primary)]">{t('users.access_denied')}</h2>
+                <p>{t('users.admin_only')}</p>
             </div>
         );
     }
@@ -166,13 +168,13 @@ export default function Users() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">User Management</h1>
+                    <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">{t('users.title')}</h1>
                     <p className="text-sm text-[var(--color-text-muted)] mt-1">
-                        Manage staff access, roles, and track cashier performance
+                        {t('users.subtitle')}
                     </p>
                 </div>
                 <Button className="btn-page-action" onClick={() => setIsFormOpen(true)} icon={<UserPlus size={16} />}>
-                    Add User
+                    {t('users.add_user')}
                 </Button>
             </div>
 
@@ -184,7 +186,7 @@ export default function Users() {
                             <UsersIcon className="w-5 h-5 text-blue-500" />
                         </div>
                         <div>
-                            <p className="text-xs text-[var(--color-text-muted)]">Total Users</p>
+                            <p className="text-xs text-[var(--color-text-muted)]">{t('users.stat_total')}</p>
                             <p className="text-xl font-bold text-[var(--color-text-primary)]">{users.length}</p>
                         </div>
                     </div>
@@ -195,7 +197,7 @@ export default function Users() {
                             <DollarSign className="w-5 h-5 text-emerald-500" />
                         </div>
                         <div>
-                            <p className="text-xs text-[var(--color-text-muted)]">Cashiers</p>
+                            <p className="text-xs text-[var(--color-text-muted)]">{t('users.stat_cashiers')}</p>
                             <p className="text-xl font-bold text-[var(--color-text-primary)]">{cashiers.length}</p>
                         </div>
                     </div>
@@ -206,7 +208,7 @@ export default function Users() {
                             <Clock className="w-5 h-5 text-purple-500" />
                         </div>
                         <div>
-                            <p className="text-xs text-[var(--color-text-muted)]">Active Sessions</p>
+                            <p className="text-xs text-[var(--color-text-muted)]">{t('users.stat_active_sessions')}</p>
                             <p className="text-xl font-bold text-[var(--color-text-primary)]">{cashierSessions.filter(s => s.status === 'active').length}</p>
                         </div>
                     </div>
@@ -217,7 +219,7 @@ export default function Users() {
                             <TrendingUp className="w-5 h-5 text-orange-500" />
                         </div>
                         <div>
-                            <p className="text-xs text-[var(--color-text-muted)]">Today's Sessions</p>
+                            <p className="text-xs text-[var(--color-text-muted)]">{t('users.stat_today_sessions')}</p>
                             <p className="text-xl font-bold text-[var(--color-text-primary)]">
                                 {cashierSessions.filter(s => new Date(s.login_time).toDateString() === new Date().toDateString()).length}
                             </p>
@@ -226,19 +228,19 @@ export default function Users() {
                 </div>
             </div>
 
-            <SearchInput value={search} onChange={setSearch} placeholder="Search users..." className="w-72" />
+            <SearchInput value={search} onChange={setSearch} placeholder={t('users.search_placeholder')} className="w-72" />
 
             {/* Users List */}
             <div className="rounded-xl border border-[var(--color-border)] overflow-hidden bg-[var(--color-bg-card)]">
                 <table className="w-full">
                     <thead className="bg-[var(--color-bg-secondary)] border-b border-[var(--color-border)]">
                         <tr>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">User</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">Role</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">PIN Code</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">Status</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">Last Login</th>
-                            <th className="px-4 py-3 text-right text-xs font-semibold text-[var(--color-text-muted)] uppercase">Actions</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('users.col_user')}</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('users.col_role')}</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('users.col_pin')}</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('users.col_status')}</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('users.col_last_login')}</th>
+                            <th className="px-4 py-3 text-right text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('users.col_actions')}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--color-border)]">
@@ -265,7 +267,7 @@ export default function Users() {
                                         <div className="flex items-center gap-2">
                                             <Lock size={14} className="text-[var(--color-text-muted)]" />
                                             <span className="text-sm text-[var(--color-text-muted)]">
-                                                {user.has_pin ? '••••' : 'No PIN'}
+                                                {user.has_pin ? '••••' : t('users.no_pin')}
                                             </span>
                                         </div>
                                     ) : (
@@ -275,16 +277,16 @@ export default function Users() {
                                 <td className="px-4 py-3">
                                     {user.is_active ? (
                                         <span className="flex items-center gap-1.5 text-xs text-emerald-400">
-                                            <CheckCircle size={12} /> Active
+                                            <CheckCircle size={12} /> {t('users.status_active')}
                                         </span>
                                     ) : (
                                         <span className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)]">
-                                            <XCircle size={12} /> Inactive
+                                            <XCircle size={12} /> {t('users.status_inactive')}
                                         </span>
                                     )}
                                 </td>
                                 <td className="px-4 py-3 text-sm text-[var(--color-text-muted)]">
-                                    {user.last_login ? formatDate(user.last_login) : 'Never'}
+                                    {user.last_login ? formatDate(user.last_login) : t('users.never_logged')}
                                 </td>
                                 <td className="px-4 py-3 text-right">
                                     <div className="flex justify-end gap-2">
@@ -292,7 +294,7 @@ export default function Users() {
                                             <button
                                                 onClick={() => handleViewPerformance(user)}
                                                 className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:bg-orange-500/10 hover:text-orange-400"
-                                                title="View Performance"
+                                                title={t('users.view_performance')}
                                             >
                                                 <BarChart3 size={16} />
                                             </button>
@@ -323,28 +325,28 @@ export default function Users() {
             <Dialog open={isFormOpen} onOpenChange={(open) => { if (!open) handleCloseForm(); }}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{editingUser ? 'Edit User' : 'Add New User'}</DialogTitle>
+                        <DialogTitle>{editingUser ? t('users.form_edit_title') : t('users.form_add_title')}</DialogTitle>
                     </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="text-xs font-medium text-[var(--color-text-muted)] mb-1.5 block">Full Name *</label>
+                        <label className="text-xs font-medium text-[var(--color-text-muted)] mb-1.5 block">{t('users.label_full_name')} *</label>
                         <input 
                             type="text" 
                             value={form.full_name} 
                             onChange={e => setForm({ ...form, full_name: e.target.value })} 
                             className={inputClass} 
-                            placeholder="Enter full name"
+                            placeholder={t('users.placeholder_full_name')}
                             required 
                         />
                     </div>
                     <div>
-                        <label className="text-xs font-medium text-[var(--color-text-muted)] mb-1.5 block">Username *</label>
+                        <label className="text-xs font-medium text-[var(--color-text-muted)] mb-1.5 block">{t('users.label_username')} *</label>
                         <input 
                             type="text" 
                             value={form.username} 
                             onChange={e => setForm({ ...form, username: e.target.value })} 
                             className={inputClass} 
-                            placeholder="Enter username"
+                            placeholder={t('users.placeholder_username')}
                             required 
                             disabled={!!editingUser} 
                         />
@@ -357,20 +359,20 @@ export default function Users() {
                             value={form.password} 
                             onChange={e => setForm({ ...form, password: e.target.value })} 
                             className={inputClass} 
-                            placeholder={editingUser ? 'Leave blank to keep current' : 'Enter password'}
+                            placeholder={editingUser ? t('users.placeholder_password_edit') : t('users.placeholder_password_new')}
                             required={!editingUser} 
                         />
                     </div>
                     <div>
-                        <label className="text-xs font-medium text-[var(--color-text-muted)] mb-1.5 block">Role *</label>
+                        <label className="text-xs font-medium text-[var(--color-text-muted)] mb-1.5 block">{t('users.label_role')} *</label>
                         <select 
                             value={form.role} 
                             onChange={e => setForm({ ...form, role: e.target.value as any })} 
                             className={inputClass}
                         >
-                            <option value="cashier">Cashier</option>
-                            <option value="manager">Manager</option>
-                            <option value="admin">Administrator</option>
+                            <option value="cashier">{t('users.role_cashier')}</option>
+                            <option value="manager">{t('users.role_manager')}</option>
+                            <option value="admin">{t('users.role_admin')}</option>
                         </select>
                     </div>
                     {form.role === 'cashier' && (
@@ -384,16 +386,16 @@ export default function Users() {
                                 value={form.pin_code} 
                                 onChange={e => setForm({ ...form, pin_code: e.target.value.replace(/\D/g, '') })} 
                                 className={inputClass} 
-                                placeholder="Enter 4-6 digit PIN"
+                                placeholder={t('users.placeholder_pin')}
                                 required={!editingUser && form.role === 'cashier'} 
                             />
-                            <p className="text-xs text-[var(--color-text-muted)] mt-1">Cashiers use this PIN for quick login at the POS</p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-1">{t('users.pin_hint')}</p>
                         </div>
                     )}
 
                     <div className="flex justify-end gap-3 pt-3 border-t border-[var(--color-border)]">
-                        <Button variant="secondary" onClick={handleCloseForm}>Cancel</Button>
-                        <Button type="submit">{editingUser ? 'Update User' : 'Create User'}</Button>
+                        <Button variant="secondary" onClick={handleCloseForm}>{t('users.cancel')}</Button>
+                        <Button type="submit">{editingUser ? t('users.update_user') : t('users.create_user')}</Button>
                     </div>
                 </form>
                 </DialogContent>
@@ -403,7 +405,7 @@ export default function Users() {
             <Dialog open={showPerformance} onOpenChange={(open) => { if (!open) setShowPerformance(false); }}>
                 <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle>{selectedCashier ? `${selectedCashier.full_name} - Performance` : 'Cashier Performance'}</DialogTitle>
+                        <DialogTitle>{selectedCashier ? t('users.performance_title', { name: selectedCashier.full_name }) : t('users.performance_title', { name: '' })}</DialogTitle>
                     </DialogHeader>
                 {selectedCashier && (
                     <div className="space-y-6">
@@ -413,19 +415,19 @@ export default function Users() {
                             return (
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4">
-                                        <p className="text-xs text-emerald-400 mb-1">Total Sessions</p>
+                                        <p className="text-xs text-emerald-400 mb-1">{t('users.perf_sessions')}</p>
                                         <p className="text-2xl font-bold text-[var(--color-text-primary)]">{performance.total_sessions}</p>
                                     </div>
                                     <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                                        <p className="text-xs text-blue-400 mb-1">Total Sales</p>
+                                        <p className="text-xs text-blue-400 mb-1">{t('users.perf_sales')}</p>
                                         <p className="text-2xl font-bold text-[var(--color-text-primary)]">{formatCurrency(performance.total_sales)}</p>
                                     </div>
                                     <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
-                                        <p className="text-xs text-purple-400 mb-1">Transactions</p>
+                                        <p className="text-xs text-purple-400 mb-1">{t('users.perf_transactions')}</p>
                                         <p className="text-2xl font-bold text-[var(--color-text-primary)]">{performance.total_transactions}</p>
                                     </div>
                                     <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
-                                        <p className="text-xs text-orange-400 mb-1">Avg Sale</p>
+                                        <p className="text-xs text-orange-400 mb-1">{t('users.perf_avg_sale')}</p>
                                         <p className="text-2xl font-bold text-[var(--color-text-primary)]">{formatCurrency(performance.average_sale)}</p>
                                     </div>
                                 </div>
@@ -434,7 +436,7 @@ export default function Users() {
 
                         {/* Recent Sessions */}
                         <div>
-                            <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-3">Recent Sessions</h3>
+                            <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-3">{t('users.recent_sessions')}</h3>
                             <div className="space-y-2 max-h-64 overflow-y-auto">
                                 {cashierSessions
                                     .filter(s => s.cashier_id === selectedCashier.id)
@@ -449,17 +451,17 @@ export default function Users() {
                                                     {formatDate(session.login_time)}
                                                 </p>
                                                 <p className="text-xs text-[var(--color-text-muted)]">
-                                                    {session.status === 'active' ? 'Active' : `Closed - ${session.logout_time ? formatDate(session.logout_time) : 'Unknown'}`}
+                                                    {session.status === 'active' ? t('users.session_active') : t('users.session_closed', { time: session.logout_time ? formatDate(session.logout_time) : t('users.session_unknown') })}
                                                 </p>
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-sm text-[var(--color-text-primary)]">{formatCurrency(session.opening_cash)}</p>
-                                                <p className="text-xs text-[var(--color-text-muted)]">Opening Cash</p>
+                                                <p className="text-xs text-[var(--color-text-muted)]">{t('users.opening_cash')}</p>
                                             </div>
                                         </div>
                                     ))}
                                 {cashierSessions.filter(s => s.cashier_id === selectedCashier.id).length === 0 && (
-                                    <p className="text-center text-[var(--color-text-muted)] py-4">No sessions recorded yet</p>
+                                    <p className="text-center text-[var(--color-text-muted)] py-4">{t('users.no_sessions')}</p>
                                 )}
                             </div>
                         </div>
@@ -472,9 +474,9 @@ export default function Users() {
                 isOpen={showDeleteConfirm}
                 onClose={() => { setShowDeleteConfirm(false); setDeleteTargetId(null); }}
                 onConfirm={confirmDelete}
-                title="Deactivate User"
-                description="Are you sure you want to deactivate this user?"
-                confirmLabel="Deactivate"
+                title={t('users.deactivate_title')}
+                description={t('users.deactivate_description')}
+                confirmLabel={t('users.deactivate_btn')}
                 variant="danger"
             />
         </div>

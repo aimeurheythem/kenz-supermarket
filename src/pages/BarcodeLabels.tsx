@@ -13,7 +13,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Printer, Trash2, Plus, X, Barcode, ShoppingBag, Settings2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import type { Product } from '@/lib/types';
 
 interface PrintItem {
@@ -82,13 +82,7 @@ export default function BarcodeLabels() {
     // Generate label array for preview
     const labelArray = queue.flatMap(item => Array(item.quantity).fill(item.originalProduct));
 
-    const formatPrice = (price: number) => {
-        const formatted = new Intl.NumberFormat('fr-FR', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 2,
-        }).format(price);
-        return `${formatted} DZ`;
-    };
+    const formatPrice = (price: number) => formatCurrency(price);
 
     return (
         <div className="relative flex flex-col h-full gap-8 p-6 lg:p-8 animate-fadeIn mt-4 min-h-[85vh]">

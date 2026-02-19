@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, ArrowRight, Check } from 'lucide-react';
 
-import { cn } from '@/lib/utils';
+import { cn, getCurrencySymbol } from '@/lib/utils';
 import type { Product } from '@/lib/types';
 import { useTranslation } from 'react-i18next';
 
@@ -110,7 +110,7 @@ export default function InventoryPreview({
                                         {formatCurrency(product.selling_price, false)}
                                     </span>
                                     <span className="text-[8px] font-bold text-zinc-400 group-hover:text-black/40 uppercase">
-                                        {i18n.language === 'ar' ? 'دج' : 'DZ'}
+                                        {getCurrencySymbol()}
                                     </span>
                                 </div>
                             </div>

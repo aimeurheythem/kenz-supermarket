@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { BadgeCent, ChevronLeft, ChevronRight, ExternalLink, ShoppingBag } from 'lucide-react';
 import { useSaleStore } from '@/stores/useSaleStore';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, getCurrencySymbol } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
@@ -143,7 +143,7 @@ export default function RecentProducts() {
         }
     };
 
-    const currencyLabel = i18n.language === 'ar' ? 'دج' : 'DZ';
+    const currencyLabel = getCurrencySymbol();
 
     return (
         <div className="w-full">

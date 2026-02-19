@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, BadgePercent, ShoppingCart, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { formatCurrency, cn } from '@/lib/utils';
+import { formatCurrency, cn, getCurrencySymbol } from '@/lib/utils';
 import type { Product } from '@/lib/types';
 
 interface FlashDealsPromotionsProps {
@@ -123,7 +123,7 @@ export default function FlashDealsPromotions({
                                                     {formatCurrency(product.selling_price * 0.8, false)}
                                                 </span>
                                                 <span className="text-xs text-emerald-500 uppercase">
-                                                    {i18n.language === 'ar' ? 'دج' : 'DZ'}
+                                                    {getCurrencySymbol()}
                                                 </span>
                                             </div>
                                         </div>

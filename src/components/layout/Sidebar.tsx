@@ -104,7 +104,7 @@ export default function Sidebar() {
             items: [
                 { label: t('sidebar.pos_sales'), path: '/pos', icon: ShoppingCart, roles: ['admin', 'manager', 'cashier'] },
                 { label: t('sidebar.inventory'), path: '/inventory', icon: Package, roles: ['admin', 'manager'] },
-                { label: 'Labels', path: '/barcodes', icon: ScanBarcode, roles: ['admin', 'manager'] },
+                { label: t('sidebar.barcodes'), path: '/barcodes', icon: ScanBarcode, roles: ['admin', 'manager'] },
                 { label: t('sidebar.stock_control'), path: '/stock', icon: ClipboardList, roles: ['admin', 'manager'] },
             ]
         },
@@ -114,16 +114,16 @@ export default function Sidebar() {
                 { label: t('sidebar.suppliers'), path: '/suppliers', icon: Truck, roles: ['admin', 'manager'] },
                 { label: t('sidebar.purchases'), path: '/purchases', icon: ScanBarcode, roles: ['admin', 'manager'] },
                 { label: t('sidebar.credit'), path: '/credit', icon: Wallet, roles: ['admin', 'manager'] },
-                { label: 'Expenses', path: '/expenses', icon: DollarSign, roles: ['admin', 'manager'] },
+                { label: t('sidebar.expenses'), path: '/expenses', icon: DollarSign, roles: ['admin', 'manager'] },
             ]
         },
         {
             title: t('sidebar.management') || "Management",
             items: [
                 { label: t('sidebar.reports'), path: '/reports', icon: BarChart3, roles: ['admin', 'manager'] },
-                { label: 'Transactions', path: '/transactions', icon: ClipboardList, roles: ['admin', 'manager'] },
-                { label: 'Audit Logs', path: '/audit-logs', icon: ShieldCheck, roles: ['admin'] },
-                { label: 'Customers', path: '/customers', icon: Users, roles: ['admin', 'manager', 'cashier'] },
+                { label: t('sidebar.transactions'), path: '/transactions', icon: ClipboardList, roles: ['admin', 'manager'] },
+                { label: t('sidebar.audit_logs'), path: '/audit-logs', icon: ShieldCheck, roles: ['admin'] },
+                { label: t('sidebar.customers'), path: '/customers', icon: Users, roles: ['admin', 'manager', 'cashier'] },
                 { label: t('sidebar.users'), path: '/users', icon: Users, roles: ['admin'] },
                 { label: t('sidebar.settings'), path: '/settings', icon: Settings, roles: ['admin'] },
             ]
@@ -470,10 +470,10 @@ export default function Sidebar() {
                             >
                                 <div className="text-center mb-6">
                                     <h3 className="text-lg font-bold text-black mb-1">
-                                        Sign out?
+                                        {t('sidebar.signout_title', 'Sign out?')}
                                     </h3>
                                     <p className="text-black/40 text-sm">
-                                        You'll need to sign in again to access your account dashboard.
+                                        {t('sidebar.signout_desc', "You'll need to sign in again to access your account dashboard.")}
                                     </p>
                                 </div>
 
@@ -482,7 +482,7 @@ export default function Sidebar() {
                                         onClick={() => setIsLogoutModalOpen(false)}
                                         className="flex-1 py-2.5 bg-gray-50 text-black font-bold rounded-xl transition-all hover:bg-gray-100"
                                     >
-                                        Cancel
+                                        {t('common.cancel', 'Cancel')}
                                     </button>
                                     <button
                                         onClick={async () => {
@@ -490,7 +490,7 @@ export default function Sidebar() {
                                         }}
                                         className="flex-1 py-2.5 bg-red-500 text-white font-bold rounded-xl transition-all hover:bg-red-600"
                                     >
-                                        Sign out
+                                        {t('sidebar.signout_confirm', 'Sign out')}
                                     </button>
                                 </div>
                             </motion.div>

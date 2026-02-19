@@ -8,7 +8,7 @@ export default function Help() {
     const contactMethods = [
         { icon: Mail, label: 'Email Support', value: 'support@supermarket.dz', color: 'text-blue-500' },
         { icon: Phone, label: 'Phone Support', value: '+213 123 456 789', color: 'text-emerald-500' },
-        { icon: MessageSquare, label: 'Live Chat', value: 'Available 9AM - 6PM', color: 'text-purple-500' },
+        { icon: MessageSquare, label: 'Live Chat', value: t('help.contact.available_hours', 'Available 9AM - 6PM'), color: 'text-purple-500' },
     ];
 
     return (

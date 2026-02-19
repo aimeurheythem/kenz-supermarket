@@ -32,7 +32,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { motion, useMotionValue, animate } from 'framer-motion';
-import { cn, formatDate } from '@/lib/utils';
+import { cn, formatDate, formatCurrency } from '@/lib/utils';
 import { useProductStore } from '@/stores/useProductStore';
 import { useCategoryStore } from '@/stores/useCategoryStore';
 import ProductFormModal from '@/components/inventory/ProductFormModal';
@@ -251,13 +251,7 @@ export default function Inventory() {
     // Calculations for stats
     const totalValue = products.reduce((sum, p) => sum + p.selling_price * p.stock_quantity, 0);
 
-    const formatPrice = (price: number) => {
-        const formatted = new Intl.NumberFormat('fr-FR', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 2,
-        }).format(price);
-        return i18n.language === 'ar' ? `${formatted} دج` : `${formatted} DZ`;
-    };
+    const formatPrice = (price: number) => formatCurrency(price);
 
     // Styles for product cards (matching POS)
     const getProductStyle = (id: number) => {

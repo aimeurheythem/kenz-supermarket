@@ -233,7 +233,7 @@ export default function Login() {
         if (ok) {
             setCashierStep('cash');
         } else {
-            setCashierError('Invalid PIN code');
+            setCashierError(t('login.errors.invalid_pin', 'Invalid PIN code'));
         }
     };
 
@@ -243,7 +243,7 @@ export default function Login() {
         if (!selectedCashier) return;
         const cash = parseFloat(openingCash);
         if (isNaN(cash) || cash < 0) {
-            setCashierError('Please enter a valid amount');
+            setCashierError(t('login.errors.invalid_amount', 'Please enter a valid amount'));
             return;
         }
         setCashierLoading(true);
@@ -253,10 +253,10 @@ export default function Login() {
             if (session && session.id && session.login_time) {
                 navigate('/pos', { replace: true });
             } else {
-                setCashierError('Failed to start session. Please try again.');
+                setCashierError(t('login.errors.session_failed', 'Failed to start session. Please try again.'));
             }
         } catch (err) {
-            setCashierError(err instanceof Error ? err.message : 'Unknown error');
+            setCashierError(err instanceof Error ? err.message : t('login.errors.unknown', 'Unknown error'));
         } finally {
             setCashierLoading(false);
         }
@@ -283,7 +283,7 @@ export default function Login() {
                 </div>
 
                 {/* Testimonials marquee */}
-                <div className="relative z-10 flex-1 flex flex-col justify-center gap-3 overflow-hidden py-4">
+                <div className="relative z-10 flex-1 flex flex-col justify-center gap-3 overflow-hidden py-4" dir="ltr">
                     {/* Row 1 — scrolls left */}
                     <div
                         className="w-full overflow-hidden"
@@ -468,11 +468,11 @@ export default function Login() {
                                 <div className="space-y-4">
                                     <div>
                                         <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
-                                            Select your name
+                                            {t('login.select_name', 'Select your name')}
                                         </label>
                                         <div className="space-y-2">
                                             {cashiers.length === 0 ? (
-                                                <p className="text-xs py-4 text-center" style={{ color: 'var(--text-muted)' }}>No cashiers found</p>
+                                                <p className="text-xs py-4 text-center" style={{ color: 'var(--text-muted)' }}>{t('login.no_cashiers', 'No cashiers found')}</p>
                                             ) : cashiers.map(c => (
                                                 <button
                                                     key={c.id}
@@ -517,11 +517,11 @@ export default function Login() {
                                             style={{ color: 'var(--text-muted)' }}
                                             onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
                                             onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}>
-                                            <ArrowLeft size={13} /> Change
+                                            <ArrowLeft size={13} /> {t('login.change', 'Change')}
                                         </button>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>PIN Code</label>
+                                        <label className="block text-xs font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>{t('login.pin_code', 'PIN Code')}</label>
                                         <NumPad value={pinCode} onChange={setPinCode} mode="pin" maxLen={selectedCashier.pin_length ?? 4} />
                                     </div>
                                     {cashierError && <p className="text-xs font-medium" style={{ color: 'var(--danger)' }}>{cashierError}</p>}
@@ -536,9 +536,9 @@ export default function Login() {
                                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                                                 </svg>
-                                                Verifying...
+                                                {t('login.verifying', 'Verifying...')}
                                             </span>
-                                        ) : 'Verify PIN'}
+                                        ) : t('login.verify_pin', 'Verify PIN')}
                                     </button>
                                 </form>
                             )}
@@ -556,7 +556,7 @@ export default function Login() {
                                         <div className="ml-auto w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>Opening Cash Amount</label>
+                                        <label className="block text-xs font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>{t('login.opening_cash', 'Opening Cash Amount')}</label>
                                         <NumPad value={openingCash} onChange={setOpeningCash} mode="cash" />
                                     </div>
                                     {cashierError && <p className="text-xs font-medium" style={{ color: 'var(--danger)' }}>{cashierError}</p>}
@@ -571,9 +571,9 @@ export default function Login() {
                                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                                                 </svg>
-                                                Opening session...
+                                                {t('login.opening_session', 'Opening session...')}
                                             </span>
-                                        ) : 'Open Session & Go to POS'}
+                                        ) : t('login.open_session', 'Open Session & Go to POS')}
                                     </button>
                                 </form>
                             )}

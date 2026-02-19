@@ -142,7 +142,7 @@ export default function Transactions() {
                             ) : filteredSales.length === 0 ? (
                                 <tr>
                                     <td colSpan={8} className="px-6 py-12 text-center text-[var(--color-text-muted)]">
-                                        No transactions found matching your criteria.
+                                        {t('transactions.no_transactions')}
                                     </td>
                                 </tr>
                             ) : (
@@ -209,8 +209,8 @@ export default function Transactions() {
 
                 {/* Footer / Pagination (Placeholder) */}
                 <div className="p-4 border-t border-[var(--color-border)] bg-[var(--color-bg-secondary)] flex justify-between items-center text-xs text-[var(--color-text-muted)]">
-                    <span>Showing {filteredSales.length} transactions</span>
-                    <span>Most recent 100 records</span>
+                    <span>{t('transactions.showing', { count: filteredSales.length })}</span>
+                    <span>{t('transactions.recent_records')}</span>
                 </div>
             </div>
 

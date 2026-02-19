@@ -40,7 +40,12 @@ export interface Product {
 }
 
 export type ProductInput = Pick<Product, 'name' | 'cost_price' | 'selling_price'> &
-    Partial<Pick<Product, 'barcode' | 'description' | 'category_id' | 'stock_quantity' | 'reorder_level' | 'unit' | 'image_url'>>;
+    Partial<
+        Pick<
+            Product,
+            'barcode' | 'description' | 'category_id' | 'stock_quantity' | 'reorder_level' | 'unit' | 'image_url'
+        >
+    >;
 
 // =============================================
 // PRODUCT BATCHES
@@ -139,7 +144,6 @@ export interface CustomerTransaction {
 export type CustomerInput = Pick<Customer, 'full_name'> &
     Partial<Pick<Customer, 'phone' | 'email' | 'address' | 'notes' | 'loyalty_points'>>;
 
-
 // =============================================
 // SALES
 // =============================================
@@ -206,7 +210,7 @@ export interface User {
     full_name: string;
     role: 'admin' | 'manager' | 'cashier';
     is_active: number;
-    has_pin?: number;  // 1 if a PIN is set, 0 otherwise (safe computed field)
+    has_pin?: number; // 1 if a PIN is set, 0 otherwise (safe computed field)
     pin_length?: number; // Original PIN digit count (4–8)
     last_login: string | null;
     created_at: string;
@@ -248,9 +252,6 @@ export interface SessionCloseInput {
     notes?: string;
 }
 
-// =============================================
-// DASHBOARD / REPORTS
-// =============================================
 // =============================================
 // DASHBOARD / REPORTS
 // =============================================

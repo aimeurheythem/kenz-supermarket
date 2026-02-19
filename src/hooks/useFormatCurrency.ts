@@ -18,7 +18,7 @@ export function useFormatCurrency() {
 
     const format = useCallback(
         (amount: number, includeSymbol = true) => formatCurrency(amount, includeSymbol),
-        [_lang, _symbol, _position]
+        [], // _lang, _symbol, _position trigger re-renders but aren't used inside the callback
     );
 
     const symbol = getCurrencySymbol();

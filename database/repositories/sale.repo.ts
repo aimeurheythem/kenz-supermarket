@@ -1,4 +1,4 @@
-import { query, execute, lastInsertId, get, transactionOperations, executeNoSave, triggerSave } from '../db';
+import { query, execute, lastInsertId, get, executeNoSave, triggerSave } from '../db';
 import type { Sale, SaleItem, CartItem } from '../../src/lib/types';
 import { AuditLogRepo } from './audit-log.repo';
 
@@ -42,7 +42,7 @@ export const SaleRepo = {
        FROM sales s
        LEFT JOIN users u ON s.user_id = u.id
        WHERE s.id = ?`,
-            [id]
+            [id],
         );
     },
 
@@ -56,9 +56,15 @@ export const SaleRepo = {
      */
     async createFromCart(
         cart: CartItem[],
-        payment: { method: string; customer_name?: string; customer_id?: number | null; tax_rate?: number; discount?: number },
+        payment: {
+            method: string;
+            customer_name?: string;
+            customer_id?: number | null;
+            tax_rate?: number;
+            discount?: number;
+        },
         userId?: number,
-        sessionId?: number
+        sessionId?: number,
     ): Promise<Sale> {
         const subtotal = cart.reduce((sum, item) => {
             return sum + item.product.selling_price * item.quantity - item.discount;
@@ -86,7 +92,7 @@ export const SaleRepo = {
                     total,
                     payment.method || 'cash',
                     payment.customer_name || 'Walk-in Customer',
-                ]
+                ],
             );
 
             const saleId = await lastInsertId();
@@ -100,20 +106,20 @@ export const SaleRepo = {
                 // Atomic debt increment — no read-compute-write gap
                 await executeNoSave(
                     'UPDATE customers SET total_debt = total_debt + ?, updated_at = datetime("now") WHERE id = ?',
-                    [total, payment.customer_id]
+                    [total, payment.customer_id],
                 );
 
                 // Read updated balance for the transaction log
                 const updatedCustomer = await get<{ total_debt: number }>(
                     'SELECT total_debt FROM customers WHERE id = ?',
-                    [payment.customer_id]
+                    [payment.customer_id],
                 );
 
                 // Add Transaction Record
                 await executeNoSave(
                     `INSERT INTO customer_transactions (customer_id, type, amount, balance_after, reference_type, reference_id, description)
                      VALUES (?, 'debt', ?, ?, 'sale', ?, 'Credit Sale')`,
-                    [payment.customer_id, total, updatedCustomer?.total_debt ?? total, saleId]
+                    [payment.customer_id, total, updatedCustomer?.total_debt ?? total, saleId],
                 );
             }
 
@@ -123,27 +129,35 @@ export const SaleRepo = {
 
                 // Validate stock inside the transaction — reject if insufficient
                 const product = await get<{ stock_quantity: number; name: string }>(
-                    "SELECT stock_quantity, name FROM products WHERE id = ?",
-                    [item.product.id]
+                    'SELECT stock_quantity, name FROM products WHERE id = ?',
+                    [item.product.id],
                 );
                 const previousStock = product?.stock_quantity ?? 0;
 
                 if (previousStock < item.quantity) {
                     throw new Error(
-                        `Insufficient stock for "${product?.name || item.product.name}": requested ${item.quantity}, available ${previousStock}`
+                        `Insufficient stock for "${product?.name || item.product.name}": requested ${item.quantity}, available ${previousStock}`,
                     );
                 }
 
                 await executeNoSave(
                     `INSERT INTO sale_items (sale_id, product_id, product_name, quantity, unit_price, discount, total)
                      VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                    [saleId, item.product.id, item.product.name, item.quantity, item.product.selling_price, item.discount, itemTotal]
+                    [
+                        saleId,
+                        item.product.id,
+                        item.product.name,
+                        item.quantity,
+                        item.product.selling_price,
+                        item.discount,
+                        itemTotal,
+                    ],
                 );
 
                 // Atomic stock decrement — no gap between read and write
                 await executeNoSave(
                     "UPDATE products SET stock_quantity = MAX(0, stock_quantity - ?), updated_at = datetime('now') WHERE id = ?",
-                    [item.quantity, item.product.id]
+                    [item.quantity, item.product.id],
                 );
                 const newStock = Math.max(0, previousStock - item.quantity);
 
@@ -151,7 +165,7 @@ export const SaleRepo = {
                 await executeNoSave(
                     `INSERT INTO stock_movements (product_id, type, quantity, previous_stock, new_stock, reason, reference_id, reference_type)
                      VALUES (?, 'out', ?, ?, ?, 'Sale', ?, 'sale')`,
-                    [item.product.id, item.quantity, previousStock, newStock, saleId]
+                    [item.product.id, item.quantity, previousStock, newStock, saleId],
                 );
             }
 
@@ -167,11 +181,13 @@ export const SaleRepo = {
 
             // Audit log (non-critical — outside transaction)
             AuditLogRepo.log(
-                'CREATE', 'SALE', saleId,
+                'CREATE',
+                'SALE',
+                saleId,
                 `Sale #${saleId} — ${cart.length} items, total ${total}, payment: ${payment.method}`,
                 null,
                 { total, items: cart.length, payment_method: payment.method, customer_id: payment.customer_id || null },
-                userId || null
+                userId || null,
             );
 
             return sale;
@@ -220,33 +236,34 @@ export const SaleRepo = {
             await executeNoSave('BEGIN TRANSACTION;');
 
             // 1. Update Sale Status
-            await executeNoSave(
-                'UPDATE sales SET status = ?, updated_at = datetime("now") WHERE id = ?',
-                [newStatus, saleId]
-            );
+            await executeNoSave('UPDATE sales SET status = ?, updated_at = datetime("now") WHERE id = ?', [
+                newStatus,
+                saleId,
+            ]);
 
             // 2. Restore Stock
             for (const item of items) {
                 // Read current stock for movement log
                 const product = await get<{ stock_quantity: number }>(
                     'SELECT stock_quantity FROM products WHERE id = ?',
-                    [item.product_id]
+                    [item.product_id],
                 );
 
-                if (product) { // Only if product still exists
+                if (product) {
+                    // Only if product still exists
                     const previousStock = product.stock_quantity;
 
                     // Atomic stock increment
                     await executeNoSave(
                         "UPDATE products SET stock_quantity = stock_quantity + ?, updated_at = datetime('now') WHERE id = ?",
-                        [item.quantity, item.product_id]
+                        [item.quantity, item.product_id],
                     );
 
                     // 3. Log Movement
                     await executeNoSave(
                         `INSERT INTO stock_movements (product_id, type, quantity, previous_stock, new_stock, reason, reference_id, reference_type)
                          VALUES (?, 'return', ?, ?, ?, ?, ?, 'sale')`,
-                        [item.product_id, item.quantity, previousStock, previousStock + item.quantity, reason, saleId]
+                        [item.product_id, item.quantity, previousStock, previousStock + item.quantity, reason, saleId],
                     );
                 }
             }
@@ -256,10 +273,12 @@ export const SaleRepo = {
 
             // Audit log (non-critical — outside transaction)
             AuditLogRepo.log(
-                newStatus === 'refunded' ? 'REFUND' : 'VOID', 'SALE', saleId,
+                newStatus === 'refunded' ? 'REFUND' : 'VOID',
+                'SALE',
+                saleId,
                 `Sale #${saleId} ${newStatus} — ${reason}`,
                 { status: sale.status, total: sale.total },
-                { status: newStatus, total: sale.total, items_restored: items.length }
+                { status: newStatus, total: sale.total, items_restored: items.length },
             );
         } catch (error) {
             await executeNoSave('ROLLBACK;');
@@ -276,7 +295,7 @@ export const SaleRepo = {
             `SELECT COALESCE(SUM(total), 0) as revenue, COUNT(*) as orders
        FROM sales
        WHERE date(sale_date) = date('now') AND status = 'completed'${userFilter}`,
-            userParams
+            userParams,
         );
 
         const cogsResult = await get<{ cogs: number }>(
@@ -285,7 +304,7 @@ export const SaleRepo = {
              JOIN sales s ON si.sale_id = s.id
              JOIN products p ON si.product_id = p.id
              WHERE date(s.sale_date) = date('now') AND s.status = 'completed'${userId ? ' AND s.user_id = ?' : ''}`,
-            userId ? [userId] : []
+            userId ? [userId] : [],
         );
 
         const revenue = revenueResult?.revenue || 0;
@@ -294,7 +313,7 @@ export const SaleRepo = {
         return {
             revenue,
             orders: revenueResult?.orders || 0,
-            profit: revenue - cogs
+            profit: revenue - cogs,
         };
     },
 
@@ -317,14 +336,14 @@ export const SaleRepo = {
              WHERE date(sale_date) = ? AND status = 'completed'${userFilter}
              GROUP BY strftime('%H', sale_date)
              ORDER BY hour`,
-            params
+            params,
         );
 
         // Fill in missing hours (08:00 to 22:00)
         const allHours: { time: string; revenue: number }[] = [];
         for (let h = 8; h <= 22; h++) {
             const hourStr = `${h.toString().padStart(2, '0')}:00`;
-            const found = rows.find(r => r.hour === hourStr);
+            const found = rows.find((r) => r.hour === hourStr);
             allHours.push({ time: hourStr, revenue: found?.revenue ?? 0 });
         }
         return allHours;
@@ -349,7 +368,7 @@ export const SaleRepo = {
              WHERE date(sale_date) >= date('now', '-6 days') AND status = 'completed'${userFilter}
              GROUP BY date(sale_date)
              ORDER BY sale_day`,
-            params
+            params,
         );
 
         // Fill in missing days
@@ -360,7 +379,7 @@ export const SaleRepo = {
             d.setDate(d.getDate() - i);
             const dayName = dayNames[d.getDay()];
             const dateStr = d.toISOString().split('T')[0];
-            const found = rows.find(r => (r as any).sale_day === dateStr);
+            const found = rows.find((r) => (r as any).sale_day === dateStr);
             result.push({ day: dayName, revenue: found?.revenue ?? 0 });
         }
         return result;
@@ -386,7 +405,7 @@ export const SaleRepo = {
              WHERE date(sale_date) >= date('now', '-5 months', 'start of month') AND status = 'completed'${userFilter}
              GROUP BY strftime('%Y-%m', sale_date)
              ORDER BY month_key`,
-            params
+            params,
         );
 
         // Fill in missing months
@@ -397,7 +416,7 @@ export const SaleRepo = {
             d.setMonth(d.getMonth() - i);
             const monthName = monthNames[d.getMonth()];
             const monthKey = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
-            const found = rows.find(r => r.month_key === monthKey);
+            const found = rows.find((r) => r.month_key === monthKey);
             result.push({ month: monthName, revenue: found?.revenue ?? 0 });
         }
         return result;
@@ -418,14 +437,14 @@ export const SaleRepo = {
              WHERE date(sale_date) = ? AND status = 'completed'${userFilter}
              GROUP BY hour_block
              ORDER BY hour_block`,
-            params
+            params,
         );
 
         // Fill all 2-hour blocks from 8 to 22
         const result: { hour: string; density: number }[] = [];
         for (let h = 8; h <= 20; h += 2) {
             const hourStr = `${h.toString().padStart(2, '0')}:00`;
-            const found = rows.find(r => r.hour_block === h);
+            const found = rows.find((r) => r.hour_block === h);
             result.push({ hour: hourStr, density: found?.sale_count ?? 0 });
         }
         return result;
@@ -434,9 +453,12 @@ export const SaleRepo = {
     /**
      * Top N products by total profit margin this month.
      */
-    async getTopProductsByProfit(limit: number = 5, userId?: number): Promise<{ name: string; profit: number; total_sold: number }[]> {
+    async getTopProductsByProfit(
+        limit: number = 5,
+        userId?: number,
+    ): Promise<{ name: string; profit: number; total_sold: number }[]> {
         const userFilter = userId ? ' AND s.user_id = ?' : '';
-        const params: (number)[] = userId ? [userId, limit] : [limit];
+        const params: number[] = userId ? [userId, limit] : [limit];
         return query<{ name: string; profit: number; total_sold: number }>(
             `SELECT 
                 p.name,
@@ -450,7 +472,7 @@ export const SaleRepo = {
              GROUP BY si.product_id
              ORDER BY profit DESC
              LIMIT ?`,
-            params
+            params,
         );
     },
 };

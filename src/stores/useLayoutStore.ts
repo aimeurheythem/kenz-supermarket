@@ -23,6 +23,6 @@ export const useLayoutStore = create<LayoutState>()(
             partialize: (state) => ({
                 isSidebarCollapsed: state.isSidebarCollapsed,
             }),
-        }
-    )
+        },
+    ),
 );

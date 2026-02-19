@@ -1,13 +1,13 @@
 /**
  * Database Connection Manager
  * Uses sql.js for SQLite database
- * 
+ *
  * PERSISTENCE STRATEGY:
  *  - When running inside Electron: saves to the file system via IPC
  *    (unlimited size, stored in AppData/data/database.sqlite)
  *  - When running in a browser (Vite dev): falls back to localStorage
  *    (5MB limit, for development only)
- * 
+ *
  * On first Electron launch, if a localStorage database exists but no
  * file-system database does, we automatically migrate the data.
  */
@@ -15,7 +15,6 @@
 import initSqlJs from 'sql.js';
 import type { Database as SqlJsDatabase } from 'sql.js';
 import { SCHEMA_SQL } from './schema';
-
 
 // ============================================
 // STATE
@@ -41,9 +40,11 @@ const SAVE_DEBOUNCE_MS = 500; // Batch saves within 500ms
 // ============================================
 
 function detectElectron(): boolean {
-    return typeof window !== 'undefined' &&
+    return (
+        typeof window !== 'undefined' &&
         typeof window.electronAPI !== 'undefined' &&
-        typeof window.electronAPI.loadDatabase === 'function';
+        typeof window.electronAPI.loadDatabase === 'function'
+    );
 }
 
 // ============================================
@@ -118,11 +119,15 @@ async function loadDatabaseBinary(): Promise<Uint8Array | null> {
         // No file on disk — check if there's legacy localStorage data to migrate
         const lsData = loadFromLocalStorage();
         if (lsData) {
-            console.log('[DB] 🔄 Migrating database from localStorage to file system...');
+            console.warn('[DB] 🔄 Migrating database from localStorage to file system...');
             await saveToFileSystem(lsData);
             // Clear localStorage after successful migration
-            try { localStorage.removeItem(DB_STORAGE_KEY); } catch (_) { /* ignore */ }
-            console.log('[DB] ✅ Migration complete!');
+            try {
+                localStorage.removeItem(DB_STORAGE_KEY);
+            } catch (_) {
+                /* ignore */
+            }
+            console.warn('[DB] ✅ Migration complete!');
             return lsData;
         }
 
@@ -173,7 +178,7 @@ async function initDatabaseInternal(): Promise<void> {
     if (sqlJsDb) return;
 
     isElectron = detectElectron();
-    console.log(`[DB] Environment: ${isElectron ? 'Electron (file system)' : 'Browser (localStorage)'}`);
+    console.warn(`[DB] Environment: ${isElectron ? 'Electron (file system)' : 'Browser (localStorage)'}`);
 
     let SQL;
     try {
@@ -190,21 +195,25 @@ async function initDatabaseInternal(): Promise<void> {
     if (existingData) {
         try {
             sqlJsDb = new SQL.Database(existingData);
-            console.log(`[DB] ✅ Database loaded (${(existingData.length / 1024).toFixed(1)} KB)`);
+            console.warn(`[DB] ✅ Database loaded (${(existingData.length / 1024).toFixed(1)} KB)`);
         } catch (e) {
             console.error('[DB] Failed to load saved database, creating new one:', e);
             sqlJsDb = new SQL.Database();
         }
     } else {
         sqlJsDb = new SQL.Database();
-        console.log('[DB] 🆕 Created new empty database');
+        console.warn('[DB] 🆕 Created new empty database');
     }
 
     // Apply schema (CREATE IF NOT EXISTS — safe to run every time)
     sqlJsDb.run(SCHEMA_SQL);
 
     // Column migrations — ALTER TABLE is safe to run every time (no-op if column exists)
-    try { sqlJsDb.run("ALTER TABLE users ADD COLUMN pin_length INTEGER DEFAULT 4"); } catch (_) { /* already exists */ }
+    try {
+        sqlJsDb.run('ALTER TABLE users ADD COLUMN pin_length INTEGER DEFAULT 4');
+    } catch (_) {
+        /* already exists */
+    }
 
     // Enable foreign keys
     try {
@@ -303,7 +312,9 @@ export async function lastInsertId(): Promise<number> {
     return result[0]?.id ?? 0;
 }
 
-export async function transactionOperations(operations: { sql: string; params?: unknown[] }[]): Promise<{ lastInsertRowid: number; changes: number }[]> {
+export async function transactionOperations(
+    operations: { sql: string; params?: unknown[] }[],
+): Promise<{ lastInsertRowid: number; changes: number }[]> {
     if (!isInitialized) {
         await initDatabase();
     }
@@ -320,7 +331,7 @@ export async function transactionOperations(operations: { sql: string; params?: 
             const idResult = await query<{ id: number }>('SELECT last_insert_rowid() as id');
             results.push({
                 lastInsertRowid: idResult[0]?.id ?? 0,
-                changes: 1
+                changes: 1,
             });
         }
 
@@ -458,7 +469,14 @@ export async function resetAllData(userId?: number, userName?: string): Promise<
         // Log the wipe as the very first operation (before audit_logs itself is cleared)
         sqlJsDb.run(
             `INSERT INTO audit_logs (user_id, user_name, action, entity, entity_id, details) VALUES (?, ?, ?, ?, ?, ?)`,
-            [userId ?? null, userName ?? null, 'DATA_WIPE', 'system', null, 'Full data reset initiated by admin'] as any
+            [
+                userId ?? null,
+                userName ?? null,
+                'DATA_WIPE',
+                'system',
+                null,
+                'Full data reset initiated by admin',
+            ] as any,
         );
 
         for (const table of tables) {

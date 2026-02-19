@@ -10,7 +10,12 @@ interface PurchaseStore {
     clearError: () => void;
     loadOrders: () => Promise<void>;
     loadOrderItems: (orderId: number) => Promise<void>;
-    createOrder: (data: { supplier_id: number; status: string; notes?: string; items: { product_id: number; quantity: number; unit_cost: number }[] }) => Promise<void>;
+    createOrder: (data: {
+        supplier_id: number;
+        status: string;
+        notes?: string;
+        items: { product_id: number; quantity: number; unit_cost: number }[];
+    }) => Promise<void>;
     receiveOrder: (id: number) => Promise<void>;
     updateStatus: (id: number, status: string) => Promise<void>;
 }
@@ -80,5 +85,5 @@ export const usePurchaseStore = create<PurchaseStore>((set, get) => ({
             set({ error: (e as Error).message });
             throw e;
         }
-    }
+    },
 }));

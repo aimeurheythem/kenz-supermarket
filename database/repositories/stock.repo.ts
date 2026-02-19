@@ -1,4 +1,4 @@
-import { query, execute, executeNoSave, triggerSave, lastInsertId, get } from '../db';
+import { query, executeNoSave, triggerSave, get } from '../db';
 import type { StockMovement } from '../../src/lib/types';
 import { AuditLogRepo } from './audit-log.repo';
 
@@ -34,8 +34,16 @@ export const StockRepo = {
     /**
      * Add stock (e.g., from a purchase or manual adjustment)
      */
-    async addStock(productId: number, quantity: number, reason: string, referenceId?: number, referenceType?: string): Promise<void> {
-        const product = await get<{ stock_quantity: number }>('SELECT stock_quantity FROM products WHERE id = ?', [productId]);
+    async addStock(
+        productId: number,
+        quantity: number,
+        reason: string,
+        referenceId?: number,
+        referenceType?: string,
+    ): Promise<void> {
+        const product = await get<{ stock_quantity: number }>('SELECT stock_quantity FROM products WHERE id = ?', [
+            productId,
+        ]);
         if (!product) throw new Error(`Product ${productId} not found`);
         const previousStock = product.stock_quantity;
 
@@ -44,22 +52,33 @@ export const StockRepo = {
 
             await executeNoSave(
                 "UPDATE products SET stock_quantity = stock_quantity + ?, updated_at = datetime('now') WHERE id = ?",
-                [quantity, productId]
+                [quantity, productId],
             );
 
             await executeNoSave(
                 `INSERT INTO stock_movements (product_id, type, quantity, previous_stock, new_stock, reason, reference_id, reference_type)
            VALUES (?, 'in', ?, ?, ?, ?, ?, ?)`,
-                [productId, quantity, previousStock, previousStock + quantity, reason, referenceId || null, referenceType || null]
+                [
+                    productId,
+                    quantity,
+                    previousStock,
+                    previousStock + quantity,
+                    reason,
+                    referenceId || null,
+                    referenceType || null,
+                ],
             );
 
             await executeNoSave('COMMIT;');
             triggerSave();
 
-            AuditLogRepo.log('STOCK_IN', 'PRODUCT', productId,
+            AuditLogRepo.log(
+                'STOCK_IN',
+                'PRODUCT',
+                productId,
                 `Added ${quantity} units — ${reason}`,
                 { stock_quantity: previousStock },
-                { stock_quantity: previousStock + quantity }
+                { stock_quantity: previousStock + quantity },
             );
         } catch (error) {
             await executeNoSave('ROLLBACK;');
@@ -71,7 +90,9 @@ export const StockRepo = {
      * Remove stock manually (e.g., damaged goods, expired)
      */
     async removeStock(productId: number, quantity: number, reason: string): Promise<void> {
-        const product = await get<{ stock_quantity: number }>('SELECT stock_quantity FROM products WHERE id = ?', [productId]);
+        const product = await get<{ stock_quantity: number }>('SELECT stock_quantity FROM products WHERE id = ?', [
+            productId,
+        ]);
         if (!product) throw new Error(`Product ${productId} not found`);
         const previousStock = product.stock_quantity;
 
@@ -86,22 +107,25 @@ export const StockRepo = {
 
             await executeNoSave(
                 "UPDATE products SET stock_quantity = MAX(0, stock_quantity - ?), updated_at = datetime('now') WHERE id = ?",
-                [quantity, productId]
+                [quantity, productId],
             );
 
             await executeNoSave(
                 `INSERT INTO stock_movements (product_id, type, quantity, previous_stock, new_stock, reason)
            VALUES (?, 'out', ?, ?, ?, ?)`,
-                [productId, quantity, previousStock, newStock, reason]
+                [productId, quantity, previousStock, newStock, reason],
             );
 
             await executeNoSave('COMMIT;');
             triggerSave();
 
-            AuditLogRepo.log('STOCK_OUT', 'PRODUCT', productId,
+            AuditLogRepo.log(
+                'STOCK_OUT',
+                'PRODUCT',
+                productId,
                 `Removed ${quantity} units — ${reason}`,
                 { stock_quantity: previousStock },
-                { stock_quantity: newStock }
+                { stock_quantity: newStock },
             );
         } catch (error) {
             await executeNoSave('ROLLBACK;');
@@ -113,31 +137,36 @@ export const StockRepo = {
      * Adjust stock to exact quantity
      */
     async adjustStock(productId: number, newQuantity: number, reason: string): Promise<void> {
-        const product = await get<{ stock_quantity: number }>('SELECT stock_quantity FROM products WHERE id = ?', [productId]);
+        const product = await get<{ stock_quantity: number }>('SELECT stock_quantity FROM products WHERE id = ?', [
+            productId,
+        ]);
         if (!product) throw new Error(`Product ${productId} not found`);
         const previousStock = product.stock_quantity;
 
         try {
             await executeNoSave('BEGIN TRANSACTION;');
 
-            await executeNoSave(
-                "UPDATE products SET stock_quantity = ?, updated_at = datetime('now') WHERE id = ?",
-                [newQuantity, productId]
-            );
+            await executeNoSave("UPDATE products SET stock_quantity = ?, updated_at = datetime('now') WHERE id = ?", [
+                newQuantity,
+                productId,
+            ]);
 
             await executeNoSave(
                 `INSERT INTO stock_movements (product_id, type, quantity, previous_stock, new_stock, reason)
            VALUES (?, 'adjustment', ?, ?, ?, ?)`,
-                [productId, Math.abs(newQuantity - previousStock), previousStock, newQuantity, reason]
+                [productId, Math.abs(newQuantity - previousStock), previousStock, newQuantity, reason],
             );
 
             await executeNoSave('COMMIT;');
             triggerSave();
 
-            AuditLogRepo.log('STOCK_ADJUST', 'PRODUCT', productId,
+            AuditLogRepo.log(
+                'STOCK_ADJUST',
+                'PRODUCT',
+                productId,
                 `Adjusted stock to ${newQuantity} — ${reason}`,
                 { stock_quantity: previousStock },
-                { stock_quantity: newQuantity }
+                { stock_quantity: newQuantity },
             );
         } catch (error) {
             await executeNoSave('ROLLBACK;');

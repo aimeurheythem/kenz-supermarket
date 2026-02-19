@@ -1,9 +1,9 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 import i18n from '@/i18n';
 
 export function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs))
+    return twMerge(clsx(inputs));
 }
 
 import { useSettingsStore } from '@/stores/useSettingsStore';
@@ -11,9 +11,12 @@ import { useSettingsStore } from '@/stores/useSettingsStore';
 // Map i18n language codes to Intl locale strings
 function getIntlLocale(): string {
     switch (i18n.language) {
-        case 'ar': return 'ar-DZ';
-        case 'fr': return 'fr-FR';
-        default: return 'en-US';
+        case 'ar':
+            return 'ar-DZ';
+        case 'fr':
+            return 'fr-FR';
+        default:
+            return 'en-US';
     }
 }
 
@@ -48,10 +51,10 @@ export function formatCurrency(amount: number, includeSymbol = true) {
 
 export function formatDate(date: string | Date) {
     return new Intl.DateTimeFormat(i18n.language, {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-    }).format(new Date(date))
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+    }).format(new Date(date));
 }
 
 // ============================================

@@ -18,8 +18,8 @@ export default function InventoryPreview({
     products,
     cart,
     formatCurrency,
-    i18n,
-    handleAddProduct
+    i18n: _i18n,
+    handleAddProduct,
 }: InventoryPreviewProps) {
     const { t } = useTranslation();
     const [addedItems, setAddedItems] = useState<Record<string, number>>({});
@@ -27,9 +27,9 @@ export default function InventoryPreview({
     const handleAdd = (product: Product) => {
         handleAddProduct(product);
         const id = String(product.id);
-        setAddedItems(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
+        setAddedItems((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
         setTimeout(() => {
-            setAddedItems(prev => {
+            setAddedItems((prev) => {
                 const newState = { ...prev };
                 delete newState[id];
                 return newState;
@@ -41,16 +41,22 @@ export default function InventoryPreview({
         <div className="space-y-6 pt-2">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <span className="text-[12px] text-black uppercase tracking-[0.3em] font-bold">{t('pos.inventory.title')}</span>
-                    <span className="px-2 py-2 rounded-full bg-yellow-300 text-[10px] font-bold text-blue-500 uppercase tracking-widest leading-none">{t('pos.inventory.quick_select')}</span>
+                    <span className="text-[12px] text-black uppercase tracking-[0.3em] font-bold">
+                        {t('pos.inventory.title')}
+                    </span>
+                    <span className="px-2 py-2 rounded-full bg-yellow-300 text-[10px] font-bold text-blue-500 uppercase tracking-widest leading-none">
+                        {t('pos.inventory.quick_select')}
+                    </span>
                 </div>
-                <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">{t('pos.inventory.products_available', { count: products.length })}</span>
+                <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">
+                    {t('pos.inventory.products_available', { count: products.length })}
+                </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                 {products.slice(0, 12).map((product) => {
                     const isOutOfStock = product.stock_quantity <= 0;
-                    const inCart = cart.find(c => c.product.id === product.id);
+                    const inCart = cart.find((c) => c.product.id === product.id);
                     const recentlyAdded = addedItems[String(product.id)];
                     const isAtLimit = inCart && inCart.quantity >= product.stock_quantity;
 
@@ -62,19 +68,21 @@ export default function InventoryPreview({
                             whileHover={{ scale: isOutOfStock ? 1 : 0.98 }}
                             whileTap={{ scale: isOutOfStock ? 1 : 0.95 }}
                             className={cn(
-                                "group relative p-5 rounded-[3rem] transition-all duration-500 ease-out text-left flex items-center gap-4 h-24",
-                                "bg-white border-2 border-gray-200",
-                                inCart && "border-yellow-400",
-                                isOutOfStock && "opacity-30 grayscale cursor-not-allowed",
-                                !isOutOfStock && isAtLimit && "opacity-60 cursor-pointer"
+                                'group relative p-5 rounded-[3rem] transition-all duration-500 ease-out text-left flex items-center gap-4 h-24',
+                                'bg-white border-2 border-gray-200',
+                                inCart && 'border-yellow-400',
+                                isOutOfStock && 'opacity-30 grayscale cursor-not-allowed',
+                                !isOutOfStock && isAtLimit && 'opacity-60 cursor-pointer',
                             )}
                         >
                             {/* Background Layer (Handles the yellow slide effect) */}
-                            <div className={cn(
-                                "absolute inset-0 rounded-[3rem] overflow-hidden pointer-events-none transition-all duration-500",
-                                "bg-[linear-gradient(to_bottom,white_50%,#ffee00_50%)] bg-[length:100%_300%] bg-no-repeat bg-[0%_0%] group-hover:bg-[0%_100%]",
-                                inCart && "bg-[0%_100%]"
-                            )} />
+                            <div
+                                className={cn(
+                                    'absolute inset-0 rounded-[3rem] overflow-hidden pointer-events-none transition-all duration-500',
+                                    'bg-[linear-gradient(to_bottom,white_50%,#ffee00_50%)] bg-[length:100%_300%] bg-no-repeat bg-[0%_0%] group-hover:bg-[0%_100%]',
+                                    inCart && 'bg-[0%_100%]',
+                                )}
+                            />
 
                             <div className="w-12 h-12 flex items-center justify-center shrink-0 relative z-10">
                                 <AnimatePresence mode="wait">
@@ -137,7 +145,10 @@ export default function InventoryPreview({
                                 </motion.div>
                             )}
 
-                            <ArrowRight size={14} className="text-zinc-200 group-hover:text-black group-hover:-rotate-45 transition-all duration-500 relative z-10" />
+                            <ArrowRight
+                                size={14}
+                                className="text-zinc-200 group-hover:text-black group-hover:-rotate-45 transition-all duration-500 relative z-10"
+                            />
                         </motion.button>
                     );
                 })}

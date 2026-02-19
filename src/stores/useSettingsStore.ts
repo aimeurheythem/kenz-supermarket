@@ -36,8 +36,8 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
         try {
             set({ error: null });
             // Optimistic update
-            set(state => ({
-                settings: { ...state.settings, [key]: value }
+            set((state) => ({
+                settings: { ...state.settings, [key]: value },
             }));
             await SettingsRepo.set(key, value);
         } catch (e) {
@@ -52,8 +52,8 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
         try {
             set({ error: null });
             // Optimistic update
-            set(state => ({
-                settings: { ...state.settings, ...newSettings }
+            set((state) => ({
+                settings: { ...state.settings, ...newSettings },
             }));
             await SettingsRepo.setMany(newSettings);
         } catch (e) {
@@ -65,10 +65,10 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
 }));
 
 /** Standalone selector — use as `useSettingsStore(selectSetting('key', 'default'))` */
-export const selectSetting = (key: string, defaultValue = '') =>
-    (state: SettingsStore) => state.settings[key] ?? defaultValue;
+export const selectSetting =
+    (key: string, defaultValue = '') =>
+    (state: SettingsStore) =>
+        state.settings[key] ?? defaultValue;
 
 /** Direct getter for non-reactive access — use as `getSetting('key', 'default')` */
-export const getSetting = (key: string, defaultValue = '') =>
-    useSettingsStore.getState().settings[key] ?? defaultValue;
-
+export const getSetting = (key: string, defaultValue = '') => useSettingsStore.getState().settings[key] ?? defaultValue;

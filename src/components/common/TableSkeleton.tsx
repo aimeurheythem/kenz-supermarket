@@ -20,10 +20,7 @@ export function TableSkeletonRows({ columns = 5, rows = 5 }: TableSkeletonProps)
                 <tr key={rowIdx}>
                     {Array.from({ length: columns }).map((_, colIdx) => (
                         <td key={colIdx} className="px-6 py-4">
-                            <Skeleton
-                                className="h-4 rounded-full"
-                                style={{ width: `${50 + Math.random() * 40}%` }}
-                            />
+                            <Skeleton className="h-4 rounded-full" style={{ width: `${50 + Math.random() * 40}%` }} />
                         </td>
                     ))}
                 </tr>

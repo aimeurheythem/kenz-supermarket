@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import './styles/globals.css';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
@@ -75,5 +76,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <ErrorBoundary>
             <Root />
         </ErrorBoundary>
-    </React.StrictMode>
+    </React.StrictMode>,
 );

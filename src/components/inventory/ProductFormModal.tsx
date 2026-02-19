@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Package, Box, DollarSign, Barcode, Scale, Save, ChevronDown, Check, ScanBarcode } from 'lucide-react';
+import { Package, Box, Barcode, Scale, Save, ChevronDown, Check, ScanBarcode } from 'lucide-react';
 import { FormModal } from '@/components/common/FormModal';
 import Button from '@/components/common/Button';
 import BarcodeScanner from '@/components/common/BarcodeScanner';
@@ -64,15 +64,17 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
         onClose();
     };
 
-    const inputWrapperClass = "space-y-2";
-    const labelClass = "text-[10px] font-black text-zinc-400 uppercase tracking-[0.15em] ml-1";
-    const inputClass = "w-full h-14 px-5 rounded-3xl bg-zinc-100/70 border-2 border-zinc-300 font-bold text-black outline-none !ring-0 focus:ring-0 focus-visible:ring-0 focus:outline-none transition-all placeholder:text-zinc-300";
-    const selectTriggerClass = "w-full h-14 px-5 flex items-center justify-between rounded-3xl bg-zinc-100/50 border-2 border-zinc-300 font-bold text-black outline-none !ring-0 focus:!ring-0 focus-visible:!ring-0 focus:outline-none transition-all cursor-pointer group";
-    const sectionTitleClass = "flex items-center gap-3 mb-6";
-    const sectionLineClass = "h-px bg-zinc-100 flex-1";
-    const sectionLabelClass = "text-[10px] font-black uppercase tracking-[0.2em] text-zinc-300";
+    const inputWrapperClass = 'space-y-2';
+    const labelClass = 'text-[10px] font-black text-zinc-400 uppercase tracking-[0.15em] ml-1';
+    const inputClass =
+        'w-full h-14 px-5 rounded-3xl bg-zinc-100/70 border-2 border-zinc-300 font-bold text-black outline-none !ring-0 focus:ring-0 focus-visible:ring-0 focus:outline-none transition-all placeholder:text-zinc-300';
+    const selectTriggerClass =
+        'w-full h-14 px-5 flex items-center justify-between rounded-3xl bg-zinc-100/50 border-2 border-zinc-300 font-bold text-black outline-none !ring-0 focus:!ring-0 focus-visible:!ring-0 focus:outline-none transition-all cursor-pointer group';
+    const sectionTitleClass = 'flex items-center gap-3 mb-6';
+    const sectionLineClass = 'h-px bg-zinc-100 flex-1';
+    const sectionLabelClass = 'text-[10px] font-black uppercase tracking-[0.2em] text-zinc-300';
 
-    const currentCategory = categories.find(c => c.id === form.category_id);
+    const currentCategory = categories.find((c) => c.id === form.category_id);
 
     return (
         <FormModal
@@ -105,13 +107,17 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                         <div className={inputWrapperClass}>
                             <label className={labelClass}>{t('inventory.form.labels.barcode')}</label>
                             <div className="relative">
-                                <Barcode size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400" strokeWidth={1.5} />
+                                <Barcode
+                                    size={18}
+                                    className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400"
+                                    strokeWidth={1.5}
+                                />
                                 <input
                                     type="text"
                                     value={form.barcode || ''}
                                     onChange={(e) => setForm({ ...form, barcode: e.target.value })}
                                     placeholder={t('inventory.form.placeholders.scan_type')}
-                                    className={inputClass + " pl-12 pr-12 font-mono text-sm"}
+                                    className={inputClass + ' pl-12 pr-12 font-mono text-sm'}
                                 />
                                 <button
                                     type="button"
@@ -130,10 +136,17 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                             <label className={labelClass}>{t('inventory.form.labels.category')}</label>
                             <DropdownMenu>
                                 <DropdownMenuTrigger className={selectTriggerClass}>
-                                    <span className={cn(form.category_id ? "text-black" : "text-zinc-300")}>
-                                        {currentCategory ? t(`categories.${currentCategory.name}`, { defaultValue: currentCategory.name }) : t('inventory.form.placeholders.select_category')}
+                                    <span className={cn(form.category_id ? 'text-black' : 'text-zinc-300')}>
+                                        {currentCategory
+                                            ? t(`categories.${currentCategory.name}`, {
+                                                  defaultValue: currentCategory.name,
+                                              })
+                                            : t('inventory.form.placeholders.select_category')}
                                     </span>
-                                    <ChevronDown size={14} className="text-zinc-400 group-hover:text-black transition-colors" />
+                                    <ChevronDown
+                                        size={14}
+                                        className="text-zinc-400 group-hover:text-black transition-colors"
+                                    />
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-white border border-zinc-100 rounded-2xl p-1 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
                                     <DropdownMenuItem
@@ -147,8 +160,10 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                                             key={cat.id}
                                             onClick={() => setForm({ ...form, category_id: cat.id })}
                                             className={cn(
-                                                "flex items-center justify-between px-4 py-3 rounded-xl font-bold transition-all cursor-pointer",
-                                                form.category_id === cat.id ? "text-black bg-zinc-50" : "text-zinc-400 hover:text-black focus:bg-zinc-50"
+                                                'flex items-center justify-between px-4 py-3 rounded-xl font-bold transition-all cursor-pointer',
+                                                form.category_id === cat.id
+                                                    ? 'text-black bg-zinc-50'
+                                                    : 'text-zinc-400 hover:text-black focus:bg-zinc-50',
                                             )}
                                         >
                                             {t(`categories.${cat.name}`, { defaultValue: cat.name })}
@@ -168,7 +183,10 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                                             {t(`inventory.units.${form.unit || 'piece'}`)}
                                         </span>
                                     </div>
-                                    <ChevronDown size={14} className="text-zinc-400 group-hover:text-black transition-colors" />
+                                    <ChevronDown
+                                        size={14}
+                                        className="text-zinc-400 group-hover:text-black transition-colors"
+                                    />
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-white border border-zinc-100 rounded-2xl p-1 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
                                     {['piece', 'kg', 'g', 'l', 'ml', 'box', 'pack'].map((u) => (
@@ -176,8 +194,10 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                                             key={u}
                                             onClick={() => setForm({ ...form, unit: u })}
                                             className={cn(
-                                                "px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-[0.2em] transition-all cursor-pointer",
-                                                form.unit === u ? "text-black bg-zinc-50" : "text-zinc-400 hover:text-black focus:bg-zinc-50"
+                                                'px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-[0.2em] transition-all cursor-pointer',
+                                                form.unit === u
+                                                    ? 'text-black bg-zinc-50'
+                                                    : 'text-zinc-400 hover:text-black focus:bg-zinc-50',
                                             )}
                                         >
                                             {t(`inventory.units.${u}`)}
@@ -205,9 +225,11 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                                     step="0.01"
                                     value={form.cost_price}
                                     onChange={(e) => setForm({ ...form, cost_price: parseFloat(e.target.value) || 0 })}
-                                    className={inputClass + " pr-12"}
+                                    className={inputClass + ' pr-12'}
                                 />
-                                <span className="absolute right-5 top-1/2 -translate-y-1/2 text-zinc-400 font-black text-[10px]">DZ</span>
+                                <span className="absolute right-5 top-1/2 -translate-y-1/2 text-zinc-400 font-black text-[10px]">
+                                    DZ
+                                </span>
                             </div>
                         </div>
                         <div className={inputWrapperClass}>
@@ -217,10 +239,14 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                                     type="number"
                                     step="0.01"
                                     value={form.selling_price}
-                                    onChange={(e) => setForm({ ...form, selling_price: parseFloat(e.target.value) || 0 })}
-                                    className={inputClass + " bg-zinc-200/50 pr-12"}
+                                    onChange={(e) =>
+                                        setForm({ ...form, selling_price: parseFloat(e.target.value) || 0 })
+                                    }
+                                    className={inputClass + ' bg-zinc-200/50 pr-12'}
                                 />
-                                <span className="absolute right-5 top-1/2 -translate-y-1/2 text-zinc-500 font-black text-[10px]">DZ</span>
+                                <span className="absolute right-5 top-1/2 -translate-y-1/2 text-zinc-500 font-black text-[10px]">
+                                    DZ
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -241,7 +267,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                                 type="number"
                                 value={form.reorder_level}
                                 onChange={(e) => setForm({ ...form, reorder_level: parseInt(e.target.value) || 0 })}
-                                className={inputClass + " bg-red-100/10 text-red-600"}
+                                className={inputClass + ' bg-red-100/10 text-red-600'}
                             />
                         </div>
                     </div>
@@ -278,5 +304,3 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
         </FormModal>
     );
 }
-
-

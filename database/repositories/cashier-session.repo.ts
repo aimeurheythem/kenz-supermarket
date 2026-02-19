@@ -5,7 +5,12 @@ export const CashierSessionRepo = {
     /**
      * Get all sessions (with optional filters)
      */
-    async getAll(filters?: { cashier_id?: number; status?: string; date_from?: string; date_to?: string }): Promise<CashierSession[]> {
+    async getAll(filters?: {
+        cashier_id?: number;
+        status?: string;
+        date_from?: string;
+        date_to?: string;
+    }): Promise<CashierSession[]> {
         let sql = `
             SELECT cs.*, u.full_name as cashier_name
             FROM cashier_sessions cs
@@ -40,12 +45,15 @@ export const CashierSessionRepo = {
      */
     async getById(id: number): Promise<CashierSession | undefined> {
         try {
-            return get<CashierSession>(`
+            return get<CashierSession>(
+                `
                 SELECT cs.*, u.full_name as cashier_name
                 FROM cashier_sessions cs
                 LEFT JOIN users u ON cs.cashier_id = u.id
                 WHERE cs.id = ?
-            `, [id]);
+            `,
+                [id],
+            );
         } catch (error) {
             console.error('Error getting session by ID:', error);
             return undefined;
@@ -56,14 +64,17 @@ export const CashierSessionRepo = {
      * Get active session for a cashier
      */
     async getActiveSession(cashier_id: number): Promise<CashierSession | undefined> {
-        const results = await query<CashierSession>(`
+        const results = await query<CashierSession>(
+            `
             SELECT cs.*, u.full_name as cashier_name
             FROM cashier_sessions cs
             JOIN users u ON cs.cashier_id = u.id
             WHERE cs.cashier_id = ? AND cs.status = 'active'
             ORDER BY cs.login_time DESC
             LIMIT 1
-        `, [cashier_id]);
+        `,
+            [cashier_id],
+        );
         return results[0];
     },
 
@@ -73,7 +84,9 @@ export const CashierSessionRepo = {
     async startSession(input: CashierSessionInput): Promise<CashierSession | null> {
         try {
             // First verify the table exists
-            const tableCheck = await query<{ name: string }>("SELECT name FROM sqlite_master WHERE type='table' AND name='cashier_sessions'");
+            const tableCheck = await query<{ name: string }>(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='cashier_sessions'",
+            );
             if (tableCheck.length === 0) {
                 console.error('cashier_sessions table does not exist');
                 return null;
@@ -82,17 +95,21 @@ export const CashierSessionRepo = {
             await executeNoSave('BEGIN TRANSACTION;');
 
             // Close any existing active sessions for this cashier first
-            await executeNoSave(`
+            await executeNoSave(
+                `
                 UPDATE cashier_sessions 
                 SET status = 'force_closed', logout_time = datetime('now'), notes = 'Auto-closed: new session started'
                 WHERE cashier_id = ? AND status = 'active'
-            `, [input.cashier_id]);
+            `,
+                [input.cashier_id],
+            );
 
             // Insert new session
-            await executeNoSave(
-                'INSERT INTO cashier_sessions (cashier_id, opening_cash, status) VALUES (?, ?, ?)',
-                [input.cashier_id, input.opening_cash, 'active']
-            );
+            await executeNoSave('INSERT INTO cashier_sessions (cashier_id, opening_cash, status) VALUES (?, ?, ?)', [
+                input.cashier_id,
+                input.opening_cash,
+                'active',
+            ]);
 
             // Get the ID immediately after insert
             let newSessionId = await lastInsertId();
@@ -121,7 +138,11 @@ export const CashierSessionRepo = {
 
             return session;
         } catch (error) {
-            try { await executeNoSave('ROLLBACK;'); } catch (_) { /* already rolled back */ }
+            try {
+                await executeNoSave('ROLLBACK;');
+            } catch (_) {
+                /* already rolled back */
+            }
             console.error('Error starting cashier session:', error);
             return null;
         }
@@ -135,16 +156,20 @@ export const CashierSessionRepo = {
         if (!session) throw new Error('Session not found');
 
         // Calculate expected cash (opening + all cash sales in this session)
-        const cashSales = await query<{ total: number }>(`
+        const cashSales = await query<{ total: number }>(
+            `
             SELECT COALESCE(SUM(total), 0) as total
             FROM sales
             WHERE session_id = ? AND payment_method = 'cash' AND status = 'completed'
-        `, [input.session_id]);
+        `,
+            [input.session_id],
+        );
 
         const expected_cash = session.opening_cash + (cashSales[0]?.total ?? 0);
         const cash_difference = input.closing_cash - expected_cash;
 
-        await execute(`
+        await execute(
+            `
             UPDATE cashier_sessions 
             SET 
                 logout_time = datetime('now'),
@@ -154,7 +179,9 @@ export const CashierSessionRepo = {
                 status = 'closed',
                 notes = COALESCE(?, notes)
             WHERE id = ?
-        `, [input.closing_cash, expected_cash, cash_difference, input.notes || '', input.session_id]);
+        `,
+            [input.closing_cash, expected_cash, cash_difference, input.notes || '', input.session_id],
+        );
 
         return this.getById(input.session_id) as Promise<CashierSession>;
     },
@@ -176,7 +203,8 @@ export const CashierSessionRepo = {
             cash_sales: number;
             card_sales: number;
             mobile_sales: number;
-        }>(`
+        }>(
+            `
             SELECT 
                 COALESCE(SUM(total), 0) as total_sales,
                 COUNT(*) as total_transactions,
@@ -185,28 +213,32 @@ export const CashierSessionRepo = {
                 COALESCE(SUM(CASE WHEN payment_method = 'mobile' THEN total ELSE 0 END), 0) as mobile_sales
             FROM sales
             WHERE session_id = ? AND status = 'completed'
-        `, [session_id]);
+        `,
+            [session_id],
+        );
 
         const stats = result[0] || {
             total_sales: 0,
             total_transactions: 0,
             cash_sales: 0,
             card_sales: 0,
-            mobile_sales: 0
+            mobile_sales: 0,
         };
 
         return {
             ...stats,
-            average_order: stats.total_transactions > 0
-                ? stats.total_sales / stats.total_transactions
-                : 0
+            average_order: stats.total_transactions > 0 ? stats.total_sales / stats.total_transactions : 0,
         };
     },
 
     /**
      * Get cashier performance report
      */
-    async getCashierPerformance(cashier_id: number, date_from?: string, date_to?: string): Promise<{
+    async getCashierPerformance(
+        cashier_id: number,
+        date_from?: string,
+        date_to?: string,
+    ): Promise<{
         total_sessions: number;
         total_sales: number;
         total_transactions: number;
@@ -246,7 +278,7 @@ export const CashierSessionRepo = {
             total_sales: stats.total_sales,
             total_transactions: stats.total_transactions,
             average_sale: stats.total_transactions > 0 ? stats.total_sales / stats.total_transactions : 0,
-            total_hours: 0 // Could calculate from session times if needed
+            total_hours: 0, // Could calculate from session times if needed
         };
-    }
+    },
 };

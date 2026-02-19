@@ -3,7 +3,21 @@ import JsBarcode from 'jsbarcode';
 
 interface BarcodeCanvasProps {
     value: string;
-    format?: 'CODE128' | 'EAN13' | 'UPC' | 'EAN8' | 'EAN5' | 'EAN2' | 'ITF14' | 'MSI' | 'MSI10' | 'MSI11' | 'MSI1010' | 'MSI1110' | 'pharmacode' | 'codabar';
+    format?:
+        | 'CODE128'
+        | 'EAN13'
+        | 'UPC'
+        | 'EAN8'
+        | 'EAN5'
+        | 'EAN2'
+        | 'ITF14'
+        | 'MSI'
+        | 'MSI10'
+        | 'MSI11'
+        | 'MSI1010'
+        | 'MSI1110'
+        | 'pharmacode'
+        | 'codabar';
     width?: number;
     height?: number;
     marginTop?: number;
@@ -32,7 +46,7 @@ export const BarcodeCanvas: React.FC<BarcodeCanvasProps> = ({
     textMargin = 2,
     background = '#ffffff',
     lineColor = '#000000',
-    className
+    className,
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -57,7 +71,21 @@ export const BarcodeCanvas: React.FC<BarcodeCanvasProps> = ({
                 console.error('Failed to generate barcode:', error);
             }
         }
-    }, [value, format, width, height, marginTop, marginBottom, marginLeft, marginRight, displayValue, fontSize, textMargin, background, lineColor]);
+    }, [
+        value,
+        format,
+        width,
+        height,
+        marginTop,
+        marginBottom,
+        marginLeft,
+        marginRight,
+        displayValue,
+        fontSize,
+        textMargin,
+        background,
+        lineColor,
+    ]);
 
     return <canvas ref={canvasRef} className={className} />;
 };

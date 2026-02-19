@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { UserRepo } from '../database/repositories/user.repo';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Toaster } from 'sonner';
@@ -25,6 +24,7 @@ import Terms from './pages/Terms';
 
 import { useAuthStore } from './stores/useAuthStore';
 import { useSettingsStore } from './stores/useSettingsStore';
+import { useUserStore } from './stores/useUserStore';
 import CashierLoginModal from './components/auth/CashierLoginModal';
 import POS from './pages/POS';
 
@@ -53,7 +53,13 @@ function RequireAuth({ children, requireAdmin = false }: { children: React.React
 }
 
 // Permission-based route wrapper
-function RequirePermission({ children, permission }: { children: React.ReactElement; permission: import('./stores/useAuthStore').Permission }) {
+function RequirePermission({
+    children,
+    permission,
+}: {
+    children: React.ReactElement;
+    permission: import('./stores/useAuthStore').Permission;
+}) {
     const { isAuthenticated, hasPermission } = useAuthStore();
     const location = useLocation();
 
@@ -72,12 +78,13 @@ export default function App() {
     const { i18n } = useTranslation();
     const { isAuthenticated, user, currentSession, logout } = useAuthStore();
     const { loadSettings } = useSettingsStore();
+    const { hasAnyUsers } = useUserStore();
     const [showCashierLogin, setShowCashierLogin] = useState(false);
     const [needsSetup, setNeedsSetup] = useState<boolean | null>(null);
 
     useEffect(() => {
         loadSettings();
-    }, []);
+    }, [loadSettings]);
 
     useEffect(() => {
         const dir = i18n.language.startsWith('ar') ? 'rtl' : 'ltr';
@@ -88,11 +95,11 @@ export default function App() {
     // Check for first-time setup
     useEffect(() => {
         const checkSetup = async () => {
-            const hasUsers = await UserRepo.hasAnyUsers();
-            setNeedsSetup(!hasUsers);
+            const has = await hasAnyUsers();
+            setNeedsSetup(!has);
         };
         checkSetup();
-    }, []);
+    }, [hasAnyUsers]);
 
     // Reset cashier login modal state when not authenticated
     useEffect(() => {
@@ -105,7 +112,6 @@ export default function App() {
     useEffect(() => {
         // Clear corrupted session data
         if (currentSession && !currentSession.session) {
-            console.log('Clearing corrupted session data');
             logout();
             return;
         }
@@ -113,7 +119,6 @@ export default function App() {
         const isLoginPage = window.location.hash === '#/login' || window.location.pathname === '/login';
 
         if (isAuthenticated && user?.role === 'cashier' && !currentSession && !isLoginPage) {
-            console.log('Showing cashier session modal from App.tsx');
             setShowCashierLogin(true);
         } else if (isLoginPage) {
             setShowCashierLogin(false);
@@ -301,8 +306,6 @@ export default function App() {
                 }}
                 onSuccess={() => {
                     setShowCashierLogin(false);
-                    // Navigate to POS after successful session creation
-                    console.log('Session created from App.tsx modal, navigating to POS...');
                 }}
             />
 

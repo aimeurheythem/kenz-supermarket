@@ -1,53 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { query } from '@/../database/db'; // Correct path to existing db module
-import { AuditLog, AuditLogRepo } from '@/../database/repositories/audit-log.repo';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { AuditLog } from '@/stores/useAuditLogStore';
+import { useAuditLogStore } from '@/stores/useAuditLogStore';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { TableSkeletonCells } from '@/components/common/TableSkeleton';
-import { Search, Filter, Eye, ArrowRight } from 'lucide-react';
+import { Search, Eye } from 'lucide-react';
 import { format } from 'date-fns';
-
-// Mock function for now if repo isn't directly accessible in frontend
-// In a real app we'd use an API or Bridge. Since this is Electron/Local, we might use the Repo directly if allowed, 
-// or validatethe architecture.
-// Assuming we can import Repo for now as per other pages.
 
 export default function AuditLogs() {
     const { t } = useTranslation();
-    const [logs, setLogs] = useState<AuditLog[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { logs, isLoading: loading, loadLogs: storeLoadLogs } = useAuditLogStore();
     const [filters, setFilters] = useState({
         entity: 'ALL',
         action: 'ALL',
-        search: ''
+        search: '',
     });
-    const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
+    const [_selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
 
-    const loadLogs = async () => {
-        setLoading(true);
-        try {
-            // Adapt filters
-            const repoFilters: any = {};
-            if (filters.entity !== 'ALL') repoFilters.entity = filters.entity;
-            if (filters.action !== 'ALL') repoFilters.action = filters.action;
-
-            const result = await AuditLogRepo.getLogs({ ...repoFilters, limit: 100 });
-            setLogs(result.logs);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const loadLogs = useCallback(async () => {
+        const repoFilters: any = {};
+        if (filters.entity !== 'ALL') repoFilters.entity = filters.entity;
+        if (filters.action !== 'ALL') repoFilters.action = filters.action;
+        await storeLoadLogs({ ...repoFilters, limit: 100 });
+    }, [filters, storeLoadLogs]);
 
     useEffect(() => {
         loadLogs();
-    }, [filters]);
+    }, [loadLogs]);
 
     return (
         <div className="p-6 max-w-[1600px] mx-auto space-y-6">
@@ -56,7 +40,9 @@ export default function AuditLogs() {
                     <h1 className="text-3xl font-black text-zinc-900 tracking-tight">{t('audit_logs.title')}</h1>
                     <p className="text-zinc-500">{t('audit_logs.subtitle')}</p>
                 </div>
-                <Button variant="outline" className="btn-page-action" onClick={loadLogs}>{t('audit_logs.refresh')}</Button>
+                <Button variant="outline" className="btn-page-action" onClick={loadLogs}>
+                    {t('audit_logs.refresh')}
+                </Button>
             </div>
 
             <Card className="border-zinc-200 shadow-sm rounded-xl">
@@ -68,11 +54,14 @@ export default function AuditLogs() {
                                 placeholder={t('audit_logs.search_placeholder')}
                                 className="pl-9 bg-white"
                                 value={filters.search}
-                                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                                onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
                             />
                         </div>
                         <div className="flex gap-2">
-                            <Select value={filters.entity} onValueChange={(v) => setFilters(prev => ({ ...prev, entity: v }))}>
+                            <Select
+                                value={filters.entity}
+                                onValueChange={(v) => setFilters((prev) => ({ ...prev, entity: v }))}
+                            >
                                 <SelectTrigger className="w-[150px] bg-white">
                                     <SelectValue placeholder={t('audit_logs.entity_label')} />
                                 </SelectTrigger>
@@ -85,7 +74,10 @@ export default function AuditLogs() {
                                 </SelectContent>
                             </Select>
 
-                            <Select value={filters.action} onValueChange={(v) => setFilters(prev => ({ ...prev, action: v }))}>
+                            <Select
+                                value={filters.action}
+                                onValueChange={(v) => setFilters((prev) => ({ ...prev, action: v }))}
+                            >
                                 <SelectTrigger className="w-[150px] bg-white">
                                     <SelectValue placeholder={t('audit_logs.action_label')} />
                                 </SelectTrigger>
@@ -132,14 +124,21 @@ export default function AuditLogs() {
                                                     <div className="w-6 h-6 rounded-full bg-zinc-100 flex items-center justify-center text-xs font-bold text-zinc-600">
                                                         {log.user_name?.[0] || '?'}
                                                     </div>
-                                                    <span className="text-sm font-medium">{log.user_name || t('audit_logs.system_user')}</span>
+                                                    <span className="text-sm font-medium">
+                                                        {log.user_name || t('audit_logs.system_user')}
+                                                    </span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
-                                                <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-bold ${log.action === 'CREATE' ? 'bg-green-100 text-green-700' :
-                                                    log.action === 'DELETE' ? 'bg-red-100 text-red-700' :
-                                                        'bg-blue-100 text-blue-700'
-                                                    }`}>
+                                                <span
+                                                    className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-bold ${
+                                                        log.action === 'CREATE'
+                                                            ? 'bg-green-100 text-green-700'
+                                                            : log.action === 'DELETE'
+                                                              ? 'bg-red-100 text-red-700'
+                                                              : 'bg-blue-100 text-blue-700'
+                                                    }`}
+                                                >
                                                     {log.action}
                                                 </span>
                                             </TableCell>
@@ -154,8 +153,15 @@ export default function AuditLogs() {
                                             <TableCell className="text-right">
                                                 <Dialog>
                                                     <DialogTrigger asChild>
-                                                        <Button variant="ghost" size="icon" onClick={() => setSelectedLog(log)}>
-                                                            <Eye size={16} className="text-zinc-400 hover:text-zinc-900" />
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => setSelectedLog(log)}
+                                                        >
+                                                            <Eye
+                                                                size={16}
+                                                                className="text-zinc-400 hover:text-zinc-900"
+                                                            />
                                                         </Button>
                                                     </DialogTrigger>
                                                     <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
@@ -165,19 +171,34 @@ export default function AuditLogs() {
                                                         <div className="space-y-6 pt-4">
                                                             <div className="grid grid-cols-2 gap-4 text-sm">
                                                                 <div>
-                                                                    <label className="text-xs font-bold text-zinc-400 uppercase">{t('audit_logs.label_timestamp')}</label>
-                                                                    <p className="font-mono">{format(new Date(log.created_at), 'PPP pp')}</p>
+                                                                    <label className="text-xs font-bold text-zinc-400 uppercase">
+                                                                        {t('audit_logs.label_timestamp')}
+                                                                    </label>
+                                                                    <p className="font-mono">
+                                                                        {format(new Date(log.created_at), 'PPP pp')}
+                                                                    </p>
                                                                 </div>
                                                                 <div>
-                                                                    <label className="text-xs font-bold text-zinc-400 uppercase">{t('audit_logs.label_user')}</label>
-                                                                    <p>{log.user_name || t('audit_logs.system_user')} (ID: {log.user_id})</p>
+                                                                    <label className="text-xs font-bold text-zinc-400 uppercase">
+                                                                        {t('audit_logs.label_user')}
+                                                                    </label>
+                                                                    <p>
+                                                                        {log.user_name || t('audit_logs.system_user')}{' '}
+                                                                        (ID: {log.user_id})
+                                                                    </p>
                                                                 </div>
                                                                 <div>
-                                                                    <label className="text-xs font-bold text-zinc-400 uppercase">{t('audit_logs.label_action')}</label>
-                                                                    <p>{log.action} on {log.entity} #{log.entity_id}</p>
+                                                                    <label className="text-xs font-bold text-zinc-400 uppercase">
+                                                                        {t('audit_logs.label_action')}
+                                                                    </label>
+                                                                    <p>
+                                                                        {log.action} on {log.entity} #{log.entity_id}
+                                                                    </p>
                                                                 </div>
                                                                 <div className="col-span-2">
-                                                                    <label className="text-xs font-bold text-zinc-400 uppercase">{t('audit_logs.label_description')}</label>
+                                                                    <label className="text-xs font-bold text-zinc-400 uppercase">
+                                                                        {t('audit_logs.label_description')}
+                                                                    </label>
                                                                     <p className="text-zinc-700">{log.details}</p>
                                                                 </div>
                                                             </div>
@@ -188,7 +209,9 @@ export default function AuditLogs() {
                                                                         {t('audit_logs.label_old_value')}
                                                                     </h4>
                                                                     <pre className="text-xs font-mono bg-red-50/50 p-3 rounded-lg overflow-x-auto text-red-900 min-h-[100px]">
-                                                                        {log.old_value ? JSON.stringify(log.old_value, null, 2) : 'null'}
+                                                                        {log.old_value
+                                                                            ? JSON.stringify(log.old_value, null, 2)
+                                                                            : 'null'}
                                                                     </pre>
                                                                 </div>
                                                                 <div>
@@ -196,7 +219,9 @@ export default function AuditLogs() {
                                                                         {t('audit_logs.label_new_value')}
                                                                     </h4>
                                                                     <pre className="text-xs font-mono bg-green-50/50 p-3 rounded-lg overflow-x-auto text-green-900 min-h-[100px]">
-                                                                        {log.new_value ? JSON.stringify(log.new_value, null, 2) : 'null'}
+                                                                        {log.new_value
+                                                                            ? JSON.stringify(log.new_value, null, 2)
+                                                                            : 'null'}
                                                                     </pre>
                                                                 </div>
                                                             </div>

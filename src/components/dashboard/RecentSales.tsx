@@ -27,18 +27,12 @@ const SaleCard = ({ id, timestamp, amount, currency, itemsCount, cashierName, pa
     const { t } = useTranslation();
 
     return (
-        <motion.div
-            className="flex-none w-[340px] p-8 rounded-[3rem] bg-gray-100 relative overflow-hidden group"
-        >
+        <motion.div className="flex-none w-[340px] p-8 rounded-[3rem] bg-gray-100 relative overflow-hidden group">
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
-                    <span className="text-[12px] uppercase tracking-widest text-black/80">
-                        Sale #{id}
-                    </span>
+                    <span className="text-[12px] uppercase tracking-widest text-black/80">Sale #{id}</span>
                 </div>
-                <span className="text-[10px] text-black/40 uppercase">
-                    {timestamp}
-                </span>
+                <span className="text-[10px] text-black/40 uppercase">{timestamp}</span>
             </div>
 
             <div className="mb-8">
@@ -46,12 +40,8 @@ const SaleCard = ({ id, timestamp, amount, currency, itemsCount, cashierName, pa
                     {t('dashboard.recent_sales.total_amount')}
                 </p>
                 <div className="flex items-baseline gap-2">
-                    <span className="text-4xl text-black/90 tracking-tighter">
-                        {amount}
-                    </span>
-                    <span className="text-xs text-emerald-500 uppercase">
-                        {currency}
-                    </span>
+                    <span className="text-4xl text-black/90 tracking-tighter">{amount}</span>
+                    <span className="text-xs text-emerald-500 uppercase">{currency}</span>
                 </div>
             </div>
 
@@ -68,9 +58,7 @@ const SaleCard = ({ id, timestamp, amount, currency, itemsCount, cashierName, pa
                     <span className="text-[9px] text-black uppercase tracking-widest mb-1">
                         {t('dashboard.recent_sales.cashier')}
                     </span>
-                    <span className="text-sm capitalize text-black/60">
-                        {cashierName}
-                    </span>
+                    <span className="text-sm capitalize text-black/60">{cashierName}</span>
                 </div>
             </div>
 
@@ -108,7 +96,10 @@ const EmptyState = () => {
                     {t('dashboard.recent_sales.no_sales_title', 'No Sales Yet')}
                 </h3>
                 <p className="text-sm text-black/40 mb-4">
-                    {t('dashboard.recent_sales.no_sales_message', 'Complete your first sale in the POS to see it here.')}
+                    {t(
+                        'dashboard.recent_sales.no_sales_message',
+                        'Complete your first sale in the POS to see it here.',
+                    )}
                 </p>
                 <button
                     onClick={() => navigate('/pos')}
@@ -121,7 +112,7 @@ const EmptyState = () => {
     );
 };
 
-export default function RecentProducts() {
+export default function RecentSales() {
     const { t, i18n } = useTranslation();
     const { recentSales } = useSaleStore();
     const { user: authUser } = useAuthStore();
@@ -133,13 +124,13 @@ export default function RecentProducts() {
 
     const next = () => {
         if (currentIndex < recentSales.length - 3) {
-            setCurrentIndex(prev => prev + 1);
+            setCurrentIndex((prev) => prev + 1);
         }
     };
 
     const prev = () => {
         if (currentIndex > 0) {
-            setCurrentIndex(prev => prev - 1);
+            setCurrentIndex((prev) => prev - 1);
         }
     };
 
@@ -184,8 +175,8 @@ export default function RecentProducts() {
                         initial="initial"
                         whileHover="hover"
                         variants={{
-                            initial: { backgroundColor: "#000000" },
-                            hover: { backgroundColor: "#18181b" }
+                            initial: { backgroundColor: '#000000' },
+                            hover: { backgroundColor: '#18181b' },
                         }}
                         onClick={() => navigate('/transactions')}
                         className="ms-2 px-6 py-2 rounded-full text-white text-xs uppercase tracking-widest transition-all active:scale-95 flex items-center gap-0 hover:gap-2 cursor-pointer group/viewall"
@@ -194,10 +185,10 @@ export default function RecentProducts() {
                         <motion.div
                             variants={{
                                 initial: { width: 0, opacity: 0, marginInlineStart: 0 },
-                                hover: { width: 'auto', opacity: 1, marginInlineStart: 8 }
+                                hover: { width: 'auto', opacity: 1, marginInlineStart: 8 },
                             }}
                             className="overflow-hidden flex items-center text-white"
-                            transition={{ duration: 0.3, ease: "easeOut" }}
+                            transition={{ duration: 0.3, ease: 'easeOut' }}
                         >
                             <ExternalLink size={14} className="min-w-[14px] text-white" />
                         </motion.div>
@@ -217,17 +208,20 @@ export default function RecentProducts() {
                                 style={{ gap: GAP, paddingInlineStart: MARGIN, paddingInlineEnd: MARGIN }}
                                 animate={{ x: (isRtl ? 1 : -1) * (currentIndex * VIEW_OFFSET) }}
                                 transition={{
-                                    type: "spring",
+                                    type: 'spring',
                                     stiffness: 260,
                                     damping: 24,
-                                    mass: 0.8
+                                    mass: 0.8,
                                 }}
                             >
                                 {recentSales.map((sale) => (
                                     <SaleCard
                                         key={sale.id}
                                         id={sale.id}
-                                        timestamp={new Date(sale.sale_date || sale.created_at).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
+                                        timestamp={new Date(sale.sale_date || sale.created_at).toLocaleTimeString(
+                                            i18n.language,
+                                            { hour: '2-digit', minute: '2-digit' },
+                                        )}
                                         amount={formatCurrency(sale.total, false)}
                                         currency={currencyLabel}
                                         itemsCount={(sale as any).item_count ?? 0}

@@ -16,12 +16,12 @@ export default function DatabaseInitialization({ error }: { error?: string | nul
                 <motion.div
                     animate={{
                         scale: [1, 1.15, 1],
-                        opacity: [0.03, 0.08, 0.03]
+                        opacity: [0.03, 0.08, 0.03],
                     }}
                     transition={{
                         duration: 4,
                         repeat: Infinity,
-                        ease: "easeInOut"
+                        ease: 'easeInOut',
                     }}
                     className="absolute inset-0 bg-accent rounded-full blur-3xl -z-10"
                     style={{ margin: '-40px' }}
@@ -46,7 +46,7 @@ export default function DatabaseInitialization({ error }: { error?: string | nul
                         animate={{ pathLength: 1, opacity: 1 }}
                         transition={{
                             duration: 2.5,
-                            ease: "easeInOut",
+                            ease: 'easeInOut',
                         }}
                     />
                     {/* Checkmark */}
@@ -57,7 +57,7 @@ export default function DatabaseInitialization({ error }: { error?: string | nul
                         transition={{
                             duration: 1.2,
                             delay: 2.2,
-                            ease: "easeOut",
+                            ease: 'easeOut',
                         }}
                     />
                 </svg>
@@ -69,9 +69,7 @@ export default function DatabaseInitialization({ error }: { error?: string | nul
                 transition={{ delay: 1, duration: 0.8 }}
                 className="mt-12 text-center space-y-3"
             >
-                <h2 className="text-xl font-medium tracking-tight text-black">
-                    {t('db_init.initializing')}
-                </h2>
+                <h2 className="text-xl font-medium tracking-tight text-black">{t('db_init.initializing')}</h2>
                 <p className="text-sm text-black font-light max-w-xs mx-auto leading-relaxed">
                     {t('db_init.please_wait')}
                 </p>

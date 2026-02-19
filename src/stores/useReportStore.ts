@@ -1,5 +1,12 @@
 import { create } from 'zustand';
-import { ReportRepo, type SalesChartData, type TopProductData, type CashierPerformanceData, type CashierDailyPerformance, type SessionReport } from '../../database/repositories/report.repo';
+import {
+    ReportRepo,
+    type SalesChartData,
+    type TopProductData,
+    type CashierPerformanceData,
+    type CashierDailyPerformance,
+    type SessionReport,
+} from '../../database/repositories/report.repo';
 import { SaleRepo } from '../../database/repositories/sale.repo';
 import type { Sale } from '../lib/types';
 
@@ -46,19 +53,12 @@ export const useReportStore = create<ReportStore>((set, get) => ({
 
     setPeriod: async (period) => {
         set({ period });
-        await Promise.all([
-            get().loadReports(),
-            get().loadCashierReports(),
-            get().loadSales(),
-        ]);
+        await Promise.all([get().loadReports(), get().loadCashierReports(), get().loadSales()]);
     },
 
     setSelectedCashier: async (cashierId) => {
         set({ selectedCashier: cashierId });
-        await Promise.all([
-            get().loadCashierReports(),
-            get().loadSales(),
-        ]);
+        await Promise.all([get().loadCashierReports(), get().loadSales()]);
     },
 
     loadReports: async () => {
@@ -82,7 +82,10 @@ export const useReportStore = create<ReportStore>((set, get) => ({
             set({ isLoadingCashier: true, error: null });
             const { period, selectedCashier } = get();
             const cashierPerformance = await ReportRepo.getCashierPerformance(period, selectedCashier || undefined);
-            const cashierDailyPerformance = await ReportRepo.getCashierDailyPerformance(period, selectedCashier || undefined);
+            const cashierDailyPerformance = await ReportRepo.getCashierDailyPerformance(
+                period,
+                selectedCashier || undefined,
+            );
             const sessionReports = await ReportRepo.getSessionReports(period, selectedCashier || undefined);
             set({ cashierPerformance, cashierDailyPerformance, sessionReports });
         } catch (e) {
@@ -107,7 +110,7 @@ export const useReportStore = create<ReportStore>((set, get) => ({
             const filters = {
                 from: past.toISOString(),
                 to: now.toISOString(),
-                limit: 100
+                limit: 100,
             };
 
             const salesList = await SaleRepo.getAll(filters);
@@ -142,6 +145,5 @@ export const useReportStore = create<ReportStore>((set, get) => ({
             set({ error: (e as Error).message });
             throw e;
         }
-    }
+    },
 }));
-

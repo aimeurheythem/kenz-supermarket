@@ -4,7 +4,12 @@ import type { Product, ProductInput } from '../../src/lib/types';
 import { AuditLogRepo } from './audit-log.repo';
 
 export const ProductRepo = {
-    async getAll(filters?: { category_id?: number; search?: string; low_stock?: boolean; active_only?: boolean }): Promise<Product[]> {
+    async getAll(filters?: {
+        category_id?: number;
+        search?: string;
+        low_stock?: boolean;
+        active_only?: boolean;
+    }): Promise<Product[]> {
         let sql = `
       SELECT p.*, c.name as category_name
       FROM products p
@@ -38,7 +43,7 @@ export const ProductRepo = {
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        WHERE p.id = ?`,
-            [id]
+            [id],
         );
     },
 
@@ -48,7 +53,7 @@ export const ProductRepo = {
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        WHERE p.barcode = ?`,
-            [barcode]
+            [barcode],
         );
     },
 
@@ -67,10 +72,10 @@ export const ProductRepo = {
                 input.reorder_level || 10,
                 input.unit || 'piece',
                 input.image_url || '',
-            ]
+            ],
         );
         const id = await lastInsertId();
-        const product = await this.getById(id) as Product;
+        const product = (await this.getById(id)) as Product;
 
         // Audit Log
         await AuditLogRepo.log('CREATE', 'PRODUCT', id, `Created product: ${product.name}`, null, product);
@@ -84,22 +89,52 @@ export const ProductRepo = {
         const fields: string[] = [];
         const values: unknown[] = [];
 
-        if (input.barcode !== undefined) { fields.push('barcode = ?'); values.push(input.barcode); }
-        if (input.name !== undefined) { fields.push('name = ?'); values.push(input.name); }
-        if (input.description !== undefined) { fields.push('description = ?'); values.push(input.description); }
-        if (input.category_id !== undefined) { fields.push('category_id = ?'); values.push(input.category_id); }
-        if (input.cost_price !== undefined) { fields.push('cost_price = ?'); values.push(input.cost_price); }
-        if (input.selling_price !== undefined) { fields.push('selling_price = ?'); values.push(input.selling_price); }
-        if (input.stock_quantity !== undefined) { fields.push('stock_quantity = ?'); values.push(input.stock_quantity); }
-        if (input.reorder_level !== undefined) { fields.push('reorder_level = ?'); values.push(input.reorder_level); }
-        if (input.unit !== undefined) { fields.push('unit = ?'); values.push(input.unit); }
-        if (input.image_url !== undefined) { fields.push('image_url = ?'); values.push(input.image_url); }
+        if (input.barcode !== undefined) {
+            fields.push('barcode = ?');
+            values.push(input.barcode);
+        }
+        if (input.name !== undefined) {
+            fields.push('name = ?');
+            values.push(input.name);
+        }
+        if (input.description !== undefined) {
+            fields.push('description = ?');
+            values.push(input.description);
+        }
+        if (input.category_id !== undefined) {
+            fields.push('category_id = ?');
+            values.push(input.category_id);
+        }
+        if (input.cost_price !== undefined) {
+            fields.push('cost_price = ?');
+            values.push(input.cost_price);
+        }
+        if (input.selling_price !== undefined) {
+            fields.push('selling_price = ?');
+            values.push(input.selling_price);
+        }
+        if (input.stock_quantity !== undefined) {
+            fields.push('stock_quantity = ?');
+            values.push(input.stock_quantity);
+        }
+        if (input.reorder_level !== undefined) {
+            fields.push('reorder_level = ?');
+            values.push(input.reorder_level);
+        }
+        if (input.unit !== undefined) {
+            fields.push('unit = ?');
+            values.push(input.unit);
+        }
+        if (input.image_url !== undefined) {
+            fields.push('image_url = ?');
+            values.push(input.image_url);
+        }
 
         fields.push("updated_at = datetime('now')");
         values.push(id); // For WHERE clause
 
         await execute(`UPDATE products SET ${fields.join(', ')} WHERE id = ?`, values);
-        const newProduct = await this.getById(id) as Product;
+        const newProduct = (await this.getById(id)) as Product;
 
         // Audit Log
         await AuditLogRepo.log('UPDATE', 'PRODUCT', id, `Updated product: ${newProduct.name}`, oldProduct, newProduct);
@@ -111,9 +146,19 @@ export const ProductRepo = {
         const product = await this.getById(id);
         const oldQty = product?.stock_quantity;
 
-        await execute("UPDATE products SET stock_quantity = ?, updated_at = datetime('now') WHERE id = ?", [newQuantity, id]);
+        await execute("UPDATE products SET stock_quantity = ?, updated_at = datetime('now') WHERE id = ?", [
+            newQuantity,
+            id,
+        ]);
 
-        await AuditLogRepo.log('UPDATE_STOCK', 'PRODUCT', id, `Updated stock for ${product?.name}`, { stock_quantity: oldQty }, { stock_quantity: newQuantity });
+        await AuditLogRepo.log(
+            'UPDATE_STOCK',
+            'PRODUCT',
+            id,
+            `Updated stock for ${product?.name}`,
+            { stock_quantity: oldQty },
+            { stock_quantity: newQuantity },
+        );
     },
 
     async delete(id: number): Promise<void> {
@@ -134,7 +179,7 @@ export const ProductRepo = {
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        WHERE p.stock_quantity <= p.reorder_level AND p.is_active = 1
-       ORDER BY (CAST(p.stock_quantity AS REAL) / p.reorder_level) ASC`
+       ORDER BY (CAST(p.stock_quantity AS REAL) / p.reorder_level) ASC`,
         );
     },
 };

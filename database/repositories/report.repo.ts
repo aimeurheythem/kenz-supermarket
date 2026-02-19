@@ -45,10 +45,10 @@ export interface SessionReport {
 }
 
 export const ReportRepo = {
-    getSalesParams(period: 'today' | '7days' | '30days' | 'year'): { start: string, end: string } {
+    getSalesParams(period: 'today' | '7days' | '30days' | 'year'): { start: string; end: string } {
         const now = new Date();
         const end = now.toISOString();
-        let start = new Date();
+        const start = new Date();
 
         if (period === 'today') start.setHours(0, 0, 0, 0);
         else if (period === '7days') start.setDate(now.getDate() - 7);
@@ -62,11 +62,12 @@ export const ReportRepo = {
         const { start, end } = this.getSalesParams(period);
 
         // Use static SQL strings — never interpolate into SQL
-        const sql = period === 'year'
-            ? `SELECT strftime('%Y-%m', sale_date) as date, SUM(total) as revenue, COUNT(id) as orders
+        const sql =
+            period === 'year'
+                ? `SELECT strftime('%Y-%m', sale_date) as date, SUM(total) as revenue, COUNT(id) as orders
                FROM sales WHERE sale_date BETWEEN ? AND ? AND status = 'completed'
                GROUP BY date ORDER BY date ASC`
-            : `SELECT strftime('%Y-%m-%d', sale_date) as date, SUM(total) as revenue, COUNT(id) as orders
+                : `SELECT strftime('%Y-%m-%d', sale_date) as date, SUM(total) as revenue, COUNT(id) as orders
                FROM sales WHERE sale_date BETWEEN ? AND ? AND status = 'completed'
                GROUP BY date ORDER BY date ASC`;
 
@@ -74,7 +75,8 @@ export const ReportRepo = {
     },
 
     async getTopProducts(limit: number = 5): Promise<TopProductData[]> {
-        return query<TopProductData>(`
+        return query<TopProductData>(
+            `
             SELECT 
                 p.id,
                 p.name, 
@@ -87,7 +89,9 @@ export const ReportRepo = {
             GROUP BY p.id 
             ORDER BY revenue DESC 
             LIMIT ?
-        `, [limit]);
+        `,
+            [limit],
+        );
     },
 
     async getCategoryPerformance(): Promise<{ name: string; value: number }[]> {
@@ -108,7 +112,10 @@ export const ReportRepo = {
     // CASHIER REPORTS
     // =============================================
 
-    async getCashierPerformance(period: 'today' | '7days' | '30days' | 'year', cashierId?: number): Promise<CashierPerformanceData[]> {
+    async getCashierPerformance(
+        period: 'today' | '7days' | '30days' | 'year',
+        cashierId?: number,
+    ): Promise<CashierPerformanceData[]> {
         const { start, end } = this.getSalesParams(period);
 
         let sql = `
@@ -141,7 +148,10 @@ export const ReportRepo = {
         return query<CashierPerformanceData>(sql, params);
     },
 
-    async getCashierDailyPerformance(period: 'today' | '7days' | '30days' | 'year', cashierId?: number): Promise<CashierDailyPerformance[]> {
+    async getCashierDailyPerformance(
+        period: 'today' | '7days' | '30days' | 'year',
+        cashierId?: number,
+    ): Promise<CashierDailyPerformance[]> {
         const { start, end } = this.getSalesParams(period);
 
         let sql = `
@@ -173,7 +183,10 @@ export const ReportRepo = {
         return query<CashierDailyPerformance>(sql, params);
     },
 
-    async getSessionReports(period: 'today' | '7days' | '30days' | 'year', cashierId?: number): Promise<SessionReport[]> {
+    async getSessionReports(
+        period: 'today' | '7days' | '30days' | 'year',
+        cashierId?: number,
+    ): Promise<SessionReport[]> {
         const { start, end } = this.getSalesParams(period);
 
         let sql = `
@@ -208,5 +221,5 @@ export const ReportRepo = {
         `;
 
         return query<SessionReport>(sql, params);
-    }
+    },
 };

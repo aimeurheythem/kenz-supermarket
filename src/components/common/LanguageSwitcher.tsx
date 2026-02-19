@@ -1,24 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Globe, Check, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useLayoutStore } from '@/stores/useLayoutStore';
+import { useLanguageSwitch } from '@/hooks/useLanguageSwitch';
 
 interface LanguageSwitcherProps {
     collapsed?: boolean;
 }
 
 export default function LanguageSwitcher({ collapsed = false }: LanguageSwitcherProps) {
-    const { i18n, t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
-    const setLanguageSwitching = useLayoutStore(state => state.setLanguageSwitching);
     const menuRef = useRef<HTMLDivElement>(null);
-
-    const languages = [
-        { code: 'en', label: 'English', flag: 'EN' },
-        { code: 'fr', label: 'Français', flag: 'FR' },
-        { code: 'ar', label: 'العربية', flag: 'AR' }
-    ];
+    const { languages, currentLang, currentLangData, changeLanguage } = useLanguageSwitch();
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -30,47 +22,31 @@ export default function LanguageSwitcher({ collapsed = false }: LanguageSwitcher
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const changeLanguage = async (lang: string) => {
-        if (i18n.language.split('-')[0] === lang) {
-            setIsOpen(false);
-            return;
-        }
-
-        setLanguageSwitching(true);
+    const handleChangeLanguage = async (lang: string) => {
         setIsOpen(false);
-
-        // Surgical delay for transition appearance (increased for better animation visibility)
-        await new Promise(resolve => setTimeout(resolve, 2800));
-
-        i18n.changeLanguage(lang);
-
-        // Let the UI breathe and finalize localization
-        await new Promise(resolve => setTimeout(resolve, 2200));
-
-        setLanguageSwitching(false);
+        await changeLanguage(lang);
     };
-
-    const currentLang = i18n.language.split('-')[0];
-    const currentLangData = languages.find(l => l.code === currentLang) || languages[0];
 
     return (
         <div className="relative w-full" ref={menuRef}>
             {/* Language Selection Menu */}
             {isOpen && (
-                <div className={cn(
-                    "absolute bottom-full left-0 right-0 mb-2 bg-secondary border border-default rounded-lg p-2 animate-scaleIn z-50 overflow-hidden",
-                    collapsed && "w-[160px] left-0"
-                )}>
+                <div
+                    className={cn(
+                        'absolute bottom-full left-0 right-0 mb-2 bg-secondary border border-default rounded-lg p-2 animate-scaleIn z-50 overflow-hidden',
+                        collapsed && 'w-[160px] left-0',
+                    )}
+                >
                     <div className="flex flex-col gap-1">
                         {languages.map((lang) => (
                             <button
                                 key={lang.code}
-                                onClick={() => changeLanguage(lang.code)}
+                                onClick={() => handleChangeLanguage(lang.code)}
                                 className={cn(
-                                    "flex items-center justify-between px-3 py-2 rounded-md transition-all duration-200 group/item app-no-drag",
+                                    'flex items-center justify-between px-3 py-2 rounded-md transition-all duration-200 group/item app-no-drag',
                                     currentLang === lang.code
-                                        ? "bg-primary text-text-primary border border-default"
-                                        : "text-muted hover:bg-tertiary hover:text-text-primary"
+                                        ? 'bg-primary text-text-primary border border-default'
+                                        : 'text-muted hover:bg-tertiary hover:text-text-primary',
                                 )}
                             >
                                 <div className="flex items-center gap-3">
@@ -96,7 +72,7 @@ export default function LanguageSwitcher({ collapsed = false }: LanguageSwitcher
                     isOpen
                         ? 'bg-primary border border-default text-text-primary'
                         : 'bg-primary border border-default text-muted hover:bg-secondary hover:text-text-primary',
-                    collapsed && 'justify-center px-0'
+                    collapsed && 'justify-center px-0',
                 )}
             >
                 <div className="relative shrink-0 text-muted">
@@ -110,7 +86,10 @@ export default function LanguageSwitcher({ collapsed = false }: LanguageSwitcher
                         >
                             {currentLangData.label}
                         </span>
-                        <ChevronUp size={14} className={cn("transition-transform duration-200 text-muted", isOpen && "rotate-180")} />
+                        <ChevronUp
+                            size={14}
+                            className={cn('transition-transform duration-200 text-muted', isOpen && 'rotate-180')}
+                        />
                     </>
                 )}
             </button>

@@ -1,12 +1,10 @@
-import { create } from 'zustand';
 import type { Supplier, SupplierInput } from '@/lib/types';
 import { SupplierRepo } from '../../database/repositories/supplier.repo';
+import { createCrudStore } from './createCrudStore';
 
-interface SupplierStore {
+interface SupplierExtras {
+    /** Alias: items */
     suppliers: Supplier[];
-    isLoading: boolean;
-    error: string | null;
-    clearError: () => void;
     loadSuppliers: () => Promise<void>;
     addSupplier: (input: SupplierInput) => Promise<Supplier>;
     updateSupplier: (id: number, input: Partial<SupplierInput>) => Promise<Supplier>;
@@ -14,69 +12,25 @@ interface SupplierStore {
     addPayment: (id: number, amount: number) => Promise<void>;
 }
 
-export const useSupplierStore = create<SupplierStore>((set, get) => ({
-    suppliers: [],
-    isLoading: false,
-    error: null,
-
-    clearError: () => set({ error: null }),
-
-    loadSuppliers: async () => {
-        try {
-            set({ isLoading: true, error: null });
-            const suppliers = await SupplierRepo.getAll();
-            set({ suppliers });
-        } catch (e) {
-            set({ error: (e as Error).message });
-            throw e;
-        } finally {
-            set({ isLoading: false });
-        }
-    },
-
-    addSupplier: async (input: SupplierInput) => {
-        try {
-            set({ error: null });
-            const supplier = await SupplierRepo.create(input);
-            await get().loadSuppliers();
-            return supplier;
-        } catch (e) {
-            set({ error: (e as Error).message });
-            throw e;
-        }
-    },
-
-    updateSupplier: async (id: number, input: Partial<SupplierInput>) => {
-        try {
-            set({ error: null });
-            const supplier = await SupplierRepo.update(id, input);
-            await get().loadSuppliers();
-            return supplier;
-        } catch (e) {
-            set({ error: (e as Error).message });
-            throw e;
-        }
-    },
-
-    deleteSupplier: async (id: number) => {
-        try {
-            set({ error: null });
-            await SupplierRepo.delete(id);
-            await get().loadSuppliers();
-        } catch (e) {
-            set({ error: (e as Error).message });
-            throw e;
-        }
-    },
-
-    addPayment: async (id: number, amount: number) => {
-        try {
-            set({ error: null });
-            await SupplierRepo.updateBalance(id, -amount);
-            await get().loadSuppliers();
-        } catch (e) {
-            set({ error: (e as Error).message });
-            throw e;
-        }
-    },
-}));
+export const useSupplierStore = createCrudStore<Supplier, SupplierInput, SupplierExtras>({
+    repo: SupplierRepo,
+    extend: (set, get) => ({
+        get suppliers() {
+            return get().items;
+        },
+        loadSuppliers: () => get().loadAll(),
+        addSupplier: (input: SupplierInput) => get().add(input),
+        updateSupplier: (id: number, input: Partial<SupplierInput>) => get().update(id, input),
+        deleteSupplier: (id: number) => get().remove(id),
+        addPayment: async (id: number, amount: number) => {
+            try {
+                set({ error: null } as never);
+                await SupplierRepo.updateBalance(id, -amount);
+                await get().loadAll();
+            } catch (e) {
+                set({ error: (e as Error).message } as never);
+                throw e;
+            }
+        },
+    }),
+});

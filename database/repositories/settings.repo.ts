@@ -10,7 +10,7 @@ export const SettingsRepo = {
     async getAll(): Promise<AppSettings> {
         const rows = await query<{ key: string; value: string }>('SELECT key, value FROM app_settings');
         const settings: AppSettings = {};
-        rows.forEach(row => {
+        rows.forEach((row) => {
             settings[row.key] = row.value;
         });
         return settings;
@@ -28,7 +28,7 @@ export const SettingsRepo = {
             `INSERT INTO app_settings (key, value, updated_at) 
              VALUES (?, ?, datetime('now')) 
              ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = datetime('now')`,
-            [key, value, value]
+            [key, value, value],
         );
         await triggerSave();
 
@@ -38,7 +38,7 @@ export const SettingsRepo = {
 
     async setMany(settings: AppSettings): Promise<void> {
         const oldSettings = await this.getAll();
-        const changes: { key: string, old: string | null, new: string }[] = [];
+        const changes: { key: string; old: string | null; new: string }[] = [];
 
         try {
             await executeNoSave('BEGIN TRANSACTION;');
@@ -51,7 +51,7 @@ export const SettingsRepo = {
                         `INSERT INTO app_settings (key, value, updated_at) 
                          VALUES (?, ?, datetime('now')) 
                          ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = datetime('now')`,
-                        [key, value, value]
+                        [key, value, value],
                     );
                 }
             }
@@ -65,7 +65,14 @@ export const SettingsRepo = {
 
         // Batch Log (outside transaction — non-critical)
         if (changes.length > 0) {
-            await AuditLogRepo.log('UPDATE_BATCH', 'SETTINGS', 'BATCH', `Updated ${changes.length} settings`, changes.map(c => ({ key: c.key, value: c.old })), changes.map(c => ({ key: c.key, value: c.new })));
+            await AuditLogRepo.log(
+                'UPDATE_BATCH',
+                'SETTINGS',
+                'BATCH',
+                `Updated ${changes.length} settings`,
+                changes.map((c) => ({ key: c.key, value: c.old })),
+                changes.map((c) => ({ key: c.key, value: c.new })),
+            );
         }
-    }
+    },
 };

@@ -12,7 +12,7 @@ export async function seedDatabase(): Promise<void> {
     const catCount = await get<{ count: number }>('SELECT COUNT(*) as count FROM categories');
     if ((catCount?.count ?? 0) > 0) return;
 
-    console.log('🌱 Seeding built-in categories...');
+    console.warn('🌱 Seeding built-in categories...');
 
     const categories = [
         // 🥛 Dairy & Eggs
@@ -47,15 +47,31 @@ export async function seedDatabase(): Promise<void> {
         { name: 'Confectionery', description: 'Chocolate, candies, gum, sweets', color: '#f43f5e' },
 
         // 🫒 Oils, Sauces & Condiments
-        { name: 'Oils & Condiments', description: 'Cooking oil, olive oil, vinegar, ketchup, mustard, mayonnaise', color: '#ca8a04' },
-        { name: 'Spices & Seasonings', description: 'Salt, pepper, cumin, paprika, herbs, spice mixes', color: '#b45309' },
+        {
+            name: 'Oils & Condiments',
+            description: 'Cooking oil, olive oil, vinegar, ketchup, mustard, mayonnaise',
+            color: '#ca8a04',
+        },
+        {
+            name: 'Spices & Seasonings',
+            description: 'Salt, pepper, cumin, paprika, herbs, spice mixes',
+            color: '#b45309',
+        },
 
         // 🍯 Breakfast & Spreads
-        { name: 'Breakfast & Cereals', description: 'Cereals, oatmeal, pancake mix, granola, muesli', color: '#fb923c' },
+        {
+            name: 'Breakfast & Cereals',
+            description: 'Cereals, oatmeal, pancake mix, granola, muesli',
+            color: '#fb923c',
+        },
         { name: 'Spreads & Jams', description: 'Honey, jam, peanut butter, Nutella, marmalade', color: '#f97316' },
 
         // 🧁 Baking Supplies
-        { name: 'Baking Supplies', description: 'Flour, sugar, baking powder, yeast, vanilla, chocolate chips', color: '#a16207' },
+        {
+            name: 'Baking Supplies',
+            description: 'Flour, sugar, baking powder, yeast, vanilla, chocolate chips',
+            color: '#a16207',
+        },
 
         // 👶 Baby Products
         { name: 'Baby Products', description: 'Baby food, formula, diapers, wipes, baby care', color: '#f0abfc' },
@@ -65,8 +81,16 @@ export async function seedDatabase(): Promise<void> {
         { name: 'Health & Wellness', description: 'Vitamins, supplements, first aid, pain relief', color: '#10b981' },
 
         // 🧹 Household & Cleaning
-        { name: 'Cleaning Supplies', description: 'Detergent, dish soap, bleach, floor cleaner, sponges', color: '#14b8a6' },
-        { name: 'Paper & Disposables', description: 'Toilet paper, tissues, paper towels, trash bags, foil', color: '#64748b' },
+        {
+            name: 'Cleaning Supplies',
+            description: 'Detergent, dish soap, bleach, floor cleaner, sponges',
+            color: '#14b8a6',
+        },
+        {
+            name: 'Paper & Disposables',
+            description: 'Toilet paper, tissues, paper towels, trash bags, foil',
+            color: '#64748b',
+        },
 
         // 🐾 Pet Supplies
         { name: 'Pet Supplies', description: 'Pet food, treats, cat litter, pet accessories', color: '#a3e635' },
@@ -76,11 +100,23 @@ export async function seedDatabase(): Promise<void> {
         { name: 'Tobacco', description: 'Cigarettes, tobacco, rolling papers, lighters', color: '#57534e' },
 
         // 🌍 International & Specialty
-        { name: 'International Foods', description: 'Asian, Mexican, Mediterranean, Middle Eastern, specialty items', color: '#0d9488' },
-        { name: 'Organic & Health Food', description: 'Organic products, gluten-free, vegan, sugar-free', color: '#4ade80' },
+        {
+            name: 'International Foods',
+            description: 'Asian, Mexican, Mediterranean, Middle Eastern, specialty items',
+            color: '#0d9488',
+        },
+        {
+            name: 'Organic & Health Food',
+            description: 'Organic products, gluten-free, vegan, sugar-free',
+            color: '#4ade80',
+        },
 
         // ❄️ Deli & Ready Meals
-        { name: 'Deli & Charcuterie', description: 'Cold cuts, cheese platters, olives, prepared salads', color: '#e11d48' },
+        {
+            name: 'Deli & Charcuterie',
+            description: 'Cold cuts, cheese platters, olives, prepared salads',
+            color: '#e11d48',
+        },
         { name: 'Ready Meals', description: 'Pre-made meals, sandwiches, salads, soups', color: '#be123c' },
 
         // 🏠 Home & Kitchen
@@ -88,7 +124,11 @@ export async function seedDatabase(): Promise<void> {
         { name: 'Home Essentials', description: 'Light bulbs, batteries, candles, matches, laundry', color: '#6b7280' },
 
         // 📦 Others
-        { name: 'Stationery & Office', description: 'Pens, notebooks, tape, envelopes, school supplies', color: '#2563eb' },
+        {
+            name: 'Stationery & Office',
+            description: 'Pens, notebooks, tape, envelopes, school supplies',
+            color: '#2563eb',
+        },
         { name: 'Seasonal & Gifts', description: 'Holiday items, decorations, gift cards, wrapping', color: '#c026d3' },
         { name: 'Other', description: 'Miscellaneous and uncategorized items', color: '#94a3b8' },
     ];
@@ -101,5 +141,5 @@ export async function seedDatabase(): Promise<void> {
         }
     }
 
-    console.log(`✅ ${categories.length} built-in categories seeded.`);
+    console.warn(`✅ ${categories.length} built-in categories seeded.`);
 }

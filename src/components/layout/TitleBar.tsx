@@ -55,16 +55,13 @@ export default function TitleBar() {
 
     return (
         <header
-            className={cn(
-                'h-16 flex items-center justify-between px-8 select-none',
-                isElectron && 'app-drag-region'
-            )}
+            className={cn('h-16 flex items-center justify-between px-8 select-none', isElectron && 'app-drag-region')}
         >
             <div className="flex items-center gap-2">
                 <button
                     onClick={toggleSidebar}
                     className="p-1.5 rounded-md text-muted hover:text-text-primary hover:bg-tertiary transition-all app-no-drag active:scale-95"
-                    title={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                    title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
                 >
                     <PanelLeft size={16} className={cn('transition-colors', !collapsed && 'text-accent')} />
                 </button>
@@ -74,10 +71,12 @@ export default function TitleBar() {
                     {breadcrumbs.map((crumb, index) => (
                         <div key={crumb.path} className="flex items-center gap-2">
                             {index > 0 && <ChevronRight size={12} className="text-muted shrink-0" />}
-                            <span className={cn(
-                                "text-sm font-primary font-medium tracking-tight transition-colors",
-                                index === breadcrumbs.length - 1 ? "text-text-primary" : "text-muted"
-                            )}>
+                            <span
+                                className={cn(
+                                    'text-sm font-primary font-medium tracking-tight transition-colors',
+                                    index === breadcrumbs.length - 1 ? 'text-text-primary' : 'text-muted',
+                                )}
+                            >
                                 {crumb.label}
                             </span>
                         </div>
@@ -95,19 +94,31 @@ export default function TitleBar() {
                         className="group flex items-center justify-center w-10 min-h-full hover:bg-black/[0.08] active:bg-black/[0.12] transition-colors duration-200"
                         title="Minimize"
                     >
-                        <Minus size={15} strokeWidth={2} className="text-black/40 group-hover:text-black transition-colors" />
+                        <Minus
+                            size={15}
+                            strokeWidth={2}
+                            className="text-black/40 group-hover:text-black transition-colors"
+                        />
                     </button>
 
                     {/* Maximize/Restore */}
                     <button
                         onClick={() => window.electronAPI?.maximizeWindow()}
                         className="group flex items-center justify-center w-10 min-h-full hover:bg-black/[0.08] active:bg-black/[0.12] transition-colors duration-200"
-                        title={isMaximized ? "Restore" : "Maximize"}
+                        title={isMaximized ? 'Restore' : 'Maximize'}
                     >
                         {isMaximized ? (
-                            <Copy size={13} strokeWidth={2} className="text-black/40 group-hover:text-black transition-colors" />
+                            <Copy
+                                size={13}
+                                strokeWidth={2}
+                                className="text-black/40 group-hover:text-black transition-colors"
+                            />
                         ) : (
-                            <Square size={13} strokeWidth={2} className="text-black/40 group-hover:text-black transition-colors" />
+                            <Square
+                                size={13}
+                                strokeWidth={2}
+                                className="text-black/40 group-hover:text-black transition-colors"
+                            />
                         )}
                     </button>
 
@@ -117,7 +128,11 @@ export default function TitleBar() {
                         className="group flex items-center justify-center w-11 min-h-full hover:bg-[#E81123] active:bg-[#AC0F1C] transition-colors duration-200"
                         title="Close"
                     >
-                        <X size={16} strokeWidth={2} className="text-black/40 group-hover:text-white transition-colors" />
+                        <X
+                            size={16}
+                            strokeWidth={2}
+                            className="text-black/40 group-hover:text-white transition-colors"
+                        />
                     </button>
                 </div>
             )}

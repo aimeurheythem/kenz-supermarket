@@ -1,12 +1,6 @@
 import React, { ReactNode } from 'react';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from "@/components/ui/dialog"
-import { cn } from "@/lib/utils"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 
 interface FormModalProps {
     isOpen: boolean;
@@ -26,12 +20,12 @@ export function FormModal({
     description,
     children,
     footer,
-    maxWidth = "max-w-2xl",
-    icon
+    maxWidth = 'max-w-2xl',
+    icon,
 }: FormModalProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className={cn("flex flex-col max-h-[90vh] p-0 overflow-hidden", maxWidth)}>
+            <DialogContent className={cn('flex flex-col max-h-[90vh] p-0 overflow-hidden', maxWidth)}>
                 {/* Header */}
                 <DialogHeader className="p-8 pb-4 flex flex-col items-start gap-4">
                     <div className="flex items-center gap-4 w-full">
@@ -54,16 +48,10 @@ export function FormModal({
                 </DialogHeader>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto px-8 pb-8 pt-2 custom-scrollbar">
-                    {children}
-                </div>
+                <div className="flex-1 overflow-y-auto px-8 pb-8 pt-2 custom-scrollbar">{children}</div>
 
                 {/* Footer */}
-                {footer && (
-                    <div className="p-8 pt-0">
-                        {footer}
-                    </div>
-                )}
+                {footer && <div className="p-8 pt-0">{footer}</div>}
             </DialogContent>
         </Dialog>
     );

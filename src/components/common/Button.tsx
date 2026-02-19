@@ -48,7 +48,7 @@ export default function Button({
                 'border',
                 variants[variant],
                 sizes[size],
-                className
+                className,
             )}
         >
             {icon}

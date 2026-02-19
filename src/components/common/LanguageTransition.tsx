@@ -30,7 +30,7 @@ export default function LanguageTransition() {
                         initial={{ scale: 0.9, opacity: 0, y: 10 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 1.1, opacity: 0, y: -10 }}
-                        transition={{ duration: 0.5, ease: "circOut" }}
+                        transition={{ duration: 0.5, ease: 'circOut' }}
                         className="flex flex-col items-center gap-10"
                         style={{ fontFamily: isArabic ? '"Cairo", sans-serif' : 'inherit' }}
                     >
@@ -57,8 +57,8 @@ export default function LanguageTransition() {
                                     transition={{
                                         duration: 5.5,
                                         repeat: Infinity,
-                                        ease: "easeInOut",
-                                        times: [0, 0.8, 1]
+                                        ease: 'easeInOut',
+                                        times: [0, 0.8, 1],
                                     }}
                                 />
                                 <motion.path
@@ -71,8 +71,8 @@ export default function LanguageTransition() {
                                     transition={{
                                         duration: 5.5,
                                         repeat: Infinity,
-                                        ease: "easeInOut",
-                                        times: [0, 0.4, 0.9, 1]
+                                        ease: 'easeInOut',
+                                        times: [0, 0.4, 0.9, 1],
                                     }}
                                 />
                             </svg>
@@ -81,15 +81,13 @@ export default function LanguageTransition() {
                             <motion.div
                                 className="absolute inset-0 rounded-full bg-black/[0.03]"
                                 animate={{ scale: [1, 1.4, 1], opacity: [0.3, 0, 0.3] }}
-                                transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+                                transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
                             />
                         </div>
 
                         {/* Text Content */}
                         <div className="flex flex-col items-center gap-4">
-                            <h2
-                                className="text-lg font-bold text-black uppercase tracking-[0.4em] text-center"
-                            >
+                            <h2 className="text-lg font-bold text-black uppercase tracking-[0.4em] text-center">
                                 {t('system.switching_language')}
                             </h2>
                             <div className="flex gap-2">
@@ -98,13 +96,13 @@ export default function LanguageTransition() {
                                         key={i}
                                         animate={{
                                             scale: [1, 1.8, 1],
-                                            opacity: [0.2, 1, 0.2]
+                                            opacity: [0.2, 1, 0.2],
                                         }}
                                         transition={{
                                             duration: 1.5,
                                             repeat: Infinity,
                                             delay: i * 0.3,
-                                            ease: "easeInOut"
+                                            ease: 'easeInOut',
                                         }}
                                         className="w-1.5 h-1.5 rounded-full bg-black/40"
                                     />

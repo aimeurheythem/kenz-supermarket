@@ -5,12 +5,7 @@ import Button from '@/components/common/Button';
 import { useCustomerStore } from '@/stores/useCustomerStore';
 import { toast } from 'sonner';
 import type { Customer, CustomerInput } from '@/lib/types';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface CustomerModalProps {
     customer?: Customer | null;
@@ -28,7 +23,7 @@ export default function CustomerModal({ customer, isOpen, onClose }: CustomerMod
         email: '',
         address: '',
         notes: '',
-        loyalty_points: 0
+        loyalty_points: 0,
     });
 
     useEffect(() => {
@@ -39,7 +34,7 @@ export default function CustomerModal({ customer, isOpen, onClose }: CustomerMod
                 email: customer.email || '',
                 address: customer.address || '',
                 notes: customer.notes || '',
-                loyalty_points: customer.loyalty_points
+                loyalty_points: customer.loyalty_points,
             });
         } else {
             setFormData({
@@ -48,7 +43,7 @@ export default function CustomerModal({ customer, isOpen, onClose }: CustomerMod
                 email: '',
                 address: '',
                 notes: '',
-                loyalty_points: 0
+                loyalty_points: 0,
             });
         }
     }, [customer, isOpen]);
@@ -71,24 +66,34 @@ export default function CustomerModal({ customer, isOpen, onClose }: CustomerMod
         }
     };
 
-    const inputClass = "w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-hover)] focus:ring-1 focus:ring-[var(--color-border-hover)] transition-all placeholder:text-[var(--color-text-placeholder)]";
+    const inputClass =
+        'w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-hover)] focus:ring-1 focus:ring-[var(--color-border-hover)] transition-all placeholder:text-[var(--color-text-placeholder)]';
 
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+        <Dialog
+            open={isOpen}
+            onOpenChange={(open) => {
+                if (!open) onClose();
+            }}
+        >
             <DialogContent className="max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>{customer ? t('customer_modal.edit_title') : t('customer_modal.new_title')}</DialogTitle>
+                    <DialogTitle>
+                        {customer ? t('customer_modal.edit_title') : t('customer_modal.new_title')}
+                    </DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Name Input */}
                     <div>
-                        <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">{t('customer_modal.label_name')}</label>
+                        <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">
+                            {t('customer_modal.label_name')}
+                        </label>
                         <input
                             required
                             type="text"
                             value={formData.full_name}
-                            onChange={e => setFormData({ ...formData, full_name: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                             className={inputClass}
                             placeholder={t('customer_modal.placeholder_name')}
                         />
@@ -97,21 +102,25 @@ export default function CustomerModal({ customer, isOpen, onClose }: CustomerMod
                     {/* Contact Info Group */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">{t('customer_modal.label_phone')}</label>
+                            <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">
+                                {t('customer_modal.label_phone')}
+                            </label>
                             <input
                                 type="tel"
                                 value={formData.phone}
-                                onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                 className={inputClass}
                                 placeholder={t('customer_modal.placeholder_phone')}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">{t('customer_modal.label_email')}</label>
+                            <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">
+                                {t('customer_modal.label_email')}
+                            </label>
                             <input
                                 type="email"
                                 value={formData.email}
-                                onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 className={inputClass}
                                 placeholder={t('customer_modal.placeholder_email')}
                             />
@@ -120,11 +129,13 @@ export default function CustomerModal({ customer, isOpen, onClose }: CustomerMod
 
                     {/* Address Input */}
                     <div>
-                        <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">{t('customer_modal.label_address')}</label>
+                        <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">
+                            {t('customer_modal.label_address')}
+                        </label>
                         <input
                             type="text"
                             value={formData.address || ''}
-                            onChange={e => setFormData({ ...formData, address: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                             className={inputClass}
                             placeholder={t('customer_modal.placeholder_address')}
                         />
@@ -132,21 +143,27 @@ export default function CustomerModal({ customer, isOpen, onClose }: CustomerMod
 
                     {/* Loyalty Points */}
                     <div>
-                        <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">{t('customer_modal.label_loyalty')}</label>
+                        <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">
+                            {t('customer_modal.label_loyalty')}
+                        </label>
                         <input
                             type="number"
                             value={formData.loyalty_points}
-                            onChange={e => setFormData({ ...formData, loyalty_points: parseInt(e.target.value) || 0 })}
+                            onChange={(e) =>
+                                setFormData({ ...formData, loyalty_points: parseInt(e.target.value) || 0 })
+                            }
                             className={inputClass}
                         />
                     </div>
 
                     {/* Notes */}
                     <div>
-                        <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">{t('customer_modal.label_notes')}</label>
+                        <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">
+                            {t('customer_modal.label_notes')}
+                        </label>
                         <textarea
                             value={formData.notes || ''}
-                            onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                             className={`${inputClass} min-h-[80px] resize-none`}
                             placeholder={t('customer_modal.placeholder_notes')}
                         />

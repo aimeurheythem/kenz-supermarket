@@ -1,20 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableSkeletonRows } from '@/components/common/TableSkeleton';
-import {
-    Plus,
-    Search,
-    Filter,
-    Download,
-    DollarSign,
-    TrendingUp,
-    TrendingDown,
-    Calendar,
-    ArrowUpRight,
-    ArrowDownLeft,
-    PieChart,
-    Wallet
-} from 'lucide-react';
+import { Plus, Search, Filter, Download, DollarSign, TrendingUp, PieChart, Wallet } from 'lucide-react';
 import Button from '@/components/common/Button';
 import { DeleteConfirmModal } from '@/components/common/DeleteConfirmModal';
 import { cn, formatCurrency } from '@/lib/utils';
@@ -35,14 +22,17 @@ export default function Expenses() {
     useEffect(() => {
         loadExpenses();
         loadStats();
-    }, []);
+    }, [loadExpenses, loadStats]);
 
-    const filteredExpenses = expenses.filter(e =>
-        e.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        e.category.toLowerCase().includes(searchTerm.toLowerCase())
-    ).filter(e => filterCategory === 'all' || e.category === filterCategory);
+    const filteredExpenses = expenses
+        .filter(
+            (e) =>
+                e.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                e.category.toLowerCase().includes(searchTerm.toLowerCase()),
+        )
+        .filter((e) => filterCategory === 'all' || e.category === filterCategory);
 
-    const uniqueCategories = [...new Set(expenses.map(e => e.category))];
+    const uniqueCategories = [...new Set(expenses.map((e) => e.category))];
 
     const handleExportExpenses = () => {
         const headers = [
@@ -53,7 +43,11 @@ export default function Expenses() {
             { key: 'date', label: 'Date' },
             { key: 'payment_method', label: 'Payment Method' },
         ];
-        exportToCsv(headers, filteredExpenses as unknown as Record<string, unknown>[], `expenses_${new Date().toISOString().split('T')[0]}.csv`);
+        exportToCsv(
+            headers,
+            filteredExpenses as unknown as Record<string, unknown>[],
+            `expenses_${new Date().toISOString().split('T')[0]}.csv`,
+        );
         toast.success(t('expenses.export_success', { count: filteredExpenses.length }));
     };
 
@@ -65,11 +59,7 @@ export default function Expenses() {
                     <h1 className="text-3xl font-black text-black tracking-tight">{t('expenses.title')}</h1>
                     <p className="text-zinc-500 font-medium mt-1">{t('expenses.subtitle')}</p>
                 </div>
-                <Button
-                    className="btn-page-action"
-                    icon={<Plus size={18} />}
-                    onClick={() => setIsModalOpen(true)}
-                >
+                <Button className="btn-page-action" icon={<Plus size={18} />} onClick={() => setIsModalOpen(true)}>
                     {t('expenses.add_expense')}
                 </Button>
             </div>
@@ -83,12 +73,12 @@ export default function Expenses() {
                             <div className="p-3 bg-white/10 rounded-xl backdrop-blur-md">
                                 <DollarSign size={20} />
                             </div>
-                            <span className="text-sm font-bold uppercase tracking-widest opacity-60">{t('expenses.stat_total')}</span>
+                            <span className="text-sm font-bold uppercase tracking-widest opacity-60">
+                                {t('expenses.stat_total')}
+                            </span>
                         </div>
                         <div className="flex items-end gap-2">
-                            <h2 className="text-5xl font-black tracking-tighter">
-                                {formatCurrency(stats.total)}
-                            </h2>
+                            <h2 className="text-5xl font-black tracking-tighter">{formatCurrency(stats.total)}</h2>
                             <span className="text-zinc-400 font-bold mb-2">{t('expenses.stat_all_time')}</span>
                         </div>
                     </div>
@@ -99,7 +89,9 @@ export default function Expenses() {
                         <div className="p-3 bg-red-50 text-red-500 rounded-xl">
                             <TrendingUp size={20} />
                         </div>
-                        <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">{t('expenses.stat_top_category')}</span>
+                        <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">
+                            {t('expenses.stat_top_category')}
+                        </span>
                     </div>
                     {stats.byCategory.length > 0 ? (
                         <div>
@@ -120,7 +112,9 @@ export default function Expenses() {
                         <div className="p-3 bg-blue-50 text-blue-500 rounded-xl">
                             <PieChart size={20} />
                         </div>
-                        <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">{t('expenses.stat_categories')}</span>
+                        <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">
+                            {t('expenses.stat_categories')}
+                        </span>
                     </div>
                     <div className="space-y-3">
                         {stats.byCategory.slice(0, 3).map((cat) => (
@@ -138,7 +132,10 @@ export default function Expenses() {
                 {/* Toolbar */}
                 <div className="p-8 pb-0 flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="relative w-full md:w-96 group">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-black transition-colors" size={20} />
+                        <Search
+                            className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-black transition-colors"
+                            size={20}
+                        />
                         <input
                             type="text"
                             value={searchTerm}
@@ -149,27 +146,41 @@ export default function Expenses() {
                     </div>
                     <div className="flex items-center gap-3">
                         <div className="relative">
-                            <Button variant="secondary" icon={<Filter size={18} />} onClick={() => setShowFilter(!showFilter)}>
+                            <Button
+                                variant="secondary"
+                                icon={<Filter size={18} />}
+                                onClick={() => setShowFilter(!showFilter)}
+                            >
                                 {filterCategory === 'all' ? t('expenses.filter') : filterCategory}
                             </Button>
                             {showFilter && (
                                 <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl border border-zinc-100 shadow-xl z-50 p-2">
                                     <button
-                                        onClick={() => { setFilterCategory('all'); setShowFilter(false); }}
+                                        onClick={() => {
+                                            setFilterCategory('all');
+                                            setShowFilter(false);
+                                        }}
                                         className={cn(
-                                            "w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-colors",
-                                            filterCategory === 'all' ? "bg-black text-white" : "text-zinc-600 hover:bg-zinc-50"
+                                            'w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-colors',
+                                            filterCategory === 'all'
+                                                ? 'bg-black text-white'
+                                                : 'text-zinc-600 hover:bg-zinc-50',
                                         )}
                                     >
                                         {t('expenses.filter_all')}
                                     </button>
-                                    {uniqueCategories.map(cat => (
+                                    {uniqueCategories.map((cat) => (
                                         <button
                                             key={cat}
-                                            onClick={() => { setFilterCategory(cat); setShowFilter(false); }}
+                                            onClick={() => {
+                                                setFilterCategory(cat);
+                                                setShowFilter(false);
+                                            }}
                                             className={cn(
-                                                "w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-colors",
-                                                filterCategory === cat ? "bg-black text-white" : "text-zinc-600 hover:bg-zinc-50"
+                                                'w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-colors',
+                                                filterCategory === cat
+                                                    ? 'bg-black text-white'
+                                                    : 'text-zinc-600 hover:bg-zinc-50',
                                             )}
                                         >
                                             {cat}
@@ -178,7 +189,9 @@ export default function Expenses() {
                                 </div>
                             )}
                         </div>
-                        <Button variant="secondary" icon={<Download size={18} />} onClick={handleExportExpenses}>{t('expenses.export')}</Button>
+                        <Button variant="secondary" icon={<Download size={18} />} onClick={handleExportExpenses}>
+                            {t('expenses.export')}
+                        </Button>
                     </div>
                 </div>
 
@@ -188,11 +201,21 @@ export default function Expenses() {
                         <table className="w-full">
                             <thead>
                                 <tr className="text-left border-b border-zinc-100">
-                                    <th className="pb-6 pl-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('expenses.col_description')}</th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('expenses.col_category')}</th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('expenses.col_date')}</th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('expenses.col_amount')}</th>
-                                    <th className="pb-6 pr-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('expenses.col_actions')}</th>
+                                    <th className="pb-6 pl-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                        {t('expenses.col_description')}
+                                    </th>
+                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                        {t('expenses.col_category')}
+                                    </th>
+                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                        {t('expenses.col_date')}
+                                    </th>
+                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                        {t('expenses.col_amount')}
+                                    </th>
+                                    <th className="pb-6 pr-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                        {t('expenses.col_actions')}
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-50">

@@ -32,7 +32,7 @@ export const AuditLogRepo = {
         details: string | null,
         oldValue: any | null = null,
         newValue: any | null = null,
-        userId: number | null = null
+        userId: number | null = null,
     ) => {
         try {
             // Get user info if not provided but available in session (this would need access to store/context, usually passed in)
@@ -57,8 +57,8 @@ export const AuditLogRepo = {
                     entityId?.toString() || null,
                     details,
                     oldValue ? JSON.stringify(oldValue) : null,
-                    newValue ? JSON.stringify(newValue) : null
-                ]
+                    newValue ? JSON.stringify(newValue) : null,
+                ],
             );
         } catch (error) {
             console.error('Failed to create audit log:', error);
@@ -115,14 +115,22 @@ export const AuditLogRepo = {
 
         // Parse JSON fields defensively
         return {
-            logs: logs.map(log => {
+            logs: logs.map((log) => {
                 let old_value = log.old_value;
                 let new_value = log.new_value;
-                try { old_value = old_value ? JSON.parse(old_value) : null; } catch { /* keep raw string */ }
-                try { new_value = new_value ? JSON.parse(new_value) : null; } catch { /* keep raw string */ }
+                try {
+                    old_value = old_value ? JSON.parse(old_value) : null;
+                } catch {
+                    /* keep raw string */
+                }
+                try {
+                    new_value = new_value ? JSON.parse(new_value) : null;
+                } catch {
+                    /* keep raw string */
+                }
                 return { ...log, old_value, new_value };
             }),
-            total
+            total,
         };
-    }
+    },
 };

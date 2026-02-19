@@ -21,12 +21,7 @@ import SearchInput from '@/components/common/SearchInput';
 import Button from '@/components/common/Button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { toast } from 'sonner';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { User, UserInput } from '@/lib/types';
 
 const defaultForm: UserInput & { pin_code?: string } = {
@@ -38,7 +33,16 @@ const defaultForm: UserInput & { pin_code?: string } = {
 };
 
 export default function Users() {
-    const { users, loadUsers, addUser, updateUser, deleteUser, loadCashierSessions, cashierSessions, getCashierPerformance } = useUserStore();
+    const {
+        users,
+        loadUsers,
+        addUser,
+        updateUser,
+        deleteUser,
+        loadCashierSessions,
+        cashierSessions,
+        getCashierPerformance,
+    } = useUserStore();
     const { user: currentUser } = useAuthStore();
     const { t } = useTranslation();
     const [search, setSearch] = useState('');
@@ -53,16 +57,16 @@ export default function Users() {
     useEffect(() => {
         loadUsers();
         loadCashierSessions();
-    }, []);
+    }, [loadUsers, loadCashierSessions]);
 
     const filtered = users.filter(
         (u) =>
             !search ||
             u.full_name.toLowerCase().includes(search.toLowerCase()) ||
-            u.username.toLowerCase().includes(search.toLowerCase())
+            u.username.toLowerCase().includes(search.toLowerCase()),
     );
 
-    const cashiers = users.filter(u => u.role === 'cashier');
+    const cashiers = users.filter((u) => u.role === 'cashier');
 
     const handleEdit = (user: User) => {
         setEditingUser(user);
@@ -133,9 +137,12 @@ export default function Users() {
 
     const getRoleColor = (role: string) => {
         switch (role) {
-            case 'admin': return 'text-red-400 bg-red-500/10';
-            case 'manager': return 'text-blue-400 bg-blue-500/10';
-            default: return 'text-emerald-400 bg-emerald-500/10';
+            case 'admin':
+                return 'text-red-400 bg-red-500/10';
+            case 'manager':
+                return 'text-blue-400 bg-blue-500/10';
+            default:
+                return 'text-emerald-400 bg-emerald-500/10';
         }
     };
 
@@ -144,7 +151,7 @@ export default function Users() {
         'bg-[var(--color-bg-input)] border border-[var(--color-border)]',
         'text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-placeholder)]',
         'focus:outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)]',
-        'transition-all duration-200'
+        'transition-all duration-200',
     );
 
     if (currentUser?.role !== 'admin') {
@@ -158,7 +165,7 @@ export default function Users() {
     }
 
     const getPerformanceStats = (cashierId: number) => {
-        const sessions = cashierSessions.filter(s => s.cashier_id === cashierId);
+        const sessions = cashierSessions.filter((s) => s.cashier_id === cashierId);
         const performance = getCashierPerformance(cashierId);
         return { sessions, performance };
     };
@@ -169,9 +176,7 @@ export default function Users() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">{t('users.title')}</h1>
-                    <p className="text-sm text-[var(--color-text-muted)] mt-1">
-                        {t('users.subtitle')}
-                    </p>
+                    <p className="text-sm text-[var(--color-text-muted)] mt-1">{t('users.subtitle')}</p>
                 </div>
                 <Button className="btn-page-action" onClick={() => setIsFormOpen(true)} icon={<UserPlus size={16} />}>
                     {t('users.add_user')}
@@ -209,7 +214,9 @@ export default function Users() {
                         </div>
                         <div>
                             <p className="text-xs text-[var(--color-text-muted)]">{t('users.stat_active_sessions')}</p>
-                            <p className="text-xl font-bold text-[var(--color-text-primary)]">{cashierSessions.filter(s => s.status === 'active').length}</p>
+                            <p className="text-xl font-bold text-[var(--color-text-primary)]">
+                                {cashierSessions.filter((s) => s.status === 'active').length}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -221,30 +228,51 @@ export default function Users() {
                         <div>
                             <p className="text-xs text-[var(--color-text-muted)]">{t('users.stat_today_sessions')}</p>
                             <p className="text-xl font-bold text-[var(--color-text-primary)]">
-                                {cashierSessions.filter(s => new Date(s.login_time).toDateString() === new Date().toDateString()).length}
+                                {
+                                    cashierSessions.filter(
+                                        (s) => new Date(s.login_time).toDateString() === new Date().toDateString(),
+                                    ).length
+                                }
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <SearchInput value={search} onChange={setSearch} placeholder={t('users.search_placeholder')} className="w-72" />
+            <SearchInput
+                value={search}
+                onChange={setSearch}
+                placeholder={t('users.search_placeholder')}
+                className="w-72"
+            />
 
             {/* Users List */}
             <div className="rounded-xl border border-[var(--color-border)] overflow-hidden bg-[var(--color-bg-card)]">
                 <table className="w-full">
                     <thead className="bg-[var(--color-bg-secondary)] border-b border-[var(--color-border)]">
                         <tr>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('users.col_user')}</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('users.col_role')}</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('users.col_pin')}</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('users.col_status')}</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('users.col_last_login')}</th>
-                            <th className="px-4 py-3 text-right text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('users.col_actions')}</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">
+                                {t('users.col_user')}
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">
+                                {t('users.col_role')}
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">
+                                {t('users.col_pin')}
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">
+                                {t('users.col_status')}
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">
+                                {t('users.col_last_login')}
+                            </th>
+                            <th className="px-4 py-3 text-right text-xs font-semibold text-[var(--color-text-muted)] uppercase">
+                                {t('users.col_actions')}
+                            </th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--color-border)]">
-                        {filtered.map(user => (
+                        {filtered.map((user) => (
                             <tr key={user.id} className="hover:bg-[var(--color-bg-hover)] transition-colors">
                                 <td className="px-4 py-3">
                                     <div className="flex items-center gap-3">
@@ -252,13 +280,20 @@ export default function Users() {
                                             {user.full_name.charAt(0).toUpperCase()}
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium text-[var(--color-text-primary)]">{user.full_name}</p>
+                                            <p className="text-sm font-medium text-[var(--color-text-primary)]">
+                                                {user.full_name}
+                                            </p>
                                             <p className="text-xs text-[var(--color-text-muted)]">@{user.username}</p>
                                         </div>
                                     </div>
                                 </td>
                                 <td className="px-4 py-3">
-                                    <span className={cn("px-2 py-1 rounded-full text-xs font-medium capitalize", getRoleColor(user.role))}>
+                                    <span
+                                        className={cn(
+                                            'px-2 py-1 rounded-full text-xs font-medium capitalize',
+                                            getRoleColor(user.role),
+                                        )}
+                                    >
                                         {user.role}
                                     </span>
                                 </td>
@@ -322,157 +357,213 @@ export default function Users() {
             </div>
 
             {/* User Form Modal */}
-            <Dialog open={isFormOpen} onOpenChange={(open) => { if (!open) handleCloseForm(); }}>
+            <Dialog
+                open={isFormOpen}
+                onOpenChange={(open) => {
+                    if (!open) handleCloseForm();
+                }}
+            >
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{editingUser ? t('users.form_edit_title') : t('users.form_add_title')}</DialogTitle>
+                        <DialogTitle>
+                            {editingUser ? t('users.form_edit_title') : t('users.form_add_title')}
+                        </DialogTitle>
                     </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="text-xs font-medium text-[var(--color-text-muted)] mb-1.5 block">{t('users.label_full_name')} *</label>
-                        <input 
-                            type="text" 
-                            value={form.full_name} 
-                            onChange={e => setForm({ ...form, full_name: e.target.value })} 
-                            className={inputClass} 
-                            placeholder={t('users.placeholder_full_name')}
-                            required 
-                        />
-                    </div>
-                    <div>
-                        <label className="text-xs font-medium text-[var(--color-text-muted)] mb-1.5 block">{t('users.label_username')} *</label>
-                        <input 
-                            type="text" 
-                            value={form.username} 
-                            onChange={e => setForm({ ...form, username: e.target.value })} 
-                            className={inputClass} 
-                            placeholder={t('users.placeholder_username')}
-                            required 
-                            disabled={!!editingUser} 
-                        />
-                    </div>
-                    <div>
-                        <label className="text-xs font-medium text-[var(--color-text-muted)] mb-1.5 block">
-                        </label>
-                        <input 
-                            type="password" 
-                            value={form.password} 
-                            onChange={e => setForm({ ...form, password: e.target.value })} 
-                            className={inputClass} 
-                            placeholder={editingUser ? t('users.placeholder_password_edit') : t('users.placeholder_password_new')}
-                            required={!editingUser} 
-                        />
-                    </div>
-                    <div>
-                        <label className="text-xs font-medium text-[var(--color-text-muted)] mb-1.5 block">{t('users.label_role')} *</label>
-                        <select 
-                            value={form.role} 
-                            onChange={e => setForm({ ...form, role: e.target.value as any })} 
-                            className={inputClass}
-                        >
-                            <option value="cashier">{t('users.role_cashier')}</option>
-                            <option value="manager">{t('users.role_manager')}</option>
-                            <option value="admin">{t('users.role_admin')}</option>
-                        </select>
-                    </div>
-                    {form.role === 'cashier' && (
+                    <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <label className="text-xs font-medium text-[var(--color-text-muted)] mb-1.5 block">
+                                {t('users.label_full_name')} *
                             </label>
-                            <input 
-                                type="password" 
-                                inputMode="numeric"
-                                maxLength={6}
-                                value={form.pin_code} 
-                                onChange={e => setForm({ ...form, pin_code: e.target.value.replace(/\D/g, '') })} 
-                                className={inputClass} 
-                                placeholder={t('users.placeholder_pin')}
-                                required={!editingUser && form.role === 'cashier'} 
+                            <input
+                                type="text"
+                                value={form.full_name}
+                                onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+                                className={inputClass}
+                                placeholder={t('users.placeholder_full_name')}
+                                required
                             />
-                            <p className="text-xs text-[var(--color-text-muted)] mt-1">{t('users.pin_hint')}</p>
                         </div>
-                    )}
+                        <div>
+                            <label className="text-xs font-medium text-[var(--color-text-muted)] mb-1.5 block">
+                                {t('users.label_username')} *
+                            </label>
+                            <input
+                                type="text"
+                                value={form.username}
+                                onChange={(e) => setForm({ ...form, username: e.target.value })}
+                                className={inputClass}
+                                placeholder={t('users.placeholder_username')}
+                                required
+                                disabled={!!editingUser}
+                            />
+                        </div>
+                        <div>
+                            <label className="text-xs font-medium text-[var(--color-text-muted)] mb-1.5 block"></label>
+                            <input
+                                type="password"
+                                value={form.password}
+                                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                                className={inputClass}
+                                placeholder={
+                                    editingUser
+                                        ? t('users.placeholder_password_edit')
+                                        : t('users.placeholder_password_new')
+                                }
+                                required={!editingUser}
+                            />
+                        </div>
+                        <div>
+                            <label className="text-xs font-medium text-[var(--color-text-muted)] mb-1.5 block">
+                                {t('users.label_role')} *
+                            </label>
+                            <select
+                                value={form.role}
+                                onChange={(e) => setForm({ ...form, role: e.target.value as any })}
+                                className={inputClass}
+                            >
+                                <option value="cashier">{t('users.role_cashier')}</option>
+                                <option value="manager">{t('users.role_manager')}</option>
+                                <option value="admin">{t('users.role_admin')}</option>
+                            </select>
+                        </div>
+                        {form.role === 'cashier' && (
+                            <div>
+                                <label className="text-xs font-medium text-[var(--color-text-muted)] mb-1.5 block"></label>
+                                <input
+                                    type="password"
+                                    inputMode="numeric"
+                                    maxLength={6}
+                                    value={form.pin_code}
+                                    onChange={(e) => setForm({ ...form, pin_code: e.target.value.replace(/\D/g, '') })}
+                                    className={inputClass}
+                                    placeholder={t('users.placeholder_pin')}
+                                    required={!editingUser && form.role === 'cashier'}
+                                />
+                                <p className="text-xs text-[var(--color-text-muted)] mt-1">{t('users.pin_hint')}</p>
+                            </div>
+                        )}
 
-                    <div className="flex justify-end gap-3 pt-3 border-t border-[var(--color-border)]">
-                        <Button variant="secondary" onClick={handleCloseForm}>{t('users.cancel')}</Button>
-                        <Button type="submit">{editingUser ? t('users.update_user') : t('users.create_user')}</Button>
-                    </div>
-                </form>
+                        <div className="flex justify-end gap-3 pt-3 border-t border-[var(--color-border)]">
+                            <Button variant="secondary" onClick={handleCloseForm}>
+                                {t('users.cancel')}
+                            </Button>
+                            <Button type="submit">
+                                {editingUser ? t('users.update_user') : t('users.create_user')}
+                            </Button>
+                        </div>
+                    </form>
                 </DialogContent>
             </Dialog>
 
             {/* Cashier Performance Modal */}
-            <Dialog open={showPerformance} onOpenChange={(open) => { if (!open) setShowPerformance(false); }}>
+            <Dialog
+                open={showPerformance}
+                onOpenChange={(open) => {
+                    if (!open) setShowPerformance(false);
+                }}
+            >
                 <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle>{selectedCashier ? t('users.performance_title', { name: selectedCashier.full_name }) : t('users.performance_title', { name: '' })}</DialogTitle>
+                        <DialogTitle>
+                            {selectedCashier
+                                ? t('users.performance_title', { name: selectedCashier.full_name })
+                                : t('users.performance_title', { name: '' })}
+                        </DialogTitle>
                     </DialogHeader>
-                {selectedCashier && (
-                    <div className="space-y-6">
-                        {/* Performance Stats */}
-                        {(() => {
-                            const { performance } = getPerformanceStats(selectedCashier.id);
-                            return (
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4">
-                                        <p className="text-xs text-emerald-400 mb-1">{t('users.perf_sessions')}</p>
-                                        <p className="text-2xl font-bold text-[var(--color-text-primary)]">{performance.total_sessions}</p>
-                                    </div>
-                                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                                        <p className="text-xs text-blue-400 mb-1">{t('users.perf_sales')}</p>
-                                        <p className="text-2xl font-bold text-[var(--color-text-primary)]">{formatCurrency(performance.total_sales)}</p>
-                                    </div>
-                                    <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
-                                        <p className="text-xs text-purple-400 mb-1">{t('users.perf_transactions')}</p>
-                                        <p className="text-2xl font-bold text-[var(--color-text-primary)]">{performance.total_transactions}</p>
-                                    </div>
-                                    <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
-                                        <p className="text-xs text-orange-400 mb-1">{t('users.perf_avg_sale')}</p>
-                                        <p className="text-2xl font-bold text-[var(--color-text-primary)]">{formatCurrency(performance.average_sale)}</p>
-                                    </div>
-                                </div>
-                            );
-                        })()}
-
-                        {/* Recent Sessions */}
-                        <div>
-                            <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-3">{t('users.recent_sessions')}</h3>
-                            <div className="space-y-2 max-h-64 overflow-y-auto">
-                                {cashierSessions
-                                    .filter(s => s.cashier_id === selectedCashier.id)
-                                    .slice(0, 10)
-                                    .map(session => (
-                                        <div 
-                                            key={session.id} 
-                                            className="flex items-center justify-between p-3 bg-[var(--color-bg-secondary)] rounded-lg border border-[var(--color-border)]"
-                                        >
-                                            <div>
-                                                <p className="text-sm text-[var(--color-text-primary)]">
-                                                    {formatDate(session.login_time)}
-                                                </p>
-                                                <p className="text-xs text-[var(--color-text-muted)]">
-                                                    {session.status === 'active' ? t('users.session_active') : t('users.session_closed', { time: session.logout_time ? formatDate(session.logout_time) : t('users.session_unknown') })}
-                                                </p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-sm text-[var(--color-text-primary)]">{formatCurrency(session.opening_cash)}</p>
-                                                <p className="text-xs text-[var(--color-text-muted)]">{t('users.opening_cash')}</p>
-                                            </div>
+                    {selectedCashier && (
+                        <div className="space-y-6">
+                            {/* Performance Stats */}
+                            {(() => {
+                                const { performance } = getPerformanceStats(selectedCashier.id);
+                                return (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4">
+                                            <p className="text-xs text-emerald-400 mb-1">{t('users.perf_sessions')}</p>
+                                            <p className="text-2xl font-bold text-[var(--color-text-primary)]">
+                                                {performance.total_sessions}
+                                            </p>
                                         </div>
-                                    ))}
-                                {cashierSessions.filter(s => s.cashier_id === selectedCashier.id).length === 0 && (
-                                    <p className="text-center text-[var(--color-text-muted)] py-4">{t('users.no_sessions')}</p>
-                                )}
+                                        <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                                            <p className="text-xs text-blue-400 mb-1">{t('users.perf_sales')}</p>
+                                            <p className="text-2xl font-bold text-[var(--color-text-primary)]">
+                                                {formatCurrency(performance.total_sales)}
+                                            </p>
+                                        </div>
+                                        <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
+                                            <p className="text-xs text-purple-400 mb-1">
+                                                {t('users.perf_transactions')}
+                                            </p>
+                                            <p className="text-2xl font-bold text-[var(--color-text-primary)]">
+                                                {performance.total_transactions}
+                                            </p>
+                                        </div>
+                                        <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
+                                            <p className="text-xs text-orange-400 mb-1">{t('users.perf_avg_sale')}</p>
+                                            <p className="text-2xl font-bold text-[var(--color-text-primary)]">
+                                                {formatCurrency(performance.average_sale)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+
+                            {/* Recent Sessions */}
+                            <div>
+                                <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-3">
+                                    {t('users.recent_sessions')}
+                                </h3>
+                                <div className="space-y-2 max-h-64 overflow-y-auto">
+                                    {cashierSessions
+                                        .filter((s) => s.cashier_id === selectedCashier.id)
+                                        .slice(0, 10)
+                                        .map((session) => (
+                                            <div
+                                                key={session.id}
+                                                className="flex items-center justify-between p-3 bg-[var(--color-bg-secondary)] rounded-lg border border-[var(--color-border)]"
+                                            >
+                                                <div>
+                                                    <p className="text-sm text-[var(--color-text-primary)]">
+                                                        {formatDate(session.login_time)}
+                                                    </p>
+                                                    <p className="text-xs text-[var(--color-text-muted)]">
+                                                        {session.status === 'active'
+                                                            ? t('users.session_active')
+                                                            : t('users.session_closed', {
+                                                                  time: session.logout_time
+                                                                      ? formatDate(session.logout_time)
+                                                                      : t('users.session_unknown'),
+                                                              })}
+                                                    </p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-sm text-[var(--color-text-primary)]">
+                                                        {formatCurrency(session.opening_cash)}
+                                                    </p>
+                                                    <p className="text-xs text-[var(--color-text-muted)]">
+                                                        {t('users.opening_cash')}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    {cashierSessions.filter((s) => s.cashier_id === selectedCashier.id).length ===
+                                        0 && (
+                                        <p className="text-center text-[var(--color-text-muted)] py-4">
+                                            {t('users.no_sessions')}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
                 </DialogContent>
             </Dialog>
 
             <ConfirmDialog
                 isOpen={showDeleteConfirm}
-                onClose={() => { setShowDeleteConfirm(false); setDeleteTargetId(null); }}
+                onClose={() => {
+                    setShowDeleteConfirm(false);
+                    setDeleteTargetId(null);
+                }}
                 onConfirm={confirmDelete}
                 title={t('users.deactivate_title')}
                 description={t('users.deactivate_description')}

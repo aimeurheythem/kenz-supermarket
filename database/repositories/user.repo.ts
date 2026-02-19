@@ -38,7 +38,7 @@ function legacySimpleHash(password: string): string {
     let h = 0;
     for (let i = 0; i < password.length; i++) {
         const char = password.charCodeAt(i);
-        h = ((h << 5) - h) + char;
+        h = (h << 5) - h + char;
         h |= 0;
     }
     return 'sh_' + Math.abs(h).toString(36) + '_' + password.length;
@@ -49,13 +49,19 @@ function legacyVerify(password: string, hash: string): boolean {
 }
 
 // Safe column list — never expose password_hash or pin_code to frontend
-const USER_SAFE_COLUMNS = 'id, username, full_name, role, is_active, (CASE WHEN pin_code IS NOT NULL AND pin_code != \'\' THEN 1 ELSE 0 END) as has_pin, pin_length, last_login, created_at, updated_at';
+const USER_SAFE_COLUMNS =
+    "id, username, full_name, role, is_active, (CASE WHEN pin_code IS NOT NULL AND pin_code != '' THEN 1 ELSE 0 END) as has_pin, pin_length, last_login, created_at, updated_at";
 
 // Internal column list — includes secrets for auth verification only
-const USER_ALL_COLUMNS = 'id, username, password_hash, pin_code, full_name, role, is_active, last_login, created_at, updated_at';
+const USER_ALL_COLUMNS =
+    'id, username, password_hash, pin_code, full_name, role, is_active, last_login, created_at, updated_at';
 
 function stripSensitiveFields(user: User): User {
-    const { password_hash, pin_code, ...safe } = user as User & { password_hash?: string; pin_code?: string };
+    const {
+        password_hash: _password_hash,
+        pin_code: _pin_code,
+        ...safe
+    } = user as User & { password_hash?: string; pin_code?: string };
     return safe as User;
 }
 
@@ -76,7 +82,8 @@ export const UserRepo = {
     /** Internal only — includes password_hash & pin_code for auth verification */
     async _getByIdFull(id: number): Promise<(User & { password_hash: string; pin_code: string | null }) | undefined> {
         return get<User & { password_hash: string; pin_code: string | null }>(
-            `SELECT ${USER_ALL_COLUMNS} FROM users WHERE id = ?`, [id]
+            `SELECT ${USER_ALL_COLUMNS} FROM users WHERE id = ?`,
+            [id],
         );
     },
 
@@ -86,9 +93,9 @@ export const UserRepo = {
 
     /** Internal only — includes password_hash for auth verification */
     async _getByUsernameFull(username: string): Promise<(User & { password_hash: string }) | undefined> {
-        return get<User & { password_hash: string }>(
-            `SELECT ${USER_ALL_COLUMNS} FROM users WHERE username = ?`, [username]
-        );
+        return get<User & { password_hash: string }>(`SELECT ${USER_ALL_COLUMNS} FROM users WHERE username = ?`, [
+            username,
+        ]);
     },
 
     async create(input: UserInput): Promise<User> {
@@ -97,7 +104,7 @@ export const UserRepo = {
         const pinLength = input.pin_code ? input.pin_code.length : 4;
         await execute(
             'INSERT INTO users (username, password_hash, pin_code, pin_length, full_name, role) VALUES (?, ?, ?, ?, ?, ?)',
-            [input.username, passwordHash, pinCode, pinLength, input.full_name, input.role]
+            [input.username, passwordHash, pinCode, pinLength, input.full_name, input.role],
         );
         const id = await lastInsertId();
         return this.getById(id) as Promise<User>;
@@ -112,7 +119,10 @@ export const UserRepo = {
         // Auto-migrate legacy hash to bcrypt on successful login
         if (user.password_hash.startsWith(LEGACY_HASH_PREFIX)) {
             const newHash = await hashPassword(password);
-            await execute("UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?", [newHash, user.id]);
+            await execute("UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?", [
+                newHash,
+                user.id,
+            ]);
         }
 
         // Update last login
@@ -134,7 +144,10 @@ export const UserRepo = {
         // Auto-migrate legacy plaintext PIN to bcrypt on successful login
         if (!user.pin_code.startsWith('$2a$') && !user.pin_code.startsWith('$2b$')) {
             const newPinHash = await hashPin(pin_code);
-            await execute("UPDATE users SET pin_code = ?, updated_at = datetime('now') WHERE id = ?", [newPinHash, user.id]);
+            await execute("UPDATE users SET pin_code = ?, updated_at = datetime('now') WHERE id = ?", [
+                newPinHash,
+                user.id,
+            ]);
         }
 
         // Update last login
@@ -157,9 +170,18 @@ export const UserRepo = {
         const fields: string[] = [];
         const values: unknown[] = [];
 
-        if (input.username !== undefined) { fields.push('username = ?'); values.push(input.username); }
-        if (input.full_name !== undefined) { fields.push('full_name = ?'); values.push(input.full_name); }
-        if (input.role !== undefined) { fields.push('role = ?'); values.push(input.role); }
+        if (input.username !== undefined) {
+            fields.push('username = ?');
+            values.push(input.username);
+        }
+        if (input.full_name !== undefined) {
+            fields.push('full_name = ?');
+            values.push(input.full_name);
+        }
+        if (input.role !== undefined) {
+            fields.push('role = ?');
+            values.push(input.role);
+        }
         if (input.password !== undefined) {
             const hashedPassword = await hashPassword(input.password);
             fields.push('password_hash = ?');
@@ -172,7 +194,10 @@ export const UserRepo = {
             fields.push('pin_length = ?');
             values.push(input.pin_code ? input.pin_code.length : 4);
         }
-        if (input.is_active !== undefined) { fields.push('is_active = ?'); values.push(input.is_active); }
+        if (input.is_active !== undefined) {
+            fields.push('is_active = ?');
+            values.push(input.is_active);
+        }
 
         fields.push("updated_at = datetime('now')");
         values.push(id);

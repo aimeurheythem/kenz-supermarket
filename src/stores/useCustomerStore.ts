@@ -108,5 +108,5 @@ export const useCustomerStore = create<CustomerStore>((set, get) => ({
 
     getDebtors: async () => {
         return await CustomerRepo.getDebtors();
-    }
+    },
 }));

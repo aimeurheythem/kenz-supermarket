@@ -19,13 +19,11 @@ function escapeField(value: unknown): string {
 export function exportToCsv(
     headers: { key: string; label: string }[],
     rows: Record<string, unknown>[],
-    filename: string
+    filename: string,
 ) {
-    const headerLine = headers.map(h => escapeField(h.label)).join(',');
+    const headerLine = headers.map((h) => escapeField(h.label)).join(',');
 
-    const dataLines = rows.map(row =>
-        headers.map(h => escapeField(row[h.key])).join(',')
-    );
+    const dataLines = rows.map((row) => headers.map((h) => escapeField(row[h.key])).join(','));
 
     const csvContent = [headerLine, ...dataLines].join('\n');
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -46,7 +44,7 @@ export function exportToCsv(
  */
 export async function parseCsvFile(file: File): Promise<Record<string, string>[]> {
     const text = await file.text();
-    const lines = text.split(/\r?\n/).filter(line => line.trim());
+    const lines = text.split(/\r?\n/).filter((line) => line.trim());
 
     if (lines.length < 2) return [];
 

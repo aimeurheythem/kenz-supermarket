@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, User, Plus, X, Loader2, Check } from 'lucide-react';
+import { User, Plus, X, Loader2 } from 'lucide-react';
 import { useCustomerStore } from '@/stores/useCustomerStore';
 import CustomerModal from '@/components/customers/CustomerModal';
-import { cn } from '@/lib/utils';
 import type { Customer } from '@/lib/types';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,7 +13,7 @@ interface CustomerSelectorProps {
 
 export default function CustomerSelector({ onSelect, selectedCustomer }: CustomerSelectorProps) {
     const { t } = useTranslation();
-    const { searchCustomers, loadCustomers } = useCustomerStore();
+    const { searchCustomers } = useCustomerStore();
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<Customer[]>([]);
     const [isOpen, setIsOpen] = useState(false);
@@ -91,7 +90,10 @@ export default function CustomerSelector({ onSelect, selectedCustomer }: Custome
             ) : (
                 /* Search Input */
                 <div className="relative group">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-black transition-colors" size={20} />
+                    <User
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-black transition-colors"
+                        size={20}
+                    />
                     <input
                         type="text"
                         placeholder="Search customer (name/phone)..."
@@ -103,7 +105,10 @@ export default function CustomerSelector({ onSelect, selectedCustomer }: Custome
                         className="w-full pl-12 pr-12 py-4 bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-zinc-200 rounded-2xl outline-none font-bold text-black placeholder:text-zinc-400 transition-all"
                     />
                     {isLoading ? (
-                        <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin text-zinc-400" size={18} />
+                        <Loader2
+                            className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin text-zinc-400"
+                            size={18}
+                        />
                     ) : (
                         <button
                             onClick={() => setIsModalOpen(true)}
@@ -147,10 +152,7 @@ export default function CustomerSelector({ onSelect, selectedCustomer }: Custome
                 </div>
             )}
 
-            <CustomerModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-            />
+            <CustomerModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
         </div>
     );
 }

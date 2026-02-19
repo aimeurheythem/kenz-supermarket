@@ -23,7 +23,29 @@ interface SaleStore {
     clearCart: () => void;
 
     // Checkout
-    checkout: (payment: { method: string; customer_name?: string; customer_id?: number | null; tax_rate?: number; discount?: number }, userId?: number, sessionId?: number) => Promise<Sale>;
+    checkout: (
+        payment: {
+            method: string;
+            customer_name?: string;
+            customer_id?: number | null;
+            tax_rate?: number;
+            discount?: number;
+        },
+        userId?: number,
+        sessionId?: number,
+    ) => Promise<Sale>;
+
+    // Analytics
+    getTopProductsByProfit: (
+        limit?: number,
+        userId?: number,
+    ) => Promise<{ name: string; profit: number; total_sold: number }[]>;
+    getTodayStatsForUser: (userId: number) => Promise<{ revenue: number; orders: number; profit: number }>;
+    getHourlyRevenue: (userId?: number) => Promise<{ time: string; revenue: number }[]>;
+    getDailyRevenue: (userId?: number) => Promise<{ day: string; revenue: number }[]>;
+    getMonthlyRevenue: (userId?: number) => Promise<{ month: string; revenue: number }[]>;
+    getPeakHours: (userId?: number) => Promise<{ hour: string; density: number }[]>;
+    getItems: (saleId: number) => Promise<import('@/lib/types').SaleItem[]>;
 
     // Stock error handling
     stockError: { productName: string; available: number } | null;
@@ -93,9 +115,7 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
         if (existing) {
             set({
                 cart: cart.map((c) =>
-                    c.product.id === item.product.id
-                        ? { ...c, quantity: c.quantity + item.quantity }
-                        : c
+                    c.product.id === item.product.id ? { ...c, quantity: c.quantity + item.quantity } : c,
                 ),
             });
         } else {
@@ -121,9 +141,7 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
             set({ cart: cart.filter((c) => c.product.id !== productId) });
         } else {
             set({
-                cart: cart.map((c) =>
-                    c.product.id === productId ? { ...c, quantity } : c
-                ),
+                cart: cart.map((c) => (c.product.id === productId ? { ...c, quantity } : c)),
             });
         }
     },
@@ -154,12 +172,37 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
         }
     },
 
+    getTopProductsByProfit: async (limit = 5, userId?) => {
+        return SaleRepo.getTopProductsByProfit(limit, userId);
+    },
+
+    getTodayStatsForUser: async (userId) => {
+        return SaleRepo.getTodayStats(userId);
+    },
+
+    getHourlyRevenue: async (userId?) => {
+        return SaleRepo.getHourlyRevenue(userId);
+    },
+
+    getDailyRevenue: async (userId?) => {
+        return SaleRepo.getDailyRevenue(userId);
+    },
+
+    getMonthlyRevenue: async (userId?) => {
+        return SaleRepo.getMonthlyRevenue(userId);
+    },
+
+    getPeakHours: async (userId?) => {
+        return SaleRepo.getPeakHours(userId);
+    },
+
+    getItems: async (saleId) => {
+        return SaleRepo.getItems(saleId);
+    },
+
     clearStockError: () => set({ stockError: null }),
 }));
 
 /** Derived selector — computes cart total from current cart state */
 export const selectCartTotal = (state: SaleStore) =>
-    state.cart.reduce(
-        (sum, item) => sum + item.product.selling_price * item.quantity - item.discount,
-        0
-    );
+    state.cart.reduce((sum, item) => sum + item.product.selling_price * item.quantity - item.discount, 0);

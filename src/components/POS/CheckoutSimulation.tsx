@@ -11,7 +11,7 @@ interface CheckoutSimulationProps {
 
 type Step = 'printing' | 'success';
 
-export default function CheckoutSimulation({ total, onComplete }: CheckoutSimulationProps) {
+export default function CheckoutSimulation({ total: _total, onComplete }: CheckoutSimulationProps) {
     const { t } = useTranslation();
     const [step, setStep] = useState<Step>('printing');
 
@@ -56,14 +56,14 @@ export default function CheckoutSimulation({ total, onComplete }: CheckoutSimula
                                     d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"
                                     initial={{ pathLength: 0 }}
                                     animate={{ pathLength: 1 }}
-                                    transition={{ duration: 1.5, ease: "easeInOut" }}
+                                    transition={{ duration: 1.5, ease: 'easeInOut' }}
                                 />
                                 {/* Lines */}
                                 <motion.path
                                     d="M14 8H8M16 12H8M13 16H8"
                                     initial={{ pathLength: 0 }}
                                     animate={{ pathLength: 1 }}
-                                    transition={{ duration: 1, delay: 1, ease: "easeOut" }}
+                                    transition={{ duration: 1, delay: 1, ease: 'easeOut' }}
                                 />
                             </motion.svg>
                         ) : (
@@ -80,19 +80,19 @@ export default function CheckoutSimulation({ total, onComplete }: CheckoutSimula
                                 className="text-green-500"
                                 initial={{ scale: 0.8, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
-                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                             >
                                 <motion.path
                                     d="M22 11.08V12a10 10 0 1 1-5.93-9.14"
                                     initial={{ pathLength: 0 }}
                                     animate={{ pathLength: 1 }}
-                                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                                    transition={{ duration: 0.5, ease: 'easeInOut' }}
                                 />
                                 <motion.path
                                     d="M22 4 12 14.01l-3-3"
                                     initial={{ pathLength: 0 }}
                                     animate={{ pathLength: 1 }}
-                                    transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
+                                    transition={{ duration: 0.4, delay: 0.2, ease: 'easeOut' }}
                                 />
                             </motion.svg>
                         )}

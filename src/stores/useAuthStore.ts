@@ -24,6 +24,7 @@ interface AuthStore {
     updateProfile: (data: Partial<User>) => Promise<boolean>;
     changePassword: (current: string, newPass: string) => Promise<boolean>;
     logout: () => Promise<void>;
+    clearError: () => void;
     hasPermission: (permission: Permission) => boolean;
 
     // Getters
@@ -48,19 +49,31 @@ export type Permission =
 // Permission matrix
 const PERMISSIONS: Record<string, Permission[]> = {
     admin: [
-        'view_dashboard', 'view_inventory', 'edit_inventory',
-        'view_reports', 'view_users', 'edit_users',
-        'view_settings', 'edit_settings', 'use_pos',
-        'process_refunds', 'view_suppliers', 'edit_suppliers'
+        'view_dashboard',
+        'view_inventory',
+        'edit_inventory',
+        'view_reports',
+        'view_users',
+        'edit_users',
+        'view_settings',
+        'edit_settings',
+        'use_pos',
+        'process_refunds',
+        'view_suppliers',
+        'edit_suppliers',
     ],
     manager: [
-        'view_dashboard', 'view_inventory', 'edit_inventory',
-        'view_reports', 'view_users', 'use_pos',
-        'process_refunds', 'view_suppliers', 'edit_suppliers'
+        'view_dashboard',
+        'view_inventory',
+        'edit_inventory',
+        'view_reports',
+        'view_users',
+        'use_pos',
+        'process_refunds',
+        'view_suppliers',
+        'edit_suppliers',
     ],
-    cashier: [
-        'use_pos'
-    ]
+    cashier: ['use_pos'],
 };
 
 export const useAuthStore = create<AuthStore>()(
@@ -112,11 +125,11 @@ export const useAuthStore = create<AuthStore>()(
                 try {
                     const session = await CashierSessionRepo.startSession({
                         cashier_id: cashierId,
-                        opening_cash: openingCash
+                        opening_cash: openingCash,
                     });
                     if (session && session.id) {
                         set({
-                            currentSession: { session, openingCash }
+                            currentSession: { session, openingCash },
                         });
                         return session;
                     }
@@ -135,7 +148,7 @@ export const useAuthStore = create<AuthStore>()(
                         await CashierSessionRepo.closeSession({
                             session_id: currentSession.session.id,
                             closing_cash: closingCash,
-                            notes
+                            notes,
                         });
                         set({ currentSession: null });
                     } catch (e) {
@@ -188,21 +201,23 @@ export const useAuthStore = create<AuthStore>()(
                 return rolePerms.includes(permission);
             },
 
+            clearError: () => set({ error: null }),
+
             getUserRole: () => {
                 return get().user?.role || null;
             },
 
             getCurrentSessionId: () => {
                 return get().currentSession?.session?.id || null;
-            }
+            },
         }),
         {
             name: 'auth-storage',
             partialize: (state) => ({
                 user: state.user,
                 isAuthenticated: state.isAuthenticated,
-                currentSession: state.currentSession
-            })
-        }
-    )
+                currentSession: state.currentSession,
+            }),
+        },
+    ),
 );

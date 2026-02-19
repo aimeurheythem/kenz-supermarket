@@ -3,17 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { RefreshCcw, Ban, Loader2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import type { Sale, SaleItem } from '@/lib/types';
-import { SaleRepo } from '../../../database/repositories/sale.repo';
+import { useSaleStore } from '@/stores/useSaleStore';
 import Button from '@/components/common/Button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { toast } from 'sonner';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface SaleDetailModalProps {
     sale: Sale;
@@ -28,22 +22,22 @@ export default function SaleDetailModal({ sale, onClose, onRefund, onVoid }: Sal
     const [processing, setProcessing] = useState(false);
     const [pendingAction, setPendingAction] = useState<'refund' | 'void' | null>(null);
     const { t } = useTranslation();
+    const { getItems } = useSaleStore();
 
     useEffect(() => {
+        const loadItems = async () => {
+            setLoading(true);
+            try {
+                const data = await getItems(sale.id);
+                setItems(data);
+            } catch (error) {
+                console.error('Failed to load sale items:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
         loadItems();
-    }, [sale.id]);
-
-    const loadItems = async () => {
-        setLoading(true);
-        try {
-            const data = await SaleRepo.getItems(sale.id);
-            setItems(data);
-        } catch (error) {
-            console.error('Failed to load sale items:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [sale.id, getItems]);
 
     const handleAction = (action: 'refund' | 'void') => {
         setPendingAction(action);
@@ -58,7 +52,7 @@ export default function SaleDetailModal({ sale, onClose, onRefund, onVoid }: Sal
             if (action === 'refund') await onRefund(sale.id);
             else await onVoid(sale.id);
             onClose();
-        } catch (error) {
+        } catch (_error) {
             toast.error(t('sale_detail.action_failed', { action }));
         } finally {
             setProcessing(false);
@@ -72,13 +66,22 @@ export default function SaleDetailModal({ sale, onClose, onRefund, onVoid }: Sal
     };
 
     return (
-        <Dialog open={true} onOpenChange={(open) => { if (!open) onClose(); }}>
+        <Dialog
+            open={true}
+            onOpenChange={(open) => {
+                if (!open) onClose();
+            }}
+        >
             <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
                 {/* Header */}
                 <DialogHeader className="p-6 pb-4">
                     <div className="flex items-center gap-3">
-                        <DialogTitle className="text-xl font-bold">{t('sale_detail.title', { id: sale.id })}</DialogTitle>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${statusColors[sale.status]}`}>
+                        <DialogTitle className="text-xl font-bold">
+                            {t('sale_detail.title', { id: sale.id })}
+                        </DialogTitle>
+                        <span
+                            className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${statusColors[sale.status]}`}
+                        >
                             {sale.status}
                         </span>
                     </div>
@@ -111,9 +114,15 @@ export default function SaleDetailModal({ sale, onClose, onRefund, onVoid }: Sal
                                             <td className="py-3 text-[var(--color-text-primary)] group-hover:text-orange-500 transition-colors">
                                                 {item.product_name}
                                             </td>
-                                            <td className="py-3 text-right text-[var(--color-text-secondary)]">{item.quantity}</td>
-                                            <td className="py-3 text-right text-[var(--color-text-secondary)]">{formatCurrency(item.unit_price)}</td>
-                                            <td className="py-3 text-right text-[var(--color-text-primary)] font-medium">{formatCurrency(item.total)}</td>
+                                            <td className="py-3 text-right text-[var(--color-text-secondary)]">
+                                                {item.quantity}
+                                            </td>
+                                            <td className="py-3 text-right text-[var(--color-text-secondary)]">
+                                                {formatCurrency(item.unit_price)}
+                                            </td>
+                                            <td className="py-3 text-right text-[var(--color-text-primary)] font-medium">
+                                                {formatCurrency(item.total)}
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -123,11 +132,15 @@ export default function SaleDetailModal({ sale, onClose, onRefund, onVoid }: Sal
                             <div className="bg-[var(--color-bg-secondary)] rounded-xl p-4 space-y-2">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-[var(--color-text-muted)]">{t('sale_detail.subtotal')}</span>
-                                    <span className="text-[var(--color-text-primary)]">{formatCurrency(sale.subtotal)}</span>
+                                    <span className="text-[var(--color-text-primary)]">
+                                        {formatCurrency(sale.subtotal)}
+                                    </span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-[var(--color-text-muted)]">{t('sale_detail.tax')}</span>
-                                    <span className="text-[var(--color-text-primary)]">{formatCurrency(sale.tax_amount)}</span>
+                                    <span className="text-[var(--color-text-primary)]">
+                                        {formatCurrency(sale.tax_amount)}
+                                    </span>
                                 </div>
                                 {sale.discount_amount > 0 && (
                                     <div className="flex justify-between text-sm text-emerald-500">
@@ -136,8 +149,12 @@ export default function SaleDetailModal({ sale, onClose, onRefund, onVoid }: Sal
                                     </div>
                                 )}
                                 <div className="pt-2 mt-2 border-t border-[var(--color-border)] flex justify-between items-center">
-                                    <span className="font-bold text-[var(--color-text-primary)]">{t('sale_detail.total')}</span>
-                                    <span className="text-xl font-bold text-[var(--color-text-primary)]">{formatCurrency(sale.total)}</span>
+                                    <span className="font-bold text-[var(--color-text-primary)]">
+                                        {t('sale_detail.total')}
+                                    </span>
+                                    <span className="text-xl font-bold text-[var(--color-text-primary)]">
+                                        {formatCurrency(sale.total)}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -177,7 +194,11 @@ export default function SaleDetailModal({ sale, onClose, onRefund, onVoid }: Sal
                     isOpen={pendingAction !== null}
                     onClose={() => setPendingAction(null)}
                     onConfirm={confirmAction}
-                    title={pendingAction === 'void' ? t('sale_detail.confirm_void_title') : t('sale_detail.confirm_refund_title')}
+                    title={
+                        pendingAction === 'void'
+                            ? t('sale_detail.confirm_void_title')
+                            : t('sale_detail.confirm_refund_title')
+                    }
                     description={t('sale_detail.confirm_description', { action: pendingAction })}
                     confirmLabel={pendingAction === 'void' ? t('sale_detail.void_btn') : t('sale_detail.refund_btn')}
                     variant="danger"

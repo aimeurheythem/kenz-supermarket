@@ -10,9 +10,13 @@ export const QuickAccessRepo = {
             ORDER BY qa.created_at DESC
         `;
         const results = await query<any>(sql);
-        return results.map(row => {
+        return results.map((row) => {
             let options = [];
-            try { options = JSON.parse(row.options || '[]'); } catch { /* default to empty array */ }
+            try {
+                options = JSON.parse(row.options || '[]');
+            } catch {
+                /* default to empty array */
+            }
             return { ...row, options };
         });
     },
@@ -28,7 +32,11 @@ export const QuickAccessRepo = {
         if (!result) return undefined;
 
         let options = [];
-        try { options = JSON.parse(result.options || '[]'); } catch { /* default to empty array */ }
+        try {
+            options = JSON.parse(result.options || '[]');
+        } catch {
+            /* default to empty array */
+        }
         return { ...result, options };
     },
 
@@ -42,8 +50,8 @@ export const QuickAccessRepo = {
                 input.icon || 'ShoppingBag',
                 input.color || 'text-zinc-500',
                 input.bg_color || 'bg-zinc-50',
-                JSON.stringify(input.options || [])
-            ]
+                JSON.stringify(input.options || []),
+            ],
         );
         const id = await lastInsertId();
         return this.getById(id) as Promise<QuickAccessItem>;
@@ -53,12 +61,30 @@ export const QuickAccessRepo = {
         const fields: string[] = [];
         const values: unknown[] = [];
 
-        if (input.product_id !== undefined) { fields.push('product_id = ?'); values.push(input.product_id); }
-        if (input.display_name !== undefined) { fields.push('display_name = ?'); values.push(input.display_name); }
-        if (input.icon !== undefined) { fields.push('icon = ?'); values.push(input.icon); }
-        if (input.color !== undefined) { fields.push('color = ?'); values.push(input.color); }
-        if (input.bg_color !== undefined) { fields.push('bg_color = ?'); values.push(input.bg_color); }
-        if (input.options !== undefined) { fields.push('options = ?'); values.push(JSON.stringify(input.options)); }
+        if (input.product_id !== undefined) {
+            fields.push('product_id = ?');
+            values.push(input.product_id);
+        }
+        if (input.display_name !== undefined) {
+            fields.push('display_name = ?');
+            values.push(input.display_name);
+        }
+        if (input.icon !== undefined) {
+            fields.push('icon = ?');
+            values.push(input.icon);
+        }
+        if (input.color !== undefined) {
+            fields.push('color = ?');
+            values.push(input.color);
+        }
+        if (input.bg_color !== undefined) {
+            fields.push('bg_color = ?');
+            values.push(input.bg_color);
+        }
+        if (input.options !== undefined) {
+            fields.push('options = ?');
+            values.push(JSON.stringify(input.options));
+        }
 
         fields.push("updated_at = datetime('now')");
         values.push(id);
@@ -69,5 +95,5 @@ export const QuickAccessRepo = {
 
     async delete(id: number): Promise<void> {
         await execute('DELETE FROM pos_quick_access WHERE id = ?', [id]);
-    }
+    },
 };

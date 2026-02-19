@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Scale, FileText, Mail, Phone, MessageSquare } from 'lucide-react';
+import { ShieldCheck, Scale, Mail, Phone, MessageSquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
 export default function Terms() {
@@ -17,16 +11,25 @@ export default function Terms() {
     const sections = [
         {
             title: t('terms.sections.general.title', 'General Usage'),
-            content: t('terms.sections.general.content', 'These terms govern your use of the SuperMarket Management System. By accessing the workstation, you agree to comply with our professional standards and data handling policies.')
+            content: t(
+                'terms.sections.general.content',
+                'These terms govern your use of the SuperMarket Management System. By accessing the workstation, you agree to comply with our professional standards and data handling policies.',
+            ),
         },
         {
             title: t('terms.sections.privacy.title', 'Data Privacy'),
-            content: t('terms.sections.privacy.content', 'We take your data seriously. All transaction records and customer information are encrypted and handled in accordance with local data protection regulations.')
+            content: t(
+                'terms.sections.privacy.content',
+                'We take your data seriously. All transaction records and customer information are encrypted and handled in accordance with local data protection regulations.',
+            ),
         },
         {
             title: t('terms.sections.license.title', 'Software License'),
-            content: t('terms.sections.license.content', 'The software is provided "as is" for internal management purposes. Redistribution or modification of the source code without explicit permission is strictly prohibited.')
-        }
+            content: t(
+                'terms.sections.license.content',
+                'The software is provided "as is" for internal management purposes. Redistribution or modification of the source code without explicit permission is strictly prohibited.',
+            ),
+        },
     ];
 
     return (
@@ -50,14 +53,15 @@ export default function Terms() {
 
             <div className="space-y-10">
                 {sections.map((section, idx) => (
-                    <div key={idx} className="space-y-4 border-l-2 border-[var(--color-border)] pl-8 py-2 hover:border-emerald-500/30 transition-colors">
+                    <div
+                        key={idx}
+                        className="space-y-4 border-l-2 border-[var(--color-border)] pl-8 py-2 hover:border-emerald-500/30 transition-colors"
+                    >
                         <h3 className="text-xl font-bold text-[var(--color-text-primary)] uppercase tracking-tight flex items-center gap-3">
                             <span className="text-emerald-500 text-sm font-black">0{idx + 1}.</span>
                             {section.title}
                         </h3>
-                        <p className="text-[var(--color-text-muted)] leading-relaxed text-sm">
-                            {section.content}
-                        </p>
+                        <p className="text-[var(--color-text-muted)] leading-relaxed text-sm">{section.content}</p>
                     </div>
                 ))}
             </div>
@@ -68,8 +72,12 @@ export default function Terms() {
                         <ShieldCheck size={32} className="text-[var(--color-text-muted)]" />
                     </div>
                     <div>
-                        <h4 className="text-[var(--color-text-primary)] font-bold">{t('terms.footer.title', 'Questions about these terms?')}</h4>
-                        <p className="text-[var(--color-text-muted)] text-sm">{t('terms.footer.subtitle', 'Contact our legal and compliance department.')}</p>
+                        <h4 className="text-[var(--color-text-primary)] font-bold">
+                            {t('terms.footer.title', 'Questions about these terms?')}
+                        </h4>
+                        <p className="text-[var(--color-text-muted)] text-sm">
+                            {t('terms.footer.subtitle', 'Contact our legal and compliance department.')}
+                        </p>
                     </div>
                 </div>
                 <button
@@ -89,7 +97,10 @@ export default function Terms() {
                             {t('terms.contact_title', 'Contact Legal & Compliance')}
                         </DialogTitle>
                         <DialogDescription>
-                            {t('terms.contact_desc', 'Reach out to our team for questions about terms, privacy, or licensing.')}
+                            {t(
+                                'terms.contact_desc',
+                                'Reach out to our team for questions about terms, privacy, or licensing.',
+                            )}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 pt-2">
@@ -97,22 +108,30 @@ export default function Terms() {
                             <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
                                 <Mail className="w-5 h-5 text-blue-500" />
                                 <div>
-                                    <p className="text-xs font-semibold text-blue-800 uppercase tracking-wider">{t('help.contact.email_support', 'Email Support')}</p>
+                                    <p className="text-xs font-semibold text-blue-800 uppercase tracking-wider">
+                                        {t('help.contact.email_support', 'Email Support')}
+                                    </p>
                                     <p className="text-sm font-bold text-blue-700">support@supermarket.dz</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl">
                                 <Phone className="w-5 h-5 text-emerald-500" />
                                 <div>
-                                    <p className="text-xs font-semibold text-emerald-800 uppercase tracking-wider">{t('help.contact.phone_support', 'Phone Support')}</p>
+                                    <p className="text-xs font-semibold text-emerald-800 uppercase tracking-wider">
+                                        {t('help.contact.phone_support', 'Phone Support')}
+                                    </p>
                                     <p className="text-sm font-bold text-emerald-700">+213 123 456 789</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-xl">
                                 <MessageSquare className="w-5 h-5 text-purple-500" />
                                 <div>
-                                    <p className="text-xs font-semibold text-purple-800 uppercase tracking-wider">{t('help.contact.live_chat', 'Live Chat')}</p>
-                                    <p className="text-sm font-bold text-purple-700">{t('terms.chat_hours', 'Available 9AM - 6PM')}</p>
+                                    <p className="text-xs font-semibold text-purple-800 uppercase tracking-wider">
+                                        {t('help.contact.live_chat', 'Live Chat')}
+                                    </p>
+                                    <p className="text-sm font-bold text-purple-700">
+                                        {t('terms.chat_hours', 'Available 9AM - 6PM')}
+                                    </p>
                                 </div>
                             </div>
                         </div>

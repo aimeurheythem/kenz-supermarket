@@ -3,12 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Banknote, Calendar, Tag } from 'lucide-react';
 import Button from '@/components/common/Button';
 import { useExpenseStore } from '@/stores/useExpenseStore';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface ExpenseModalProps {
     isOpen: boolean;
@@ -24,7 +19,7 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
         amount: '',
         category: 'Other',
         payment_method: 'cash',
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
     });
 
     const categories = [
@@ -46,7 +41,7 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
                 amount: parseFloat(formData.amount),
                 category: formData.category,
                 payment_method: formData.payment_method,
-                date: formData.date
+                date: formData.date,
             });
             onClose();
             setFormData({
@@ -54,7 +49,7 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
                 amount: '',
                 category: 'Other',
                 payment_method: 'cash',
-                date: new Date().toISOString().split('T')[0]
+                date: new Date().toISOString().split('T')[0],
             });
         } catch (error) {
             console.error('Failed to add expense:', error);
@@ -64,7 +59,12 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+        <Dialog
+            open={isOpen}
+            onOpenChange={(open) => {
+                if (!open) onClose();
+            }}
+        >
             <DialogContent className="max-w-lg">
                 <DialogHeader>
                     <DialogTitle>{t('expense_modal.title')}</DialogTitle>
@@ -120,8 +120,10 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
                                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                     className="w-full h-12 pl-10 pr-4 bg-zinc-50 border-2 border-transparent focus:border-black/5 focus:bg-white rounded-xl outline-none transition-all font-medium text-black appearance-none cursor-pointer"
                                 >
-                                    {categories.map(c => (
-                                        <option key={c.value} value={c.value}>{c.label}</option>
+                                    {categories.map((c) => (
+                                        <option key={c.value} value={c.value}>
+                                            {c.label}
+                                        </option>
                                     ))}
                                 </select>
                             </div>
@@ -132,7 +134,10 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
                                 {t('expense_modal.label_date')}
                             </label>
                             <div className="relative">
-                                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                                <Calendar
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+                                    size={16}
+                                />
                                 <input
                                     type="date"
                                     required
@@ -149,15 +154,20 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
                             {t('expense_modal.label_payment_method')}
                         </label>
                         <div className="flex gap-2">
-                            {[{ value: 'cash', label: t('expense_modal.pm_cash') }, { value: 'card', label: t('expense_modal.pm_card') }, { value: 'bank_transfer', label: t('expense_modal.pm_bank_transfer') }].map((method) => (
+                            {[
+                                { value: 'cash', label: t('expense_modal.pm_cash') },
+                                { value: 'card', label: t('expense_modal.pm_card') },
+                                { value: 'bank_transfer', label: t('expense_modal.pm_bank_transfer') },
+                            ].map((method) => (
                                 <button
                                     key={method.value}
                                     type="button"
                                     onClick={() => setFormData({ ...formData, payment_method: method.value })}
-                                    className={`flex-1 h-10 rounded-lg text-xs font-bold uppercase tracking-wide border transition-all ${formData.payment_method === method.value
-                                        ? 'bg-black text-white border-black'
-                                        : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-300'
-                                        }`}
+                                    className={`flex-1 h-10 rounded-lg text-xs font-bold uppercase tracking-wide border transition-all ${
+                                        formData.payment_method === method.value
+                                            ? 'bg-black text-white border-black'
+                                            : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-300'
+                                    }`}
                                 >
                                     {method.label}
                                 </button>

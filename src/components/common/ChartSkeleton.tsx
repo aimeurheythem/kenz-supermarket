@@ -27,10 +27,7 @@ export function ChartSkeleton({ height = 300, className }: ChartSkeletonProps) {
             </div>
 
             {/* Chart area */}
-            <div
-                className="relative flex items-end gap-3 pt-4"
-                style={{ height }}
-            >
+            <div className="relative flex items-end gap-3 pt-4" style={{ height }}>
                 {/* Y-axis ticks */}
                 <div className="absolute left-0 top-0 bottom-8 w-8 flex flex-col justify-between">
                     {Array.from({ length: 5 }).map((_, i) => (

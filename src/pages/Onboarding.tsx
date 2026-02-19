@@ -3,22 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import {
-    Store,
-    User,
-    Settings as SettingsIcon,
-    Check,
-    ArrowRight,
-    ChevronRight,
-    Globe,
-    Banknote,
-    Receipt
-} from 'lucide-react';
+import { Store, User, Settings as SettingsIcon, Check, ArrowRight, Globe } from 'lucide-react';
 import { useSettingsStore } from '@/stores/useSettingsStore';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { UserRepo } from '../../database/repositories/user.repo';
+import { useUserStore } from '@/stores/useUserStore';
 import { cn, validatePassword } from '@/lib/utils';
-import Button from '@/components/common/Button';
 
 // Step definitions
 const STEPS = [
@@ -33,6 +22,7 @@ export default function Onboarding() {
     const { t, i18n } = useTranslation();
     const { updateSettings } = useSettingsStore();
     const { login } = useAuthStore();
+    const { addUser, hasAnyUsers } = useUserStore();
 
     const [currentStep, setCurrentStep] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -62,18 +52,18 @@ export default function Onboarding() {
     // Check if we should be here
     useEffect(() => {
         const checkUsers = async () => {
-            const hasUsers = await UserRepo.hasAnyUsers();
-            if (hasUsers) {
+            const has = await hasAnyUsers();
+            if (has) {
                 navigate('/login', { replace: true });
             }
         };
         checkUsers();
-    }, [navigate]);
+    }, [navigate, hasAnyUsers]);
 
     const handleNext = () => {
         if (currentStep < STEPS.length - 1) {
             setDirection(1);
-            setCurrentStep(prev => prev + 1);
+            setCurrentStep((prev) => prev + 1);
         } else {
             handleComplete();
         }
@@ -82,7 +72,7 @@ export default function Onboarding() {
     const handleBack = () => {
         if (currentStep > 0) {
             setDirection(-1);
-            setCurrentStep(prev => prev - 1);
+            setCurrentStep((prev) => prev - 1);
         }
     };
 
@@ -90,11 +80,11 @@ export default function Onboarding() {
         setLoading(true);
         try {
             // 1. Create Admin User
-            await UserRepo.create({
+            await addUser({
                 username: formData.adminUsername,
                 password: formData.adminPassword,
                 full_name: formData.adminName,
-                role: 'admin'
+                role: 'admin',
             });
 
             // 2. Save Settings
@@ -135,38 +125,43 @@ export default function Onboarding() {
     // Step Validation
     const isStepValid = () => {
         switch (currentStep) {
-            case 0: return true; // Language selection is always valid (has defaults)
-            case 1: return formData.storeName.length > 0;
+            case 0:
+                return true; // Language selection is always valid (has defaults)
+            case 1:
+                return formData.storeName.length > 0;
             case 2:
-                return formData.adminName.length > 0 &&
+                return (
+                    formData.adminName.length > 0 &&
                     formData.adminUsername.length > 0 &&
                     validatePassword(formData.adminPassword).valid &&
-                    formData.adminPassword === formData.adminConfirmPassword;
-            case 3: return true; // Defaults provided
-            default: return false;
+                    formData.adminPassword === formData.adminConfirmPassword
+                );
+            case 3:
+                return true; // Defaults provided
+            default:
+                return false;
         }
     };
 
     const variants = {
         enter: (direction: number) => ({
             x: direction > 0 ? 50 : -50,
-            opacity: 0
+            opacity: 0,
         }),
         center: {
             zIndex: 1,
             x: 0,
-            opacity: 1
+            opacity: 1,
         },
         exit: (direction: number) => ({
             zIndex: 0,
             x: direction < 0 ? 50 : -50,
-            opacity: 0
-        })
+            opacity: 0,
+        }),
     };
 
     return (
         <div className="min-h-screen bg-white text-zinc-900 flex flex-col font-sans selection:bg-black selection:text-white">
-
             {/* Top Bar - Progress */}
             <div className="w-full h-16 px-8 flex items-center justify-between border-b border-zinc-100 sticky top-0 bg-white/80 backdrop-blur-md z-50">
                 <div className="flex items-center gap-3">
@@ -179,18 +174,25 @@ export default function Onboarding() {
                 <div className="flex items-center gap-2">
                     {STEPS.map((step, idx) => (
                         <div key={step.id} className="flex items-center">
-                            <div className={cn(
-                                "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300",
-                                idx === currentStep ? "bg-black text-white scale-110" :
-                                    idx < currentStep ? "bg-zinc-100 text-zinc-400" : "bg-white border border-zinc-200 text-zinc-300"
-                            )}>
+                            <div
+                                className={cn(
+                                    'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300',
+                                    idx === currentStep
+                                        ? 'bg-black text-white scale-110'
+                                        : idx < currentStep
+                                          ? 'bg-zinc-100 text-zinc-400'
+                                          : 'bg-white border border-zinc-200 text-zinc-300',
+                                )}
+                            >
                                 {idx < currentStep ? <Check size={14} /> : idx + 1}
                             </div>
                             {idx < STEPS.length - 1 && (
-                                <div className={cn(
-                                    "w-8 h-[2px] mx-2 transition-colors duration-300",
-                                    idx < currentStep ? "bg-zinc-200" : "bg-zinc-100"
-                                )} />
+                                <div
+                                    className={cn(
+                                        'w-8 h-[2px] mx-2 transition-colors duration-300',
+                                        idx < currentStep ? 'bg-zinc-200' : 'bg-zinc-100',
+                                    )}
+                                />
                             )}
                         </div>
                     ))}
@@ -199,8 +201,7 @@ export default function Onboarding() {
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col items-center justify-center p-6 relative overflow-hidden">
-
-                <AnimatePresence mode='wait' custom={direction}>
+                <AnimatePresence mode="wait" custom={direction}>
                     <motion.div
                         key={currentStep}
                         custom={direction}
@@ -209,8 +210,8 @@ export default function Onboarding() {
                         animate="center"
                         exit="exit"
                         transition={{
-                            x: { type: "spring", stiffness: 300, damping: 30 },
-                            opacity: { duration: 0.2 }
+                            x: { type: 'spring', stiffness: 300, damping: 30 },
+                            opacity: { duration: 0.2 },
                         }}
                         className="w-full max-w-lg"
                     >
@@ -218,7 +219,9 @@ export default function Onboarding() {
                         {currentStep === 0 && (
                             <div className="space-y-8 text-center">
                                 <div className="space-y-2">
-                                    <h1 className="text-4xl font-extrabold tracking-tight">{t('onboarding.welcome_title')}</h1>
+                                    <h1 className="text-4xl font-extrabold tracking-tight">
+                                        {t('onboarding.welcome_title')}
+                                    </h1>
                                     <p className="text-zinc-500 text-lg">{t('onboarding.welcome_subtitle')}</p>
                                 </div>
 
@@ -226,16 +229,16 @@ export default function Onboarding() {
                                     {[
                                         { code: 'en', label: 'English', flag: '🇺🇸' },
                                         { code: 'fr', label: 'Français', flag: '🇫🇷' },
-                                        { code: 'ar', label: 'العربية', flag: '🇲🇦' }
+                                        { code: 'ar', label: 'العربية', flag: '🇲🇦' },
                                     ].map((lang) => (
                                         <button
                                             key={lang.code}
                                             onClick={() => setLanguage(lang.code)}
                                             className={cn(
-                                                "flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 transition-all duration-200 hover:scale-105",
+                                                'flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 transition-all duration-200 hover:scale-105',
                                                 i18n.language.startsWith(lang.code)
-                                                    ? "border-black bg-zinc-50 shadow-lg"
-                                                    : "border-zinc-100 bg-white hover:border-zinc-200"
+                                                    ? 'border-black bg-zinc-50 shadow-lg'
+                                                    : 'border-zinc-100 bg-white hover:border-zinc-200',
                                             )}
                                         >
                                             <span className="text-3xl">{lang.flag}</span>
@@ -256,7 +259,9 @@ export default function Onboarding() {
 
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_store_name')}</label>
+                                        <label className="block text-sm font-bold mb-1.5 ml-1">
+                                            {t('onboarding.label_store_name')}
+                                        </label>
                                         <input
                                             type="text"
                                             value={formData.storeName}
@@ -268,28 +273,38 @@ export default function Onboarding() {
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_phone')}</label>
+                                            <label className="block text-sm font-bold mb-1.5 ml-1">
+                                                {t('onboarding.label_phone')}
+                                            </label>
                                             <input
                                                 type="tel"
                                                 value={formData.storePhone}
-                                                onChange={(e) => setFormData({ ...formData, storePhone: e.target.value })}
+                                                onChange={(e) =>
+                                                    setFormData({ ...formData, storePhone: e.target.value })
+                                                }
                                                 className="w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium"
                                                 placeholder={t('onboarding.placeholder_phone')}
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_email')}</label>
+                                            <label className="block text-sm font-bold mb-1.5 ml-1">
+                                                {t('onboarding.label_email')}
+                                            </label>
                                             <input
                                                 type="email"
                                                 value={formData.storeEmail}
-                                                onChange={(e) => setFormData({ ...formData, storeEmail: e.target.value })}
+                                                onChange={(e) =>
+                                                    setFormData({ ...formData, storeEmail: e.target.value })
+                                                }
                                                 className="w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium"
                                                 placeholder={t('onboarding.placeholder_email')}
                                             />
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_address')}</label>
+                                        <label className="block text-sm font-bold mb-1.5 ml-1">
+                                            {t('onboarding.label_address')}
+                                        </label>
                                         <textarea
                                             value={formData.storeAddress}
                                             onChange={(e) => setFormData({ ...formData, storeAddress: e.target.value })}
@@ -311,7 +326,9 @@ export default function Onboarding() {
 
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_full_name')}</label>
+                                        <label className="block text-sm font-bold mb-1.5 ml-1">
+                                            {t('onboarding.label_full_name')}
+                                        </label>
                                         <input
                                             type="text"
                                             value={formData.adminName}
@@ -321,41 +338,60 @@ export default function Onboarding() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_username')}</label>
+                                        <label className="block text-sm font-bold mb-1.5 ml-1">
+                                            {t('onboarding.label_username')}
+                                        </label>
                                         <input
                                             type="text"
                                             value={formData.adminUsername}
-                                            onChange={(e) => setFormData({ ...formData, adminUsername: e.target.value })}
+                                            onChange={(e) =>
+                                                setFormData({ ...formData, adminUsername: e.target.value })
+                                            }
                                             className="w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium"
                                             placeholder={t('onboarding.placeholder_username')}
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_password')}</label>
+                                            <label className="block text-sm font-bold mb-1.5 ml-1">
+                                                {t('onboarding.label_password')}
+                                            </label>
                                             <input
                                                 type="password"
                                                 value={formData.adminPassword}
-                                                onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
+                                                onChange={(e) =>
+                                                    setFormData({ ...formData, adminPassword: e.target.value })
+                                                }
                                                 className={cn(
-                                                    "w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium",
-                                                    formData.adminPassword && !validatePassword(formData.adminPassword).valid && "border-red-500 focus:border-red-500"
+                                                    'w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium',
+                                                    formData.adminPassword &&
+                                                        !validatePassword(formData.adminPassword).valid &&
+                                                        'border-red-500 focus:border-red-500',
                                                 )}
                                                 placeholder={t('onboarding.placeholder_password')}
                                             />
-                                            {formData.adminPassword && !validatePassword(formData.adminPassword).valid && (
-                                                <p className="text-xs text-red-500 mt-1 ml-1">{validatePassword(formData.adminPassword).message}</p>
-                                            )}
+                                            {formData.adminPassword &&
+                                                !validatePassword(formData.adminPassword).valid && (
+                                                    <p className="text-xs text-red-500 mt-1 ml-1">
+                                                        {validatePassword(formData.adminPassword).message}
+                                                    </p>
+                                                )}
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_confirm')}</label>
+                                            <label className="block text-sm font-bold mb-1.5 ml-1">
+                                                {t('onboarding.label_confirm')}
+                                            </label>
                                             <input
                                                 type="password"
                                                 value={formData.adminConfirmPassword}
-                                                onChange={(e) => setFormData({ ...formData, adminConfirmPassword: e.target.value })}
+                                                onChange={(e) =>
+                                                    setFormData({ ...formData, adminConfirmPassword: e.target.value })
+                                                }
                                                 className={cn(
-                                                    "w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium",
-                                                    formData.adminConfirmPassword && formData.adminPassword !== formData.adminConfirmPassword && "border-red-500 focus:border-red-500"
+                                                    'w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium',
+                                                    formData.adminConfirmPassword &&
+                                                        formData.adminPassword !== formData.adminConfirmPassword &&
+                                                        'border-red-500 focus:border-red-500',
                                                 )}
                                                 placeholder={t('onboarding.placeholder_confirm')}
                                             />
@@ -376,32 +412,46 @@ export default function Onboarding() {
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_currency_symbol')}</label>
+                                            <label className="block text-sm font-bold mb-1.5 ml-1">
+                                                {t('onboarding.label_currency_symbol')}
+                                            </label>
                                             <input
                                                 type="text"
                                                 value={formData.currencySymbol}
-                                                onChange={(e) => setFormData({ ...formData, currencySymbol: e.target.value })}
+                                                onChange={(e) =>
+                                                    setFormData({ ...formData, currencySymbol: e.target.value })
+                                                }
                                                 className="w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium"
                                                 placeholder="DZ"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_position')}</label>
+                                            <label className="block text-sm font-bold mb-1.5 ml-1">
+                                                {t('onboarding.label_position')}
+                                            </label>
                                             <div className="grid grid-cols-2 gap-2 h-[58px]">
                                                 <button
-                                                    onClick={() => setFormData({ ...formData, currencyPosition: 'prefix' })}
+                                                    onClick={() =>
+                                                        setFormData({ ...formData, currencyPosition: 'prefix' })
+                                                    }
                                                     className={cn(
-                                                        "rounded-xl text-sm font-bold transition-all",
-                                                        formData.currencyPosition === 'prefix' ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
+                                                        'rounded-xl text-sm font-bold transition-all',
+                                                        formData.currencyPosition === 'prefix'
+                                                            ? 'bg-black text-white'
+                                                            : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200',
                                                     )}
                                                 >
                                                     DZ 100
                                                 </button>
                                                 <button
-                                                    onClick={() => setFormData({ ...formData, currencyPosition: 'suffix' })}
+                                                    onClick={() =>
+                                                        setFormData({ ...formData, currencyPosition: 'suffix' })
+                                                    }
                                                     className={cn(
-                                                        "rounded-xl text-sm font-bold transition-all",
-                                                        formData.currencyPosition === 'suffix' ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
+                                                        'rounded-xl text-sm font-bold transition-all',
+                                                        formData.currencyPosition === 'suffix'
+                                                            ? 'bg-black text-white'
+                                                            : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200',
                                                     )}
                                                 >
                                                     100 DZ
@@ -412,7 +462,9 @@ export default function Onboarding() {
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_tax_name')}</label>
+                                            <label className="block text-sm font-bold mb-1.5 ml-1">
+                                                {t('onboarding.label_tax_name')}
+                                            </label>
                                             <input
                                                 type="text"
                                                 value={formData.taxName}
@@ -422,7 +474,9 @@ export default function Onboarding() {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-bold mb-1.5 ml-1">{t('onboarding.label_tax_rate')}</label>
+                                            <label className="block text-sm font-bold mb-1.5 ml-1">
+                                                {t('onboarding.label_tax_rate')}
+                                            </label>
                                             <input
                                                 type="number"
                                                 value={formData.taxRate}
@@ -435,7 +489,6 @@ export default function Onboarding() {
                                 </div>
                             </div>
                         )}
-
                     </motion.div>
                 </AnimatePresence>
             </div>
@@ -446,7 +499,7 @@ export default function Onboarding() {
                     onClick={handleBack}
                     disabled={currentStep === 0 || loading}
                     className={cn(
-                        "px-6 py-3 rounded-xl font-bold text-zinc-500 hover:text-black hover:bg-zinc-50 transition-all disabled:opacity-0"
+                        'px-6 py-3 rounded-xl font-bold text-zinc-500 hover:text-black hover:bg-zinc-50 transition-all disabled:opacity-0',
                     )}
                 >
                     {t('onboarding.back')}
@@ -456,14 +509,16 @@ export default function Onboarding() {
                     onClick={handleNext}
                     disabled={!isStepValid() || loading}
                     className={cn(
-                        "flex items-center gap-2 px-8 py-3 rounded-xl font-bold bg-black text-white transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed shadow-lg shadow-black/20"
+                        'flex items-center gap-2 px-8 py-3 rounded-xl font-bold bg-black text-white transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed shadow-lg shadow-black/20',
                     )}
                 >
                     {loading ? (
                         <span>{t('onboarding.setting_up')}</span>
                     ) : (
                         <>
-                            <span>{currentStep === STEPS.length - 1 ? t('onboarding.finish') : t('onboarding.continue')}</span>
+                            <span>
+                                {currentStep === STEPS.length - 1 ? t('onboarding.finish') : t('onboarding.continue')}
+                            </span>
                             <ArrowRight size={18} />
                         </>
                     )}

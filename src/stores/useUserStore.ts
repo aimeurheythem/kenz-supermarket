@@ -22,6 +22,7 @@ interface UserStore {
         average_sale: number;
         total_hours: number;
     }>;
+    hasAnyUsers: () => Promise<boolean>;
 }
 
 export const useUserStore = create<UserStore>((set, get) => ({
@@ -100,5 +101,9 @@ export const useUserStore = create<UserStore>((set, get) => ({
             set({ error: (e as Error).message });
             throw e;
         }
-    }
+    },
+
+    hasAnyUsers: async () => {
+        return UserRepo.hasAnyUsers();
+    },
 }));

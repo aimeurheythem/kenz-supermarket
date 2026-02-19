@@ -1,21 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TableSkeletonRows } from '@/components/common/TableSkeleton';
-import {
-    Wallet,
-    ArrowUpRight,
-    ArrowDownLeft,
-    Search,
-    Filter,
-    Download,
-    MoreHorizontal,
-    AlertCircle,
-    CheckCircle2,
-    Clock,
-    Banknote,
-    Users
-} from 'lucide-react';
+import { Wallet, Search, Filter, Download, AlertCircle, CheckCircle2, Banknote, Users } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useCustomerStore } from '@/stores/useCustomerStore';
 import { toast } from 'sonner';
@@ -26,7 +13,7 @@ import Portal from '@/components/common/Portal';
 
 export default function Credit() {
     const { t } = useTranslation();
-    const { getDebtors, makePayment, loadTransactions, transactions } = useCustomerStore();
+    const { getDebtors } = useCustomerStore();
 
     // State
     const [debtors, setDebtors] = useState<Customer[]>([]);
@@ -37,12 +24,7 @@ export default function Credit() {
     const [filterStatus, setFilterStatus] = useState<'all' | 'high' | 'low'>('all');
     const [showFilter, setShowFilter] = useState(false);
 
-    // Initial Load
-    useEffect(() => {
-        loadDebtors();
-    }, []);
-
-    const loadDebtors = async () => {
+    const loadDebtors = useCallback(async () => {
         setIsLoading(true);
         try {
             const data = await getDebtors();
@@ -52,19 +34,23 @@ export default function Credit() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [getDebtors]);
+
+    // Initial Load
+    useEffect(() => {
+        loadDebtors();
+    }, [loadDebtors]);
 
     // Derived State
     const totalOutstanding = debtors.reduce((sum, c) => sum + (c.total_debt || 0), 0);
     const debtorCount = debtors.length;
-    const filteredDebtors = debtors.filter(c =>
-        c.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.phone?.includes(searchQuery)
-    ).filter(c => {
-        if (filterStatus === 'high') return c.total_debt >= 10000;
-        if (filterStatus === 'low') return c.total_debt < 10000;
-        return true;
-    });
+    const filteredDebtors = debtors
+        .filter((c) => c.full_name.toLowerCase().includes(searchQuery.toLowerCase()) || c.phone?.includes(searchQuery))
+        .filter((c) => {
+            if (filterStatus === 'high') return c.total_debt >= 10000;
+            if (filterStatus === 'low') return c.total_debt < 10000;
+            return true;
+        });
 
     const handleExport = () => {
         const headers = [
@@ -74,7 +60,11 @@ export default function Credit() {
             { key: 'email', label: 'Email' },
             { key: 'total_debt', label: 'Total Debt' },
         ];
-        exportToCsv(headers, filteredDebtors as unknown as Record<string, unknown>[], `credit_report_${new Date().toISOString().split('T')[0]}.csv`);
+        exportToCsv(
+            headers,
+            filteredDebtors as unknown as Record<string, unknown>[],
+            `credit_report_${new Date().toISOString().split('T')[0]}.csv`,
+        );
         toast.success(t('credit.export_success', { count: filteredDebtors.length }));
     };
 
@@ -92,12 +82,16 @@ export default function Credit() {
                         </div>
                         <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-white/5">
                             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">{t('credit.active_debts')}</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest">
+                                {t('credit.active_debts')}
+                            </span>
                         </div>
                     </div>
 
                     <div className="relative z-10 space-y-2">
-                        <span className="text-zinc-400 text-xs font-bold uppercase tracking-[0.2em]">{t('credit.total_outstanding')}</span>
+                        <span className="text-zinc-400 text-xs font-bold uppercase tracking-[0.2em]">
+                            {t('credit.total_outstanding')}
+                        </span>
                         <div className="flex items-baseline gap-1">
                             <h2 className="text-5xl lg:text-7xl font-black tracking-tighter">
                                 {formatCurrency(totalOutstanding)}
@@ -108,23 +102,16 @@ export default function Credit() {
 
                 {/* Quick Stats */}
                 <div className="space-y-6">
-                    <div className="bg-white rounded-[2.5rem] p-8 border border-zinc-100 flex flex-col justify-between h-[calc(50%-12px)]">
+                    <div className="bg-white rounded-[2.5rem] p-8 border border-zinc-100 flex flex-col justify-between">
                         <div className="flex items-center gap-4">
                             <div className="p-3 bg-red-50 text-red-500 rounded-2xl">
                                 <Users size={20} />
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{t('credit.total_debtors')}</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                                {t('credit.total_debtors')}
+                            </span>
                         </div>
                         <span className="text-4xl font-black text-black tracking-tighter">{debtorCount}</span>
-                    </div>
-                    <div className="bg-emerald-50 rounded-[2.5rem] p-8 border border-emerald-100 flex flex-col justify-between h-[calc(50%-12px)]">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-white text-emerald-500 rounded-2xl shadow-sm">
-                                <CheckCircle2 size={20} />
-                            </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600/60">{t('credit.collection_health')}</span>
-                        </div>
-                        <span className="text-4xl font-black text-emerald-700 tracking-tighter">{t('credit.collection_good')}</span>
                     </div>
                 </div>
             </div>
@@ -134,7 +121,10 @@ export default function Credit() {
                 {/* Toolbar */}
                 <div className="p-8 pb-0 flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="relative w-full md:w-96 group">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-black transition-colors" size={20} />
+                        <Search
+                            className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-black transition-colors"
+                            size={20}
+                        />
                         <input
                             type="text"
                             value={searchQuery}
@@ -145,8 +135,16 @@ export default function Credit() {
                     </div>
                     <div className="flex items-center gap-3">
                         <div className="relative">
-                            <Button variant="secondary" icon={<Filter size={18} />} onClick={() => setShowFilter(!showFilter)}>
-                                {filterStatus === 'all' ? t('credit.filter') : filterStatus === 'high' ? t('credit.high_debt') : t('credit.low_debt')}
+                            <Button
+                                variant="secondary"
+                                icon={<Filter size={18} />}
+                                onClick={() => setShowFilter(!showFilter)}
+                            >
+                                {filterStatus === 'all'
+                                    ? t('credit.filter')
+                                    : filterStatus === 'high'
+                                      ? t('credit.high_debt')
+                                      : t('credit.low_debt')}
                             </Button>
                             {showFilter && (
                                 <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl border border-zinc-100 shadow-xl z-50 p-2">
@@ -154,13 +152,18 @@ export default function Credit() {
                                         { key: 'all' as const, label: t('credit.filter_all') },
                                         { key: 'high' as const, label: t('credit.filter_high') },
                                         { key: 'low' as const, label: t('credit.filter_low') },
-                                    ].map(opt => (
+                                    ].map((opt) => (
                                         <button
                                             key={opt.key}
-                                            onClick={() => { setFilterStatus(opt.key); setShowFilter(false); }}
+                                            onClick={() => {
+                                                setFilterStatus(opt.key);
+                                                setShowFilter(false);
+                                            }}
                                             className={cn(
-                                                "w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-colors",
-                                                filterStatus === opt.key ? "bg-black text-white" : "text-zinc-600 hover:bg-zinc-50"
+                                                'w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-colors',
+                                                filterStatus === opt.key
+                                                    ? 'bg-black text-white'
+                                                    : 'text-zinc-600 hover:bg-zinc-50',
                                             )}
                                         >
                                             {opt.label}
@@ -169,7 +172,9 @@ export default function Credit() {
                                 </div>
                             )}
                         </div>
-                        <Button variant="secondary" icon={<Download size={18} />} onClick={handleExport}>{t('credit.export')}</Button>
+                        <Button variant="secondary" icon={<Download size={18} />} onClick={handleExport}>
+                            {t('credit.export')}
+                        </Button>
                     </div>
                 </div>
 
@@ -179,11 +184,21 @@ export default function Credit() {
                         <table className="w-full">
                             <thead>
                                 <tr className="text-left border-b border-zinc-100">
-                                    <th className="pb-6 pl-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('credit.col_customer')}</th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('credit.col_contact')}</th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('credit.col_debt')}</th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('credit.col_status')}</th>
-                                    <th className="pb-6 pr-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('credit.col_actions')}</th>
+                                    <th className="pb-6 pl-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                        {t('credit.col_customer')}
+                                    </th>
+                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                        {t('credit.col_contact')}
+                                    </th>
+                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                        {t('credit.col_debt')}
+                                    </th>
+                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                        {t('credit.col_status')}
+                                    </th>
+                                    <th className="pb-6 pr-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                        {t('credit.col_actions')}
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-50">
@@ -210,13 +225,17 @@ export default function Credit() {
                                                     </div>
                                                     <div>
                                                         <div className="font-bold text-black">{debtor.full_name}</div>
-                                                        <div className="text-xs font-medium text-zinc-400">ID: #{debtor.id}</div>
+                                                        <div className="text-xs font-medium text-zinc-400">
+                                                            ID: #{debtor.id}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="py-6">
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-bold text-zinc-600">{debtor.phone || '—'}</span>
+                                                    <span className="text-sm font-bold text-zinc-600">
+                                                        {debtor.phone || '—'}
+                                                    </span>
                                                     <span className="text-xs text-zinc-400">{debtor.email}</span>
                                                 </div>
                                             </td>
@@ -228,7 +247,9 @@ export default function Credit() {
                                             <td className="py-6">
                                                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-50 border border-red-100">
                                                     <AlertCircle size={14} className="text-red-500" />
-                                                    <span className="text-[10px] font-bold uppercase tracking-wide text-red-600">{t('credit.status_overdue')}</span>
+                                                    <span className="text-[10px] font-bold uppercase tracking-wide text-red-600">
+                                                        {t('credit.status_overdue')}
+                                                    </span>
                                                 </div>
                                             </td>
                                             <td className="py-6 pr-4 text-right">
@@ -272,7 +293,15 @@ export default function Credit() {
     );
 }
 
-function PaymentModal({ customer, onClose, onSuccess }: { customer: Customer, onClose: () => void, onSuccess: () => void }) {
+function PaymentModal({
+    customer,
+    onClose,
+    onSuccess,
+}: {
+    customer: Customer;
+    onClose: () => void;
+    onSuccess: () => void;
+}) {
     const { makePayment } = useCustomerStore();
     const { t } = useTranslation();
     const [amount, setAmount] = useState(customer.total_debt.toString());
@@ -304,7 +333,9 @@ function PaymentModal({ customer, onClose, onSuccess }: { customer: Customer, on
                     <div className="p-8 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
                         <div>
                             <h2 className="text-xl font-black text-black">{t('credit.record_payment')}</h2>
-                            <p className="text-sm font-medium text-zinc-400">{t('credit.payment_for', { name: customer.full_name })}</p>
+                            <p className="text-sm font-medium text-zinc-400">
+                                {t('credit.payment_for', { name: customer.full_name })}
+                            </p>
                         </div>
                         <div className="p-3 bg-white rounded-xl shadow-sm">
                             <Banknote size={24} className="text-emerald-500" />
@@ -314,14 +345,22 @@ function PaymentModal({ customer, onClose, onSuccess }: { customer: Customer, on
                     <form onSubmit={handleSubmit} className="p-8 space-y-8">
                         <div className="space-y-4">
                             <div className="p-4 bg-zinc-50 rounded-xl border border-zinc-100 flex justify-between items-center">
-                                <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">{t('credit.total_due')}</span>
-                                <span className="text-xl font-black text-red-500">{formatCurrency(customer.total_debt)}</span>
+                                <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">
+                                    {t('credit.total_due')}
+                                </span>
+                                <span className="text-xl font-black text-red-500">
+                                    {formatCurrency(customer.total_debt)}
+                                </span>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 ml-1">{t('credit.payment_amount')}</label>
+                                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 ml-1">
+                                    {t('credit.payment_amount')}
+                                </label>
                                 <div className="relative">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-zinc-400">DZ</span>
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-zinc-400">
+                                        DZ
+                                    </span>
                                     <input
                                         type="number"
                                         step="0.01"
@@ -334,10 +373,20 @@ function PaymentModal({ customer, onClose, onSuccess }: { customer: Customer, on
                         </div>
 
                         <div className="flex gap-3 pt-2">
-                            <Button type="button" variant="secondary" onClick={onClose} disabled={isLoading} className="flex-1">
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                onClick={onClose}
+                                disabled={isLoading}
+                                className="flex-1"
+                            >
                                 Cancel
                             </Button>
-                            <Button type="submit" disabled={isLoading} className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black border-none shadow-lg shadow-yellow-400/20">
+                            <Button
+                                type="submit"
+                                disabled={isLoading}
+                                className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black border-none shadow-lg shadow-yellow-400/20"
+                            >
                                 {isLoading ? t('credit.processing') : t('credit.confirm_payment')}
                             </Button>
                         </div>

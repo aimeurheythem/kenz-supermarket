@@ -10,6 +10,7 @@ interface ExpenseStore {
     };
     isLoading: boolean;
     error: string | null;
+    clearError: () => void;
 
     loadExpenses: (filters?: { startDate?: string; endDate?: string; category?: string }) => Promise<void>;
     addExpense: (expense: ExpenseInput) => Promise<void>;
@@ -22,6 +23,8 @@ export const useExpenseStore = create<ExpenseStore>((set, get) => ({
     stats: { total: 0, byCategory: [] },
     isLoading: false,
     error: null,
+
+    clearError: () => set({ error: null }),
 
     loadExpenses: async (filters) => {
         set({ isLoading: true, error: null });
@@ -69,5 +72,5 @@ export const useExpenseStore = create<ExpenseStore>((set, get) => ({
         } catch (error) {
             console.error('Failed to load expense stats:', error);
         }
-    }
+    },
 }));

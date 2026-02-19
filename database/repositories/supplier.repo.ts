@@ -24,13 +24,20 @@ export const SupplierRepo = {
     },
 
     async create(input: SupplierInput): Promise<Supplier> {
-        await execute(
-            'INSERT INTO suppliers (name, contact_person, phone, email, address) VALUES (?, ?, ?, ?, ?)',
-            [input.name, input.contact_person || '', input.phone || '', input.email || '', input.address || '']
-        );
+        await execute('INSERT INTO suppliers (name, contact_person, phone, email, address) VALUES (?, ?, ?, ?, ?)', [
+            input.name,
+            input.contact_person || '',
+            input.phone || '',
+            input.email || '',
+            input.address || '',
+        ]);
         const id = await lastInsertId();
 
-        AuditLogRepo.log('CREATE', 'SUPPLIER', id, `Created supplier: ${input.name}`, null, { name: input.name, phone: input.phone, email: input.email });
+        AuditLogRepo.log('CREATE', 'SUPPLIER', id, `Created supplier: ${input.name}`, null, {
+            name: input.name,
+            phone: input.phone,
+            email: input.email,
+        });
 
         return this.getById(id) as Promise<Supplier>;
     },
@@ -39,11 +46,26 @@ export const SupplierRepo = {
         const fields: string[] = [];
         const values: unknown[] = [];
 
-        if (input.name !== undefined) { fields.push('name = ?'); values.push(input.name); }
-        if (input.contact_person !== undefined) { fields.push('contact_person = ?'); values.push(input.contact_person); }
-        if (input.phone !== undefined) { fields.push('phone = ?'); values.push(input.phone); }
-        if (input.email !== undefined) { fields.push('email = ?'); values.push(input.email); }
-        if (input.address !== undefined) { fields.push('address = ?'); values.push(input.address); }
+        if (input.name !== undefined) {
+            fields.push('name = ?');
+            values.push(input.name);
+        }
+        if (input.contact_person !== undefined) {
+            fields.push('contact_person = ?');
+            values.push(input.contact_person);
+        }
+        if (input.phone !== undefined) {
+            fields.push('phone = ?');
+            values.push(input.phone);
+        }
+        if (input.email !== undefined) {
+            fields.push('email = ?');
+            values.push(input.email);
+        }
+        if (input.address !== undefined) {
+            fields.push('address = ?');
+            values.push(input.address);
+        }
 
         fields.push("updated_at = datetime('now')");
         values.push(id);
@@ -57,14 +79,24 @@ export const SupplierRepo = {
     },
 
     async updateBalance(id: number, amount: number): Promise<void> {
-        await execute("UPDATE suppliers SET balance = balance + ?, updated_at = datetime('now') WHERE id = ?", [amount, id]);
+        await execute("UPDATE suppliers SET balance = balance + ?, updated_at = datetime('now') WHERE id = ?", [
+            amount,
+            id,
+        ]);
     },
 
     async delete(id: number): Promise<void> {
         const supplier = await this.getById(id);
         await execute('UPDATE suppliers SET is_active = 0 WHERE id = ?', [id]);
 
-        AuditLogRepo.log('DELETE', 'SUPPLIER', id, `Deactivated supplier: ${supplier?.name || id}`, { is_active: 1 }, { is_active: 0 });
+        AuditLogRepo.log(
+            'DELETE',
+            'SUPPLIER',
+            id,
+            `Deactivated supplier: ${supplier?.name || id}`,
+            { is_active: 1 },
+            { is_active: 0 },
+        );
     },
 
     async count(): Promise<number> {

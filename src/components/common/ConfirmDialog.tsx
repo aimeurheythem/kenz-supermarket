@@ -6,9 +6,9 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
-import Button from "@/components/common/Button";
-import { AlertTriangle } from "lucide-react";
+} from '@/components/ui/dialog';
+import Button from '@/components/common/Button';
+import { AlertTriangle } from 'lucide-react';
 
 interface ConfirmDialogProps {
     isOpen: boolean;
@@ -26,22 +26,29 @@ export function ConfirmDialog({
     isOpen,
     onClose,
     onConfirm,
-    title = "Are you sure?",
-    description = "This action cannot be undone.",
-    confirmLabel = "Confirm",
-    cancelLabel = "Cancel",
+    title = 'Are you sure?',
+    description = 'This action cannot be undone.',
+    confirmLabel = 'Confirm',
+    cancelLabel = 'Cancel',
     variant = 'warning',
     loading = false,
 }: ConfirmDialogProps) {
-    const iconColor = variant === 'danger' ? 'text-red-500' : variant === 'warning' ? 'text-amber-500' : 'text-zinc-500';
-    const btnClass = variant === 'danger'
-        ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20 border-none'
-        : variant === 'warning'
-            ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20 border-none'
-            : 'bg-zinc-900 hover:bg-zinc-800 text-white border-none';
+    const iconColor =
+        variant === 'danger' ? 'text-red-500' : variant === 'warning' ? 'text-amber-500' : 'text-zinc-500';
+    const btnClass =
+        variant === 'danger'
+            ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20 border-none'
+            : variant === 'warning'
+              ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20 border-none'
+              : 'bg-zinc-900 hover:bg-zinc-800 text-white border-none';
 
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+        <Dialog
+            open={isOpen}
+            onOpenChange={(open) => {
+                if (!open) onClose();
+            }}
+        >
             <DialogContent className="max-w-[400px]">
                 <DialogHeader className="pt-4 px-4">
                     <div className="flex items-center gap-3">

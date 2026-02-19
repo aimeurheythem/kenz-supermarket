@@ -6,10 +6,10 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog"
-import Button from "@/components/common/Button"
-import { Trash2, AlertCircle } from "lucide-react"
-import { useTranslation } from 'react-i18next'
+} from '@/components/ui/dialog';
+import Button from '@/components/common/Button';
+import { Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface DeleteConfirmModalProps {
     isOpen: boolean;
@@ -24,9 +24,9 @@ export function DeleteConfirmModal({
     isOpen,
     onClose,
     onConfirm,
-    title = "Confirm Deletion",
-    description = "Are you sure you want to delete this item? This action cannot be undone.",
-    itemName
+    title = 'Confirm Deletion',
+    description = 'Are you sure you want to delete this item? This action cannot be undone.',
+    itemName,
 }: DeleteConfirmModalProps) {
     const { t } = useTranslation();
     return (
@@ -68,6 +68,6 @@ export function DeleteConfirmModal({
                     </Button>
                 </DialogFooter>
             </DialogContent>
-        </Dialog >
+        </Dialog>
     );
 }

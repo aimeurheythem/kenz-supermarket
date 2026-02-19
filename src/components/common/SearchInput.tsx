@@ -22,7 +22,7 @@ export default function SearchInput({ value, onChange, placeholder = 'Search...'
                     'bg-primary border border-default',
                     'text-sm text-primary placeholder:text-placeholder',
                     'focus:outline-none focus:border-focus',
-                    'transition-all duration-150'
+                    'transition-all duration-150',
                 )}
             />
         </div>

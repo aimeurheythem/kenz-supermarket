@@ -5,13 +5,7 @@ import { Eye, EyeOff, Users, Shield, ShoppingCart, KeyRound, ChevronDown, ArrowL
 import { useTranslation } from 'react-i18next';
 import { UserRepo } from '../../database';
 import type { User } from '@/lib/types';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
 type Tab = 'owner' | 'cashier';
@@ -23,7 +17,12 @@ type CashierStep = 'select' | 'pin' | 'cash';
 // ─────────────────────────────────────────────
 type NumPadMode = 'pin' | 'cash';
 
-function NumPad({ value, onChange, mode, maxLen = 8 }: {
+function NumPad({
+    value,
+    onChange,
+    mode,
+    maxLen = 8,
+}: {
     value: string;
     onChange: (v: string) => void;
     mode: NumPadMode;
@@ -63,9 +62,7 @@ function NumPad({ value, onChange, mode, maxLen = 8 }: {
         <div className="space-y-3">
             {/* Value display */}
             {mode === 'pin' ? (
-                <div className="flex items-center justify-center gap-2.5 py-3">
-                    {pinDots}
-                </div>
+                <div className="flex items-center justify-center gap-2.5 py-3">{pinDots}</div>
             ) : (
                 <div
                     className="text-center py-3 text-2xl font-bold tracking-tight rounded-lg"
@@ -98,8 +95,18 @@ function NumPad({ value, onChange, mode, maxLen = 8 }: {
                                 color: isBackspace ? 'var(--text-muted)' : 'var(--text-primary)',
                                 border: '1px solid var(--border-default)',
                             }}
-                            onMouseEnter={e => { e.currentTarget.style.background = isBackspace ? 'var(--border-default)' : 'var(--accent-light)'; e.currentTarget.style.borderColor = 'var(--accent)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = isBackspace ? 'var(--bg-tertiary)' : 'var(--bg-secondary)'; e.currentTarget.style.borderColor = 'var(--border-default)'; }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = isBackspace
+                                    ? 'var(--border-default)'
+                                    : 'var(--accent-light)';
+                                e.currentTarget.style.borderColor = 'var(--accent)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = isBackspace
+                                    ? 'var(--bg-tertiary)'
+                                    : 'var(--bg-secondary)';
+                                e.currentTarget.style.borderColor = 'var(--border-default)';
+                            }}
                         >
                             {isBackspace ? <Delete size={16} /> : k}
                         </button>
@@ -129,7 +136,12 @@ const TESTIMONIALS_ROW2 = [
 ];
 
 function TestimonialCard({ name, role, quote }: { name: string; role: string; quote: string }) {
-    const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const initials = name
+        .split(' ')
+        .map((w) => w[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
     return (
         <div
             className="flex-shrink-0 flex flex-col gap-2 w-[220px] rounded-xl px-4 py-3.5 select-none"
@@ -189,7 +201,7 @@ export default function Login() {
                 .then(setCashiers)
                 .catch(() => setCashierError('Failed to load cashiers'));
         }
-    }, [tab]);
+    }, [tab, cashiers.length]);
 
     const switchTab = (next: Tab) => {
         setTab(next);
@@ -208,7 +220,6 @@ export default function Login() {
         setOwnerError('');
         setOwnerLoading(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 500));
             const success = await login(username, password);
             if (success) {
                 navigate(from, { replace: true });
@@ -263,8 +274,10 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen w-full flex overflow-hidden" style={{ fontFamily: 'var(--font-primary)', background: 'var(--bg-primary)' }}>
-
+        <div
+            className="min-h-screen w-full flex overflow-hidden"
+            style={{ fontFamily: 'var(--font-primary)', background: 'var(--bg-primary)' }}
+        >
             {/* â”€â”€ LEFT PANEL â”€â”€ */}
             {/* ── LEFT PANEL ── */}
             <div
@@ -273,12 +286,17 @@ export default function Login() {
             >
                 {/* Branding */}
                 <div className="relative z-10 flex flex-col items-center pt-12 pb-6 px-10 text-center gap-3">
-                    <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'var(--accent)' }}>
+                    <div
+                        className="w-14 h-14 rounded-full flex items-center justify-center"
+                        style={{ background: 'var(--accent)' }}
+                    >
                         <ShoppingCart className="w-7 h-7" style={{ color: '#0f172a' }} strokeWidth={2} />
                     </div>
                     <div>
                         <h1 className="text-white text-2xl font-bold tracking-tight leading-tight">Kenz</h1>
-                        <p className="text-white/40 text-xs font-medium tracking-widest uppercase mt-1">Supermarket Pro</p>
+                        <p className="text-white/40 text-xs font-medium tracking-widest uppercase mt-1">
+                            Supermarket Pro
+                        </p>
                     </div>
                 </div>
 
@@ -287,7 +305,10 @@ export default function Login() {
                     {/* Row 1 — scrolls left */}
                     <div
                         className="w-full overflow-hidden"
-                        style={{ maskImage: 'linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)' }}
+                        style={{
+                            maskImage:
+                                'linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)',
+                        }}
                     >
                         <div
                             className="flex gap-3"
@@ -301,7 +322,10 @@ export default function Login() {
                     {/* Row 2 — scrolls right */}
                     <div
                         className="w-full overflow-hidden"
-                        style={{ maskImage: 'linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)' }}
+                        style={{
+                            maskImage:
+                                'linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)',
+                        }}
                     >
                         <div
                             className="flex gap-3"
@@ -321,14 +345,21 @@ export default function Login() {
             </div>
 
             {/* â”€â”€ RIGHT PANEL â”€â”€ */}
-            <div className="flex-1 flex flex-col items-center justify-center px-6 py-12" style={{ background: 'var(--bg-primary)' }}>
-
+            <div
+                className="flex-1 flex flex-col items-center justify-center px-6 py-12"
+                style={{ background: 'var(--bg-primary)' }}
+            >
                 {/* Mobile logo */}
                 <div className="lg:hidden flex flex-col items-center gap-3 mb-10">
-                    <div className="w-14 h-14 rounded-xl flex items-center justify-center" style={{ background: 'var(--accent)' }}>
+                    <div
+                        className="w-14 h-14 rounded-xl flex items-center justify-center"
+                        style={{ background: 'var(--accent)' }}
+                    >
                         <ShoppingCart className="w-7 h-7" style={{ color: '#0f172a' }} />
                     </div>
-                    <p className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>Kenz Supermarket Pro</p>
+                    <p className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>
+                        Kenz Supermarket Pro
+                    </p>
                 </div>
 
                 {/* Card */}
@@ -345,7 +376,10 @@ export default function Login() {
                     <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-muted)' }}>
                         {t('login.welcome', 'Welcome back')}
                     </p>
-                    <h2 className="text-2xl font-bold leading-tight mb-7" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+                    <h2
+                        className="text-2xl font-bold leading-tight mb-7"
+                        style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}
+                    >
                         {t('login.title', 'Log into your Account')}
                     </h2>
 
@@ -355,9 +389,15 @@ export default function Login() {
                             type="button"
                             onClick={() => switchTab('owner')}
                             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-semibold transition-all duration-150"
-                            style={tab === 'owner'
-                                ? { background: '#ffffff', color: 'var(--text-primary)', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }
-                                : { color: 'var(--text-muted)' }}
+                            style={
+                                tab === 'owner'
+                                    ? {
+                                          background: '#ffffff',
+                                          color: 'var(--text-primary)',
+                                          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                                      }
+                                    : { color: 'var(--text-muted)' }
+                            }
                         >
                             <Shield className="w-3.5 h-3.5" />
                             {t('login.owner', 'Owner')}
@@ -366,9 +406,15 @@ export default function Login() {
                             type="button"
                             onClick={() => switchTab('cashier')}
                             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-semibold transition-all duration-150"
-                            style={tab === 'cashier'
-                                ? { background: '#ffffff', color: 'var(--text-primary)', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }
-                                : { color: 'var(--text-muted)' }}
+                            style={
+                                tab === 'cashier'
+                                    ? {
+                                          background: '#ffffff',
+                                          color: 'var(--text-primary)',
+                                          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                                      }
+                                    : { color: 'var(--text-muted)' }
+                            }
                         >
                             <Users className="w-3.5 h-3.5" />
                             {t('login.cashier', 'Cashier')}
@@ -379,7 +425,11 @@ export default function Login() {
                     {tab === 'owner' && (
                         <form onSubmit={handleOwnerSubmit} className="space-y-4">
                             <div>
-                                <label htmlFor="username" className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                                <label
+                                    htmlFor="username"
+                                    className="block text-xs font-semibold mb-1.5"
+                                    style={{ color: 'var(--text-secondary)' }}
+                                >
                                     {t('login.username', 'Username')}
                                 </label>
                                 <input
@@ -391,14 +441,29 @@ export default function Login() {
                                     placeholder={t('login.email_placeholder', 'Enter your username')}
                                     required
                                     className="w-full rounded-lg px-3.5 py-2.5 text-sm outline-none transition-all duration-150"
-                                    style={{ border: '1px solid var(--border-default)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontFamily: 'var(--font-primary)' }}
-                                    onFocus={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(250,204,21,0.15)'; }}
-                                    onBlur={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.boxShadow = 'none'; }}
+                                    style={{
+                                        border: '1px solid var(--border-default)',
+                                        background: 'var(--bg-input)',
+                                        color: 'var(--text-primary)',
+                                        fontFamily: 'var(--font-primary)',
+                                    }}
+                                    onFocus={(e) => {
+                                        e.currentTarget.style.borderColor = 'var(--accent)';
+                                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(250,204,21,0.15)';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.currentTarget.style.borderColor = 'var(--border-default)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                    }}
                                 />
                             </div>
                             <div>
                                 <div className="flex items-center justify-between mb-1.5">
-                                    <label htmlFor="password" className="block text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                                    <label
+                                        htmlFor="password"
+                                        className="block text-xs font-semibold"
+                                        style={{ color: 'var(--text-secondary)' }}
+                                    >
                                         {t('login.password', 'Password')}
                                     </label>
                                     <button
@@ -406,8 +471,8 @@ export default function Login() {
                                         onClick={() => setShowForgotPassword(true)}
                                         className="text-xs font-medium transition-colors"
                                         style={{ color: 'var(--text-muted)' }}
-                                        onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
-                                        onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+                                        onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                                        onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
                                     >
                                         {t('login.forgot_password', 'Forgot password?')}
                                     </button>
@@ -415,8 +480,16 @@ export default function Login() {
                                 <div
                                     className="flex items-center rounded-lg px-3.5 transition-all duration-150"
                                     style={{ border: '1px solid var(--border-default)', background: 'var(--bg-input)' }}
-                                    onFocus={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(250,204,21,0.15)'; }}
-                                    onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.boxShadow = 'none'; } }}
+                                    onFocus={(e) => {
+                                        e.currentTarget.style.borderColor = 'var(--accent)';
+                                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(250,204,21,0.15)';
+                                    }}
+                                    onBlur={(e) => {
+                                        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                                            e.currentTarget.style.borderColor = 'var(--border-default)';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                        }
+                                    }}
                                 >
                                     <input
                                         id="password"
@@ -429,32 +502,61 @@ export default function Login() {
                                         className="flex-1 py-2.5 text-sm outline-none bg-transparent no-inner-ring"
                                         style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-primary)' }}
                                     />
-                                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
                                         className="flex-shrink-0 p-1 transition-colors"
                                         style={{ color: 'var(--text-placeholder)' }}
-                                        onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-muted)')}
-                                        onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-placeholder)')}>
+                                        onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
+                                        onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-placeholder)')}
+                                    >
                                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                     </button>
                                 </div>
                             </div>
-                            {ownerError && <p className="text-xs font-medium" style={{ color: 'var(--danger)' }}>{ownerError}</p>}
+                            {ownerError && (
+                                <p className="text-xs font-medium" style={{ color: 'var(--danger)' }}>
+                                    {ownerError}
+                                </p>
+                            )}
                             <button
-                                type="submit" disabled={ownerLoading}
+                                type="submit"
+                                disabled={ownerLoading}
                                 className="w-full py-2.5 rounded-lg text-sm font-bold transition-all duration-150 mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
-                                style={{ background: 'var(--accent)', color: '#0f172a', boxShadow: '0 2px 8px rgba(250,204,21,0.3)' }}
-                                onMouseEnter={e => { if (!ownerLoading) e.currentTarget.style.background = 'var(--accent-hover)'; }}
-                                onMouseLeave={e => { e.currentTarget.style.background = 'var(--accent)'; }}
+                                style={{
+                                    background: 'var(--accent)',
+                                    color: '#0f172a',
+                                    boxShadow: '0 2px 8px rgba(250,204,21,0.3)',
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!ownerLoading) e.currentTarget.style.background = 'var(--accent-hover)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'var(--accent)';
+                                }}
                             >
                                 {ownerLoading ? (
                                     <span className="flex items-center justify-center gap-2">
                                         <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            />
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8v8H4z"
+                                            />
                                         </svg>
                                         {t('login.logging_in', 'Signing in...')}
                                     </span>
-                                ) : t('login.login_button', 'Log In')}
+                                ) : (
+                                    t('login.login_button', 'Log In')
+                                )}
                             </button>
                         </form>
                     )}
@@ -462,41 +564,86 @@ export default function Login() {
                     {/* CASHIER FORM */}
                     {tab === 'cashier' && (
                         <div className="space-y-5">
-
                             {/* Step: select cashier */}
                             {cashierStep === 'select' && (
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                                        <label
+                                            className="block text-xs font-semibold mb-1.5"
+                                            style={{ color: 'var(--text-secondary)' }}
+                                        >
                                             {t('login.select_name', 'Select your name')}
                                         </label>
                                         <div className="space-y-2">
                                             {cashiers.length === 0 ? (
-                                                <p className="text-xs py-4 text-center" style={{ color: 'var(--text-muted)' }}>{t('login.no_cashiers', 'No cashiers found')}</p>
-                                            ) : cashiers.map(c => (
-                                                <button
-                                                    key={c.id}
-                                                    type="button"
-                                                    onClick={() => { setSelectedCashier(c); setCashierStep('pin'); setCashierError(''); }}
-                                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 text-left"
-                                                    style={{ border: '1px solid var(--border-default)', background: 'var(--bg-input)', color: 'var(--text-primary)' }}
-                                                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.background = 'var(--accent-light)'; }}
-                                                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.background = 'var(--bg-input)'; }}
+                                                <p
+                                                    className="text-xs py-4 text-center"
+                                                    style={{ color: 'var(--text-muted)' }}
                                                 >
-                                                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
-                                                        style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
-                                                        {c.full_name.charAt(0).toUpperCase()}
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{c.full_name}</p>
-                                                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>@{c.username}</p>
-                                                    </div>
-                                                    <ChevronDown className="w-4 h-4 ml-auto -rotate-90 flex-shrink-0" style={{ color: 'var(--text-placeholder)' }} />
-                                                </button>
-                                            ))}
+                                                    {t('login.no_cashiers', 'No cashiers found')}
+                                                </p>
+                                            ) : (
+                                                cashiers.map((c) => (
+                                                    <button
+                                                        key={c.id}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setSelectedCashier(c);
+                                                            setCashierStep('pin');
+                                                            setCashierError('');
+                                                        }}
+                                                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 text-left"
+                                                        style={{
+                                                            border: '1px solid var(--border-default)',
+                                                            background: 'var(--bg-input)',
+                                                            color: 'var(--text-primary)',
+                                                        }}
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.borderColor = 'var(--accent)';
+                                                            e.currentTarget.style.background = 'var(--accent-light)';
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.borderColor = 'var(--border-default)';
+                                                            e.currentTarget.style.background = 'var(--bg-input)';
+                                                        }}
+                                                    >
+                                                        <div
+                                                            className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
+                                                            style={{
+                                                                background: 'var(--bg-secondary)',
+                                                                color: 'var(--text-primary)',
+                                                            }}
+                                                        >
+                                                            {c.full_name.charAt(0).toUpperCase()}
+                                                        </div>
+                                                        <div>
+                                                            <p
+                                                                className="font-semibold text-sm"
+                                                                style={{ color: 'var(--text-primary)' }}
+                                                            >
+                                                                {c.full_name}
+                                                            </p>
+                                                            <p
+                                                                className="text-xs"
+                                                                style={{ color: 'var(--text-muted)' }}
+                                                            >
+                                                                @{c.username}
+                                                            </p>
+                                                        </div>
+                                                        <ChevronDown
+                                                            className="w-4 h-4 ml-auto -rotate-90 flex-shrink-0"
+                                                            style={{ color: 'var(--text-placeholder)' }}
+                                                        />
+                                                    </button>
+                                                ))
+                                            )}
                                         </div>
                                     </div>
-                                    {cashierError && <p className="text-xs font-medium" style={{ color: 'var(--danger)' }}>{cashierError}</p>}
+                                    {cashierError && (
+                                        <p className="text-xs font-medium" style={{ color: 'var(--danger)' }}>
+                                            {cashierError}
+                                        </p>
+                                    )}
                                 </div>
                             )}
 
@@ -504,41 +651,98 @@ export default function Login() {
                             {cashierStep === 'pin' && selectedCashier && (
                                 <form onSubmit={handlePinSubmit} className="space-y-4">
                                     {/* selected cashier pill */}
-                                    <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg" style={{ background: 'var(--bg-secondary)' }}>
-                                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                                            style={{ background: 'var(--accent)', color: '#0f172a' }}>
+                                    <div
+                                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg"
+                                        style={{ background: 'var(--bg-secondary)' }}
+                                    >
+                                        <div
+                                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                                            style={{ background: 'var(--accent)', color: '#0f172a' }}
+                                        >
                                             {selectedCashier.full_name.charAt(0).toUpperCase()}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{selectedCashier.full_name}</p>
+                                            <p
+                                                className="text-sm font-semibold truncate"
+                                                style={{ color: 'var(--text-primary)' }}
+                                            >
+                                                {selectedCashier.full_name}
+                                            </p>
                                         </div>
-                                        <button type="button" onClick={() => { setSelectedCashier(null); setCashierStep('select'); setCashierError(''); setPinCode(''); }}
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setSelectedCashier(null);
+                                                setCashierStep('select');
+                                                setCashierError('');
+                                                setPinCode('');
+                                            }}
                                             className="text-xs flex items-center gap-1 transition-colors flex-shrink-0"
                                             style={{ color: 'var(--text-muted)' }}
-                                            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
-                                            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}>
+                                            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                                            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
+                                        >
                                             <ArrowLeft size={13} /> {t('login.change', 'Change')}
                                         </button>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>{t('login.pin_code', 'PIN Code')}</label>
-                                        <NumPad value={pinCode} onChange={setPinCode} mode="pin" maxLen={selectedCashier.pin_length ?? 4} />
+                                        <label
+                                            className="block text-xs font-semibold mb-2"
+                                            style={{ color: 'var(--text-secondary)' }}
+                                        >
+                                            {t('login.pin_code', 'PIN Code')}
+                                        </label>
+                                        <NumPad
+                                            value={pinCode}
+                                            onChange={setPinCode}
+                                            mode="pin"
+                                            maxLen={selectedCashier.pin_length ?? 4}
+                                        />
                                     </div>
-                                    {cashierError && <p className="text-xs font-medium" style={{ color: 'var(--danger)' }}>{cashierError}</p>}
-                                    <button type="submit" disabled={cashierLoading || pinCode.length === 0}
+                                    {cashierError && (
+                                        <p className="text-xs font-medium" style={{ color: 'var(--danger)' }}>
+                                            {cashierError}
+                                        </p>
+                                    )}
+                                    <button
+                                        type="submit"
+                                        disabled={cashierLoading || pinCode.length === 0}
                                         className="w-full py-2.5 rounded-lg text-sm font-bold transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
-                                        style={{ background: 'var(--accent)', color: '#0f172a', boxShadow: '0 2px 8px rgba(250,204,21,0.3)' }}
-                                        onMouseEnter={e => { if (!cashierLoading) e.currentTarget.style.background = 'var(--accent-hover)'; }}
-                                        onMouseLeave={e => { e.currentTarget.style.background = 'var(--accent)'; }}>
+                                        style={{
+                                            background: 'var(--accent)',
+                                            color: '#0f172a',
+                                            boxShadow: '0 2px 8px rgba(250,204,21,0.3)',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (!cashierLoading)
+                                                e.currentTarget.style.background = 'var(--accent-hover)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = 'var(--accent)';
+                                        }}
+                                    >
                                         {cashierLoading ? (
                                             <span className="flex items-center justify-center gap-2">
                                                 <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                                    <circle
+                                                        className="opacity-25"
+                                                        cx="12"
+                                                        cy="12"
+                                                        r="10"
+                                                        stroke="currentColor"
+                                                        strokeWidth="4"
+                                                    />
+                                                    <path
+                                                        className="opacity-75"
+                                                        fill="currentColor"
+                                                        d="M4 12a8 8 0 018-8v8H4z"
+                                                    />
                                                 </svg>
                                                 {t('login.verifying', 'Verifying...')}
                                             </span>
-                                        ) : t('login.verify_pin', 'Verify PIN')}
+                                        ) : (
+                                            t('login.verify_pin', 'Verify PIN')
+                                        )}
                                     </button>
                                 </form>
                             )}
@@ -547,33 +751,74 @@ export default function Login() {
                             {cashierStep === 'cash' && selectedCashier && (
                                 <form onSubmit={handleCashSubmit} className="space-y-4">
                                     {/* cashier chip */}
-                                    <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg" style={{ background: 'var(--bg-secondary)' }}>
-                                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                                            style={{ background: 'var(--accent)', color: '#0f172a' }}>
+                                    <div
+                                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg"
+                                        style={{ background: 'var(--bg-secondary)' }}
+                                    >
+                                        <div
+                                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                                            style={{ background: 'var(--accent)', color: '#0f172a' }}
+                                        >
                                             {selectedCashier.full_name.charAt(0).toUpperCase()}
                                         </div>
-                                        <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{selectedCashier.full_name}</p>
+                                        <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                                            {selectedCashier.full_name}
+                                        </p>
                                         <div className="ml-auto w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>{t('login.opening_cash', 'Opening Cash Amount')}</label>
+                                        <label
+                                            className="block text-xs font-semibold mb-2"
+                                            style={{ color: 'var(--text-secondary)' }}
+                                        >
+                                            {t('login.opening_cash', 'Opening Cash Amount')}
+                                        </label>
                                         <NumPad value={openingCash} onChange={setOpeningCash} mode="cash" />
                                     </div>
-                                    {cashierError && <p className="text-xs font-medium" style={{ color: 'var(--danger)' }}>{cashierError}</p>}
-                                    <button type="submit" disabled={cashierLoading || !openingCash}
+                                    {cashierError && (
+                                        <p className="text-xs font-medium" style={{ color: 'var(--danger)' }}>
+                                            {cashierError}
+                                        </p>
+                                    )}
+                                    <button
+                                        type="submit"
+                                        disabled={cashierLoading || !openingCash}
                                         className="w-full py-2.5 rounded-lg text-sm font-bold transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
-                                        style={{ background: 'var(--accent)', color: '#0f172a', boxShadow: '0 2px 8px rgba(250,204,21,0.3)' }}
-                                        onMouseEnter={e => { if (!cashierLoading) e.currentTarget.style.background = 'var(--accent-hover)'; }}
-                                        onMouseLeave={e => { e.currentTarget.style.background = 'var(--accent)'; }}>
+                                        style={{
+                                            background: 'var(--accent)',
+                                            color: '#0f172a',
+                                            boxShadow: '0 2px 8px rgba(250,204,21,0.3)',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (!cashierLoading)
+                                                e.currentTarget.style.background = 'var(--accent-hover)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = 'var(--accent)';
+                                        }}
+                                    >
                                         {cashierLoading ? (
                                             <span className="flex items-center justify-center gap-2">
                                                 <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                                    <circle
+                                                        className="opacity-25"
+                                                        cx="12"
+                                                        cy="12"
+                                                        r="10"
+                                                        stroke="currentColor"
+                                                        strokeWidth="4"
+                                                    />
+                                                    <path
+                                                        className="opacity-75"
+                                                        fill="currentColor"
+                                                        d="M4 12a8 8 0 018-8v8H4z"
+                                                    />
                                                 </svg>
                                                 {t('login.opening_session', 'Opening session...')}
                                             </span>
-                                        ) : t('login.open_session', 'Open Session & Go to POS')}
+                                        ) : (
+                                            t('login.open_session', 'Open Session & Go to POS')
+                                        )}
                                     </button>
                                 </form>
                             )}
@@ -599,26 +844,46 @@ export default function Login() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 pt-2">
-                        <div className="rounded-xl p-4 space-y-2" style={{ background: 'var(--accent-light)', border: '1px solid var(--accent)' }}>
+                        <div
+                            className="rounded-xl p-4 space-y-2"
+                            style={{ background: 'var(--accent-light)', border: '1px solid var(--accent)' }}
+                        >
                             <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                                 {t('login.forgot_password_steps_title', 'To reset your password:')}
                             </p>
-                            <ol className="text-sm space-y-1 list-decimal list-inside" style={{ color: 'var(--text-secondary)' }}>
+                            <ol
+                                className="text-sm space-y-1 list-decimal list-inside"
+                                style={{ color: 'var(--text-secondary)' }}
+                            >
                                 <li>{t('login.forgot_step_1', 'Contact the store owner or system administrator')}</li>
-                                <li>{t('login.forgot_step_2', 'They can reset your password from the Users management page')}</li>
+                                <li>
+                                    {t(
+                                        'login.forgot_step_2',
+                                        'They can reset your password from the Users management page',
+                                    )}
+                                </li>
                                 <li>{t('login.forgot_step_3', 'Log in with the new password provided')}</li>
                             </ol>
                         </div>
                         <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                            {t('login.forgot_password_note', 'For security reasons, passwords can only be reset by an administrator with owner-level access.')}
+                            {t(
+                                'login.forgot_password_note',
+                                'For security reasons, passwords can only be reset by an administrator with owner-level access.',
+                            )}
                         </p>
                         <button
                             onClick={() => {
                                 setShowForgotPassword(false);
-                                toast.info(t('login.forgot_password_toast', 'Please contact your administrator to reset your password.'));
+                                toast.info(
+                                    t(
+                                        'login.forgot_password_toast',
+                                        'Please contact your administrator to reset your password.',
+                                    ),
+                                );
                             }}
                             className="w-full py-2.5 rounded-lg text-sm font-bold transition-all"
-                            style={{ background: 'var(--accent)', color: '#0f172a' }}>
+                            style={{ background: 'var(--accent)', color: '#0f172a' }}
+                        >
                             {t('common.understood', 'Understood')}
                         </button>
                     </div>

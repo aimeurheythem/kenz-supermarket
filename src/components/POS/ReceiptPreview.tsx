@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Printer, X, CheckCircle } from 'lucide-react';
 import Portal from '@/components/common/Portal';
@@ -25,8 +25,6 @@ export default function ReceiptPreview({ sale, items, onClose, onPrint }: Receip
     const receiptHeader = useSettingsStore(selectSetting('receipt.header', ''));
     const receiptFooter = useSettingsStore(selectSetting('receipt.footer', 'Thank you for your visit!'));
     const receiptShowLogo = useSettingsStore(selectSetting('receipt.showLogo', 'false'));
-    const receiptRef = useRef<HTMLDivElement>(null);
-
     const handlePrint = () => {
         if (onPrint) onPrint();
         window.print();
@@ -40,7 +38,7 @@ export default function ReceiptPreview({ sale, items, onClose, onPrint }: Receip
         email: storeEmail,
         header: receiptHeader,
         footer: receiptFooter,
-        showLogo: receiptShowLogo === 'true'
+        showLogo: receiptShowLogo === 'true',
     };
 
     return (
@@ -54,8 +52,12 @@ export default function ReceiptPreview({ sale, items, onClose, onPrint }: Receip
                                 <CheckCircle size={20} />
                             </div>
                             <div>
-                                <h2 className="text-lg font-bold text-zinc-900">{t('pos.receipt.title', 'Payment Successful')}</h2>
-                                <p className="text-xs text-zinc-500 font-medium">{t('pos.receipt.subtitle', 'Transaction completed')}</p>
+                                <h2 className="text-lg font-bold text-zinc-900">
+                                    {t('pos.receipt.title', 'Payment Successful')}
+                                </h2>
+                                <p className="text-xs text-zinc-500 font-medium">
+                                    {t('pos.receipt.subtitle', 'Transaction completed')}
+                                </p>
                             </div>
                         </div>
                         <button
@@ -73,7 +75,11 @@ export default function ReceiptPreview({ sale, items, onClose, onPrint }: Receip
                                 <h3 className="font-black text-lg uppercase tracking-wider">{storeInfo.name}</h3>
                                 <p className="text-xs text-zinc-500 whitespace-pre-line">{storeInfo.address}</p>
                                 <p className="text-xs text-zinc-500">{storeInfo.phone}</p>
-                                {storeInfo.header && <p className="text-xs text-zinc-400 mt-2 italic whitespace-pre-line">{storeInfo.header}</p>}
+                                {storeInfo.header && (
+                                    <p className="text-xs text-zinc-400 mt-2 italic whitespace-pre-line">
+                                        {storeInfo.header}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="space-y-2 text-sm">
@@ -96,16 +102,16 @@ export default function ReceiptPreview({ sale, items, onClose, onPrint }: Receip
                                                 {item.quantity} x {formatCurrency(item.unit_price)}
                                             </div>
                                         </div>
-                                        <div className="font-bold text-zinc-900">
-                                            {formatCurrency(item.total)}
-                                        </div>
+                                        <div className="font-bold text-zinc-900">{formatCurrency(item.total)}</div>
                                     </div>
                                 ))}
                             </div>
 
                             <div className="border-t border-zinc-900 pt-2 space-y-2">
                                 <div className="flex justify-between items-center text-sm">
-                                    <span className="text-zinc-500 font-medium">{t('pos.receipt.subtotal', 'Subtotal')}</span>
+                                    <span className="text-zinc-500 font-medium">
+                                        {t('pos.receipt.subtotal', 'Subtotal')}
+                                    </span>
                                     <span className="font-bold">{formatCurrency(sale.subtotal)}</span>
                                 </div>
                                 {sale.discount_amount > 0 && (
@@ -115,7 +121,9 @@ export default function ReceiptPreview({ sale, items, onClose, onPrint }: Receip
                                     </div>
                                 )}
                                 <div className="flex justify-between items-center text-lg pt-2 border-t border-dashed border-zinc-200">
-                                    <span className="font-black uppercase tracking-wider">{t('pos.receipt.total', 'Total')}</span>
+                                    <span className="font-black uppercase tracking-wider">
+                                        {t('pos.receipt.total', 'Total')}
+                                    </span>
                                     <span className="font-black">{formatCurrency(sale.total)}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-xs text-zinc-500 pt-1">
@@ -126,17 +134,19 @@ export default function ReceiptPreview({ sale, items, onClose, onPrint }: Receip
 
                             {/* Barcode Placeholder */}
                             <div className="pt-4 flex justify-center opacity-40">
-                                <div className="h-8 w-2/3 bg-current repeating-linear-gradient(90deg,currentColor 0 2px,transparent 0 4px)" style={{ background: 'repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 3px)' }}></div>
+                                <div
+                                    className="h-8 w-2/3 bg-current repeating-linear-gradient(90deg,currentColor 0 2px,transparent 0 4px)"
+                                    style={{
+                                        background:
+                                            'repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 3px)',
+                                    }}
+                                ></div>
                             </div>
                         </div>
                     </div>
 
                     <div className="p-6 border-t border-zinc-100 flex gap-3 bg-white">
-                        <Button
-                            variant="secondary"
-                            className="flex-1 py-4"
-                            onClick={onClose}
-                        >
+                        <Button variant="secondary" className="flex-1 py-4" onClick={onClose}>
                             {t('common.close', 'Close')}
                         </Button>
                         <Button
@@ -155,7 +165,9 @@ export default function ReceiptPreview({ sale, items, onClose, onPrint }: Receip
                         <h1 className="font-black text-xl uppercase mb-1">{storeInfo.name}</h1>
                         <p className="text-[10px] whitespace-pre-line">{storeInfo.address}</p>
                         <p className="text-[10px]">{storeInfo.phone}</p>
-                        {storeInfo.header && <p className="text-[10px] mt-2 italic whitespace-pre-line">{storeInfo.header}</p>}
+                        {storeInfo.header && (
+                            <p className="text-[10px] mt-2 italic whitespace-pre-line">{storeInfo.header}</p>
+                        )}
                     </div>
 
                     <div className="mb-4 text-[10px] flex justify-between border-b border-black pb-2 border-dashed">

@@ -2,12 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { Camera, RefreshCw } from 'lucide-react';
 import Button from '@/components/common/Button';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface BarcodeScannerProps {
     onScan: (code: string) => void;
@@ -17,13 +12,12 @@ interface BarcodeScannerProps {
 
 export default function BarcodeScanner({ onScan, onClose, title = 'Scan Barcode' }: BarcodeScannerProps) {
     const scannerRef = useRef<Html5QrcodeScanner | null>(null);
-    const [scannedResult, setScannedResult] = useState<string | null>(null);
-    const [scanError, setScanError] = useState<string | null>(null);
+    const [_scannedResult, setScannedResult] = useState<string | null>(null);
 
     useEffect(() => {
         // Initialize scanner
         const scanner = new Html5QrcodeScanner(
-            "reader",
+            'reader',
             {
                 fps: 30,
                 qrbox: { width: 300, height: 300 },
@@ -40,16 +34,15 @@ export default function BarcodeScanner({ onScan, onClose, title = 'Scan Barcode'
                     Html5QrcodeSupportedFormats.CODE_93,
                     Html5QrcodeSupportedFormats.CODABAR,
                     Html5QrcodeSupportedFormats.QR_CODE,
-                ]
+                ],
             },
-            /* verbose= */ false
+            /* verbose= */ false,
         );
 
         scanner.render(
             (decodedText) => {
                 // Play beep sound
-                const audio = new Audio('/sounds/beep.mp3'); // We'll need to check if this exists or use a synth
-                // Fallback synth beep if file doesn't exist
+                // Fallback synth beep
                 try {
                     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
                     const osc = ctx.createOscillator();
@@ -60,16 +53,18 @@ export default function BarcodeScanner({ onScan, onClose, title = 'Scan Barcode'
                     gain.gain.value = 0.1;
                     osc.start();
                     setTimeout(() => osc.stop(), 100);
-                } catch (e) { /* ignore audio error */ }
+                } catch (_e) {
+                    /* ignore audio error */
+                }
 
                 setScannedResult(decodedText);
                 scanner.clear().then(() => {
                     onScan(decodedText);
                 });
             },
-            (errorMessage) => {
+            (_errorMessage) => {
                 // ignore scanning errors, they happen every frame no code is detected
-            }
+            },
         );
 
         scannerRef.current = scanner;
@@ -88,7 +83,12 @@ export default function BarcodeScanner({ onScan, onClose, title = 'Scan Barcode'
     };
 
     return (
-        <Dialog open={true} onOpenChange={(open) => { if (!open) handleClose(); }}>
+        <Dialog
+            open={true}
+            onOpenChange={(open) => {
+                if (!open) handleClose();
+            }}
+        >
             <DialogContent className="max-w-lg p-0 overflow-hidden">
                 {/* Header */}
                 <DialogHeader className="p-4 pb-2">
@@ -111,7 +111,12 @@ export default function BarcodeScanner({ onScan, onClose, title = 'Scan Barcode'
                 {/* Footer */}
                 <div className="p-4 flex justify-between items-center text-sm text-[var(--color-text-muted)]">
                     <span>Supports EAN, UPC, Code 128</span>
-                    <Button variant="secondary" size="sm" onClick={() => window.location.reload()} icon={<RefreshCw size={14} />}>
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => window.location.reload()}
+                        icon={<RefreshCw size={14} />}
+                    >
                         Reset Camera
                     </Button>
                 </div>

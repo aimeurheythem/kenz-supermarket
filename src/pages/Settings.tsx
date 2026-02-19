@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Save, Database, Upload, Download, Settings as SettingsIcon, Globe, Receipt, Banknote, Store, User, Trash2 } from 'lucide-react';
 import Button from '@/components/common/Button';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -9,6 +10,7 @@ import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 
 export default function Settings() {
+    const { t } = useTranslation();
     const { user, updateProfile, changePassword } = useAuthStore();
     const { settings, loadSettings, updateSettings, isLoading } = useSettingsStore();
     const [activeTab, setActiveTab] = useState<'account' | 'general' | 'localization' | 'sales' | 'receipt' | 'system'>('account');
@@ -56,12 +58,12 @@ export default function Settings() {
             });
         }
 
-        toast.success('Settings saved successfully!');
+        toast.success(t('settings.saved_success'));
     };
 
     const handlePasswordChange = async () => {
         if (passwords.new !== passwords.confirm) {
-            toast.error('New passwords do not match');
+            toast.error(t('settings.password_mismatch'));
             return;
         }
         const validation = validatePassword(passwords.new);
@@ -72,10 +74,10 @@ export default function Settings() {
 
         const success = await changePassword(passwords.current, passwords.new);
         if (success) {
-            toast.success('Password changed successfully');
+            toast.success(t('settings.password_changed'));
             setPasswords({ current: '', new: '', confirm: '' });
         } else {
-            toast.error('Failed to change password. Check current password.');
+            toast.error(t('settings.password_change_failed'));
         }
     };
 
@@ -143,26 +145,26 @@ export default function Settings() {
         return (
             <div className="flex flex-col items-center justify-center h-full text-[var(--color-text-muted)]">
                 <SettingsIcon size={64} className="mb-4 opacity-50" />
-                <h2 className="text-xl font-semibold">Access Denied</h2>
-                <p>Only administrators can access settings.</p>
+                <h2 className="text-xl font-semibold">{t('settings.access_denied')}</h2>
+                <p>{t('settings.admin_only')}</p>
             </div>
         );
     }
 
     const tabs = [
-        { id: 'account', label: 'My Account', icon: User },
-        { id: 'general', label: 'General', icon: Store },
-        { id: 'localization', label: 'Localization', icon: Globe },
-        { id: 'sales', label: 'Sales & Tax', icon: Banknote },
-        { id: 'receipt', label: 'Receipt', icon: Receipt },
-        { id: 'system', label: 'System', icon: Database },
+        { id: 'account', label: t('settings.tab_account'), icon: User },
+        { id: 'general', label: t('settings.tab_general'), icon: Store },
+        { id: 'localization', label: t('settings.tab_localization'), icon: Globe },
+        { id: 'sales', label: t('settings.tab_sales'), icon: Banknote },
+        { id: 'receipt', label: t('settings.tab_receipt'), icon: Receipt },
+        { id: 'system', label: t('settings.tab_system'), icon: Database },
     ];
 
     return (
         <div className="space-y-6 animate-fadeIn max-w-5xl mx-auto pb-10">
             <div className="border-b border-[var(--color-border)] pb-4">
-                <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Settings</h1>
-                <p className="text-sm text-[var(--color-text-muted)] mt-1">System configuration and maintenance</p>
+                <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">{t('settings.title')}</h1>
+                <p className="text-sm text-[var(--color-text-muted)] mt-1">{t('settings.subtitle')}</p>
             </div>
 
             <div className="flex flex-col md:flex-row gap-6">
@@ -195,11 +197,11 @@ export default function Settings() {
                             <div>
                                 <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                                     <User size={20} className="text-blue-600" />
-                                    Profile Information
+                                    {t('settings.profile_title')}
                                 </h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Full Name</label>
+                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">{t('settings.label_full_name')}</label>
                                         <input
                                             type="text"
                                             value={formData['user.name'] || ''}
@@ -208,7 +210,7 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Username</label>
+                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">{t('settings.label_username')}</label>
                                         <input
                                             type="text"
                                             value={formData['user.username'] || ''}
@@ -218,7 +220,7 @@ export default function Settings() {
                                     </div>
                                 </div>
                                 <div className="mt-4 flex justify-end">
-                                    <Button className="btn-page-action" onClick={handleSave} icon={<Save size={16} />}>Update Profile</Button>
+                                    <Button className="btn-page-action" onClick={handleSave} icon={<Save size={16} />}>{t('settings.update_profile')}</Button>
                                 </div>
                             </div>
 
@@ -228,11 +230,11 @@ export default function Settings() {
                             <div>
                                 <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                                     <SettingsIcon size={20} className="text-red-500" />
-                                    Change Password
+                                    {t('settings.change_password')}
                                 </h2>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
-                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Current Password</label>
+                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">{t('settings.label_current_password')}</label>
                                         <input
                                             type="password"
                                             value={passwords.current}
@@ -241,7 +243,7 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">New Password</label>
+                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">{t('settings.label_new_password')}</label>
                                         <input
                                             type="password"
                                             value={passwords.new}
@@ -250,7 +252,7 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Confirm Password</label>
+                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">{t('settings.label_confirm_password')}</label>
                                         <input
                                             type="password"
                                             value={passwords.confirm}
@@ -260,7 +262,7 @@ export default function Settings() {
                                     </div>
                                 </div>
                                 <div className="mt-4 flex justify-end">
-                                    <Button onClick={handlePasswordChange} icon={<Save size={16} />} variant="secondary">Change Password</Button>
+                                    <Button onClick={handlePasswordChange} icon={<Save size={16} />} variant="secondary">{t('settings.change_password_btn')}</Button>
                                 </div>
                             </div>
 
@@ -270,10 +272,10 @@ export default function Settings() {
                             <div>
                                 <h2 className="text-lg font-bold mb-2 flex items-center gap-2 text-red-600">
                                     <Trash2 size={20} />
-                                    Danger Zone
+                                    {t('settings.danger_zone')}
                                 </h2>
                                 <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                                    This will permanently delete your account, all products, sales, and every piece of data. The app will restart from scratch with the setup wizard.
+                                    {t('settings.danger_description')}
                                 </p>
 
                                 {!showDeleteConfirm ? (
@@ -282,25 +284,25 @@ export default function Settings() {
                                         className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
                                     >
                                         <Trash2 size={16} />
-                                        Delete Account & All Data
+                                        {t('settings.delete_account')}
                                     </button>
                                 ) : (
                                     <div className="p-4 border-2 border-red-300 bg-red-50 rounded-xl space-y-3">
-                                        <p className="text-sm font-semibold text-red-700">Enter your password to confirm deletion:</p>
+                                        <p className="text-sm font-semibold text-red-700">{t('settings.delete_password_prompt')}</p>
                                         <input
                                             type="password"
                                             value={deletePassword}
                                             onChange={e => { setDeletePassword(e.target.value); setDeleteError(''); }}
-                                            placeholder="Enter your password"
+                                            placeholder={t('settings.delete_password_placeholder')}
                                             className="w-full px-3 py-2.5 rounded-lg bg-white border border-red-300 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all text-sm"
                                             autoFocus
                                         />
-                                        <p className="text-sm font-semibold text-red-700">Type <span className="font-mono bg-red-100 px-1.5 py-0.5 rounded">DELETE</span> to confirm:</p>
+                                        <p className="text-sm font-semibold text-red-700">{t('settings.delete_confirm_prompt')}</p>
                                         <input
                                             type="text"
                                             value={deleteConfirmText}
                                             onChange={e => { setDeleteConfirmText(e.target.value.toUpperCase()); setDeleteError(''); }}
-                                            placeholder="Type DELETE"
+                                            placeholder={t('settings.delete_type_placeholder')}
                                             className="w-full px-3 py-2.5 rounded-lg bg-white border border-red-300 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all text-sm font-mono"
                                         />
                                         {deleteError && (
@@ -313,7 +315,7 @@ export default function Settings() {
                                                 className="px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
                                             >
                                                 <Trash2 size={16} />
-                                                {deleteLoading ? 'Deleting...' : 'Confirm Delete'}
+                                                {deleteLoading ? t('settings.deleting') : t('settings.confirm_delete')}
                                             </button>
                                             <button
                                                 onClick={() => { setShowDeleteConfirm(false); setDeletePassword(''); setDeleteConfirmText(''); setDeleteError(''); }}
@@ -334,12 +336,12 @@ export default function Settings() {
                         <div className="bg-[var(--color-bg-card)] p-6 rounded-xl border border-[var(--color-border)] shadow-sm animate-fadeIn">
                             <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                                 <Store size={20} className="text-blue-500" />
-                                Store Profile
+                                {t('settings.store_profile')}
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Store Name</label>
+                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">{t('settings.label_store_name')}</label>
                                         <input
                                             type="text"
                                             value={formData['store.name'] || ''}
@@ -349,7 +351,7 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Email Address</label>
+                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">{t('settings.label_email')}</label>
                                         <input
                                             type="email"
                                             value={formData['store.email'] || ''}
@@ -359,7 +361,7 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Phone Number</label>
+                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">{t('settings.label_phone')}</label>
                                         <input
                                             type="text"
                                             value={formData['store.phone'] || ''}
@@ -371,7 +373,7 @@ export default function Settings() {
                                 </div>
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Address</label>
+                                        <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">{t('settings.label_address')}</label>
                                         <textarea
                                             value={formData['store.address'] || ''}
                                             onChange={e => handleChange('store.address', e.target.value)}
@@ -383,7 +385,7 @@ export default function Settings() {
                                 </div>
                             </div>
                             <div className="mt-6 flex justify-end">
-                                <Button className="btn-page-action" onClick={handleSave} icon={<Save size={16} />}>Save Changes</Button>
+                                <Button className="btn-page-action" onClick={handleSave} icon={<Save size={16} />}>{t('settings.save_changes')}</Button>
                             </div>
                         </div>
                     )}
@@ -393,11 +395,11 @@ export default function Settings() {
                         <div className="bg-[var(--color-bg-card)] p-6 rounded-xl border border-[var(--color-border)] shadow-sm animate-fadeIn">
                             <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                                 <Globe size={20} className="text-emerald-500" />
-                                Localization
+                                {t('settings.localization_title')}
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Currency Symbol</label>
+                                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">{t('settings.label_currency_symbol')}</label>
                                     <input
                                         type="text"
                                         value={formData['currency.symbol'] || 'DZ'}
@@ -405,22 +407,22 @@ export default function Settings() {
                                         className="w-full px-3 py-2.5 rounded-lg bg-[var(--color-bg-input)] border border-[var(--color-border)] focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
                                         placeholder="DZ"
                                     />
-                                    <p className="text-xs text-[var(--color-text-muted)] mt-1">Symbol displayed next to prices (e.g. DZ, €, £).</p>
+                                    <p className="text-xs text-[var(--color-text-muted)] mt-1">{t('settings.currency_hint')}</p>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Currency Position</label>
+                                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">{t('settings.label_currency_position')}</label>
                                     <select
                                         value={formData['currency.position'] || 'suffix'}
                                         onChange={e => handleChange('currency.position', e.target.value)}
                                         className="w-full px-3 py-2.5 rounded-lg bg-[var(--color-bg-input)] border border-[var(--color-border)] focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
                                     >
-                                        <option value="prefix">Prefix (DZ 100)</option>
-                                        <option value="suffix">Suffix (100 DZ)</option>
+                                        <option value="prefix">{t('settings.currency_prefix')}</option>
+                                        <option value="suffix">{t('settings.currency_suffix')}</option>
                                     </select>
                                 </div>
                             </div>
                             <div className="mt-6 flex justify-end">
-                                <Button className="btn-page-action" onClick={handleSave} icon={<Save size={16} />}>Save Changes</Button>
+                                <Button className="btn-page-action" onClick={handleSave} icon={<Save size={16} />}>{t('settings.save_changes')}</Button>
                             </div>
                         </div>
                     )}
@@ -430,11 +432,11 @@ export default function Settings() {
                         <div className="bg-[var(--color-bg-card)] p-6 rounded-xl border border-[var(--color-border)] shadow-sm animate-fadeIn">
                             <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                                 <Banknote size={20} className="text-purple-500" />
-                                Sales & Tax
+                                {t('settings.sales_tax_title')}
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Tax Name</label>
+                                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">{t('settings.label_tax_name')}</label>
                                     <input
                                         type="text"
                                         value={formData['tax.name'] || 'Tax'}
@@ -444,7 +446,7 @@ export default function Settings() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Default Tax Rate (%)</label>
+                                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">{t('settings.label_tax_rate')}</label>
                                     <input
                                         type="number"
                                         value={formData['tax.rate'] || '0'}
@@ -454,11 +456,11 @@ export default function Settings() {
                                         min="0"
                                         step="0.01"
                                     />
-                                    <p className="text-xs text-[var(--color-text-muted)] mt-1">Default tax rate applied to new products.</p>
+                                    <p className="text-xs text-[var(--color-text-muted)] mt-1">{t('settings.tax_rate_hint')}</p>
                                 </div>
                             </div>
                             <div className="mt-6 flex justify-end">
-                                <Button className="btn-page-action" onClick={handleSave} icon={<Save size={16} />}>Save Changes</Button>
+                                <Button className="btn-page-action" onClick={handleSave} icon={<Save size={16} />}>{t('settings.save_changes')}</Button>
                             </div>
                         </div>
                     )}
@@ -468,11 +470,11 @@ export default function Settings() {
                         <div className="bg-[var(--color-bg-card)] p-6 rounded-xl border border-[var(--color-border)] shadow-sm animate-fadeIn">
                             <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                                 <Receipt size={20} className="text-orange-500" />
-                                Receipt Configuration
+                                {t('settings.receipt_title')}
                             </h2>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Receipt Header</label>
+                                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">{t('settings.label_receipt_header')}</label>
                                     <textarea
                                         value={formData['receipt.header'] || ''}
                                         onChange={e => handleChange('receipt.header', e.target.value)}
@@ -480,10 +482,10 @@ export default function Settings() {
                                         className="w-full px-3 py-2.5 rounded-lg bg-[var(--color-bg-input)] border border-[var(--color-border)] focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all resize-none"
                                         placeholder="Thank you for shopping with us!"
                                     />
-                                    <p className="text-xs text-[var(--color-text-muted)] mt-1">Text displayed at the top of the receipt, below the store details.</p>
+                                    <p className="text-xs text-[var(--color-text-muted)] mt-1">{t('settings.receipt_header_hint')}</p>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Receipt Footer</label>
+                                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">{t('settings.label_receipt_footer')}</label>
                                     <textarea
                                         value={formData['receipt.footer'] || ''}
                                         onChange={e => handleChange('receipt.footer', e.target.value)}
@@ -491,7 +493,7 @@ export default function Settings() {
                                         className="w-full px-3 py-2.5 rounded-lg bg-[var(--color-bg-input)] border border-[var(--color-border)] focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all resize-none"
                                         placeholder="No returns without receipt."
                                     />
-                                    <p className="text-xs text-[var(--color-text-muted)] mt-1">Text displayed at the bottom of the receipt.</p>
+                                    <p className="text-xs text-[var(--color-text-muted)] mt-1">{t('settings.receipt_footer_hint')}</p>
                                 </div>
                                 <div className="flex items-center gap-2 mt-2">
                                     <input
@@ -501,11 +503,11 @@ export default function Settings() {
                                         onChange={e => handleChange('receipt.showLogo', String(e.target.checked))}
                                         className="rounded border-[var(--color-border)] text-orange-500 focus:ring-orange-500"
                                     />
-                                    <label htmlFor="showLogo" className="text-sm text-[var(--color-text-primary)]">Show Store Logo on Receipt</label>
+                                    <label htmlFor="showLogo" className="text-sm text-[var(--color-text-primary)]">{t('settings.label_show_logo')}</label>
                                 </div>
                             </div>
                             <div className="mt-6 flex justify-end">
-                                <Button className="btn-page-action" onClick={handleSave} icon={<Save size={16} />}>Save Changes</Button>
+                                <Button className="btn-page-action" onClick={handleSave} icon={<Save size={16} />}>{t('settings.save_changes')}</Button>
                             </div>
                         </div>
                     )}
@@ -515,21 +517,21 @@ export default function Settings() {
                         <div className="bg-[var(--color-bg-card)] p-6 rounded-xl border border-[var(--color-border)] shadow-sm animate-fadeIn">
                             <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                                 <Database size={20} className="text-red-500" />
-                                Database Management
+                                {t('settings.system_title')}
                             </h2>
                             <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
                                 <div>
-                                    <h3 className="text-sm font-medium text-[var(--color-text-primary)] mb-1">Backup & Restore</h3>
+                                    <h3 className="text-sm font-medium text-[var(--color-text-primary)] mb-1">{t('settings.backup_title')}</h3>
                                     <p className="text-sm text-[var(--color-text-muted)]">
-                                        Download a backup of your data or restore from a previous backup file.
+                                        {t('settings.backup_desc')}
                                     </p>
                                 </div>
                                 <div className="flex gap-4">
                                     <Button variant="secondary" onClick={handleBackup} icon={<Download size={16} />}>
-                                        Backup Data
+                                        {t('settings.backup_btn')}
                                     </Button>
                                     <Button variant="secondary" onClick={handleRestore} icon={<Upload size={16} />}>
-                                        Restore Data
+                                        {t('settings.restore_btn')}
                                     </Button>
                                 </div>
                             </div>
@@ -542,9 +544,9 @@ export default function Settings() {
                 isOpen={showRestoreConfirm}
                 onClose={() => setShowRestoreConfirm(false)}
                 onConfirm={confirmRestore}
-                title="Restore Database"
-                description="WARNING: This will overwrite the current database with the backup. All current data will be lost. Continue?"
-                confirmLabel="Restore"
+                title={t('settings.restore_confirm_title')}
+                description={t('settings.restore_confirm_desc')}
+                confirmLabel={t('settings.restore_confirm_btn')}
                 variant="danger"
             />
         </div>

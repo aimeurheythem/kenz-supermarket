@@ -53,10 +53,10 @@ export default function AuditLogs() {
         <div className="p-6 max-w-[1600px] mx-auto space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-zinc-900 tracking-tight">Audit Logs</h1>
-                    <p className="text-zinc-500">Track system changes and user actions</p>
+                    <h1 className="text-3xl font-black text-zinc-900 tracking-tight">{t('audit_logs.title')}</h1>
+                    <p className="text-zinc-500">{t('audit_logs.subtitle')}</p>
                 </div>
-                <Button variant="outline" className="btn-page-action" onClick={loadLogs}>Refresh</Button>
+                <Button variant="outline" className="btn-page-action" onClick={loadLogs}>{t('audit_logs.refresh')}</Button>
             </div>
 
             <Card className="border-zinc-200 shadow-sm rounded-xl">
@@ -65,7 +65,7 @@ export default function AuditLogs() {
                         <div className="flex-1 relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
                             <Input
-                                placeholder="Search details..."
+                                placeholder={t('audit_logs.search_placeholder')}
                                 className="pl-9 bg-white"
                                 value={filters.search}
                                 onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
@@ -74,26 +74,26 @@ export default function AuditLogs() {
                         <div className="flex gap-2">
                             <Select value={filters.entity} onValueChange={(v) => setFilters(prev => ({ ...prev, entity: v }))}>
                                 <SelectTrigger className="w-[150px] bg-white">
-                                    <SelectValue placeholder="Entity" />
+                                    <SelectValue placeholder={t('audit_logs.entity_label')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="ALL">All Entities</SelectItem>
-                                    <SelectItem value="PRODUCT">Product</SelectItem>
-                                    <SelectItem value="SETTINGS">Settings</SelectItem>
-                                    <SelectItem value="USER">User</SelectItem>
-                                    <SelectItem value="ORDER">Order</SelectItem>
+                                    <SelectItem value="ALL">{t('audit_logs.all_entities')}</SelectItem>
+                                    <SelectItem value="PRODUCT">{t('audit_logs.entity_product')}</SelectItem>
+                                    <SelectItem value="SETTINGS">{t('audit_logs.entity_settings')}</SelectItem>
+                                    <SelectItem value="USER">{t('audit_logs.entity_user')}</SelectItem>
+                                    <SelectItem value="ORDER">{t('audit_logs.entity_order')}</SelectItem>
                                 </SelectContent>
                             </Select>
 
                             <Select value={filters.action} onValueChange={(v) => setFilters(prev => ({ ...prev, action: v }))}>
                                 <SelectTrigger className="w-[150px] bg-white">
-                                    <SelectValue placeholder="Action" />
+                                    <SelectValue placeholder={t('audit_logs.action_label')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="ALL">All Actions</SelectItem>
-                                    <SelectItem value="CREATE">Create</SelectItem>
-                                    <SelectItem value="UPDATE">Update</SelectItem>
-                                    <SelectItem value="DELETE">Delete</SelectItem>
+                                    <SelectItem value="ALL">{t('audit_logs.all_actions')}</SelectItem>
+                                    <SelectItem value="CREATE">{t('audit_logs.action_create')}</SelectItem>
+                                    <SelectItem value="UPDATE">{t('audit_logs.action_update')}</SelectItem>
+                                    <SelectItem value="DELETE">{t('audit_logs.action_delete')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -104,12 +104,12 @@ export default function AuditLogs() {
                         <Table>
                             <TableHeader>
                                 <TableRow className="hover:bg-zinc-50/50">
-                                    <TableHead className="w-[180px]">Timestamp</TableHead>
-                                    <TableHead>User</TableHead>
-                                    <TableHead>Action</TableHead>
-                                    <TableHead>Entity</TableHead>
-                                    <TableHead className="w-[40%]">Details</TableHead>
-                                    <TableHead className="text-right">View</TableHead>
+                                    <TableHead className="w-[180px]">{t('audit_logs.col_timestamp')}</TableHead>
+                                    <TableHead>{t('audit_logs.col_user')}</TableHead>
+                                    <TableHead>{t('audit_logs.col_action')}</TableHead>
+                                    <TableHead>{t('audit_logs.col_entity')}</TableHead>
+                                    <TableHead className="w-[40%]">{t('audit_logs.col_details')}</TableHead>
+                                    <TableHead className="text-right">{t('audit_logs.col_view')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -118,7 +118,7 @@ export default function AuditLogs() {
                                 ) : logs.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={6} className="text-center py-8 text-zinc-500">
-                                            No logs found
+                                            {t('audit_logs.no_logs')}
                                         </TableCell>
                                     </TableRow>
                                 ) : (
@@ -132,7 +132,7 @@ export default function AuditLogs() {
                                                     <div className="w-6 h-6 rounded-full bg-zinc-100 flex items-center justify-center text-xs font-bold text-zinc-600">
                                                         {log.user_name?.[0] || '?'}
                                                     </div>
-                                                    <span className="text-sm font-medium">{log.user_name || 'System'}</span>
+                                                    <span className="text-sm font-medium">{log.user_name || t('audit_logs.system_user')}</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
@@ -160,24 +160,24 @@ export default function AuditLogs() {
                                                     </DialogTrigger>
                                                     <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
                                                         <DialogHeader>
-                                                            <DialogTitle>Log Details</DialogTitle>
+                                                            <DialogTitle>{t('audit_logs.log_details')}</DialogTitle>
                                                         </DialogHeader>
                                                         <div className="space-y-6 pt-4">
                                                             <div className="grid grid-cols-2 gap-4 text-sm">
                                                                 <div>
-                                                                    <label className="text-xs font-bold text-zinc-400 uppercase">Timestamp</label>
+                                                                    <label className="text-xs font-bold text-zinc-400 uppercase">{t('audit_logs.label_timestamp')}</label>
                                                                     <p className="font-mono">{format(new Date(log.created_at), 'PPP pp')}</p>
                                                                 </div>
                                                                 <div>
-                                                                    <label className="text-xs font-bold text-zinc-400 uppercase">User</label>
-                                                                    <p>{log.user_name || 'System'} (ID: {log.user_id})</p>
+                                                                    <label className="text-xs font-bold text-zinc-400 uppercase">{t('audit_logs.label_user')}</label>
+                                                                    <p>{log.user_name || t('audit_logs.system_user')} (ID: {log.user_id})</p>
                                                                 </div>
                                                                 <div>
-                                                                    <label className="text-xs font-bold text-zinc-400 uppercase">Action</label>
+                                                                    <label className="text-xs font-bold text-zinc-400 uppercase">{t('audit_logs.label_action')}</label>
                                                                     <p>{log.action} on {log.entity} #{log.entity_id}</p>
                                                                 </div>
                                                                 <div className="col-span-2">
-                                                                    <label className="text-xs font-bold text-zinc-400 uppercase">Description</label>
+                                                                    <label className="text-xs font-bold text-zinc-400 uppercase">{t('audit_logs.label_description')}</label>
                                                                     <p className="text-zinc-700">{log.details}</p>
                                                                 </div>
                                                             </div>
@@ -185,7 +185,7 @@ export default function AuditLogs() {
                                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-zinc-50 p-4 rounded-xl border border-zinc-100">
                                                                 <div>
                                                                     <h4 className="text-xs font-bold text-red-500 uppercase mb-2 flex items-center gap-2">
-                                                                        Old Value
+                                                                        {t('audit_logs.label_old_value')}
                                                                     </h4>
                                                                     <pre className="text-xs font-mono bg-red-50/50 p-3 rounded-lg overflow-x-auto text-red-900 min-h-[100px]">
                                                                         {log.old_value ? JSON.stringify(log.old_value, null, 2) : 'null'}
@@ -193,7 +193,7 @@ export default function AuditLogs() {
                                                                 </div>
                                                                 <div>
                                                                     <h4 className="text-xs font-bold text-green-500 uppercase mb-2 flex items-center gap-2">
-                                                                        New Value
+                                                                        {t('audit_logs.label_new_value')}
                                                                     </h4>
                                                                     <pre className="text-xs font-mono bg-green-50/50 p-3 rounded-lg overflow-x-auto text-green-900 min-h-[100px]">
                                                                         {log.new_value ? JSON.stringify(log.new_value, null, 2) : 'null'}

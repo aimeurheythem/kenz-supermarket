@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Plus,
     FileText,
@@ -24,6 +25,7 @@ import SearchInput from '@/components/common/SearchInput';
 import type { Product } from '@/lib/types';
 
 export default function Purchases() {
+    const { t } = useTranslation();
     const { orders, currentOrderItems, loadOrders, loadOrderItems, createOrder, receiveOrder, updateStatus } = usePurchaseStore();
     const { suppliers, loadSuppliers } = useSupplierStore();
     const { products, loadProducts } = useProductStore();
@@ -109,11 +111,11 @@ export default function Purchases() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Purchase Orders</h1>
-                    <p className="text-sm text-[var(--color-text-muted)] mt-1">Manage supplier orders and restocking</p>
+                    <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">{t('purchases.title')}</h1>
+                    <p className="text-sm text-[var(--color-text-muted)] mt-1">{t('purchases.subtitle')}</p>
                 </div>
                 <Button className="btn-page-action" onClick={() => setIsNewOrderOpen(true)} icon={<Plus size={16} />}>
-                    New Purchase Order
+                    {t('purchases.new_order')}
                 </Button>
             </div>
 
@@ -122,12 +124,12 @@ export default function Purchases() {
                 <table className="w-full">
                     <thead className="bg-[var(--color-bg-secondary)] border-b border-[var(--color-border)]">
                         <tr>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">PO #</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">Supplier</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">Date</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">Status</th>
-                            <th className="px-4 py-3 text-right text-xs font-semibold text-[var(--color-text-muted)] uppercase">Total</th>
-                            <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--color-text-muted)] uppercase">Actions</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('purchases.col_po')}</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('purchases.col_supplier')}</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('purchases.col_date')}</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('purchases.col_status')}</th>
+                            <th className="px-4 py-3 text-right text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('purchases.col_total')}</th>
+                            <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--color-text-muted)] uppercase">{t('purchases.col_actions')}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--color-border)]">
@@ -182,28 +184,28 @@ export default function Purchases() {
             <Dialog open={isNewOrderOpen} onOpenChange={(open) => { if (!open) { setIsNewOrderOpen(false); resetForm(); } }}>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>Create Purchase Order</DialogTitle>
+                        <DialogTitle>{t('purchases.create_order')}</DialogTitle>
                     </DialogHeader>
                 <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 block">Supplier</label>
+                            <label className="text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 block">{t('purchases.label_supplier')}</label>
                             <select
                                 value={selectedSupplier}
                                 onChange={(e) => setSelectedSupplier(e.target.value ? Number(e.target.value) : '')}
                                 className="w-full px-3 py-2.5 rounded-[var(--radius-md)] bg-[var(--color-bg-input)] border border-[var(--color-border)] text-sm focus:border-[var(--color-accent)] focus:outline-none"
                             >
-                                <option value="">Select Supplier...</option>
+                                <option value="">{t('purchases.select_supplier')}</option>
                                 {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                             </select>
                         </div>
                         <div>
-                            <label className="text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 block">Notes</label>
+                            <label className="text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 block">{t('purchases.label_notes')}</label>
                             <input
                                 type="text"
                                 value={notes}
                                 onChange={e => setNotes(e.target.value)}
-                                placeholder="Optional notes..."
+                                placeholder={t('purchases.notes_placeholder')}
                                 className="w-full px-3 py-2.5 rounded-[var(--radius-md)] bg-[var(--color-bg-input)] border border-[var(--color-border)] text-sm focus:border-[var(--color-accent)] focus:outline-none"
                             />
                         </div>
@@ -214,7 +216,7 @@ export default function Purchases() {
                         <SearchInput
                             value={itemSearch}
                             onChange={setItemSearch}
-                            placeholder="Search products to add..."
+                            placeholder={t('purchases.search_products')}
                         />
                         {itemSearch && filteredProducts.length > 0 && (
                             <div className="absolute top-full left-0 right-0 z-10 mt-1 max-h-48 overflow-y-auto bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-lg">
@@ -225,7 +227,7 @@ export default function Purchases() {
                                         className="w-full text-left px-3 py-2 text-sm hover:bg-[var(--color-bg-hover)] text-[var(--color-text-primary)]"
                                     >
                                         <span className="font-medium">{p.name}</span>
-                                        <span className="text-[var(--color-text-muted)] ml-2 text-xs">Stock: {p.stock_quantity}</span>
+                                        <span className="text-[var(--color-text-muted)] ml-2 text-xs">{t('purchases.stock_label', { count: p.stock_quantity })}</span>
                                     </button>
                                 ))}
                             </div>
@@ -237,10 +239,10 @@ export default function Purchases() {
                         <table className="w-full">
                             <thead className="bg-[var(--color-bg-secondary)]">
                                 <tr>
-                                    <th className="px-3 py-2 text-left text-xs font-semibold text-[var(--color-text-muted)]">Product</th>
-                                    <th className="px-3 py-2 text-right text-xs font-semibold text-[var(--color-text-muted)] w-24">Quantity</th>
-                                    <th className="px-3 py-2 text-right text-xs font-semibold text-[var(--color-text-muted)] w-32">Unit Cost</th>
-                                    <th className="px-3 py-2 text-right text-xs font-semibold text-[var(--color-text-muted)] w-32">Line Total</th>
+                                    <th className="px-3 py-2 text-left text-xs font-semibold text-[var(--color-text-muted)]">{t('purchases.col_product')}</th>
+                                    <th className="px-3 py-2 text-right text-xs font-semibold text-[var(--color-text-muted)] w-24">{t('purchases.col_quantity')}</th>
+                                    <th className="px-3 py-2 text-right text-xs font-semibold text-[var(--color-text-muted)] w-32">{t('purchases.col_unit_cost')}</th>
+                                    <th className="px-3 py-2 text-right text-xs font-semibold text-[var(--color-text-muted)] w-32">{t('purchases.col_line_total')}</th>
                                     <th className="px-3 py-2 w-10"></th>
                                 </tr>
                             </thead>
@@ -275,13 +277,13 @@ export default function Purchases() {
                                     </tr>
                                 ))}
                                 {orderItems.length === 0 && (
-                                    <tr><td colSpan={5} className="py-8 text-center text-sm text-[var(--color-text-muted)]">Add products to create an order</td></tr>
+                                    <tr><td colSpan={5} className="py-8 text-center text-sm text-[var(--color-text-muted)]">{t('purchases.empty_items')}</td></tr>
                                 )}
                             </tbody>
                             {orderItems.length > 0 && (
                                 <tfoot className="bg-[var(--color-bg-secondary)] font-semibold">
                                     <tr>
-                                        <td colSpan={3} className="px-3 py-2 text-right text-sm">Total:</td>
+                                        <td colSpan={3} className="px-3 py-2 text-right text-sm">{t('purchases.total')}</td>
                                         <td className="px-3 py-2 text-right text-sm">
                                             {formatCurrency(orderItems.reduce((s, i) => s + (i.quantity * i.cost), 0))}
                                         </td>
@@ -293,8 +295,8 @@ export default function Purchases() {
                     </div>
 
                     <div className="flex justify-end gap-3">
-                        <Button variant="secondary" onClick={() => { setIsNewOrderOpen(false); resetForm(); }}>Cancel</Button>
-                        <Button onClick={handleSubmitOrder} disabled={!selectedSupplier || orderItems.length === 0}>Create Order</Button>
+                        <Button variant="secondary" onClick={() => { setIsNewOrderOpen(false); resetForm(); }}>{t('purchases.cancel')}</Button>
+                        <Button onClick={handleSubmitOrder} disabled={!selectedSupplier || orderItems.length === 0}>{t('purchases.create')}</Button>
                     </div>
                 </div>
                 </DialogContent>
@@ -305,7 +307,7 @@ export default function Purchases() {
                 <Dialog open={true} onOpenChange={(open) => { if (!open) setViewedOrder(null); }}>
                 <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>Order Details: PO-{activeOrder.id}</DialogTitle>
+                        <DialogTitle>{t('purchases.order_details', { id: activeOrder.id })}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-6">
                         <div className="flex justify-between items-start p-4 bg-[var(--color-bg-secondary)] rounded-[var(--radius-md)]">
@@ -326,7 +328,7 @@ export default function Purchases() {
                         </div>
 
                         <div>
-                            <h3 className="font-semibold text-sm mb-2">Order Items</h3>
+                            <h3 className="font-semibold text-sm mb-2">{t('purchases.order_items')}</h3>
                             <table className="w-full">
                                 <thead>
                                     <tr className="border-b border-[var(--color-border)]">
@@ -348,7 +350,7 @@ export default function Purchases() {
                                 </tbody>
                                 <tfoot>
                                     <tr className="border-t border-[var(--color-border)]">
-                                        <td colSpan={3} className="py-2 text-right font-bold text-sm">Total:</td>
+                                        <td colSpan={3} className="py-2 text-right font-bold text-sm">{t('purchases.total')}</td>
                                         <td className="py-2 text-right font-bold text-sm text-[var(--color-accent)]">{formatCurrency(activeOrder.total_amount)}</td>
                                     </tr>
                                 </tfoot>
@@ -356,14 +358,14 @@ export default function Purchases() {
                         </div>
 
                         <div className="flex justify-end pt-4 border-t border-[var(--color-border)]">
-                            <Button variant="secondary" onClick={() => setViewedOrder(null)}>Close</Button>
+                            <Button variant="secondary" onClick={() => setViewedOrder(null)}>{t('purchases.close')}</Button>
                             {activeOrder.status !== 'received' && activeOrder.status !== 'cancelled' && (
                                 <Button
                                     className="ml-3"
                                     onClick={() => { receiveOrder(activeOrder.id); setViewedOrder(null); }}
                                     icon={<CheckCircle size={16} />}
                                 >
-                                    Receive Order
+                                    {t('purchases.receive_order')}
                                 </Button>
                             )}
                         </div>

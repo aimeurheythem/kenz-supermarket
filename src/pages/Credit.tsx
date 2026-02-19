@@ -75,7 +75,7 @@ export default function Credit() {
             { key: 'total_debt', label: 'Total Debt' },
         ];
         exportToCsv(headers, filteredDebtors as unknown as Record<string, unknown>[], `credit_report_${new Date().toISOString().split('T')[0]}.csv`);
-        toast.success(`Exported ${filteredDebtors.length} debtor records`);
+        toast.success(t('credit.export_success', { count: filteredDebtors.length }));
     };
 
     return (
@@ -92,12 +92,12 @@ export default function Credit() {
                         </div>
                         <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-white/5">
                             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Active Debts</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest">{t('credit.active_debts')}</span>
                         </div>
                     </div>
 
                     <div className="relative z-10 space-y-2">
-                        <span className="text-zinc-400 text-xs font-bold uppercase tracking-[0.2em]">Total Outstanding</span>
+                        <span className="text-zinc-400 text-xs font-bold uppercase tracking-[0.2em]">{t('credit.total_outstanding')}</span>
                         <div className="flex items-baseline gap-1">
                             <h2 className="text-5xl lg:text-7xl font-black tracking-tighter">
                                 {formatCurrency(totalOutstanding)}
@@ -113,7 +113,7 @@ export default function Credit() {
                             <div className="p-3 bg-red-50 text-red-500 rounded-2xl">
                                 <Users size={20} />
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Total Debtors</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{t('credit.total_debtors')}</span>
                         </div>
                         <span className="text-4xl font-black text-black tracking-tighter">{debtorCount}</span>
                     </div>
@@ -122,9 +122,9 @@ export default function Credit() {
                             <div className="p-3 bg-white text-emerald-500 rounded-2xl shadow-sm">
                                 <CheckCircle2 size={20} />
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600/60">Collection Health</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600/60">{t('credit.collection_health')}</span>
                         </div>
-                        <span className="text-4xl font-black text-emerald-700 tracking-tighter">Good</span>
+                        <span className="text-4xl font-black text-emerald-700 tracking-tighter">{t('credit.collection_good')}</span>
                     </div>
                 </div>
             </div>
@@ -139,21 +139,21 @@ export default function Credit() {
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search debtors..."
+                            placeholder={t('credit.search_placeholder')}
                             className="w-full h-14 pl-14 pr-6 bg-zinc-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-black/5 transition-all font-bold placeholder:font-medium placeholder:text-zinc-400"
                         />
                     </div>
                     <div className="flex items-center gap-3">
                         <div className="relative">
                             <Button variant="secondary" icon={<Filter size={18} />} onClick={() => setShowFilter(!showFilter)}>
-                                {filterStatus === 'all' ? 'Filter' : filterStatus === 'high' ? 'High Debt' : 'Low Debt'}
+                                {filterStatus === 'all' ? t('credit.filter') : filterStatus === 'high' ? t('credit.high_debt') : t('credit.low_debt')}
                             </Button>
                             {showFilter && (
                                 <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl border border-zinc-100 shadow-xl z-50 p-2">
                                     {[
-                                        { key: 'all' as const, label: 'All Debtors' },
-                                        { key: 'high' as const, label: 'High Debt (≥10k)' },
-                                        { key: 'low' as const, label: 'Low Debt (<10k)' },
+                                        { key: 'all' as const, label: t('credit.filter_all') },
+                                        { key: 'high' as const, label: t('credit.filter_high') },
+                                        { key: 'low' as const, label: t('credit.filter_low') },
                                     ].map(opt => (
                                         <button
                                             key={opt.key}
@@ -169,7 +169,7 @@ export default function Credit() {
                                 </div>
                             )}
                         </div>
-                        <Button variant="secondary" icon={<Download size={18} />} onClick={handleExport}>Export</Button>
+                        <Button variant="secondary" icon={<Download size={18} />} onClick={handleExport}>{t('credit.export')}</Button>
                     </div>
                 </div>
 
@@ -179,11 +179,11 @@ export default function Credit() {
                         <table className="w-full">
                             <thead>
                                 <tr className="text-left border-b border-zinc-100">
-                                    <th className="pb-6 pl-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Customer</th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Contact</th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Total Debt</th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Status</th>
-                                    <th className="pb-6 pr-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Actions</th>
+                                    <th className="pb-6 pl-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('credit.col_customer')}</th>
+                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('credit.col_contact')}</th>
+                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('credit.col_debt')}</th>
+                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('credit.col_status')}</th>
+                                    <th className="pb-6 pr-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('credit.col_actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-50">
@@ -196,7 +196,7 @@ export default function Credit() {
                                                 <div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center">
                                                     <CheckCircle2 size={32} className="text-zinc-400 ml-1" />
                                                 </div>
-                                                <p className="font-bold text-zinc-400">No active debts found.</p>
+                                                <p className="font-bold text-zinc-400">{t('credit.no_debts')}</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -228,7 +228,7 @@ export default function Credit() {
                                             <td className="py-6">
                                                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-50 border border-red-100">
                                                     <AlertCircle size={14} className="text-red-500" />
-                                                    <span className="text-[10px] font-bold uppercase tracking-wide text-red-600">Overdue</span>
+                                                    <span className="text-[10px] font-bold uppercase tracking-wide text-red-600">{t('credit.status_overdue')}</span>
                                                 </div>
                                             </td>
                                             <td className="py-6 pr-4 text-right">
@@ -239,7 +239,7 @@ export default function Credit() {
                                                         setShowPaymentModal(true);
                                                     }}
                                                 >
-                                                    Settle Debt
+                                                    {t('credit.settle_debt')}
                                                 </Button>
                                             </td>
                                         </tr>
@@ -274,6 +274,7 @@ export default function Credit() {
 
 function PaymentModal({ customer, onClose, onSuccess }: { customer: Customer, onClose: () => void, onSuccess: () => void }) {
     const { makePayment } = useCustomerStore();
+    const { t } = useTranslation();
     const [amount, setAmount] = useState(customer.total_debt.toString());
     const [isLoading, setIsLoading] = useState(false);
 
@@ -285,7 +286,7 @@ function PaymentModal({ customer, onClose, onSuccess }: { customer: Customer, on
             onSuccess();
         } catch (error) {
             console.error(error);
-            toast.error('Payment failed');
+            toast.error(t('credit.payment_failed'));
         } finally {
             setIsLoading(false);
         }
@@ -302,8 +303,8 @@ function PaymentModal({ customer, onClose, onSuccess }: { customer: Customer, on
                 >
                     <div className="p-8 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
                         <div>
-                            <h2 className="text-xl font-black text-black">Record Payment</h2>
-                            <p className="text-sm font-medium text-zinc-400">for {customer.full_name}</p>
+                            <h2 className="text-xl font-black text-black">{t('credit.record_payment')}</h2>
+                            <p className="text-sm font-medium text-zinc-400">{t('credit.payment_for', { name: customer.full_name })}</p>
                         </div>
                         <div className="p-3 bg-white rounded-xl shadow-sm">
                             <Banknote size={24} className="text-emerald-500" />
@@ -313,12 +314,12 @@ function PaymentModal({ customer, onClose, onSuccess }: { customer: Customer, on
                     <form onSubmit={handleSubmit} className="p-8 space-y-8">
                         <div className="space-y-4">
                             <div className="p-4 bg-zinc-50 rounded-xl border border-zinc-100 flex justify-between items-center">
-                                <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">Total Due</span>
+                                <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">{t('credit.total_due')}</span>
                                 <span className="text-xl font-black text-red-500">{formatCurrency(customer.total_debt)}</span>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 ml-1">Payment Amount</label>
+                                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 ml-1">{t('credit.payment_amount')}</label>
                                 <div className="relative">
                                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-zinc-400">DZ</span>
                                     <input
@@ -337,7 +338,7 @@ function PaymentModal({ customer, onClose, onSuccess }: { customer: Customer, on
                                 Cancel
                             </Button>
                             <Button type="submit" disabled={isLoading} className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black border-none shadow-lg shadow-yellow-400/20">
-                                {isLoading ? 'Processing...' : 'Confirm Payment'}
+                                {isLoading ? t('credit.processing') : t('credit.confirm_payment')}
                             </Button>
                         </div>
                     </form>

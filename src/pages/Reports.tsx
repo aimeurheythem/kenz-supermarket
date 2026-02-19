@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     BarChart3,
     TrendingUp,
@@ -39,6 +40,7 @@ import type { User } from '@/lib/types';
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
 export default function Reports() {
+    const { t } = useTranslation();
     const {
         period,
         setPeriod,
@@ -113,9 +115,9 @@ export default function Reports() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Analytics & Reports</h1>
+                    <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">{t('reports.title')}</h1>
                     <p className="text-sm text-[var(--color-text-muted)] mt-1">
-                        Performance metrics and sales insights
+                        {t('reports.subtitle')}
                     </p>
                 </div>
 
@@ -128,7 +130,7 @@ export default function Reports() {
                                 activeTab === 'overview' ? "bg-[var(--color-bg-card)] text-[var(--color-text-primary)] shadow-sm" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
                             )}
                         >
-                            Overview
+                            {t('reports.tab_overview')}
                         </button>
                         <button
                             onClick={() => setActiveTab('cashiers')}
@@ -137,7 +139,7 @@ export default function Reports() {
                                 activeTab === 'cashiers' ? "bg-[var(--color-bg-card)] text-[var(--color-text-primary)] shadow-sm" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
                             )}
                         >
-                            Cashiers
+                            {t('reports.tab_cashiers')}
                         </button>
 
                     </div>
@@ -148,23 +150,23 @@ export default function Reports() {
                             onClick={() => setPeriod('7days')}
                             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${period === '7days' ? 'bg-[var(--color-bg-card)] text-[var(--color-text-primary)] shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'}`}
                         >
-                            7 Days
+                            {t('reports.period_7days')}
                         </button>
                         <button
                             onClick={() => setPeriod('30days')}
                             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${period === '30days' ? 'bg-[var(--color-bg-card)] text-[var(--color-text-primary)] shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'}`}
                         >
-                            30 Days
+                            {t('reports.period_30days')}
                         </button>
                         <button
                             onClick={() => setPeriod('year')}
                             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${period === 'year' ? 'bg-[var(--color-bg-card)] text-[var(--color-text-primary)] shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'}`}
                         >
-                            Year
+                            {t('reports.period_year')}
                         </button>
                     </div>
                     <Button className="btn-page-action" icon={<Download size={16} />} onClick={activeTab === 'cashiers' ? handleExportCashierReport : handleExport}>
-                        Export
+                        {t('reports.export')}
                     </Button>
                 </div>
             </div>
@@ -179,10 +181,10 @@ export default function Reports() {
                                 <div className="p-2 rounded-lg bg-orange-500/10">
                                     <TrendingUp size={20} className="text-orange-500" />
                                 </div>
-                                <p className="text-sm font-medium text-[var(--color-text-muted)]">Total Revenue</p>
+                                <p className="text-sm font-medium text-[var(--color-text-muted)]">{t('reports.kpi_revenue')}</p>
                             </div>
                             <p className="text-2xl font-bold text-[var(--color-text-primary)]">{formatCurrency(totalRevenue)}</p>
-                            <p className="text-xs text-[var(--color-text-muted)] mt-1">in selected period</p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-1">{t('reports.kpi_in_period')}</p>
                         </div>
 
                         <div className="p-5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
@@ -190,10 +192,10 @@ export default function Reports() {
                                 <div className="p-2 rounded-lg bg-emerald-500/10">
                                     <BarChart3 size={20} className="text-emerald-500" />
                                 </div>
-                                <p className="text-sm font-medium text-[var(--color-text-muted)]">Total Orders</p>
+                                <p className="text-sm font-medium text-[var(--color-text-muted)]">{t('reports.kpi_orders')}</p>
                             </div>
                             <p className="text-2xl font-bold text-[var(--color-text-primary)]">{totalOrders}</p>
-                            <p className="text-xs text-[var(--color-text-muted)] mt-1">transactions processed</p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-1">{t('reports.kpi_transactions')}</p>
                         </div>
 
                         <div className="p-5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
@@ -201,16 +203,16 @@ export default function Reports() {
                                 <div className="p-2 rounded-lg bg-blue-500/10">
                                     <CreditCard size={20} className="text-blue-500" />
                                 </div>
-                                <p className="text-sm font-medium text-[var(--color-text-muted)]">Avg. Order Value</p>
+                                <p className="text-sm font-medium text-[var(--color-text-muted)]">{t('reports.kpi_avg_order')}</p>
                             </div>
                             <p className="text-2xl font-bold text-[var(--color-text-primary)]">{formatCurrency(avgOrderValue)}</p>
-                            <p className="text-xs text-[var(--color-text-muted)] mt-1">per transaction</p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-1">{t('reports.kpi_per_transaction')}</p>
                         </div>
                     </div>
 
                     {/* Main Chart */}
                     <div className="p-6 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)] h-[400px]">
-                        <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-6">Revenue Trend</h3>
+                        <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-6">{t('reports.revenue_trend')}</h3>
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={salesData}>
                                 <defs>
@@ -260,10 +262,10 @@ export default function Reports() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Top Products */}
                         <div className="p-6 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
-                            <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Top Selling Products</h3>
+                            <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">{t('reports.top_products')}</h3>
                             <div className="flex flex-col gap-4">
                                 {topProducts.length === 0 ? (
-                                    <p className="text-sm text-[var(--color-text-muted)]">No sales data yet.</p>
+                                    <p className="text-sm text-[var(--color-text-muted)]">{t('reports.no_data')}</p>
                                 ) : (
                                     topProducts.map((product, i) => (
                                         <div key={product.id} className="flex items-center justify-between">
@@ -273,7 +275,7 @@ export default function Reports() {
                                                 </span>
                                                 <div>
                                                     <p className="text-sm font-medium text-[var(--color-text-primary)]">{product.name}</p>
-                                                    <p className="text-xs text-[var(--color-text-muted)]">{product.quantity_sold} units sold</p>
+                                                    <p className="text-xs text-[var(--color-text-muted)]">{t('reports.units_sold', { count: product.quantity_sold })}</p>
                                                 </div>
                                             </div>
                                             <span className="text-sm font-semibold text-[var(--color-text-primary)]">
@@ -287,7 +289,7 @@ export default function Reports() {
 
                         {/* Category Performance */}
                         <div className="p-6 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]">
-                            <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Sales by Category</h3>
+                            <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">{t('reports.sales_by_category')}</h3>
                             <div className="h-[250px]">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
@@ -362,7 +364,7 @@ export default function Reports() {
                                 <div className="p-2 rounded-lg bg-emerald-500/10">
                                     <Banknote size={20} className="text-emerald-500" />
                                 </div>
-                                <p className="text-sm font-medium text-[var(--color-text-muted)]">Cashier Sales</p>
+                                <p className="text-sm font-medium text-[var(--color-text-muted)]">{t('reports.cashier_total_sales')}</p>
                             </div>
                             <p className="text-2xl font-bold text-[var(--color-text-primary)]">{formatCurrency(totalCashierSales)}</p>
                             <p className="text-xs text-[var(--color-text-muted)] mt-1">from {cashierPerformance.length} cashiers</p>
@@ -372,7 +374,7 @@ export default function Reports() {
                                 <div className="p-2 rounded-lg bg-blue-500/10">
                                     <BarChart3 size={20} className="text-blue-500" />
                                 </div>
-                                <p className="text-sm font-medium text-[var(--color-text-muted)]">Transactions</p>
+                                <p className="text-sm font-medium text-[var(--color-text-muted)]">{t('reports.cashier_transactions')}</p>
                             </div>
                             <p className="text-2xl font-bold text-[var(--color-text-primary)]">{totalCashierTransactions}</p>
                             <p className="text-xs text-[var(--color-text-muted)] mt-1">processed</p>
@@ -382,10 +384,10 @@ export default function Reports() {
                                 <div className="p-2 rounded-lg bg-purple-500/10">
                                     <Users size={20} className="text-purple-500" />
                                 </div>
-                                <p className="text-sm font-medium text-[var(--color-text-muted)]">Top Performer</p>
+                                <p className="text-sm font-medium text-[var(--color-text-muted)]">{t('reports.cashier_top')}</p>
                             </div>
                             <p className="text-lg font-bold text-[var(--color-text-primary)] truncate">
-                                {topCashier?.cashier_name || 'N/A'}
+                                {topCashier?.cashier_name || t('common.na')}
                             </p>
                             <p className="text-xs text-[var(--color-text-muted)] mt-1">
                                 {topCashier ? formatCurrency(topCashier.total_sales) : 'No sales'}
@@ -396,7 +398,7 @@ export default function Reports() {
                                 <div className="p-2 rounded-lg bg-orange-500/10">
                                     <Clock size={20} className="text-orange-500" />
                                 </div>
-                                <p className="text-sm font-medium text-[var(--color-text-muted)]">Total Sessions</p>
+                                <p className="text-sm font-medium text-[var(--color-text-muted)]">{t('reports.cashier_sessions')}</p>
                             </div>
                             <p className="text-2xl font-bold text-[var(--color-text-primary)]">
                                 {sessionReports.length}

@@ -35,9 +35,9 @@ export default function Transactions() {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[var(--color-text-primary)] tracking-tight">Transactions</h1>
+                    <h1 className="text-2xl font-bold text-[var(--color-text-primary)] tracking-tight">{t('transactions.title')}</h1>
                     <p className="text-[var(--color-text-muted)] text-sm mt-1">
-                        View and manage your sales history, refunds, and voids.
+                        {t('transactions.subtitle')}
                     </p>
                 </div>
 
@@ -54,9 +54,9 @@ export default function Transactions() {
                                         : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)]"
                                 )}
                             >
-                                {p === 'today' ? 'Today' :
-                                    p === '7days' ? '7 Days' :
-                                        p === '30days' ? '30 Days' : 'Year'}
+                                {p === 'today' ? t('transactions.period_today') :
+                                    p === '7days' ? t('transactions.period_7days') :
+                                        p === '30days' ? t('transactions.period_30days') : t('transactions.period_year')}
                             </button>
                         ))}
                     </div>
@@ -70,7 +70,7 @@ export default function Transactions() {
                         <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
                             <ArrowUpRight size={18} />
                         </div>
-                        <span className="text-[var(--color-text-muted)] text-sm font-medium">Total Revenue</span>
+                        <span className="text-[var(--color-text-muted)] text-sm font-medium">{t('transactions.stat_revenue')}</span>
                     </div>
                     <div className="text-2xl font-bold text-[var(--color-text-primary)] tracking-tight">
                         {formatCurrency(totalRevenue)}
@@ -82,7 +82,7 @@ export default function Transactions() {
                         <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
                             <Clock size={18} />
                         </div>
-                        <span className="text-[var(--color-text-muted)] text-sm font-medium">Transactions</span>
+                        <span className="text-[var(--color-text-muted)] text-sm font-medium">{t('transactions.stat_transactions')}</span>
                     </div>
                     <div className="text-2xl font-bold text-[var(--color-text-primary)] tracking-tight">
                         {totalTransactions}
@@ -94,7 +94,7 @@ export default function Transactions() {
                         <div className="p-2 rounded-lg bg-red-500/10 text-red-500">
                             <ArrowDownLeft size={18} />
                         </div>
-                        <span className="text-[var(--color-text-muted)] text-sm font-medium">Refunded / Voided</span>
+                        <span className="text-[var(--color-text-muted)] text-sm font-medium">{t('transactions.stat_refunded')}</span>
                     </div>
                     <div className="text-2xl font-bold text-[var(--color-text-primary)] tracking-tight">
                         {refundedCount}
@@ -110,14 +110,14 @@ export default function Transactions() {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" size={14} />
                         <input
                             type="text"
-                            placeholder="Search ID or Customer..."
+                            placeholder={t('transactions.search_placeholder')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg pl-9 pr-3 py-2 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-placeholder)] focus:outline-none focus:border-[var(--color-border-hover)] transition-colors"
                         />
                     </div>
                     <Button variant="secondary" size="sm" onClick={() => loadSales()} icon={<Filter size={14} className="mr-1" />}>
-                        Refresh List
+                        {t('transactions.refresh')}
                     </Button>
                 </div>
 
@@ -126,14 +126,14 @@ export default function Transactions() {
                     <table className="w-full text-left text-sm">
                         <thead className="bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] border-b border-[var(--color-border)]">
                             <tr>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">ID</th>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">Date</th>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">Customer</th>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">Payment</th>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">Cashier</th>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider text-right">Total</th>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider text-center">Status</th>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider text-right">Actions</th>
+                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">{t('transactions.col_id')}</th>
+                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">{t('transactions.col_date')}</th>
+                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">{t('transactions.col_customer')}</th>
+                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">{t('transactions.col_payment')}</th>
+                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">{t('transactions.col_cashier')}</th>
+                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider text-right">{t('transactions.col_total')}</th>
+                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider text-center">{t('transactions.col_status')}</th>
+                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider text-right">{t('transactions.col_actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--color-border)]">
@@ -163,7 +163,7 @@ export default function Transactions() {
                                             {sale.customer_name ? (
                                                 <span className="text-[var(--color-text-primary)]">{sale.customer_name}</span>
                                             ) : (
-                                                <span className="text-[var(--color-text-muted)] italic">Walk-in</span>
+                                                <span className="text-[var(--color-text-muted)] italic">{t('transactions.walk_in')}</span>
                                             )}
                                         </td>
                                         <td className="px-6 py-4 text-[var(--color-text-muted)] capitalize">
@@ -171,7 +171,7 @@ export default function Transactions() {
                                                 {sale.payment_method}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-[var(--color-text-muted)] text-xs">{sale.user_name || 'N/A'}</td>
+                                        <td className="px-6 py-4 text-[var(--color-text-muted)] text-xs">{sale.user_name || t('common.na')}</td>
                                         <td className="px-6 py-4 text-right font-bold text-[var(--color-text-primary)] font-mono">
                                             {formatCurrency(sale.total)}
                                         </td>

@@ -54,7 +54,7 @@ export default function Expenses() {
             { key: 'payment_method', label: 'Payment Method' },
         ];
         exportToCsv(headers, filteredExpenses as unknown as Record<string, unknown>[], `expenses_${new Date().toISOString().split('T')[0]}.csv`);
-        toast.success(`Exported ${filteredExpenses.length} expenses`);
+        toast.success(t('expenses.export_success', { count: filteredExpenses.length }));
     };
 
     return (
@@ -62,15 +62,15 @@ export default function Expenses() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-black tracking-tight">Expenses</h1>
-                    <p className="text-zinc-500 font-medium mt-1">Track and manage your operational costs.</p>
+                    <h1 className="text-3xl font-black text-black tracking-tight">{t('expenses.title')}</h1>
+                    <p className="text-zinc-500 font-medium mt-1">{t('expenses.subtitle')}</p>
                 </div>
                 <Button
                     className="btn-page-action"
                     icon={<Plus size={18} />}
                     onClick={() => setIsModalOpen(true)}
                 >
-                    Add Expense
+                    {t('expenses.add_expense')}
                 </Button>
             </div>
 
@@ -83,13 +83,13 @@ export default function Expenses() {
                             <div className="p-3 bg-white/10 rounded-xl backdrop-blur-md">
                                 <DollarSign size={20} />
                             </div>
-                            <span className="text-sm font-bold uppercase tracking-widest opacity-60">Total Expenses</span>
+                            <span className="text-sm font-bold uppercase tracking-widest opacity-60">{t('expenses.stat_total')}</span>
                         </div>
                         <div className="flex items-end gap-2">
                             <h2 className="text-5xl font-black tracking-tighter">
                                 {formatCurrency(stats.total)}
                             </h2>
-                            <span className="text-zinc-400 font-bold mb-2">/ All time</span>
+                            <span className="text-zinc-400 font-bold mb-2">{t('expenses.stat_all_time')}</span>
                         </div>
                     </div>
                 </div>
@@ -99,7 +99,7 @@ export default function Expenses() {
                         <div className="p-3 bg-red-50 text-red-500 rounded-xl">
                             <TrendingUp size={20} />
                         </div>
-                        <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">Top Category</span>
+                        <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">{t('expenses.stat_top_category')}</span>
                     </div>
                     {stats.byCategory.length > 0 ? (
                         <div>
@@ -111,7 +111,7 @@ export default function Expenses() {
                             </p>
                         </div>
                     ) : (
-                        <p className="text-zinc-400 font-medium">No data yet</p>
+                        <p className="text-zinc-400 font-medium">{t('expenses.stat_no_data')}</p>
                     )}
                 </div>
 
@@ -120,7 +120,7 @@ export default function Expenses() {
                         <div className="p-3 bg-blue-50 text-blue-500 rounded-xl">
                             <PieChart size={20} />
                         </div>
-                        <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">Categories</span>
+                        <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">{t('expenses.stat_categories')}</span>
                     </div>
                     <div className="space-y-3">
                         {stats.byCategory.slice(0, 3).map((cat) => (
@@ -143,14 +143,14 @@ export default function Expenses() {
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Search expenses..."
+                            placeholder={t('expenses.search_placeholder')}
                             className="w-full h-14 pl-14 pr-6 bg-zinc-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-black/5 transition-all font-bold placeholder:font-medium placeholder:text-zinc-400"
                         />
                     </div>
                     <div className="flex items-center gap-3">
                         <div className="relative">
                             <Button variant="secondary" icon={<Filter size={18} />} onClick={() => setShowFilter(!showFilter)}>
-                                {filterCategory === 'all' ? 'Filter' : filterCategory}
+                                {filterCategory === 'all' ? t('expenses.filter') : filterCategory}
                             </Button>
                             {showFilter && (
                                 <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl border border-zinc-100 shadow-xl z-50 p-2">
@@ -161,7 +161,7 @@ export default function Expenses() {
                                             filterCategory === 'all' ? "bg-black text-white" : "text-zinc-600 hover:bg-zinc-50"
                                         )}
                                     >
-                                        All Categories
+                                        {t('expenses.filter_all')}
                                     </button>
                                     {uniqueCategories.map(cat => (
                                         <button
@@ -178,7 +178,7 @@ export default function Expenses() {
                                 </div>
                             )}
                         </div>
-                        <Button variant="secondary" icon={<Download size={18} />} onClick={handleExportExpenses}>Export</Button>
+                        <Button variant="secondary" icon={<Download size={18} />} onClick={handleExportExpenses}>{t('expenses.export')}</Button>
                     </div>
                 </div>
 
@@ -188,11 +188,11 @@ export default function Expenses() {
                         <table className="w-full">
                             <thead>
                                 <tr className="text-left border-b border-zinc-100">
-                                    <th className="pb-6 pl-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Description</th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Category</th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Date</th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Amount</th>
-                                    <th className="pb-6 pr-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Actions</th>
+                                    <th className="pb-6 pl-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('expenses.col_description')}</th>
+                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('expenses.col_category')}</th>
+                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('expenses.col_date')}</th>
+                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('expenses.col_amount')}</th>
+                                    <th className="pb-6 pr-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{t('expenses.col_actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-50">
@@ -205,7 +205,7 @@ export default function Expenses() {
                                                 <div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center">
                                                     <Wallet size={32} className="text-zinc-400" />
                                                 </div>
-                                                <p className="font-bold text-zinc-400">No expenses recorded yet.</p>
+                                                <p className="font-bold text-zinc-400">{t('expenses.no_expenses')}</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -235,7 +235,7 @@ export default function Expenses() {
                                                     onClick={() => setDeleteTarget(expense.id)}
                                                     className="text-zinc-400 hover:text-red-500 font-bold text-xs uppercase tracking-wide transition-colors"
                                                 >
-                                                    Delete
+                                                    {t('expenses.delete_expense')}
                                                 </button>
                                             </td>
                                         </tr>
@@ -256,8 +256,8 @@ export default function Expenses() {
                     if (deleteTarget !== null) deleteExpense(deleteTarget);
                     setDeleteTarget(null);
                 }}
-                title="Delete Expense"
-                description="Are you sure you want to delete this expense? This action cannot be undone."
+                title={t('expenses.delete_title')}
+                description={t('expenses.delete_description')}
             />
         </div>
     );

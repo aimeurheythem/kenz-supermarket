@@ -43,9 +43,9 @@ export default function Customers() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[var(--color-text-primary)] tracking-tight">Customers</h1>
+                    <h1 className="text-2xl font-bold text-[var(--color-text-primary)] tracking-tight">{t('customers.title')}</h1>
                     <p className="text-[var(--color-text-muted)] text-sm mt-1">
-                        Manage your customer database and loyalty program.
+                        {t('customers.subtitle')}
                     </p>
                 </div>
                 <Button
@@ -53,7 +53,7 @@ export default function Customers() {
                     icon={<Plus size={18} />}
                     onClick={() => { setSelectedCustomer(null); setIsModalOpen(true); }}
                 >
-                    Add Customer
+                    {t('customers.add_customer')}
                 </Button>
             </div>
 
@@ -65,7 +65,7 @@ export default function Customers() {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" size={14} />
                         <input
                             type="text"
-                            placeholder="Search by name, phone, or email..."
+                            placeholder={t('customers.search_placeholder')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg pl-9 pr-3 py-2 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-placeholder)] focus:outline-none focus:border-[var(--color-border-hover)] transition-colors"
@@ -78,11 +78,11 @@ export default function Customers() {
                     <table className="w-full text-left text-sm">
                         <thead className="bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] border-b border-[var(--color-border)]">
                             <tr>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">Customer</th>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">Contact</th>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">Loyalty</th>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">Debt</th>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider text-right">Actions</th>
+                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">{t('customers.col_customer')}</th>
+                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">{t('customers.col_contact')}</th>
+                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">{t('customers.col_loyalty')}</th>
+                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">{t('customers.col_debt')}</th>
+                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider text-right">{t('customers.col_actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--color-border)]">
@@ -133,7 +133,7 @@ export default function Customers() {
                                             <div className="flex items-center gap-2">
                                                 <Award size={16} className="text-yellow-500" />
                                                 <span className="text-[var(--color-text-primary)] font-medium">{customer.loyalty_points}</span>
-                                                <span className="text-[var(--color-text-muted)] text-xs">pts</span>
+                                                <span className="text-[var(--color-text-muted)] text-xs">{t('customers.pts')}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
@@ -179,8 +179,8 @@ export default function Customers() {
                 isOpen={deleteTarget !== null}
                 onClose={() => setDeleteTarget(null)}
                 onConfirm={confirmDelete}
-                title="Delete Customer"
-                description="Are you sure you want to delete this customer? This action cannot be undone."
+                title={t('customers.delete_title')}
+                description={t('customers.delete_description')}
             />
         </div>
     );

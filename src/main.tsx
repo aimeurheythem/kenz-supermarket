@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { HashRouter } from 'react-router-dom';
 import App from './App';
-import { initDatabase } from '../database/db';
+import { initDatabase, saveDatabaseImmediate } from '../database/db';
 import { seedDatabase } from '../database/seed';
 import './i18n';
 import ErrorBoundary from './components/common/ErrorBoundary';
@@ -18,6 +18,13 @@ function Root() {
             try {
                 // Initialize DB as fast as possible without artificial delay
                 await initDatabase();
+
+                // Register flush-on-quit so no in-memory writes are lost
+                if (window.electronAPI?.onBeforeQuit) {
+                    window.electronAPI.onBeforeQuit(async () => {
+                        await saveDatabaseImmediate();
+                    });
+                }
 
                 // Seed is non-fatal: if data already exists, silently skip
                 try {

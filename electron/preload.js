@@ -64,4 +64,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
      * @returns {Array<{ name: string, displayName: string, description: string, status: number, isDefault: boolean }>}
      */
     getPrinters: () => ipcRenderer.invoke('print:get-printers'),
+
+    // ========================
+    // App Lifecycle
+    // ========================
+
+    /**
+     * Register a callback for when the app is about to quit.
+     * The callback should flush any pending database writes.
+     */
+    onBeforeQuit: (callback) => {
+        ipcRenderer.on('app:before-quit', () => callback());
+    },
 });

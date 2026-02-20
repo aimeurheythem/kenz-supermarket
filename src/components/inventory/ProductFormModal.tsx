@@ -148,10 +148,10 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                                         className="text-zinc-400 group-hover:text-black transition-colors"
                                     />
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-white border border-zinc-100 rounded-2xl p-1 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                                <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
                                     <DropdownMenuItem
                                         onClick={() => setForm({ ...form, category_id: undefined })}
-                                        className="text-zinc-400 hover:text-black focus:bg-zinc-50 rounded-xl px-4 py-3 font-bold transition-all cursor-pointer"
+                                        className="px-4 py-3 font-bold"
                                     >
                                         {t('inventory.form.placeholders.none')}
                                     </DropdownMenuItem>
@@ -160,10 +160,8 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                                             key={cat.id}
                                             onClick={() => setForm({ ...form, category_id: cat.id })}
                                             className={cn(
-                                                'flex items-center justify-between px-4 py-3 rounded-xl font-bold transition-all cursor-pointer',
-                                                form.category_id === cat.id
-                                                    ? 'text-black bg-zinc-50'
-                                                    : 'text-zinc-400 hover:text-black focus:bg-zinc-50',
+                                                'flex items-center justify-between px-4 py-3 font-bold',
+                                                form.category_id === cat.id && 'text-black bg-zinc-50',
                                             )}
                                         >
                                             {t(`categories.${cat.name}`, { defaultValue: cat.name })}
@@ -188,16 +186,14 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                                         className="text-zinc-400 group-hover:text-black transition-colors"
                                     />
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-white border border-zinc-100 rounded-2xl p-1 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                                <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
                                     {['piece', 'kg', 'g', 'l', 'ml', 'box', 'pack'].map((u) => (
                                         <DropdownMenuItem
                                             key={u}
                                             onClick={() => setForm({ ...form, unit: u })}
                                             className={cn(
-                                                'px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-[0.2em] transition-all cursor-pointer',
-                                                form.unit === u
-                                                    ? 'text-black bg-zinc-50'
-                                                    : 'text-zinc-400 hover:text-black focus:bg-zinc-50',
+                                                'px-4 py-3 font-bold uppercase text-[10px] tracking-[0.2em]',
+                                                form.unit === u && 'text-black bg-zinc-50',
                                             )}
                                         >
                                             {t(`inventory.units.${u}`)}

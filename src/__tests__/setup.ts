@@ -71,6 +71,9 @@ const mockElectronAPI: Window['electronAPI'] = {
     // Printing
     printReceipt: vi.fn().mockResolvedValue({ success: true, failureReason: '' }),
     getPrinters: vi.fn().mockResolvedValue([]),
+
+    // App lifecycle
+    onBeforeQuit: vi.fn(),
 };
 
 Object.defineProperty(window, 'electronAPI', {

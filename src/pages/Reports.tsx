@@ -22,6 +22,7 @@ import Button from '@/components/common/Button';
 import { exportToCsv } from '@/lib/csv';
 import { toast } from 'sonner';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -363,18 +364,22 @@ export default function Reports() {
                     <div className="flex items-center gap-3 p-4 bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)]">
                         <Filter size={18} className="text-[var(--color-text-muted)]" />
                         <span className="text-sm text-[var(--color-text-muted)]">{t('reports.filter_by_cashier')}</span>
-                        <select
-                            value={selectedCashier || ''}
-                            onChange={(e) => setSelectedCashier(e.target.value ? parseInt(e.target.value) : null)}
-                            className="bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)]"
+                        <Select
+                            value={selectedCashier ? String(selectedCashier) : 'all'}
+                            onValueChange={(v) => setSelectedCashier(v === 'all' ? null : parseInt(v))}
                         >
-                            <option value="">{t('reports.all_cashiers')}</option>
-                            {cashiers.map((cashier) => (
-                                <option key={cashier.id} value={cashier.id}>
-                                    {cashier.full_name}
-                                </option>
-                            ))}
-                        </select>
+                            <SelectTrigger className="w-[180px] h-9 bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg text-sm font-medium !ring-0">
+                                <SelectValue placeholder={t('reports.all_cashiers')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">{t('reports.all_cashiers')}</SelectItem>
+                                {cashiers.map((cashier) => (
+                                    <SelectItem key={cashier.id} value={String(cashier.id)}>
+                                        {cashier.full_name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                         {selectedCashier && (
                             <button
                                 onClick={() => setSelectedCashier(null)}

@@ -4,6 +4,7 @@ import { cn, formatCurrency } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import Portal from '@/components/common/Portal';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Product, QuickAccessItem, QuickAccessItemInput } from '@/lib/types';
 
 interface QuickAccessManagerProps {
@@ -207,10 +208,9 @@ function QuickAccessForm({ products, initialData, onSave, onCancel }: QuickAcces
                         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                             {t('pos.quick_access.select_product')}
                         </label>
-                        <select
-                            value={formData.product_id}
-                            onChange={(e) => {
-                                const val = e.target.value;
+                        <Select
+                            value={formData.product_id ? String(formData.product_id) : ''}
+                            onValueChange={(val) => {
                                 if (!val) {
                                     setFormData({ ...formData, product_id: '', display_name: '' });
                                     return;
@@ -219,15 +219,18 @@ function QuickAccessForm({ products, initialData, onSave, onCancel }: QuickAcces
                                 const product = products.find((p) => p.id === prodId);
                                 setFormData({ ...formData, product_id: prodId, display_name: product?.name || '' });
                             }}
-                            className="w-full h-14 px-6 rounded-2xl bg-zinc-50 border border-zinc-100 font-bold outline-none focus:border-black transition-all"
                         >
-                            <option value="">Select a product...</option>
-                            {products.map((p) => (
-                                <option key={p.id} value={p.id}>
-                                    {p.name}
-                                </option>
-                            ))}
-                        </select>
+                            <SelectTrigger className="w-full h-14 px-6 rounded-2xl bg-zinc-50 border border-zinc-100 font-bold !ring-0">
+                                <SelectValue placeholder="Select a product..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {products.map((p) => (
+                                    <SelectItem key={p.id} value={String(p.id)}>
+                                        {p.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <div className="space-y-2">

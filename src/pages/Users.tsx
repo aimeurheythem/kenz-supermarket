@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     Users as UsersIcon,
@@ -24,6 +24,7 @@ import { usePagination } from '@/hooks/usePagination';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { User, UserInput } from '@/lib/types';
 import { usePageTitle } from '@/hooks/usePageTitle';
 
@@ -179,9 +180,24 @@ export default function Users() {
         );
     }
 
-    const selectedCashierPerf = useMemo(() => {
-        if (!selectedCashier) return null;
-        return getCashierPerformance(selectedCashier.id);
+    const [selectedCashierPerf, setSelectedCashierPerf] = useState<{
+        total_sessions: number;
+        total_sales: number;
+        total_transactions: number;
+        average_sale: number;
+        total_hours: number;
+    } | null>(null);
+
+    useEffect(() => {
+        if (!selectedCashier) {
+            setSelectedCashierPerf(null);
+            return;
+        }
+        let cancelled = false;
+        getCashierPerformance(selectedCashier.id).then((perf) => {
+            if (!cancelled) setSelectedCashierPerf(perf);
+        });
+        return () => { cancelled = true; };
     }, [selectedCashier, getCashierPerformance]);
 
     return (
@@ -443,15 +459,19 @@ export default function Users() {
                             <label className="text-xs font-medium text-[var(--color-text-muted)] mb-1.5 block">
                                 {t('users.label_role')} *
                             </label>
-                            <select
+                            <Select
                                 value={form.role}
-                                onChange={(e) => setForm({ ...form, role: e.target.value as any })}
-                                className={inputClass}
+                                onValueChange={(v) => setForm({ ...form, role: v as any })}
                             >
-                                <option value="cashier">{t('users.role_cashier')}</option>
-                                <option value="manager">{t('users.role_manager')}</option>
-                                <option value="admin">{t('users.role_admin')}</option>
-                            </select>
+                                <SelectTrigger className={cn(inputClass, '!ring-0')}>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="cashier">{t('users.role_cashier')}</SelectItem>
+                                    <SelectItem value="manager">{t('users.role_manager')}</SelectItem>
+                                    <SelectItem value="admin">{t('users.role_admin')}</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                         {form.role === 'cashier' && (
                             <div>

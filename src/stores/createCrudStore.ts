@@ -104,11 +104,11 @@ export function createCrudStore<T, TInput, TExtra extends object = object>(
 
         const extra = extend ? extend(set, get, store) : ({} as TExtra);
 
-        // Use Object.defineProperties to preserve getter properties (e.g. alias getters
-        // like `get categories()`) which would be eagerly evaluated and lost by `...spread`.
-        const result = { ...base } as CrudStoreState<T, TInput> & TExtra;
-        const descriptors = Object.getOwnPropertyDescriptors(extra);
-        Object.defineProperties(result, descriptors);
-        return result;
+        // ⚠️  DO NOT use JavaScript getters (get prop()) in the extend object.
+        //    Zustand's set() uses Object.assign({}, state, partial) which invokes
+        //    getters once and replaces them with stale plain values.
+        //    Use destructuring aliases in components instead:
+        //      const { items: categories } = useCategoryStore();
+        return { ...base, ...extra } as CrudStoreState<T, TInput> & TExtra;
     });
 }

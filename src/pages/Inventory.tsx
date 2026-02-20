@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import { exportToCsv, parseCsvFile } from '@/lib/csv';
-import { Plus, Package, AlertTriangle, Box, BarChart3, Upload, Download } from 'lucide-react';
+import { Plus, Package, AlertTriangle, Box, BarChart3, Upload, Download, Barcode } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useProductStore } from '@/stores/useProductStore';
@@ -13,6 +13,8 @@ import InventoryGrid from '@/components/inventory/InventoryGrid';
 import InventoryList from '@/components/inventory/InventoryList';
 import Pagination from '@/components/common/Pagination';
 import { usePagination } from '@/hooks/usePagination';
+import BarcodeScanner from '@/components/common/BarcodeScanner';
+import { useBarcodeScanner } from '@/hooks/useBarcodeScanner';
 import type { Product } from '@/lib/types';
 import { getProductStyle } from '@/lib/product-styles';
 import { useTranslation } from 'react-i18next';
@@ -33,7 +35,7 @@ export default function Inventory() {
         setFilters,
     } = useProductStore();
 
-    const { categories, loadCategories } = useCategoryStore();
+    const { items: categories, loadCategories } = useCategoryStore();
 
     const [search, setSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
@@ -44,6 +46,7 @@ export default function Inventory() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
     const [isImporting, setIsImporting] = useState(false);
+    const [showScanner, setShowScanner] = useState(false);
     const csvInputRef = useRef<HTMLInputElement>(null);
 
     const ITEMS_PER_PAGE = 16;
@@ -51,6 +54,35 @@ export default function Inventory() {
         totalItems: products.length,
         pageSize: ITEMS_PER_PAGE,
     });
+
+    // O(1) barcode→product lookup for instant scan results
+    const barcodeMap = useMemo(() => {
+        const map = new Map<string, Product>();
+        for (const p of products) {
+            if (p.barcode) map.set(p.barcode, p);
+        }
+        return map;
+    }, [products]);
+
+    const handleBarcodeScan = useCallback(
+        (barcode: string) => {
+            const product = barcodeMap.get(barcode);
+            if (product) {
+                setSearch(barcode);
+                setShowScanner(false);
+                toast.success(product.name, {
+                    description: t('inventory.scan_found', 'Product found — showing in results'),
+                    duration: 2000,
+                });
+            } else {
+                toast.warning(t('inventory.scan_not_found', 'No product with barcode: ') + barcode);
+            }
+        },
+        [barcodeMap, t],
+    );
+
+    // Hardware barcode scanner support (works even when search is focused)
+    useBarcodeScanner(handleBarcodeScan, !showScanner);
 
     useEffect(() => {
         loadCategories();
@@ -219,6 +251,13 @@ export default function Inventory() {
                             className="hidden"
                             onChange={handleImportCsv}
                         />
+                        <button
+                            onClick={() => setShowScanner(true)}
+                            className="flex items-center gap-2 px-5 py-3 bg-black text-white hover:bg-zinc-800 rounded-[3rem] font-black uppercase tracking-widest text-xs transition-all"
+                        >
+                            <Barcode size={18} strokeWidth={3} />
+                            <span>{t('inventory.scan', 'Scan')}</span>
+                        </button>
                         <button
                             onClick={() => csvInputRef.current?.click()}
                             disabled={isImporting}
@@ -399,6 +438,15 @@ export default function Inventory() {
                 description={t('inventory.delete_modal.description')}
                 itemName={productToDelete?.name}
             />
+
+            {/* Camera Barcode Scanner */}
+            {showScanner && (
+                <BarcodeScanner
+                    onScan={handleBarcodeScan}
+                    onClose={() => setShowScanner(false)}
+                    title={t('inventory.scan_product', 'Scan Product')}
+                />
+            )}
         </div>
     );
 }

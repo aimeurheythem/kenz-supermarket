@@ -9,6 +9,7 @@ import Button from '@/components/common/Button';
 import Pagination from '@/components/common/Pagination';
 import { usePagination } from '@/hooks/usePagination';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import SearchInput from '@/components/common/SearchInput';
 import type { Product } from '@/lib/types';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -17,7 +18,7 @@ export default function Purchases() {
     const { t } = useTranslation();
     usePageTitle(t('sidebar.purchases'));
     const { orders, currentOrderItems, loadOrders, loadOrderItems, createOrder, receiveOrder } = usePurchaseStore();
-    const { suppliers, loadSuppliers } = useSupplierStore();
+    const { items: suppliers, loadSuppliers } = useSupplierStore();
     const { products, loadProducts } = useProductStore();
 
     const [isNewOrderOpen, setIsNewOrderOpen] = useState(false);
@@ -236,18 +237,21 @@ export default function Purchases() {
                                 <label className="text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 block">
                                     {t('purchases.label_supplier')}
                                 </label>
-                                <select
-                                    value={selectedSupplier}
-                                    onChange={(e) => setSelectedSupplier(e.target.value ? Number(e.target.value) : '')}
-                                    className="w-full px-3 py-2.5 rounded-[var(--radius-md)] bg-[var(--color-bg-input)] border border-[var(--color-border)] text-sm focus:border-[var(--color-accent)] focus:outline-none"
+                                <Select
+                                    value={selectedSupplier ? String(selectedSupplier) : ''}
+                                    onValueChange={(v) => setSelectedSupplier(v ? Number(v) : '')}
                                 >
-                                    <option value="">{t('purchases.select_supplier')}</option>
-                                    {suppliers.map((s) => (
-                                        <option key={s.id} value={s.id}>
-                                            {s.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger className="w-full h-11 rounded-[var(--radius-md)] bg-[var(--color-bg-input)] border border-[var(--color-border)] text-sm font-medium !ring-0">
+                                        <SelectValue placeholder={t('purchases.select_supplier')} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {suppliers.map((s) => (
+                                            <SelectItem key={s.id} value={String(s.id)}>
+                                                {s.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div>
                                 <label className="text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 block">

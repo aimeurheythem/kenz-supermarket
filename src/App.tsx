@@ -141,15 +141,18 @@ export default function App() {
     // Force redirect to onboarding if no users exist
     if (needsSetup) {
         return (
+            <ErrorBoundary>
             <Routes>
                 <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="*" element={<Navigate to="/onboarding" replace />} />
             </Routes>
+            </ErrorBoundary>
         );
     }
 
     return (
         <>
+            <ErrorBoundary>
             <Routes>
                 <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="/login" element={<Login />} />
@@ -288,7 +291,7 @@ export default function App() {
                                     <Route path="/terms" element={<Terms />} />
 
                                     {/* Default redirect */}
-                                    <Route path=\"*\" element={<Navigate to={getDefaultRoute} replace />} />
+                                    <Route path="*" element={<Navigate to={getDefaultRoute} replace />} />
                                 </Routes>
                             </AppShell>
                             </ErrorBoundary>
@@ -296,6 +299,8 @@ export default function App() {
                     }
                 />
             </Routes>
+
+            </ErrorBoundary>
 
             {/* Cashier Login Modal - for existing logged-in cashiers without session */}
             <CashierLoginModal

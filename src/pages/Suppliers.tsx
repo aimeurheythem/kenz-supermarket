@@ -32,7 +32,7 @@ const defaultForm: SupplierInput = {
 };
 
 export default function Suppliers() {
-    const { suppliers, loadSuppliers, addSupplier, updateSupplier, deleteSupplier, addPayment } = useSupplierStore();
+    const { items: suppliers, loadSuppliers, addSupplier, updateSupplier, deleteSupplier, addPayment } = useSupplierStore();
     const { t } = useTranslation();
     usePageTitle(t('sidebar.suppliers'));
     const [search, setSearch] = useState('');

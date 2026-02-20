@@ -151,20 +151,6 @@ function createWindow() {
         mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
     }
 
-    // ============================================
-    // WINDOW CONTROL IPC
-    // ============================================
-    ipcMain.on('window:minimize', () => mainWindow.minimize());
-    ipcMain.on('window:maximize', () => {
-        if (mainWindow.isMaximized()) {
-            mainWindow.unmaximize();
-        } else {
-            mainWindow.maximize();
-        }
-    });
-    ipcMain.on('window:close', () => mainWindow.close());
-    ipcMain.handle('window:isMaximized', () => mainWindow.isMaximized());
-
     mainWindow.on('maximize', () => {
         mainWindow.webContents.send('window:maximized-change', true);
     });
@@ -172,73 +158,87 @@ function createWindow() {
         mainWindow.webContents.send('window:maximized-change', false);
     });
 
-    // ============================================
-    // PRINT IPC HANDLERS
-    // ============================================
-
-    /**
-     * print:receipt — Print using Electron's native webContents.print().
-     * Returns { success, failureReason } so the renderer can show feedback.
-     */
-    ipcMain.handle('print:receipt', async (_event, options = {}) => {
-        try {
-            return await new Promise((resolve) => {
-                mainWindow.webContents.print(
-                    {
-                        silent: options.silent || false,
-                        printBackground: true,
-                        deviceName: options.deviceName || '',
-                        margins: { marginType: 'none' },
-                        ...(options.pageSize ? { pageSize: options.pageSize } : {}),
-                    },
-                    (success, failureReason) => {
-                        resolve({
-                            success,
-                            failureReason: failureReason || '',
-                        });
-                    },
-                );
-            });
-        } catch (err) {
-            console.error('❌ Print failed:', err);
-            return { success: false, failureReason: err.message };
-        }
-    });
-
-    /**
-     * print:get-printers — List available printers for thermal printer selection.
-     */
-    ipcMain.handle('print:get-printers', async () => {
-        try {
-            return await mainWindow.webContents.getPrintersAsync();
-        } catch (err) {
-            console.error('❌ Failed to get printers:', err);
-            return [];
-        }
-    });
+    return mainWindow;
 }
 
 // ============================================
 // APP LIFECYCLE
 // ============================================
 
-// Save database to disk before the app fully quits
-app.on('before-quit', () => {
-    try {
-        if (fs.existsSync(DB_PATH)) {
-            console.log('💾 before-quit: database already persisted on disk.');
-        } else {
-            console.log('ℹ️  before-quit: no database file on disk (nothing to flush).');
-        }
-    } catch (err) {
-        console.error('❌ before-quit save check failed:', err);
+// ============================================
+// WINDOW-DEPENDENT IPC HANDLERS
+// Registered once, outside createWindow(), to
+// avoid duplicate registrations on macOS activate.
+// ============================================
+let mainWindow = null;
+
+ipcMain.on('window:minimize', () => mainWindow?.minimize());
+ipcMain.on('window:maximize', () => {
+    if (mainWindow?.isMaximized()) {
+        mainWindow.unmaximize();
+    } else {
+        mainWindow?.maximize();
     }
+});
+ipcMain.on('window:close', () => mainWindow?.close());
+ipcMain.handle('window:isMaximized', () => mainWindow?.isMaximized() ?? false);
+
+ipcMain.handle('print:receipt', async (_event, options = {}) => {
+    if (!mainWindow) return { success: false, failureReason: 'No window' };
+    try {
+        return await new Promise((resolve) => {
+            mainWindow.webContents.print(
+                {
+                    silent: options.silent || false,
+                    printBackground: true,
+                    deviceName: options.deviceName || '',
+                    margins: { marginType: 'none' },
+                    ...(options.pageSize ? { pageSize: options.pageSize } : {}),
+                },
+                (success, failureReason) => {
+                    resolve({ success, failureReason: failureReason || '' });
+                },
+            );
+        });
+    } catch (err) {
+        console.error('❌ Print failed:', err);
+        return { success: false, failureReason: err.message };
+    }
+});
+
+ipcMain.handle('print:get-printers', async () => {
+    if (!mainWindow) return [];
+    try {
+        return await mainWindow.webContents.getPrintersAsync();
+    } catch (err) {
+        console.error('❌ Failed to get printers:', err);
+        return [];
+    }
+});
+
+// ============================================
+// FLUSH DATABASE ON QUIT
+// Ask the renderer to saveDatabaseImmediate()
+// before the app fully exits.
+// ============================================
+app.on('before-quit', async (e) => {
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+    e.preventDefault();
+    try {
+        mainWindow.webContents.send('app:before-quit');
+        // Give renderer 2 seconds to flush
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+    } catch (err) {
+        console.error('❌ before-quit flush failed:', err);
+    }
+    mainWindow = null;
+    app.exit(0);
 });
 
 app.whenReady().then(() => {
     console.log('✅ Electron app ready — file-based database persistence enabled');
     console.log(`📂 Database path: ${DB_PATH}`);
-    createWindow();
+    mainWindow = createWindow();
 });
 
 app.on('window-all-closed', () => {
@@ -249,6 +249,6 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
+        mainWindow = createWindow();
     }
 });

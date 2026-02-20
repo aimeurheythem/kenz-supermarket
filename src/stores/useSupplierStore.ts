@@ -3,8 +3,6 @@ import { SupplierRepo } from '../../database/repositories/supplier.repo';
 import { createCrudStore } from './createCrudStore';
 
 interface SupplierExtras {
-    /** Alias: items */
-    suppliers: Supplier[];
     loadSuppliers: () => Promise<void>;
     addSupplier: (input: SupplierInput) => Promise<Supplier>;
     updateSupplier: (id: number, input: Partial<SupplierInput>) => Promise<Supplier>;
@@ -12,12 +10,13 @@ interface SupplierExtras {
     addPayment: (id: number, amount: number) => Promise<void>;
 }
 
+/**
+ * Supplier store — use `items` for the supplier list.
+ * Destructure as `{ items: suppliers }` in components for a friendly alias.
+ */
 export const useSupplierStore = createCrudStore<Supplier, SupplierInput, SupplierExtras>({
     repo: SupplierRepo,
     extend: (set, get) => ({
-        get suppliers() {
-            return get().items;
-        },
         loadSuppliers: () => get().loadAll(),
         addSupplier: (input: SupplierInput) => get().add(input),
         updateSupplier: (id: number, input: Partial<SupplierInput>) => get().update(id, input),

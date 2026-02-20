@@ -277,10 +277,10 @@ export default function BarcodeLabels() {
                                     value={labelFormat}
                                     onValueChange={(v: string) => setLabelFormat(v as LabelFormat)}
                                 >
-                                    <SelectTrigger className="w-full h-12 rounded-[2rem] border-2 border-zinc-200 bg-zinc-50 font-bold focus:ring-0">
+                                    <SelectTrigger className="w-full h-12 rounded-[2rem] border-2 border-zinc-200 bg-zinc-50 font-bold !ring-0">
                                         <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-white border-2 border-zinc-200 rounded-[1.5rem]">
+                                    <SelectContent>
                                         <SelectItem value="5160">{t('barcode_labels.formats.avery_5160')}</SelectItem>
                                         <SelectItem value="thermal_50x30">
                                             {t('barcode_labels.formats.thermal_50x30')}
@@ -300,10 +300,10 @@ export default function BarcodeLabels() {
                                     value={barcodeType}
                                     onValueChange={(v: string) => setBarcodeType(v as 'CODE128' | 'EAN13')}
                                 >
-                                    <SelectTrigger className="w-full h-12 rounded-[2rem] border-2 border-zinc-200 bg-zinc-50 font-bold focus:ring-0">
+                                    <SelectTrigger className="w-full h-12 rounded-[2rem] border-2 border-zinc-200 bg-zinc-50 font-bold !ring-0">
                                         <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-white border-2 border-zinc-200 rounded-[1.5rem]">
+                                    <SelectContent>
                                         <SelectItem value="CODE128">{t('barcode_labels.types.code128')}</SelectItem>
                                         <SelectItem value="EAN13">{t('barcode_labels.types.ean13')}</SelectItem>
                                     </SelectContent>

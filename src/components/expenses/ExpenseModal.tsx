@@ -4,6 +4,7 @@ import { Banknote, Calendar, Tag } from 'lucide-react';
 import Button from '@/components/common/Button';
 import { useExpenseStore } from '@/stores/useExpenseStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ExpenseModalProps {
     isOpen: boolean;
@@ -115,18 +116,22 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
                                 {t('expense_modal.label_category')}
                             </label>
                             <div className="relative">
-                                <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
-                                <select
+                                <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 z-10 pointer-events-none" size={16} />
+                                <Select
                                     value={formData.category}
-                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                    className="w-full h-12 pl-10 pr-4 bg-zinc-50 border-2 border-transparent focus:border-black/5 focus:bg-white rounded-xl outline-none transition-all font-medium text-black appearance-none cursor-pointer"
+                                    onValueChange={(v) => setFormData({ ...formData, category: v })}
                                 >
-                                    {categories.map((c) => (
-                                        <option key={c.value} value={c.value}>
-                                            {c.label}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger className="w-full h-12 pl-10 pr-4 bg-zinc-50 border-2 border-transparent focus:border-black/5 focus:bg-white rounded-xl font-medium text-black !ring-0">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {categories.map((c) => (
+                                            <SelectItem key={c.value} value={c.value}>
+                                                {c.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
 

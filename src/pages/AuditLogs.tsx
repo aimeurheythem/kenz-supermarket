@@ -85,7 +85,7 @@ export default function AuditLogs() {
                                 value={filters.entity}
                                 onValueChange={(v) => setFilters((prev) => ({ ...prev, entity: v }))}
                             >
-                                <SelectTrigger className="w-[150px] bg-white">
+                                <SelectTrigger className="w-[150px] bg-white !ring-0">
                                     <SelectValue placeholder={t('audit_logs.entity_label')} />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -101,7 +101,7 @@ export default function AuditLogs() {
                                 value={filters.action}
                                 onValueChange={(v) => setFilters((prev) => ({ ...prev, action: v }))}
                             >
-                                <SelectTrigger className="w-[150px] bg-white">
+                                <SelectTrigger className="w-[150px] bg-white !ring-0">
                                     <SelectValue placeholder={t('audit_logs.action_label')} />
                                 </SelectTrigger>
                                 <SelectContent>

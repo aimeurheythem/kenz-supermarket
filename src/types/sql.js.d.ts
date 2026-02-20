@@ -68,6 +68,9 @@ declare global {
                     isDefault: boolean;
                 }>
             >;
+
+            // App lifecycle
+            onBeforeQuit: (callback: () => void | Promise<void>) => void;
         };
     }
 

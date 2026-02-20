@@ -6,6 +6,7 @@ import { useProductStore } from '@/stores/useProductStore';
 import { useSaleStore, selectCartTotal } from '@/stores/useSaleStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useQuickAccessStore } from '@/stores/useQuickAccessStore';
+import { useBarcodeScanner } from '@/hooks/useBarcodeScanner';
 import BarcodeScanner from '@/components/common/BarcodeScanner';
 import type { Product, Sale, SaleItem, Customer } from '@/lib/types';
 import { useTranslation } from 'react-i18next';
@@ -56,39 +57,32 @@ export default function POS() {
     const [showEndShiftConfirm, setShowEndShiftConfirm] = useState(false);
 
     const searchInputRef = useRef<HTMLInputElement>(null);
-    const barcodeBuffer = useRef('');
-    const barcodeTimer = useRef<NodeJS.Timeout | null>(null);
 
-    const handleBarcodeInput = useCallback(
-        async (e: KeyboardEvent) => {
-            const target = e.target as HTMLElement;
-            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+    // O(1) barcode→product lookup map — rebuilt only when products change
+    const barcodeMap = useMemo(() => {
+        const map = new Map<string, Product>();
+        for (const p of products) {
+            if (p.barcode) map.set(p.barcode, p);
+        }
+        return map;
+    }, [products]);
 
-            if (e.key === 'Enter' && barcodeBuffer.current.length > 3) {
-                const barcode = barcodeBuffer.current;
-                barcodeBuffer.current = '';
-                const product = await getByBarcode(barcode);
+    // Hardware barcode scanner: instant in-memory lookup, works even when search input is focused
+    useBarcodeScanner(
+        useCallback(
+            async (barcode: string) => {
+                const product = barcodeMap.get(barcode);
                 if (product) {
                     await addToCart({ product, quantity: 1, discount: 0 });
+                    toast.success(product.name, { description: t('pos.scan.added', 'Added to cart'), duration: 1500 });
+                } else {
+                    toast.warning(t('pos.scan.not_found', 'Product not found: ') + barcode);
                 }
-                return;
-            }
-
-            if (e.key.length === 1) {
-                barcodeBuffer.current += e.key;
-                if (barcodeTimer.current) clearTimeout(barcodeTimer.current);
-                barcodeTimer.current = setTimeout(() => {
-                    barcodeBuffer.current = '';
-                }, 100);
-            }
-        },
-        [getByBarcode, addToCart],
+            },
+            [barcodeMap, addToCart, t],
+        ),
+        !showScanner, // disable hardware scanner while camera scanner is open
     );
-
-    useEffect(() => {
-        window.addEventListener('keydown', handleBarcodeInput);
-        return () => window.removeEventListener('keydown', handleBarcodeInput);
-    }, [handleBarcodeInput]);
 
     useEffect(() => {
         loadProducts();
@@ -137,7 +131,7 @@ export default function POS() {
                     customer_name: selectedCustomer ? selectedCustomer.full_name : 'Walk-in Customer',
                     customer_id: selectedCustomer?.id,
                 },
-                undefined,
+                user?.id,
                 sessionId || undefined,
             );
 
@@ -155,7 +149,7 @@ export default function POS() {
             toast.error('Checkout error: ' + message);
             setShowSimulation(false);
         }
-    }, [checkout, paymentMethod, selectedCustomer, getCurrentSessionId, loadProducts, cart]);
+    }, [checkout, paymentMethod, selectedCustomer, getCurrentSessionId, loadProducts, cart, user]);
 
     const handleBeforeCheckout = useCallback(() => {
         if (cart.length === 0) {
@@ -170,15 +164,17 @@ export default function POS() {
         setShowEndShiftConfirm(false);
     };
 
-    const handleScan = async (code: string) => {
-        const product = await getByBarcode(code);
+    const handleScan = useCallback(async (code: string) => {
+        // In-memory lookup first (instant), fallback to DB if products not loaded yet
+        const product = barcodeMap.get(code) ?? await getByBarcode(code);
         if (product) {
             await addToCart({ product, quantity: 1, discount: 0 });
             setShowScanner(false);
+            toast.success(product.name, { description: t('pos.scan.added', 'Added to cart'), duration: 1500 });
         } else {
             toast.warning(t('pos.scan.not_found', 'Product not found with barcode: ') + code);
         }
-    };
+    }, [barcodeMap, getByBarcode, addToCart, t]);
 
     return (
         <div className="relative flex flex-col lg:flex-row items-start gap-8 p-6 lg:p-8 animate-fadeIn mt-4">

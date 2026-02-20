@@ -118,7 +118,15 @@
             "today_orders": "طلبات اليوم",
             "low_stock_alerts": "تنبيهات انخفاض المخزون",
             "low_stock": "مخزون منخفض",
-            "orders_count": "{{count}} طلبات",
+            "orders_count": "{{count}} طلبات"
+        },
+        "cashier": {
+            "select": "اختر الصندوق",
+            "title": "الصناديق",
+            "all": "كل الصناديق",
+            "none": "لم يتم العثور على صناديق"
+        },
+        "shortcuts": {
             "no_sales": "لا توجد مبيعات بعد",
             "units_in_stock": "{{count}} وحدة في المخزون",
             "avg_order": "{{amount}} متوسط",

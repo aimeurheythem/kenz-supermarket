@@ -119,7 +119,15 @@
             "low_stock_alerts": "Low Stock Alerts",
             "low_stock": "Low Stock",
             "orders_count": "{{count}} orders",
-            "no_sales": "No sales yet",
+            "no_sales": "No sales yet"
+        },
+        "cashier": {
+            "select": "Select Cashier",
+            "title": "Cashiers",
+            "all": "All Cashiers",
+            "none": "No cashiers found"
+        },
+        "shortcuts": {
             "units_in_stock": "{{count}} units in stock",
             "avg_order": "{{amount}} avg",
             "needs_attention": "Needs attention",

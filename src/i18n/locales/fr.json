@@ -118,7 +118,15 @@
             "today_orders": "Commandes aujourd'hui",
             "low_stock_alerts": "Alertes de stock faible",
             "low_stock": "Stock Faible",
-            "orders_count": "{{count}} commandes",
+            "orders_count": "{{count}} commandes"
+        },
+        "cashier": {
+            "select": "Sélectionner Caissier",
+            "title": "Caissiers",
+            "all": "Tous les Caissiers",
+            "none": "Aucun caissier trouvé"
+        },
+        "shortcuts": {
             "no_sales": "Pas encore de ventes",
             "units_in_stock": "{{count}} unités en stock",
             "avg_order": "{{amount}} moy",

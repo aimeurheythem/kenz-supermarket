@@ -9,6 +9,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface CashierSelectorProps {
     selectedCashier: User | null;
@@ -16,6 +17,7 @@ interface CashierSelectorProps {
 }
 
 export default function CashierSelector({ selectedCashier, onSelect }: CashierSelectorProps) {
+    const { t } = useTranslation();
     const { users, loadUsers } = useUserStore();
 
     useEffect(() => {
@@ -39,7 +41,7 @@ export default function CashierSelector({ selectedCashier, onSelect }: CashierSe
                     <div className="flex items-center justify-center">
                         <UserIcon size={12} className="text-[var(--color-text-muted)]" />
                     </div>
-                    <span>{selectedCashier ? selectedCashier.full_name : 'Select Cashier'}</span>
+                    <span>{selectedCashier ? selectedCashier.full_name : t('dashboard.cashier.select')}</span>
                     <ChevronDown size={14} className="text-[var(--color-text-muted)]" />
                 </button>
             </DropdownMenuTrigger>
@@ -48,7 +50,7 @@ export default function CashierSelector({ selectedCashier, onSelect }: CashierSe
                 className="w-41 rounded-[1rem] bg-[var(--color-bg-card)] border-[var(--color-border)]"
             >
                 <div className="px-2 py-1.5 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
-                    Cashiers
+                    {t('dashboard.cashier.title')}
                 </div>
                 <DropdownMenuItem
                     onClick={() => onSelect(null)}
@@ -57,7 +59,7 @@ export default function CashierSelector({ selectedCashier, onSelect }: CashierSe
                         'flex items-center justify-between',
                     )}
                 >
-                    <span>All Cashiers</span>
+                    <span>{t('dashboard.cashier.all')}</span>
                     {selectedCashier === null && <Check size={14} className="text-accent" />}
                 </DropdownMenuItem>
                 {cashiers.map((cashier) => (
@@ -75,7 +77,7 @@ export default function CashierSelector({ selectedCashier, onSelect }: CashierSe
                 ))}
                 {cashiers.length === 0 && (
                     <div className="px-2 py-3 text-sm text-[var(--color-text-muted)] text-center">
-                        No cashiers found
+                        {t('dashboard.cashier.none')}
                     </div>
                 )}
             </DropdownMenuContent>

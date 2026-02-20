@@ -352,7 +352,7 @@ export default function Dashboard() {
                                 <h2 className="text-[2rem] font-bold text-black uppercase tracking-tight leading-none">
                                     {t('dashboard.top_performance.title')}
                                 </h2>
-                                <p className="text-[10px] text-black/40 uppercase tracking-[0.2em] mt-2">
+                                <p className="text-[9px] text-black/40 uppercase tracking-[0.2em] mt-2">
                                     {t('dashboard.top_performance.subtitle')}
                                 </p>
                             </div>

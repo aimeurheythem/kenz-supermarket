@@ -92,30 +92,39 @@ export default function Dashboard() {
     const totalProducts = products.length;
 
     // Data for Shortcuts
-    const shortcuts = useMemo(() => [
-        { label: t('dashboard.shortcuts.pos'), icon: MonitorCog, path: '/pos', color: 'text-white', bg: 'bg-black' },
-        {
-            label: t('dashboard.shortcuts.inventory'),
-            icon: ShoppingBasket,
-            path: '/inventory',
-            color: 'text-white',
-            bg: 'bg-black',
-        },
-        {
-            label: t('dashboard.shortcuts.suppliers'),
-            icon: Container,
-            path: '/suppliers',
-            color: 'text-white',
-            bg: 'bg-black',
-        },
-        {
-            label: t('dashboard.shortcuts.reports'),
-            icon: CloudUpload,
-            path: '/reports',
-            color: 'text-white',
-            bg: 'bg-black',
-        },
-    ], [t]);
+    const shortcuts = useMemo(
+        () => [
+            {
+                label: t('dashboard.shortcuts.pos'),
+                icon: MonitorCog,
+                path: '/pos',
+                color: 'text-white',
+                bg: 'bg-black',
+            },
+            {
+                label: t('dashboard.shortcuts.inventory'),
+                icon: ShoppingBasket,
+                path: '/inventory',
+                color: 'text-white',
+                bg: 'bg-black',
+            },
+            {
+                label: t('dashboard.shortcuts.suppliers'),
+                icon: Container,
+                path: '/suppliers',
+                color: 'text-white',
+                bg: 'bg-black',
+            },
+            {
+                label: t('dashboard.shortcuts.reports'),
+                icon: CloudUpload,
+                path: '/reports',
+                color: 'text-white',
+                bg: 'bg-black',
+            },
+        ],
+        [t],
+    );
 
     const getGreeting = () => {
         const hour = new Date().getHours();
@@ -365,12 +374,12 @@ export default function Dashboard() {
                                         )}
                                     >
                                         {/* Rank Badge + Icon */}
-                                        <div className="mb-12 relative">
+                                        <div className="mb-4 relative">
                                             <Award
                                                 size={150}
                                                 className={cn(RANK_COLORS[idx]?.iconColor ?? 'text-zinc-400', 'filter')}
                                             />
-                                            <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="absolute inset-0 flex items-center justify-center mb-10">
                                                 <span className="text-5xl font-black text-black/20">#{idx + 1}</span>
                                             </div>
                                         </div>

@@ -117,6 +117,7 @@
             "total_products": "إجمالي المنتجات",
             "today_orders": "طلبات اليوم",
             "low_stock_alerts": "تنبيهات انخفاض المخزون",
+            "low_stock": "مخزون منخفض",
             "orders_count": "{{count}} طلبات",
             "no_sales": "لا توجد مبيعات بعد",
             "units_in_stock": "{{count}} وحدة في المخزون",

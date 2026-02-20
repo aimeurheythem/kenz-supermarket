@@ -117,6 +117,7 @@
             "total_products": "Total des produits",
             "today_orders": "Commandes aujourd'hui",
             "low_stock_alerts": "Alertes de stock faible",
+            "low_stock": "Stock Faible",
             "orders_count": "{{count}} commandes",
             "no_sales": "Pas encore de ventes",
             "units_in_stock": "{{count}} unités en stock",

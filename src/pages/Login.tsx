@@ -146,8 +146,8 @@ function TestimonialCard({ name, role, quote }: { name: string; role: string; qu
         .toUpperCase();
     return (
         <div
-            className="flex-shrink-0 flex flex-col gap-2 w-[220px] rounded-xl px-4 py-3.5 select-none"
-            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)' }}
+            className="flex-shrink-0 flex flex-col gap-5 w-[220px] rounded-[3rem] px-5.5 py-3.5 select-none"
+            style={{ background: 'rgba(255,255,255,0.05)', border: '3px solid rgba(255, 196, 0, 0.23)' }}
         >
             <p className="text-white/70 text-xs leading-relaxed">&ldquo;{quote}&rdquo;</p>
             <div className="flex items-center gap-2 mt-1">
@@ -280,11 +280,11 @@ export default function Login() {
             className="min-h-screen w-full flex overflow-hidden"
             style={{ fontFamily: 'var(--font-primary)', background: 'var(--bg-primary)' }}
         >
-            {/* â”€â”€ LEFT PANEL â”€â”€ */}
+            {/* LEFT PANEL */}
             {/* ── LEFT PANEL ── */}
             <div
-                className="hidden lg:flex lg:w-[38%] xl:w-[36%] flex-col relative overflow-hidden m-1.5 rounded-[1rem]"
-                style={{ background: 'linear-gradient(160deg, #0f172a 0%, #1e293b 60%, #0c1a2e 100%)' }}
+                className="hidden lg:flex lg:w-[38%] xl:w-[36%] flex-col relative overflow-hidden m-1.5 rounded-[1.5rem]"
+                style={{ background: 'linear-gradient(160deg, #000000ff 0%, #000000ff 60%, #2e250cff 100%)' }}
             >
                 {/* Branding */}
                 <div className="relative z-10 flex flex-col items-center pt-12 pb-6 px-10 text-center gap-3">
@@ -344,7 +344,7 @@ export default function Login() {
                 </div>
             </div>
 
-            {/* â”€â”€ RIGHT PANEL â”€â”€ */}
+            {/* RIGHT PANEL */}
             <div
                 className="flex-1 flex flex-col items-center justify-center px-6 py-12"
                 style={{ background: 'var(--bg-primary)' }}

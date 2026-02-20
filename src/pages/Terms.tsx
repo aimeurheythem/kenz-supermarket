@@ -35,70 +35,83 @@ export default function Terms() {
     ];
 
     return (
-        <div className="h-full flex flex-col p-8 animate-fadeIn max-w-4xl mx-auto w-full space-y-12">
-            <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center">
-                        <Scale size={20} className="text-emerald-500" />
-                    </div>
-                    <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em]">
-                        {t('terms.version', 'Last Updated: Feb 2026')}
-                    </span>
-                </div>
-                <h1 className="text-4xl font-black text-[var(--color-text-primary)] tracking-tighter uppercase">
-                    {t('terms.title', 'Terms of Use')}
-                </h1>
-                <p className="text-[var(--color-text-muted)] text-lg font-medium">
-                    {t('terms.subtitle', 'Please review our professional guidelines for using this workstation.')}
-                </p>
-            </div>
+        <div className="relative flex flex-col items-start gap-8 p-6 lg:p-8 animate-fadeIn mt-4 max-w-4xl mx-auto w-full">
+            {/* Grid Background */}
+            <div
+                className="absolute inset-0 pointer-events-none opacity-[0.15] rounded-[3rem]"
+                style={{
+                    backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 1px, transparent 1px)`,
+                    backgroundSize: '32px 32px',
+                    maskImage: 'radial-gradient(circle at top center, black, transparent 90%)',
+                    WebkitMaskImage: 'radial-gradient(circle at top center, black, transparent 90%)',
+                }}
+            />
 
-            <div className="space-y-10">
-                {sections.map((section, idx) => (
-                    <div
-                        key={idx}
-                        className="space-y-4 border-l-2 border-[var(--color-border)] pl-8 py-2 hover:border-emerald-500/30 transition-colors"
+            <div className="relative z-10 space-y-12 w-full">
+                <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                            <Scale size={20} className="text-emerald-600" />
+                        </div>
+                        <span className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.3em]">
+                            {t('terms.version', 'Last Updated: Feb 2026')}
+                        </span>
+                    </div>
+                    <h1 className="text-4xl font-black text-black tracking-tighter uppercase">
+                        {t('terms.title', 'Terms of Use')}
+                    </h1>
+                    <p className="text-zinc-500 text-lg font-medium">
+                        {t('terms.subtitle', 'Please review our professional guidelines for using this workstation.')}
+                    </p>
+                </div>
+
+                <div className="space-y-10">
+                    {sections.map((section, idx) => (
+                        <div
+                            key={idx}
+                            className="space-y-4 border-l-2 border-zinc-200 pl-8 py-2 hover:border-emerald-300 transition-colors"
+                        >
+                            <h3 className="text-xl font-bold text-black uppercase tracking-tight flex items-center gap-3">
+                                <span className="text-emerald-500 text-sm font-black">0{idx + 1}.</span>
+                                {section.title}
+                            </h3>
+                            <p className="text-zinc-500 leading-relaxed text-sm">{section.content}</p>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="bg-white border-2 border-black/5 p-8 rounded-[2rem] flex items-center justify-between gap-6">
+                    <div className="flex items-center gap-6">
+                        <div className="w-16 h-16 bg-zinc-50 rounded-2xl flex items-center justify-center">
+                            <ShieldCheck size={32} className="text-zinc-400" />
+                        </div>
+                        <div>
+                            <h4 className="text-black font-bold">
+                                {t('terms.footer.title', 'Questions about these terms?')}
+                            </h4>
+                            <p className="text-zinc-500 text-sm">
+                                {t('terms.footer.subtitle', 'Contact our legal and compliance department.')}
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => setShowContact(true)}
+                        className="px-6 py-3 bg-zinc-100 hover:bg-black text-black hover:text-white rounded-2xl font-bold text-sm transition-all active:scale-95 uppercase tracking-widest"
                     >
-                        <h3 className="text-xl font-bold text-[var(--color-text-primary)] uppercase tracking-tight flex items-center gap-3">
-                            <span className="text-emerald-500 text-sm font-black">0{idx + 1}.</span>
-                            {section.title}
-                        </h3>
-                        <p className="text-[var(--color-text-muted)] leading-relaxed text-sm">{section.content}</p>
-                    </div>
-                ))}
-            </div>
-
-            <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] p-8 rounded-[32px] flex items-center justify-between gap-6">
-                <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 bg-[var(--color-bg-secondary)] rounded-2xl flex items-center justify-center">
-                        <ShieldCheck size={32} className="text-[var(--color-text-muted)]" />
-                    </div>
-                    <div>
-                        <h4 className="text-[var(--color-text-primary)] font-bold">
-                            {t('terms.footer.title', 'Questions about these terms?')}
-                        </h4>
-                        <p className="text-[var(--color-text-muted)] text-sm">
-                            {t('terms.footer.subtitle', 'Contact our legal and compliance department.')}
-                        </p>
-                    </div>
+                        {t('terms.contact_us', 'Contact Us')}
+                    </button>
                 </div>
-                <button
-                    onClick={() => setShowContact(true)}
-                    className="px-6 py-3 bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)] rounded-2xl font-bold text-sm transition-all active:scale-95 uppercase tracking-widest"
-                >
-                    {t('terms.contact_us', 'Contact Us')}
-                </button>
             </div>
 
             {/* Contact Dialog */}
             <Dialog open={showContact} onOpenChange={setShowContact}>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent className="sm:max-w-md rounded-[2rem] p-6 bg-white border border-zinc-200 shadow-xl">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
+                        <DialogTitle className="flex items-center gap-2 text-xl font-bold text-black">
                             <ShieldCheck className="w-5 h-5 text-emerald-500" />
                             {t('terms.contact_title', 'Contact Legal & Compliance')}
                         </DialogTitle>
-                        <DialogDescription>
+                        <DialogDescription className="text-zinc-500">
                             {t(
                                 'terms.contact_desc',
                                 'Reach out to our team for questions about terms, privacy, or licensing.',

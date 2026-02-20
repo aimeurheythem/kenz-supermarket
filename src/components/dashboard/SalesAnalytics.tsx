@@ -191,10 +191,16 @@ export default function SalesAnalytics({ userId }: SalesAnalyticsProps) {
                                 axisLine={false}
                                 tickLine={false}
                                 tickMargin={10}
-                                tickFormatter={(value) => value.slice(0, 3)}
-                                className="text-[10px] font-bold fill-black/40 uppercase tracking-wider"
+                                tickFormatter={(value) =>
+                                    timeRange === 'hourly' ? value.replace(':00', 'h') : value.slice(0, 3)
+                                }
+                                className="text-[10px] font-bold fill-black/40"
                             />
-                            <YAxis hide={true} />
+                            <YAxis
+                                hide={false}
+                                tickFormatter={(value) => formatCurrency(Number(value))}
+                                className="text-[10px] font-bold fill-black/40"
+                            />
                             <ChartTooltip
                                 cursor={false}
                                 content={
@@ -218,11 +224,6 @@ export default function SalesAnalytics({ userId }: SalesAnalyticsProps) {
                         </AreaChart>
                     </ChartContainer>
                 </CardContent>
-
-                {/* Subtle Background Decoration */}
-                <div className="absolute -right-10 top-1/2 -translate-y-1/2 opacity-[0.02] pointer-events-none select-none rotate-90">
-                    <span className="text-[140px] font-black tracking-tighter uppercase italic">Analytics</span>
-                </div>
             </Card>
 
             {/* Peak Hours Card */}
@@ -238,8 +239,8 @@ export default function SalesAnalytics({ userId }: SalesAnalyticsProps) {
                                     {selectedPeakPeriod === 1
                                         ? '01:00 - 08:00'
                                         : selectedPeakPeriod === 2
-                                          ? '09:00 - 16:00'
-                                          : '17:00 - 00:00'}
+                                            ? '09:00 - 16:00'
+                                            : '17:00 - 00:00'}
                                     <ChevronDown size={12} />
                                 </button>
                             </DropdownMenuTrigger>

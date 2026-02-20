@@ -337,15 +337,6 @@
             "only_units_available": "Seulement {{count}} unités de \"{{name}}\" en stock."
         }
     },
-    "common": {
-        "language": "Langue",
-        "english": "Anglais",
-        "french": "Français",
-        "arabic": "Arabe",
-        "customer": "Client",
-        "add_products": "Ajouter des Produits",
-        "close": "D'accord"
-    },
     "footer": {
         "copyright": "© {{year}} SuperMarket Pro. Tous droits réservés.",
         "privacy": "Politique de confidentialité",
@@ -522,7 +513,6 @@
         "active_debts": "Dettes Actives",
         "total_outstanding": "Total Impayé",
         "total_debtors": "Total Débiteurs",
-        "collection_health": "Santé de Recouvrement",
         "collection_good": "Bon",
         "search_placeholder": "Rechercher des débiteurs...",
         "filter": "Filtrer",

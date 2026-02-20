@@ -337,15 +337,6 @@
             "only_units_available": "يتوفر فقط {{count}} وحدات من \"{{name}}\" في المخزون."
         }
     },
-    "common": {
-        "language": "اللغة",
-        "english": "الإنجليزية",
-        "french": "الفرنسية",
-        "arabic": "العربية",
-        "customer": "العميل",
-        "add_products": "إضافة منتجات",
-        "close": "حسناً"
-    },
     "footer": {
         "copyright": "© {{year}} SuperMarket Pro. جميع الحقوق محفوظة.",
         "privacy": "سياسة الخصوصية",
@@ -522,7 +513,6 @@
         "active_debts": "ديون نشطة",
         "total_outstanding": "إجمالي المستحق",
         "total_debtors": "إجمالي المدينين",
-        "collection_health": "حالة التحصيل",
         "collection_good": "جيد",
         "search_placeholder": "البحث عن المدينين...",
         "filter": "تصفية",

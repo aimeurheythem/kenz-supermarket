@@ -21,9 +21,9 @@ export function useLanguageSwitch() {
 
             setLanguageSwitching(true);
 
-            await new Promise((resolve) => setTimeout(resolve, 300));
+            await new Promise((resolve) => setTimeout(resolve, 800));
             i18n.changeLanguage(lang);
-            await new Promise((resolve) => setTimeout(resolve, 200));
+            await new Promise((resolve) => setTimeout(resolve, 4300));
 
             setLanguageSwitching(false);
         },

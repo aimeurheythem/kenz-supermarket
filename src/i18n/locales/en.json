@@ -337,15 +337,6 @@
             "only_units_available": "Only {{count}} units of \"{{name}}\" in stock."
         }
     },
-    "common": {
-        "language": "Language",
-        "english": "English",
-        "french": "French",
-        "arabic": "Arabic",
-        "customer": "Customer",
-        "add_products": "Add Products",
-        "close": "Got it"
-    },
     "footer": {
         "copyright": "© {{year}} SuperMarket Pro. All rights reserved.",
         "privacy": "Privacy Policy",
@@ -522,7 +513,6 @@
         "active_debts": "Active Debts",
         "total_outstanding": "Total Outstanding",
         "total_debtors": "Total Debtors",
-        "collection_health": "Collection Health",
         "collection_good": "Good",
         "search_placeholder": "Search debtors...",
         "filter": "Filter",

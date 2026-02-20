@@ -236,7 +236,7 @@ export default function QuickAccess({ user, items, products, cart, addToCart, se
                     {user?.role === 'admin' && (
                         <Button
                             onClick={() => setIsManagerOpen(true)}
-                            className="bg-black text-white px-8 rounded-2xl h-12"
+                            className="px-8 h-12"
                         >
                             {t('pos.quick_access.add_first')}
                         </Button>

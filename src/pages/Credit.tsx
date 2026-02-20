@@ -1,8 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TableSkeletonRows } from '@/components/common/TableSkeleton';
-import { Wallet, Search, Filter, Download, AlertCircle, CheckCircle2, Banknote, Users, TrendingUp } from 'lucide-react';
+import {
+    Wallet,
+    Search,
+    Filter,
+    Download,
+    AlertCircle,
+    CheckCircle2,
+    Banknote,
+    Users,
+    TrendingUp,
+    X,
+} from 'lucide-react';
 import { cn, formatCurrency, validatePaymentAmount } from '@/lib/utils';
 import { useCustomerStore } from '@/stores/useCustomerStore';
 import { toast } from 'sonner';
@@ -17,7 +28,6 @@ export default function Credit() {
     usePageTitle(t('sidebar.credit'));
     const { getDebtors, getCollectionStats } = useCustomerStore();
 
-    // State
     const [debtors, setDebtors] = useState<Customer[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [collectionRate, setCollectionRate] = useState<number | null>(null);
@@ -26,6 +36,7 @@ export default function Credit() {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [filterStatus, setFilterStatus] = useState<'all' | 'high' | 'low'>('all');
     const [showFilter, setShowFilter] = useState(false);
+    const searchInputRef = useRef<HTMLInputElement>(null);
 
     const loadDebtors = useCallback(async () => {
         setIsLoading(true);
@@ -41,12 +52,10 @@ export default function Credit() {
         }
     }, [getDebtors, getCollectionStats]);
 
-    // Initial Load
     useEffect(() => {
         loadDebtors();
     }, [loadDebtors]);
 
-    // Derived State
     const totalOutstanding = debtors.reduce((sum, c) => sum + (c.total_debt || 0), 0);
     const debtorCount = debtors.length;
     const filteredDebtors = debtors
@@ -74,92 +83,115 @@ export default function Credit() {
     };
 
     return (
-        <div className="space-y-8 animate-fadeIn pb-10">
-            {/* Header / Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Total Outstanding Card */}
-                <div className="col-span-1 md:col-span-2 relative overflow-hidden bg-black rounded-[2.5rem] p-8 text-white min-h-[220px] flex flex-col justify-between group">
-                    <div className="absolute top-0 right-0 p-32 bg-zinc-900 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2 group-hover:bg-zinc-800 transition-colors duration-700" />
+        <div className="relative flex flex-col items-start gap-8 p-6 lg:p-8 animate-fadeIn mt-4">
+            {/* Grid Background */}
+            <div
+                className="absolute inset-0 pointer-events-none opacity-[0.15] rounded-[3rem]"
+                style={{
+                    backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 1px, transparent 1px)`,
+                    backgroundSize: '32px 32px',
+                    maskImage: 'radial-gradient(circle at top center, black, transparent 90%)',
+                    WebkitMaskImage: 'radial-gradient(circle at top center, black, transparent 90%)',
+                }}
+            />
 
-                    <div className="relative z-10 flex items-start justify-between">
-                        <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10">
-                            <Wallet size={24} className="text-white" />
-                        </div>
-                        <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-white/5">
-                            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">
-                                {t('credit.active_debts')}
+            <div className="relative z-10 flex-1 w-full">
+                {/* Header Section */}
+                <div className="flex flex-col space-y-6 pb-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[12px] text-zinc-400 tracking-[0.3em] font-bold">
+                                {t('sidebar.credit')}
                             </span>
-                        </div>
-                    </div>
-
-                    <div className="relative z-10 space-y-2">
-                        <span className="text-zinc-400 text-xs font-bold uppercase tracking-[0.2em]">
-                            {t('credit.total_outstanding')}
-                        </span>
-                        <div className="flex items-baseline gap-1">
-                            <h2 className="text-5xl lg:text-7xl font-black tracking-tighter">
-                                {formatCurrency(totalOutstanding)}
+                            <h2 className="text-3xl font-black text-black tracking-tighter uppercase">
+                                {t('credit.title')}
                             </h2>
                         </div>
                     </div>
                 </div>
 
-                {/* Quick Stats */}
-                <div className="space-y-4">
-                    <div className="bg-white rounded-[2.5rem] p-8 border border-zinc-100 flex flex-col justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-red-50 text-red-500 rounded-2xl">
-                                <Users size={20} />
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-black text-white border-2 border-black/10 flex flex-col justify-between aspect-[2/1] md:aspect-auto md:h-40 p-6 rounded-[3rem] relative overflow-hidden group cursor-pointer"
+                    >
+                        <div className="absolute top-0 right-0 p-24 bg-zinc-800 rounded-full blur-3xl opacity-30 -translate-y-1/2 translate-x-1/2" />
+                        <div className="flex items-center justify-between relative z-10">
+                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                                {t('credit.total_outstanding')}
+                            </span>
+                            <div className="p-2 bg-white/10 rounded-full">
+                                <Wallet size={14} className="text-white" />
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                        </div>
+                        <div className="relative z-10">
+                            <span className="text-2xl font-black text-white tracking-tighter">
+                                {formatCurrency(totalOutstanding, false)}
+                            </span>
+                        </div>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.05 }}
+                        className="bg-rose-100 border-2 border-rose-200 flex flex-col justify-between aspect-[2/1] md:aspect-auto md:h-40 p-6 rounded-[3rem] relative overflow-hidden group cursor-pointer"
+                    >
+                        <div className="flex items-center justify-between relative z-10">
+                            <span className="text-[10px] font-bold text-rose-900/60 uppercase tracking-widest">
                                 {t('credit.total_debtors')}
                             </span>
-                        </div>
-                        <span className="text-4xl font-black text-black tracking-tighter">{debtorCount}</span>
-                    </div>
-
-                    <div className="bg-white rounded-[2.5rem] p-8 border border-zinc-100 flex flex-col gap-4">
-                        <div className="flex items-center gap-4">
-                            <div
-                                className={cn(
-                                    'p-3 rounded-2xl',
-                                    collectionRate !== null && collectionRate >= 70
-                                        ? 'bg-emerald-50 text-emerald-500'
-                                        : collectionRate !== null && collectionRate >= 40
-                                          ? 'bg-amber-50 text-amber-500'
-                                          : 'bg-red-50 text-red-500',
-                                )}
-                            >
-                                <TrendingUp size={20} />
+                            <div className="p-2 bg-rose-900/10 rounded-full">
+                                <Users size={14} className="text-rose-900" />
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                        </div>
+                        <div className="relative z-10">
+                            <span className="text-2xl font-black text-rose-900 tracking-tighter">{debtorCount}</span>
+                        </div>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="bg-white border-2 border-black/10 flex flex-col justify-between aspect-[2/1] md:aspect-auto md:h-40 p-6 rounded-[3rem] relative overflow-hidden group cursor-pointer"
+                    >
+                        <div className="flex items-center justify-between relative z-10">
+                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                                 {t('credit.collection_health')}
                             </span>
+                            <div
+                                className={cn(
+                                    'p-2 rounded-full',
+                                    collectionRate !== null && collectionRate >= 70
+                                        ? 'bg-emerald-100'
+                                        : collectionRate !== null && collectionRate >= 40
+                                          ? 'bg-amber-100'
+                                          : 'bg-red-100',
+                                )}
+                            >
+                                <TrendingUp
+                                    size={14}
+                                    className={cn(
+                                        '',
+                                        collectionRate !== null && collectionRate >= 70
+                                            ? 'text-emerald-600'
+                                            : collectionRate !== null && collectionRate >= 40
+                                              ? 'text-amber-600'
+                                              : 'text-red-600',
+                                    )}
+                                />
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <div className="flex items-baseline justify-between">
-                                <span className="text-3xl font-black text-black tracking-tighter">
+                        <div className="relative z-10 space-y-2">
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-2xl font-black text-black tracking-tighter">
                                     {collectionRate !== null ? `${collectionRate.toFixed(0)}%` : '—'}
                                 </span>
-                                <span
-                                    className={cn(
-                                        'text-xs font-bold',
-                                        collectionRate !== null && collectionRate >= 70
-                                            ? 'text-emerald-500'
-                                            : collectionRate !== null && collectionRate >= 40
-                                              ? 'text-amber-500'
-                                              : 'text-red-500',
-                                    )}
-                                >
-                                    {collectionRate !== null && collectionRate >= 70
-                                        ? t('credit.health_good')
-                                        : collectionRate !== null && collectionRate >= 40
-                                          ? t('credit.health_fair')
-                                          : t('credit.health_poor')}
-                                </span>
                             </div>
-                            <div className="w-full h-2 bg-zinc-100 rounded-full overflow-hidden">
+                            <div className="w-full h-1.5 bg-zinc-100 rounded-full overflow-hidden">
                                 <div
                                     className={cn(
                                         'h-full rounded-full transition-all duration-700',
@@ -173,163 +205,195 @@ export default function Credit() {
                                 />
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
-            </div>
 
-            {/* Main Content Area */}
-            <div className="bg-white rounded-[3rem] border border-zinc-100 overflow-hidden min-h-[500px]">
-                {/* Toolbar */}
-                <div className="p-8 pb-0 flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="relative w-full md:w-96 group">
+                {/* Search & Filter Bar */}
+                <div className="flex flex-col lg:flex-row items-center gap-4 mb-6">
+                    <div className="relative group flex-1 w-full">
                         <Search
-                            className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-black transition-colors"
-                            size={20}
+                            size={22}
+                            className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-black transition-colors"
                         />
                         <input
+                            ref={searchInputRef}
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder={t('credit.search_placeholder')}
-                            className="w-full h-14 pl-14 pr-6 bg-zinc-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-black/5 transition-all font-bold placeholder:font-medium placeholder:text-zinc-400"
+                            className={cn(
+                                'w-full pl-16 pr-16 py-4 rounded-2xl',
+                                'bg-white border border-zinc-200 shadow-none',
+                                'text-black placeholder:text-zinc-300 text-base font-bold',
+                                'focus:outline-none focus:ring-0 focus:!outline-none focus-visible:!outline-none focus-visible:ring-0 focus:border-zinc-400 transition-all placeholder:transition-opacity focus:placeholder:opacity-50',
+                            )}
                         />
+                        {searchQuery && (
+                            <motion.button
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    searchInputRef.current?.focus();
+                                }}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-zinc-100 text-zinc-400 hover:bg-black hover:text-white transition-all duration-300"
+                            >
+                                <X size={16} strokeWidth={3} />
+                            </motion.button>
+                        )}
                     </div>
+
                     <div className="flex items-center gap-3">
                         <div className="relative">
-                            <Button
-                                variant="secondary"
-                                icon={<Filter size={18} />}
+                            <button
                                 onClick={() => setShowFilter(!showFilter)}
+                                className={cn(
+                                    'flex items-center gap-2 px-4 py-3.5 rounded-2xl border transition-all',
+                                    filterStatus !== 'all'
+                                        ? 'bg-rose-100 text-rose-700 border-rose-200 hover:bg-rose-200'
+                                        : 'bg-zinc-100 text-zinc-600 border-zinc-200 hover:bg-zinc-200 hover:text-black',
+                                )}
                             >
-                                {filterStatus === 'all'
-                                    ? t('credit.filter')
-                                    : filterStatus === 'high'
-                                      ? t('credit.high_debt')
-                                      : t('credit.low_debt')}
-                            </Button>
-                            {showFilter && (
-                                <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl border border-zinc-100 shadow-xl z-50 p-2">
-                                    {[
-                                        { key: 'all' as const, label: t('credit.filter_all') },
-                                        { key: 'high' as const, label: t('credit.filter_high') },
-                                        { key: 'low' as const, label: t('credit.filter_low') },
-                                    ].map((opt) => (
-                                        <button
-                                            key={opt.key}
-                                            onClick={() => {
-                                                setFilterStatus(opt.key);
-                                                setShowFilter(false);
-                                            }}
-                                            className={cn(
-                                                'w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-colors',
-                                                filterStatus === opt.key
-                                                    ? 'bg-black text-white'
-                                                    : 'text-zinc-600 hover:bg-zinc-50',
-                                            )}
-                                        >
-                                            {opt.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
+                                <Filter size={16} />
+                                <span className="text-sm font-bold">
+                                    {filterStatus === 'all'
+                                        ? t('credit.filter')
+                                        : filterStatus === 'high'
+                                          ? t('credit.high_debt')
+                                          : t('credit.low_debt')}
+                                </span>
+                            </button>
+                            <AnimatePresence>
+                                {showFilter && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95, y: -5 }}
+                                        className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl border border-zinc-200 shadow-xl z-50 p-2"
+                                    >
+                                        {[
+                                            { key: 'all' as const, label: t('credit.filter_all') },
+                                            { key: 'high' as const, label: t('credit.filter_high') },
+                                            { key: 'low' as const, label: t('credit.filter_low') },
+                                        ].map((opt) => (
+                                            <button
+                                                key={opt.key}
+                                                onClick={() => {
+                                                    setFilterStatus(opt.key);
+                                                    setShowFilter(false);
+                                                }}
+                                                className={cn(
+                                                    'w-full text-left px-4 py-2.5 rounded-lg text-sm font-bold transition-colors',
+                                                    filterStatus === opt.key
+                                                        ? 'bg-black text-white'
+                                                        : 'text-zinc-600 hover:bg-zinc-50',
+                                                )}
+                                            >
+                                                {opt.label}
+                                            </button>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
-                        <Button variant="secondary" icon={<Download size={18} />} onClick={handleExport}>
-                            {t('credit.export')}
-                        </Button>
+                        <button
+                            onClick={handleExport}
+                            className="flex items-center gap-2 px-4 py-3.5 rounded-2xl bg-zinc-100 border border-zinc-200 hover:bg-zinc-200 hover:text-black transition-all text-zinc-600"
+                        >
+                            <Download size={16} />
+                            <span className="text-sm font-bold">{t('credit.export')}</span>
+                        </button>
                     </div>
                 </div>
 
                 {/* Table */}
-                <div className="p-8">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="text-left border-b border-zinc-100">
-                                    <th className="pb-6 pl-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                                        {t('credit.col_customer')}
-                                    </th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                                        {t('credit.col_contact')}
-                                    </th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                                        {t('credit.col_debt')}
-                                    </th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                                        {t('credit.col_status')}
-                                    </th>
-                                    <th className="pb-6 pr-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                                        {t('credit.col_actions')}
-                                    </th>
+                <div className="rounded-[3rem] bg-white border-2 border-black/5 overflow-hidden min-h-[500px]">
+                    <table className="w-full" dir="auto">
+                        <thead className="bg-zinc-50 border-b border-zinc-100">
+                            <tr>
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                    {t('credit.col_customer')}
+                                </th>
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                    {t('credit.col_contact')}
+                                </th>
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                    {t('credit.col_debt')}
+                                </th>
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                    {t('credit.col_status')}
+                                </th>
+                                <th className="px-6 py-4 rtl:text-left ltr:text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                    {t('credit.col_actions')}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-100">
+                            {isLoading ? (
+                                <TableSkeletonRows columns={5} rows={5} />
+                            ) : filteredDebtors.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-16">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center">
+                                                <CheckCircle2 size={24} className="text-zinc-300" />
+                                            </div>
+                                            <p className="text-sm font-bold text-zinc-400">{t('credit.no_debts')}</p>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody className="divide-y divide-zinc-50">
-                                {isLoading ? (
-                                    <TableSkeletonRows columns={5} rows={5} />
-                                ) : filteredDebtors.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={5} className="py-20 text-center">
-                                            <div className="flex flex-col items-center gap-4 opacity-50">
-                                                <div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center">
-                                                    <CheckCircle2 size={32} className="text-zinc-400 ml-1" />
+                            ) : (
+                                filteredDebtors.map((debtor) => (
+                                    <tr key={debtor.id} className="group hover:bg-zinc-50 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center font-bold text-zinc-500 uppercase text-xs">
+                                                    {debtor.full_name.slice(0, 2)}
                                                 </div>
-                                                <p className="font-bold text-zinc-400">{t('credit.no_debts')}</p>
+                                                <div>
+                                                    <p className="text-sm font-bold text-black">{debtor.full_name}</p>
+                                                    <p className="text-xs text-zinc-400">ID: #{debtor.id}</p>
+                                                </div>
                                             </div>
                                         </td>
-                                    </tr>
-                                ) : (
-                                    filteredDebtors.map((debtor) => (
-                                        <tr key={debtor.id} className="group hover:bg-zinc-50/80 transition-colors">
-                                            <td className="py-6 pl-4">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 flex items-center justify-center font-black text-zinc-500 uppercase">
-                                                        {debtor.full_name.slice(0, 2)}
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-bold text-black">{debtor.full_name}</div>
-                                                        <div className="text-xs font-medium text-zinc-400">
-                                                            ID: #{debtor.id}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="py-6">
-                                                <div className="flex flex-col">
-                                                    <span className="text-sm font-bold text-zinc-600">
-                                                        {debtor.phone || '—'}
-                                                    </span>
-                                                    <span className="text-xs text-zinc-400">{debtor.email}</span>
-                                                </div>
-                                            </td>
-                                            <td className="py-6">
-                                                <span className="text-lg font-black text-black">
-                                                    {formatCurrency(debtor.total_debt)}
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-medium text-zinc-600">
+                                                    {debtor.phone || '—'}
                                                 </span>
-                                            </td>
-                                            <td className="py-6">
-                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-50 border border-red-100">
-                                                    <AlertCircle size={14} className="text-red-500" />
-                                                    <span className="text-[10px] font-bold uppercase tracking-wide text-red-600">
-                                                        {t('credit.status_overdue')}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className="py-6 pr-4 text-right">
-                                                <Button
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setSelectedDebtor(debtor);
-                                                        setShowPaymentModal(true);
-                                                    }}
-                                                >
-                                                    {t('credit.settle_debt')}
-                                                </Button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                                <span className="text-xs text-zinc-400">{debtor.email}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="text-sm font-black text-black">
+                                                {formatCurrency(debtor.total_debt)}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-100">
+                                                <AlertCircle size={12} className="text-red-500" />
+                                                <span className="text-[10px] font-bold uppercase tracking-wide text-red-600">
+                                                    {t('credit.status_overdue')}
+                                                </span>
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedDebtor(debtor);
+                                                    setShowPaymentModal(true);
+                                                }}
+                                                className="px-4 py-2 bg-black text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-neutral-800 transition-all"
+                                            >
+                                                {t('credit.settle_debt')}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -398,55 +462,50 @@ function PaymentModal({
                     exit={{ opacity: 0, scale: 0.95 }}
                     className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden"
                 >
-                    <div className="p-8 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
+                    <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
                         <div>
-                            <h2 className="text-xl font-black text-black">{t('credit.record_payment')}</h2>
-                            <p className="text-sm font-medium text-zinc-400">
+                            <h2 className="text-lg font-bold text-black">{t('credit.record_payment')}</h2>
+                            <p className="text-xs font-medium text-zinc-400">
                                 {t('credit.payment_for', { name: customer.full_name })}
                             </p>
                         </div>
-                        <div className="p-3 bg-white rounded-xl shadow-sm">
-                            <Banknote size={24} className="text-emerald-500" />
+                        <div className="p-2 bg-emerald-50 rounded-xl">
+                            <Banknote size={20} className="text-emerald-600" />
                         </div>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="p-8 space-y-8">
-                        <div className="space-y-4">
-                            <div className="p-4 bg-zinc-50 rounded-xl border border-zinc-100 flex justify-between items-center">
-                                <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">
-                                    {t('credit.total_due')}
-                                </span>
-                                <span className="text-xl font-black text-red-500">
-                                    {formatCurrency(customer.total_debt)}
-                                </span>
-                            </div>
+                    <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                        <div className="p-4 bg-zinc-50 rounded-xl flex justify-between items-center">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                                {t('credit.total_due')}
+                            </span>
+                            <span className="text-lg font-black text-red-500">
+                                {formatCurrency(customer.total_debt)}
+                            </span>
+                        </div>
 
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 ml-1">
-                                    {t('credit.payment_amount')}
-                                </label>
-                                <div className="relative">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-zinc-400">
-                                        DZ
-                                    </span>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        min="0.01"
-                                        max={customer.total_debt}
-                                        value={amount}
-                                        onChange={(e) => setAmount(e.target.value)}
-                                        className={cn(
-                                            'w-full h-16 pl-10 pr-4 rounded-2xl bg-white border-2 text-2xl font-black text-black focus:outline-none transition-colors',
-                                            !amountValidation.valid && amount
-                                                ? 'border-red-300 focus:border-red-500'
-                                                : 'border-zinc-100 focus:border-black',
-                                        )}
-                                    />
-                                    {!amountValidation.valid && amount && (
-                                        <p className="text-xs text-red-500 mt-1 ml-1">{amountValidation.message}</p>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">
+                                {t('credit.payment_amount')}
+                            </label>
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-zinc-400">
+                                    DZ
+                                </span>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0.01"
+                                    max={customer.total_debt}
+                                    value={amount}
+                                    onChange={(e) => setAmount(e.target.value)}
+                                    className={cn(
+                                        'w-full h-12 pl-10 pr-4 rounded-xl bg-white border-2 text-base font-bold text-black focus:outline-none transition-colors',
+                                        !amountValidation.valid && amount
+                                            ? 'border-red-300 focus:border-red-500'
+                                            : 'border-zinc-200 focus:border-zinc-400',
                                     )}
-                                </div>
+                                />
                             </div>
                         </div>
 
@@ -456,14 +515,14 @@ function PaymentModal({
                                 variant="secondary"
                                 onClick={onClose}
                                 disabled={isLoading}
-                                className="flex-1"
+                                className="flex-1 rounded-xl"
                             >
-                                Cancel
+                                {t('credit.cancel')}
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={isLoading || !amountValidation.valid}
-                                className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black border-none shadow-lg shadow-yellow-400/20"
+                                className="flex-1 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-black border-none"
                             >
                                 {isLoading ? t('credit.processing') : t('credit.confirm_payment')}
                             </Button>

@@ -213,31 +213,31 @@ export default function Transactions() {
 
                 {/* Transactions Table */}
                 <div className="rounded-[3rem] bg-white border-2 border-black/5 overflow-hidden">
-                    <table className="w-full">
+                    <table className="w-full" dir="auto">
                         <thead className="bg-zinc-50 border-b border-zinc-100">
                             <tr>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('transactions.col_id')}
                                 </th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('transactions.col_date')}
                                 </th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('transactions.col_customer')}
                                 </th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('transactions.col_payment')}
                                 </th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('transactions.col_cashier')}
                                 </th>
-                                <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-left ltr:text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('transactions.col_total')}
                                 </th>
                                 <th className="px-6 py-4 text-center text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('transactions.col_status')}
                                 </th>
-                                <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-left ltr:text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('transactions.col_actions')}
                                 </th>
                             </tr>

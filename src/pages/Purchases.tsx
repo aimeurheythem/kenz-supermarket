@@ -144,22 +144,22 @@ export default function Purchases() {
 
                 {/* Orders List */}
                 <div className="rounded-[3rem] bg-white border-2 border-black/5 overflow-hidden">
-                    <table className="w-full">
+                    <table className="w-full" dir="auto">
                         <thead className="bg-zinc-50 border-b border-zinc-100">
                             <tr>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('purchases.col_po')}
                                 </th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('purchases.col_supplier')}
                                 </th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('purchases.col_date')}
                                 </th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('purchases.col_status')}
                                 </th>
-                                <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-left ltr:text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('purchases.col_total')}
                                 </th>
                                 <th className="px-6 py-4 text-center text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
@@ -334,7 +334,7 @@ export default function Purchases() {
 
                             {/* Items List */}
                             <div className="min-h-[200px] border border-[var(--color-border)] rounded-[var(--radius-md)] overflow-hidden">
-                                <table className="w-full">
+                                <table className="w-full" dir="auto">
                                     <thead className="bg-[var(--color-bg-secondary)]">
                                         <tr>
                                             <th className="px-3 py-2 text-left text-xs font-semibold text-[var(--color-text-muted)]">
@@ -489,7 +489,7 @@ export default function Purchases() {
 
                                 <div>
                                     <h3 className="font-semibold text-sm mb-2">{t('purchases.order_items')}</h3>
-                                    <table className="w-full">
+                                    <table className="w-full" dir="auto">
                                         <thead>
                                             <tr className="border-b border-[var(--color-border)]">
                                                 <th className="text-left py-2 text-xs font-medium text-[var(--color-text-muted)]">

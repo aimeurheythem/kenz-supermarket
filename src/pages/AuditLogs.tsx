@@ -107,7 +107,7 @@ export default function AuditLogs() {
                     >
                         <div className="flex items-center justify-between relative z-10">
                             <span className="text-[10px] font-bold text-black/60 uppercase tracking-widest">
-                                {t('audit_logs.stat_total', 'Total Logs')}
+                                {t('audit_logs.stat_total')}
                             </span>
                             <div className="p-2 bg-black/5 rounded-full">
                                 <Activity size={14} className="text-black" />
@@ -128,7 +128,7 @@ export default function AuditLogs() {
                     >
                         <div className="flex items-center justify-between relative z-10">
                             <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                                {t('audit_logs.stat_today', "Today's Logs")}
+                                {t('audit_logs.stat_today')}
                             </span>
                             <div className="p-2 bg-zinc-100 rounded-full">
                                 <Clock size={14} className="text-zinc-500" />
@@ -151,7 +151,7 @@ export default function AuditLogs() {
                         <div className="absolute top-0 right-0 p-24 bg-zinc-800 rounded-full blur-3xl opacity-30 -translate-y-1/2 translate-x-1/2" />
                         <div className="flex items-center justify-between relative z-10">
                             <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                                {t('audit_logs.stat_users', 'Unique Users')}
+                                {t('audit_logs.stat_users')}
                             </span>
                             <div className="p-2 bg-white/10 rounded-full">
                                 <User size={14} className="text-white" />
@@ -238,25 +238,25 @@ export default function AuditLogs() {
 
                 {/* Logs Table */}
                 <div className="rounded-[3rem] bg-white border-2 border-black/5 overflow-hidden">
-                    <table className="w-full">
+                    <table className="w-full" dir="auto">
                         <thead className="bg-zinc-50 border-b border-zinc-100">
                             <tr>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 w-[180px]">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 w-[180px]">
                                     {t('audit_logs.col_timestamp')}
                                 </th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('audit_logs.col_user')}
                                 </th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('audit_logs.col_action')}
                                 </th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('audit_logs.col_entity')}
                                 </th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('audit_logs.col_details')}
                                 </th>
-                                <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-left ltr:text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('audit_logs.col_view')}
                                 </th>
                             </tr>

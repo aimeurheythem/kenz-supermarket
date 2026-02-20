@@ -107,7 +107,7 @@ export default function Customers() {
                     >
                         <div className="flex items-center justify-between relative z-10">
                             <span className="text-[10px] font-bold text-black/60 uppercase tracking-widest">
-                                {t('customers.stat_total', 'Total Customers')}
+                                {t('customers.stat_total')}
                             </span>
                             <div className="p-2 bg-black/5 rounded-full">
                                 <Users size={14} className="text-black" />
@@ -131,7 +131,7 @@ export default function Customers() {
                     >
                         <div className="flex items-center justify-between relative z-10">
                             <span className="text-[10px] font-bold text-rose-900/60 uppercase tracking-widest">
-                                {t('customers.stat_debt', 'Total Debt')}
+                                {t('customers.stat_debt')}
                             </span>
                             <div className="p-2 bg-rose-900/10 rounded-full">
                                 <Wallet size={14} className="text-rose-900" />
@@ -152,7 +152,7 @@ export default function Customers() {
                     >
                         <div className="flex items-center justify-between relative z-10">
                             <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                                {t('customers.stat_points', 'Total Points')}
+                                {t('customers.stat_points')}
                             </span>
                             <div className="p-2 bg-zinc-100 rounded-full">
                                 <Award size={14} className="text-yellow-500" />
@@ -206,22 +206,22 @@ export default function Customers() {
 
                 {/* Customers Table */}
                 <div className="rounded-[3rem] bg-white border-2 border-black/5 overflow-hidden">
-                    <table className="w-full">
+                    <table className="w-full" dir="auto">
                         <thead className="bg-zinc-50 border-b border-zinc-100">
                             <tr>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('customers.col_customer')}
                                 </th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('customers.col_contact')}
                                 </th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('customers.col_loyalty')}
                                 </th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-right ltr:text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('customers.col_debt')}
                                 </th>
-                                <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="px-6 py-4 rtl:text-left ltr:text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('customers.col_actions')}
                                 </th>
                             </tr>

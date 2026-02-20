@@ -278,12 +278,12 @@ export default function AuditLogs() {
                             ) : (
                                 paginatedLogs.map((log) => (
                                     <tr key={log.id} className="hover:bg-zinc-50 transition-colors">
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span className="text-sm font-bold text-black">
                                                 {format(new Date(log.created_at), 'MMM dd, HH:mm:ss')}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <div className="flex items-center gap-2">
                                                 <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-xs font-bold text-zinc-600">
                                                     {log.user_name?.[0] || '?'}
@@ -293,7 +293,7 @@ export default function AuditLogs() {
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span
                                                 className={cn(
                                                     'inline-flex px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider',
@@ -305,17 +305,17 @@ export default function AuditLogs() {
                                                 {log.action}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span className="text-xs font-bold bg-zinc-100 px-3 py-1 rounded-full text-zinc-600 uppercase tracking-wider">
                                                 {log.entity}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span className="text-sm text-zinc-500 truncate max-w-[300px] block">
                                                 {log.details}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-6 py-4 rtl:text-left ltr:text-right">
                                             <Dialog>
                                                 <DialogTrigger asChild>
                                                     <button

@@ -343,25 +343,25 @@ export default function Expenses() {
                             ) : (
                                 paginatedExpenses.map((expense) => (
                                     <tr key={expense.id} className="hover:bg-zinc-50 transition-colors">
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span className="text-sm font-bold text-black">{expense.description}</span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span className="inline-flex items-center px-3 py-1 rounded-full bg-zinc-100 text-[10px] font-bold text-zinc-600 uppercase tracking-wider">
                                                 {expense.category}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span className="text-sm text-zinc-500">
                                                 {new Date(expense.date).toLocaleDateString()}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span className="text-sm font-black text-black">
                                                 {formatCurrency(expense.amount)}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-6 py-4 rtl:text-left ltr:text-right">
                                             <button
                                                 onClick={() => setDeleteTarget(expense.id)}
                                                 className="text-zinc-400 hover:text-rose-500 font-bold text-[10px] uppercase tracking-wider transition-colors"

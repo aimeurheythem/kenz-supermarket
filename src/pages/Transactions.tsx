@@ -265,10 +265,10 @@ export default function Transactions() {
                                         className="group hover:bg-zinc-50 transition-colors cursor-pointer"
                                         onClick={() => setSelectedSale(sale)}
                                     >
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span className="text-sm font-bold text-black">#{sale.id}</span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <div className="flex flex-col">
                                                 <span className="text-sm font-bold text-black">
                                                     {new Date(sale.sale_date).toLocaleDateString()}
@@ -281,7 +281,7 @@ export default function Transactions() {
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             {sale.customer_name ? (
                                                 <span className="text-sm font-medium text-zinc-600">
                                                     {sale.customer_name}
@@ -292,17 +292,17 @@ export default function Transactions() {
                                                 </span>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span className="inline-flex px-3 py-1 rounded-full bg-zinc-100 text-[10px] font-bold text-zinc-600 uppercase tracking-wider">
                                                 {sale.payment_method}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span className="text-sm text-zinc-500">
                                                 {sale.user_name || t('common.na')}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-6 py-4 rtl:text-left ltr:text-right">
                                             <span className="text-sm font-black text-black">
                                                 {formatCurrency(sale.total)}
                                             </span>
@@ -319,7 +319,7 @@ export default function Transactions() {
                                                 {sale.status}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-6 py-4 rtl:text-left ltr:text-right">
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();

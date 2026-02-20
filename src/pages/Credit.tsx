@@ -346,7 +346,7 @@ export default function Credit() {
                             ) : (
                                 filteredDebtors.map((debtor) => (
                                     <tr key={debtor.id} className="group hover:bg-zinc-50 transition-colors">
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center font-bold text-zinc-500 uppercase text-xs">
                                                     {debtor.full_name.slice(0, 2)}
@@ -357,7 +357,7 @@ export default function Credit() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <div className="flex flex-col">
                                                 <span className="text-sm font-medium text-zinc-600">
                                                     {debtor.phone || '—'}
@@ -365,12 +365,12 @@ export default function Credit() {
                                                 <span className="text-xs text-zinc-400">{debtor.email}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span className="text-sm font-black text-black">
                                                 {formatCurrency(debtor.total_debt)}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-100">
                                                 <AlertCircle size={12} className="text-red-500" />
                                                 <span className="text-[10px] font-bold uppercase tracking-wide text-red-600">
@@ -378,7 +378,7 @@ export default function Credit() {
                                                 </span>
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-6 py-4 rtl:text-left ltr:text-right">
                                             <button
                                                 onClick={() => {
                                                     setSelectedDebtor(debtor);

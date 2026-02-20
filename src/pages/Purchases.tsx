@@ -184,22 +184,22 @@ export default function Purchases() {
                             ) : (
                                 paginatedOrders.map((order) => (
                                     <tr key={order.id} className="hover:bg-zinc-50 transition-colors">
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span className="text-sm font-bold text-black">
                                                 PO-{order.id.toString().padStart(4, '0')}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span className="text-sm font-medium text-zinc-600">
                                                 {order.supplier_name}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span className="text-sm text-zinc-500">
                                                 {formatDate(order.order_date)}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span
                                                 className={cn(
                                                     'inline-flex px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider',
@@ -212,7 +212,7 @@ export default function Purchases() {
                                                 {order.status}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-6 py-4 rtl:text-left ltr:text-right">
                                             <span className="text-sm font-black text-black">
                                                 {formatCurrency(order.total_amount)}
                                             </span>

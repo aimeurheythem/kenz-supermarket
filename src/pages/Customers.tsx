@@ -245,7 +245,7 @@ export default function Customers() {
                             ) : (
                                 paginatedCustomers.map((customer) => (
                                     <tr key={customer.id} className="group hover:bg-zinc-50 transition-colors">
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center text-sm font-bold text-zinc-600">
                                                     {customer.full_name.charAt(0).toUpperCase()}
@@ -263,7 +263,7 @@ export default function Customers() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <div className="flex flex-col gap-1">
                                                 {customer.phone && (
                                                     <div className="flex items-center gap-1.5 text-zinc-600 text-xs">
@@ -279,7 +279,7 @@ export default function Customers() {
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <div className="flex items-center gap-2">
                                                 <div className="p-1.5 bg-yellow-100 rounded-lg">
                                                     <Award size={14} className="text-yellow-600" />
@@ -292,7 +292,7 @@ export default function Customers() {
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <span
                                                 className={cn(
                                                     'text-sm font-black',
@@ -302,7 +302,7 @@ export default function Customers() {
                                                 {formatCurrency(customer.total_debt || 0)}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-6 py-4 rtl:text-left ltr:text-right">
                                             <div className="flex items-center justify-end gap-2">
                                                 <button
                                                     onClick={() => {

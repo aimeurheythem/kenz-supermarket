@@ -386,7 +386,7 @@ export default function Users() {
                         <tbody className="divide-y divide-zinc-100">
                             {paginatedUsers.map((user) => (
                                 <tr key={user.id} className="group hover:bg-zinc-50 transition-colors">
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white font-bold text-sm">
                                                 {user.full_name.charAt(0).toUpperCase()}
@@ -397,7 +397,7 @@ export default function Users() {
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                         <span
                                             className={cn(
                                                 'inline-flex px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider',
@@ -407,7 +407,7 @@ export default function Users() {
                                             {user.role}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                         {user.role === 'cashier' ? (
                                             <div className="flex items-center gap-2">
                                                 <Lock size={14} className="text-zinc-300" />
@@ -419,7 +419,7 @@ export default function Users() {
                                             <span className="text-sm text-zinc-300">-</span>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                         {user.is_active ? (
                                             <div className="flex items-center gap-2">
                                                 <div className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -436,12 +436,12 @@ export default function Users() {
                                             </div>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                         <span className="text-sm text-zinc-500">
                                             {user.last_login ? formatDate(user.last_login) : t('users.never_logged')}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-right">
+                                    <td className="px-6 py-4 rtl:text-left ltr:text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             {user.role === 'cashier' && (
                                                 <button

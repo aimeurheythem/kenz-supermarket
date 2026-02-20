@@ -10,9 +10,11 @@ import { Filter, Search, ArrowUpRight, ArrowDownLeft, Clock } from 'lucide-react
 import { formatCurrency } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { TableSkeletonRows } from '@/components/common/TableSkeleton';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 export default function Transactions() {
     const { t } = useTranslation();
+    usePageTitle(t('sidebar.transactions'));
     const { salesList, loadSales, refundSale, voidSale, period, setPeriod, isLoadingSales } = useReportStore();
     const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
     const [searchTerm, setSearchTerm] = useState('');

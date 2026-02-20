@@ -10,9 +10,11 @@ import { usePagination } from '@/hooks/usePagination';
 import { cn, formatCurrency } from '@/lib/utils';
 import type { Customer } from '@/lib/types';
 import { TableSkeletonRows } from '@/components/common/TableSkeleton';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 export default function Customers() {
     const { t } = useTranslation();
+    usePageTitle(t('sidebar.customers'));
     const { customers, loadCustomers, deleteCustomer, isLoadingCustomers } = useCustomerStore();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);

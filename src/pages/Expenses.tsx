@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableSkeletonRows } from '@/components/common/TableSkeleton';
 import { Plus, Search, Filter, Download, DollarSign, TrendingUp, PieChart, Wallet } from 'lucide-react';
@@ -11,9 +11,11 @@ import { useExpenseStore } from '@/stores/useExpenseStore';
 import { exportToCsv } from '@/lib/csv';
 import { toast } from 'sonner';
 import ExpenseModal from '@/components/expenses/ExpenseModal';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 export default function Expenses() {
     const { t } = useTranslation();
+    usePageTitle(t('sidebar.expenses'));
     const { expenses, stats, isLoading, loadExpenses, loadStats, deleteExpense } = useExpenseStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -25,6 +27,11 @@ export default function Expenses() {
         loadExpenses();
         loadStats();
     }, [loadExpenses, loadStats]);
+
+    const sortedCategories = useMemo(
+        () => [...stats.byCategory].sort((a, b) => b.total - a.total),
+        [stats.byCategory],
+    );
 
     const filteredExpenses = expenses
         .filter(
@@ -106,13 +113,13 @@ export default function Expenses() {
                             {t('expenses.stat_top_category')}
                         </span>
                     </div>
-                    {stats.byCategory.length > 0 ? (
+                    {sortedCategories.length > 0 ? (
                         <div>
                             <h3 className="text-2xl font-black text-black mb-1">
-                                {stats.byCategory.sort((a, b) => b.total - a.total)[0].category}
+                                {sortedCategories[0].category}
                             </h3>
                             <p className="text-zinc-400 font-medium">
-                                {formatCurrency(stats.byCategory.sort((a, b) => b.total - a.total)[0].total)}
+                                {formatCurrency(sortedCategories[0].total)}
                             </p>
                         </div>
                     ) : (
@@ -130,7 +137,7 @@ export default function Expenses() {
                         </span>
                     </div>
                     <div className="space-y-3">
-                        {stats.byCategory.slice(0, 3).map((cat) => (
+                        {sortedCategories.slice(0, 3).map((cat) => (
                             <div key={cat.category} className="flex items-center justify-between">
                                 <span className="font-bold text-zinc-600 text-sm">{cat.category}</span>
                                 <span className="font-bold text-black text-sm">{formatCurrency(cat.total)}</span>

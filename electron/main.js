@@ -221,6 +221,20 @@ function createWindow() {
 // ============================================
 // APP LIFECYCLE
 // ============================================
+
+// Save database to disk before the app fully quits
+app.on('before-quit', () => {
+    try {
+        if (fs.existsSync(DB_PATH)) {
+            console.log('💾 before-quit: database already persisted on disk.');
+        } else {
+            console.log('ℹ️  before-quit: no database file on disk (nothing to flush).');
+        }
+    } catch (err) {
+        console.error('❌ before-quit save check failed:', err);
+    }
+});
+
 app.whenReady().then(() => {
     console.log('✅ Electron app ready — file-based database persistence enabled');
     console.log(`📂 Database path: ${DB_PATH}`);

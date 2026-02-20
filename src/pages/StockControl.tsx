@@ -10,9 +10,11 @@ import Pagination from '@/components/common/Pagination';
 import { usePagination } from '@/hooks/usePagination';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { Product } from '@/lib/types';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 export default function StockControl() {
     const { t } = useTranslation();
+    usePageTitle(t('sidebar.stock_control'));
     const { products, lowStockProducts, loadProducts, loadLowStock } = useProductStore();
     const { movements, loadMovements, addStock, removeStock, adjustStock } = useStockStore();
     const [search, setSearch] = useState('');

@@ -13,11 +13,13 @@ import LocalizationTab from '@/components/settings/LocalizationTab';
 import TaxTab from '@/components/settings/TaxTab';
 import ReceiptTab from '@/components/settings/ReceiptTab';
 import SystemTab from '@/components/settings/SystemTab';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 type TabId = 'account' | 'general' | 'localization' | 'sales' | 'receipt' | 'system';
 
 export default function Settings() {
     const { t } = useTranslation();
+    usePageTitle(t('sidebar.settings'));
     const { user, updateProfile, changePassword } = useAuthStore();
     const { settings, loadSettings, updateSettings } = useSettingsStore();
     const [activeTab, setActiveTab] = useState<TabId>('account');
@@ -86,7 +88,11 @@ export default function Settings() {
         setShowRestoreConfirm(false);
         try {
             await restoreDatabase();
-            window.location.reload();
+            // Clear auth state and reload settings from restored DB
+            const { logout } = useAuthStore.getState();
+            logout();
+            await loadSettings();
+            toast.success(t('settings.restore_success', 'Database restored successfully. Please log in again.'));
         } catch (err) {
             console.error(err);
             toast.error('Failed to restore database. Invalid file format.');
@@ -114,7 +120,8 @@ export default function Settings() {
         try {
             await resetAllData(user!.id, user!.full_name);
             localStorage.removeItem('auth-storage');
-            window.location.reload();
+            const { logout: doLogout } = useAuthStore.getState();
+            doLogout();
         } catch (error) {
             console.error('Failed to delete account:', error);
             setDeleteError('Failed to delete account. Please try again.');

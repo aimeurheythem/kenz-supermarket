@@ -112,3 +112,15 @@ export function validatePaymentAmount(
     }
     return { valid: true, message: '' };
 }
+
+/**
+ * Stock-status helper — single source of truth for Inventory grid/list views.
+ */
+export function getStockStatus(stockQty: number, reorderLevel?: number | null) {
+    const threshold = reorderLevel || 10;
+    return {
+        isOutStock: stockQty <= 0,
+        isLowStock: stockQty > 0 && stockQty < threshold,
+        isInStock: stockQty >= threshold,
+    };
+}

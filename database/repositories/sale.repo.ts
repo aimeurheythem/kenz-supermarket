@@ -3,7 +3,7 @@ import type { Sale, SaleItem, CartItem } from '../../src/lib/types';
 import { AuditLogRepo } from './audit-log.repo';
 
 export const SaleRepo = {
-    async getAll(filters?: { from?: string; to?: string; status?: string; limit?: number }): Promise<Sale[]> {
+    async getAll(filters?: { from?: string; to?: string; status?: string; cashier_id?: number; limit?: number }): Promise<Sale[]> {
         let sql = `
       SELECT s.*, u.full_name as user_name,
         (SELECT COUNT(*) FROM sale_items si WHERE si.sale_id = s.id) as item_count
@@ -24,6 +24,10 @@ export const SaleRepo = {
         if (filters?.status) {
             sql += ' AND s.status = ?';
             params.push(filters.status);
+        }
+        if (filters?.cashier_id) {
+            sql += ' AND s.user_id = ?';
+            params.push(filters.cashier_id);
         }
 
         sql += ' ORDER BY s.sale_date DESC';

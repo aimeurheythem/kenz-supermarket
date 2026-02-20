@@ -16,9 +16,11 @@ import { usePagination } from '@/hooks/usePagination';
 import type { Product } from '@/lib/types';
 import { getProductStyle } from '@/lib/product-styles';
 import { useTranslation } from 'react-i18next';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 export default function Inventory() {
     const { t, i18n } = useTranslation();
+    usePageTitle(t('sidebar.inventory'));
 
     const {
         products,
@@ -54,14 +56,6 @@ export default function Inventory() {
         loadCategories();
         loadProducts();
         loadLowStock();
-
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible') {
-                loadProducts();
-            }
-        };
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
     }, [loadCategories, loadProducts, loadLowStock]);
 
     useEffect(() => {

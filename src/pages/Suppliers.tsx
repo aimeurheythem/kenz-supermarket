@@ -21,6 +21,7 @@ import Button from '@/components/common/Button';
 import { FormModal } from '@/components/common/FormModal';
 import { DeleteConfirmModal } from '@/components/common/DeleteConfirmModal';
 import type { Supplier, SupplierInput } from '@/lib/types';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 const defaultForm: SupplierInput = {
     name: '',
@@ -33,6 +34,7 @@ const defaultForm: SupplierInput = {
 export default function Suppliers() {
     const { suppliers, loadSuppliers, addSupplier, updateSupplier, deleteSupplier, addPayment } = useSupplierStore();
     const { t } = useTranslation();
+    usePageTitle(t('sidebar.suppliers'));
     const [search, setSearch] = useState('');
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);

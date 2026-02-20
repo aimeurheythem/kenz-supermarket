@@ -9,8 +9,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe } from 'vitest-axe';
+import type { AxeMatchers } from 'vitest-axe/matchers';
 import * as matchers from 'vitest-axe/matchers';
 import React from 'react';
+
+declare module 'vitest' {
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+    interface Assertion extends AxeMatchers {}
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+    interface AsymmetricMatchersContaining extends AxeMatchers {}
+}
 
 expect.extend(matchers);
 

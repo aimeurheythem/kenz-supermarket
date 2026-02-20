@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Scale, Mail, Phone, MessageSquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
 export default function Terms() {
     const { t } = useTranslation();
+    usePageTitle(t('terms.title', 'Terms & Conditions'));
     const [showContact, setShowContact] = useState(false);
 
     const sections = [

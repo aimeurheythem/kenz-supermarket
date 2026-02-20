@@ -13,9 +13,11 @@ import Pagination from '@/components/common/Pagination';
 import { usePagination } from '@/hooks/usePagination';
 import { Search, Eye } from 'lucide-react';
 import { format } from 'date-fns';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 export default function AuditLogs() {
     const { t } = useTranslation();
+    usePageTitle(t('sidebar.audit_logs'));
     const { logs, isLoading: loading, loadLogs: storeLoadLogs } = useAuditLogStore();
     const [filters, setFilters] = useState({
         entity: 'ALL',

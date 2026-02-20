@@ -103,10 +103,8 @@ export default function Onboarding() {
             const success = await login(formData.adminUsername, formData.adminPassword);
 
             if (success) {
-                // Full reload so App.tsx re-checks hasAnyUsers() and renders the main app
-                setTimeout(() => {
-                    window.location.reload();
-                }, 500);
+                // Navigate home — App.tsx re-checks hasAnyUsers via isAuthenticated dep
+                navigate('/');
             }
         } catch (error) {
             console.error('Setup failed:', error);

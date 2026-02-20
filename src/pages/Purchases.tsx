@@ -11,9 +11,11 @@ import { usePagination } from '@/hooks/usePagination';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import SearchInput from '@/components/common/SearchInput';
 import type { Product } from '@/lib/types';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 export default function Purchases() {
     const { t } = useTranslation();
+    usePageTitle(t('sidebar.purchases'));
     const { orders, currentOrderItems, loadOrders, loadOrderItems, createOrder, receiveOrder } = usePurchaseStore();
     const { suppliers, loadSuppliers } = useSupplierStore();
     const { products, loadProducts } = useProductStore();

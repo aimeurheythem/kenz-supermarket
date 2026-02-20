@@ -4,12 +4,14 @@ import { Minus, Square, X, Copy, PanelLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLayoutStore } from '@/stores/useLayoutStore';
 import { useTranslation } from 'react-i18next';
+import { useElectron } from '@/hooks/useElectron';
 
 export default function TitleBar() {
     const [isMaximized, setIsMaximized] = useState(false);
     const { isSidebarCollapsed: collapsed, toggleSidebar } = useLayoutStore();
     const location = useLocation();
     const { t } = useTranslation();
+    const electron = useElectron();
 
     const getBreadcrumbs = () => {
         const path = location.pathname;
@@ -47,15 +49,13 @@ export default function TitleBar() {
     const breadcrumbs = getBreadcrumbs();
 
     useEffect(() => {
-        window.electronAPI?.isMaximized().then(setIsMaximized);
-        window.electronAPI?.onMaximizedChange(setIsMaximized);
+        electron.isMaximized().then(setIsMaximized);
+        electron.onMaximizedChange(setIsMaximized);
     }, []);
-
-    const isElectron = !!window.electronAPI;
 
     return (
         <header
-            className={cn('h-16 flex items-center justify-between px-8 select-none', isElectron && 'app-drag-region')}
+            className={cn('h-16 flex items-center justify-between px-8 select-none', electron.isElectron && 'app-drag-region')}
         >
             <div className="flex items-center gap-2">
                 <button
@@ -86,11 +86,11 @@ export default function TitleBar() {
 
             <div className="flex-1" />
 
-            {isElectron && (
+            {electron.isElectron && (
                 <div className="fixed top-0 ltr:right-0 rtl:left-0 h-10 flex items-center gap-0.5 px-3 z-[9999] app-no-drag pointer-events-auto">
                     {/* Minimize */}
                     <button
-                        onClick={() => window.electronAPI?.minimizeWindow()}
+                        onClick={() => electron.minimize()}
                         className="group flex items-center justify-center w-10 min-h-full hover:bg-black/[0.08] active:bg-black/[0.12] transition-colors duration-200"
                         title="Minimize"
                     >
@@ -103,7 +103,7 @@ export default function TitleBar() {
 
                     {/* Maximize/Restore */}
                     <button
-                        onClick={() => window.electronAPI?.maximizeWindow()}
+                        onClick={() => electron.maximize()}
                         className="group flex items-center justify-center w-10 min-h-full hover:bg-black/[0.08] active:bg-black/[0.12] transition-colors duration-200"
                         title={isMaximized ? 'Restore' : 'Maximize'}
                     >
@@ -124,7 +124,7 @@ export default function TitleBar() {
 
                     {/* Close */}
                     <button
-                        onClick={() => window.electronAPI?.closeWindow()}
+                        onClick={() => electron.close()}
                         className="group flex items-center justify-center w-11 min-h-full hover:bg-[#E81123] active:bg-[#AC0F1C] transition-colors duration-200"
                         title="Close"
                     >

@@ -10,9 +10,11 @@ import { exportToCsv } from '@/lib/csv';
 import type { Customer } from '@/lib/types';
 import Button from '@/components/common/Button';
 import Portal from '@/components/common/Portal';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 export default function Credit() {
     const { t } = useTranslation();
+    usePageTitle(t('sidebar.credit'));
     const { getDebtors, getCollectionStats } = useCustomerStore();
 
     // State

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { useProductStore } from '@/stores/useProductStore';
 import { BarcodeCanvas } from '@/components/barcodes/BarcodeCanvas';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ type LabelFormat = '5160' | 'thermal_50x30' | 'thermal_40x25';
 
 export default function BarcodeLabels() {
     const { t } = useTranslation();
+    usePageTitle(t('sidebar.barcodes'));
     const { products, loadProducts } = useProductStore();
     const [searchQuery, setSearchQuery] = useState('');
     const [queue, setQueue] = useState<PrintItem[]>([]);

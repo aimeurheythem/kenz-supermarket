@@ -21,11 +21,13 @@ import { useUserStore } from '@/stores/useUserStore';
 import Button from '@/components/common/Button';
 import { exportToCsv } from '@/lib/csv';
 import { toast } from 'sonner';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
 export default function Reports() {
     const { t } = useTranslation();
+    usePageTitle(t('sidebar.reports'));
     const {
         period,
         setPeriod,

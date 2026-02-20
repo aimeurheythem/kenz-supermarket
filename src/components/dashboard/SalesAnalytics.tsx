@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -77,11 +77,15 @@ export default function SalesAnalytics({ userId }: SalesAnalyticsProps) {
     const getDataKey = () => (timeRange === 'hourly' ? 'time' : timeRange === 'daily' ? 'day' : 'month');
 
     // Calculate peak hour for the recommendation card
-    const peakHour = peakHoursData.reduce<{ hour: string; density: number } | null>(
-        (max, curr) => (!max || curr.density > max.density ? curr : max),
-        null,
+    const peakHour = useMemo(
+        () =>
+            peakHoursData.reduce<{ hour: string; density: number } | null>(
+                (max, curr) => (!max || curr.density > max.density ? curr : max),
+                null,
+            ),
+        [peakHoursData],
     );
-    const totalTodaySales = peakHoursData.reduce((sum, h) => sum + h.density, 0);
+    const totalTodaySales = useMemo(() => peakHoursData.reduce((sum, h) => sum + h.density, 0), [peakHoursData]);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

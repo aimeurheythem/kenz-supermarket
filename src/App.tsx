@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Toaster } from 'sonner';
 import AppShell from './components/layout/AppShell';
@@ -25,6 +25,7 @@ import Terms from './pages/Terms';
 import { useAuthStore } from './stores/useAuthStore';
 import { useSettingsStore } from './stores/useSettingsStore';
 import { useUserStore } from './stores/useUserStore';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 import CashierLoginModal from './components/auth/CashierLoginModal';
 import POS from './pages/POS';
 
@@ -92,14 +93,14 @@ export default function App() {
         document.documentElement.lang = i18n.language;
     }, [i18n.language]);
 
-    // Check for first-time setup
+    // Check for first-time setup (re-check after auth changes, e.g. after onboarding)
     useEffect(() => {
         const checkSetup = async () => {
             const has = await hasAnyUsers();
             setNeedsSetup(!has);
         };
         checkSetup();
-    }, [hasAnyUsers]);
+    }, [hasAnyUsers, isAuthenticated]);
 
     // Reset cashier login modal state when not authenticated
     useEffect(() => {
@@ -126,11 +127,11 @@ export default function App() {
     }, [isAuthenticated, user, currentSession, logout]);
 
     // Get default route based on role
-    const getDefaultRoute = () => {
+    const getDefaultRoute = useMemo(() => {
         if (!isAuthenticated) return '/login';
         if (user?.role === 'cashier') return '/pos';
         return '/';
-    };
+    }, [isAuthenticated, user?.role]);
 
     // Show nothing until we know if setup is needed
     if (needsSetup === null) {
@@ -157,6 +158,7 @@ export default function App() {
                     path="/*"
                     element={
                         <RequireAuth>
+                            <ErrorBoundary>
                             <AppShell>
                                 <Routes>
                                     {/* Cashier-only routes */}
@@ -286,9 +288,10 @@ export default function App() {
                                     <Route path="/terms" element={<Terms />} />
 
                                     {/* Default redirect */}
-                                    <Route path="*" element={<Navigate to={getDefaultRoute()} replace />} />
+                                    <Route path=\"*\" element={<Navigate to={getDefaultRoute} replace />} />
                                 </Routes>
                             </AppShell>
+                            </ErrorBoundary>
                         </RequireAuth>
                     }
                 />

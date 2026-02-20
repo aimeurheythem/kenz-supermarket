@@ -1,9 +1,11 @@
 import React from 'react';
 import { Mail, MessageSquare, Phone, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 export default function Help() {
     const { t } = useTranslation();
+    usePageTitle(t('sidebar.help'));
 
     const contactMethods = [
         { icon: Mail, label: 'Email Support', value: 'support@supermarket.dz', color: 'text-blue-500' },

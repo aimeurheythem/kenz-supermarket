@@ -1,5 +1,5 @@
 // POS.tsx — Orchestrator
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Search, X, Barcode } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useProductStore } from '@/stores/useProductStore';
@@ -22,9 +22,11 @@ import QuickAccessManager from '@/components/POS/QuickAccessManager';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { toast } from 'sonner';
 import { getProductStyle } from '@/lib/product-styles';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 export default function POS() {
     const { t, i18n } = useTranslation();
+    usePageTitle(t('sidebar.pos_sales'));
     const { products, loadProducts, getByBarcode } = useProductStore();
     const {
         cart,
@@ -91,29 +93,28 @@ export default function POS() {
     useEffect(() => {
         loadProducts();
         fetchItems();
-
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible') {
-                loadProducts();
-            }
-        };
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
     }, [loadProducts, fetchItems]);
 
-    const filteredProducts = products
-        .filter(
-            (p) =>
-                !searchQuery ||
-                p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                (p.barcode && p.barcode.includes(searchQuery)),
-        )
-        .slice(0, 20);
+    const filteredProducts = useMemo(
+        () =>
+            products
+                .filter(
+                    (p) =>
+                        !searchQuery ||
+                        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        (p.barcode && p.barcode.includes(searchQuery)),
+                )
+                .slice(0, 20),
+        [products, searchQuery],
+    );
 
-    const handleAddProduct = async (product: Product) => {
-        if (product.stock_quantity <= 0) return;
-        await addToCart({ product, quantity: 1, discount: 0 });
-    };
+    const handleAddProduct = useCallback(
+        async (product: Product) => {
+            if (product.stock_quantity <= 0) return;
+            await addToCart({ product, quantity: 1, discount: 0 });
+        },
+        [addToCart],
+    );
 
     const handleFinalizeCheckout = useCallback(async () => {
         try {

@@ -99,7 +99,7 @@ export const useReportStore = create<ReportStore>((set, get) => ({
     loadSales: async () => {
         try {
             set({ isLoadingSales: true, error: null });
-            const { period } = get();
+            const { period, selectedCashier } = get();
             const now = new Date();
             const past = new Date();
             if (period === 'today') past.setHours(0, 0, 0, 0);
@@ -107,11 +107,15 @@ export const useReportStore = create<ReportStore>((set, get) => ({
             else if (period === '30days') past.setDate(now.getDate() - 30);
             else if (period === 'year') past.setFullYear(now.getFullYear() - 1);
 
-            const filters = {
+            const filters: { from: string; to: string; limit: number; cashier_id?: number } = {
                 from: past.toISOString(),
                 to: now.toISOString(),
                 limit: 100,
             };
+
+            if (selectedCashier) {
+                filters.cashier_id = selectedCashier;
+            }
 
             const salesList = await SaleRepo.getAll(filters);
             set({ salesList });

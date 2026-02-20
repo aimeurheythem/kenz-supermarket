@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { Camera, RefreshCw } from 'lucide-react';
 import Button from '@/components/common/Button';
@@ -13,6 +13,15 @@ interface BarcodeScannerProps {
 export default function BarcodeScanner({ onScan, onClose, title = 'Scan Barcode' }: BarcodeScannerProps) {
     const scannerRef = useRef<Html5QrcodeScanner | null>(null);
     const [_scannedResult, setScannedResult] = useState<string | null>(null);
+    const [scannerKey, setScannerKey] = useState(0);
+
+    const resetScanner = useCallback(() => {
+        if (scannerRef.current) {
+            scannerRef.current.clear().catch(console.error);
+            scannerRef.current = null;
+        }
+        setScannerKey((k) => k + 1);
+    }, []);
 
     useEffect(() => {
         // Initialize scanner
@@ -75,7 +84,7 @@ export default function BarcodeScanner({ onScan, onClose, title = 'Scan Barcode'
                 scannerRef.current.clear().catch(console.error);
             }
         };
-    }, [onScan]);
+    }, [onScan, scannerKey]);
 
     const handleClose = () => {
         if (scannerRef.current) scannerRef.current.clear();
@@ -114,7 +123,7 @@ export default function BarcodeScanner({ onScan, onClose, title = 'Scan Barcode'
                     <Button
                         variant="secondary"
                         size="sm"
-                        onClick={() => window.location.reload()}
+                        onClick={resetScanner}
                         icon={<RefreshCw size={14} />}
                     >
                         Reset Camera

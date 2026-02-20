@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
     Banknote,
     Package,
@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn, formatCurrency, getCurrencySymbol } from '@/lib/utils';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { useProductStore } from '@/stores/useProductStore';
 import { useSaleStore } from '@/stores/useSaleStore';
 import { useExpenseStore } from '@/stores/useExpenseStore';
@@ -43,6 +44,7 @@ export default function Dashboard() {
     const [activeProductIndex, setActiveProductIndex] = useState(0);
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
+    usePageTitle(t('sidebar.dashboard'));
 
     // Real Top Products by Profit
     const [topProducts, setTopProducts] = useState<{ name: string; profit: number; total_sold: number }[]>([]);
@@ -90,7 +92,7 @@ export default function Dashboard() {
     const totalProducts = products.length;
 
     // Data for Shortcuts
-    const shortcuts = [
+    const shortcuts = useMemo(() => [
         { label: t('dashboard.shortcuts.pos'), icon: MonitorCog, path: '/pos', color: 'text-white', bg: 'bg-black' },
         {
             label: t('dashboard.shortcuts.inventory'),
@@ -113,7 +115,7 @@ export default function Dashboard() {
             color: 'text-white',
             bg: 'bg-black',
         },
-    ];
+    ], [t]);
 
     const getGreeting = () => {
         const hour = new Date().getHours();

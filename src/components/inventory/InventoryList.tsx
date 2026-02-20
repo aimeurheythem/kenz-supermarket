@@ -7,7 +7,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { cn, formatDate, formatCurrency } from '@/lib/utils';
+import { cn, formatDate, formatCurrency, getStockStatus } from '@/lib/utils';
 import type { Product } from '@/lib/types';
 import { useTranslation } from 'react-i18next';
 
@@ -60,9 +60,7 @@ export default function InventoryList({ products, handleEdit, handleDelete }: In
 
             {/* Table Rows */}
             {products.map((product) => {
-                const isOutStock = product.stock_quantity <= 0;
-                const isLowStock = product.stock_quantity > 0 && product.stock_quantity < (product.reorder_level || 10);
-                const isInStock = product.stock_quantity >= (product.reorder_level || 10);
+                const { isOutStock, isLowStock, isInStock } = getStockStatus(product.stock_quantity, product.reorder_level);
 
                 return (
                     <div

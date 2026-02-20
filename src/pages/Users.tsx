@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     Users as UsersIcon,
@@ -25,6 +25,7 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { User, UserInput } from '@/lib/types';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 const defaultForm: UserInput & { pin_code?: string } = {
     username: '',
@@ -47,6 +48,7 @@ export default function Users() {
     } = useUserStore();
     const { user: currentUser } = useAuthStore();
     const { t } = useTranslation();
+    usePageTitle(t('sidebar.users'));
     const [search, setSearch] = useState('');
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -177,11 +179,10 @@ export default function Users() {
         );
     }
 
-    const getPerformanceStats = (cashierId: number) => {
-        const sessions = cashierSessions.filter((s) => s.cashier_id === cashierId);
-        const performance = getCashierPerformance(cashierId);
-        return { sessions, performance };
-    };
+    const selectedCashierPerf = useMemo(() => {
+        if (!selectedCashier) return null;
+        return getCashierPerformance(selectedCashier.id);
+    }, [selectedCashier, getCashierPerformance]);
 
     return (
         <div className="space-y-6 animate-fadeIn">
@@ -497,42 +498,37 @@ export default function Users() {
                                 : t('users.performance_title', { name: '' })}
                         </DialogTitle>
                     </DialogHeader>
-                    {selectedCashier && (
+                    {selectedCashier && selectedCashierPerf && (
                         <div className="space-y-6">
                             {/* Performance Stats */}
-                            {(() => {
-                                const { performance } = getPerformanceStats(selectedCashier.id);
-                                return (
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4">
-                                            <p className="text-xs text-emerald-400 mb-1">{t('users.perf_sessions')}</p>
-                                            <p className="text-2xl font-bold text-[var(--color-text-primary)]">
-                                                {performance.total_sessions}
-                                            </p>
-                                        </div>
-                                        <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                                            <p className="text-xs text-blue-400 mb-1">{t('users.perf_sales')}</p>
-                                            <p className="text-2xl font-bold text-[var(--color-text-primary)]">
-                                                {formatCurrency(performance.total_sales)}
-                                            </p>
-                                        </div>
-                                        <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
-                                            <p className="text-xs text-purple-400 mb-1">
-                                                {t('users.perf_transactions')}
-                                            </p>
-                                            <p className="text-2xl font-bold text-[var(--color-text-primary)]">
-                                                {performance.total_transactions}
-                                            </p>
-                                        </div>
-                                        <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
-                                            <p className="text-xs text-orange-400 mb-1">{t('users.perf_avg_sale')}</p>
-                                            <p className="text-2xl font-bold text-[var(--color-text-primary)]">
-                                                {formatCurrency(performance.average_sale)}
-                                            </p>
-                                        </div>
-                                    </div>
-                                );
-                            })()}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4">
+                                    <p className="text-xs text-emerald-400 mb-1">{t('users.perf_sessions')}</p>
+                                    <p className="text-2xl font-bold text-[var(--color-text-primary)]">
+                                        {selectedCashierPerf.total_sessions}
+                                    </p>
+                                </div>
+                                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                                    <p className="text-xs text-blue-400 mb-1">{t('users.perf_sales')}</p>
+                                    <p className="text-2xl font-bold text-[var(--color-text-primary)]">
+                                        {formatCurrency(selectedCashierPerf.total_sales)}
+                                    </p>
+                                </div>
+                                <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
+                                    <p className="text-xs text-purple-400 mb-1">
+                                        {t('users.perf_transactions')}
+                                    </p>
+                                    <p className="text-2xl font-bold text-[var(--color-text-primary)]">
+                                        {selectedCashierPerf.total_transactions}
+                                    </p>
+                                </div>
+                                <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
+                                    <p className="text-xs text-orange-400 mb-1">{t('users.perf_avg_sale')}</p>
+                                    <p className="text-2xl font-bold text-[var(--color-text-primary)]">
+                                        {formatCurrency(selectedCashierPerf.average_sale)}
+                                    </p>
+                                </div>
+                            </div>
 
                             {/* Recent Sessions */}
                             <div>

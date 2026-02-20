@@ -8,7 +8,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn, formatCurrency, getStockStatus } from '@/lib/utils';
 import type { Product, Category } from '@/lib/types';
 import type { ProductStyle } from '@/lib/product-styles';
 import { useTranslation } from 'react-i18next';
@@ -33,8 +33,7 @@ export default function InventoryGrid({
         <>
             {products.map((product) => {
                 const _style = _getProductStyle(product.id);
-                const isLowStock = product.stock_quantity > 0 && product.stock_quantity < (product.reorder_level || 10);
-                const isOutStock = product.stock_quantity <= 0;
+                const { isLowStock, isOutStock } = getStockStatus(product.stock_quantity, product.reorder_level);
                 const displayStock = Math.max(0, product.stock_quantity);
 
                 return (

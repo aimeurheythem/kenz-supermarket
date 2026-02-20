@@ -315,84 +315,86 @@ export default function AuditLogs() {
                                                 {log.details}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 rtl:text-left ltr:text-right">
-                                            <Dialog>
-                                                <DialogTrigger asChild>
-                                                    <button
-                                                        onClick={() => setSelectedLog(log)}
-                                                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 hover:bg-black hover:text-white transition-all"
-                                                    >
-                                                        <Eye size={16} />
-                                                    </button>
-                                                </DialogTrigger>
-                                                <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto rounded-[2rem]">
-                                                    <DialogHeader>
-                                                        <DialogTitle className="text-xl font-bold text-black tracking-tight">
-                                                            {t('audit_logs.log_details')}
-                                                        </DialogTitle>
-                                                    </DialogHeader>
-                                                    <div className="space-y-6 pt-4">
-                                                        <div className="grid grid-cols-2 gap-4 text-sm">
-                                                            <div className="p-4 bg-zinc-50 rounded-xl">
-                                                                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                                                                    {t('audit_logs.label_timestamp')}
-                                                                </label>
-                                                                <p className="font-bold text-black mt-1">
-                                                                    {format(new Date(log.created_at), 'PPP pp')}
-                                                                </p>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center justify-end rtl:justify-start">
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
+                                                        <button
+                                                            onClick={() => setSelectedLog(log)}
+                                                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 hover:bg-black hover:text-white transition-all"
+                                                        >
+                                                            <Eye size={16} />
+                                                        </button>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto rounded-[2rem]">
+                                                        <DialogHeader>
+                                                            <DialogTitle className="text-xl font-bold text-black tracking-tight">
+                                                                {t('audit_logs.log_details')}
+                                                            </DialogTitle>
+                                                        </DialogHeader>
+                                                        <div className="space-y-6 pt-4">
+                                                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                                                <div className="p-4 bg-zinc-50 rounded-xl">
+                                                                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                                                                        {t('audit_logs.label_timestamp')}
+                                                                    </label>
+                                                                    <p className="font-bold text-black mt-1">
+                                                                        {format(new Date(log.created_at), 'PPP pp')}
+                                                                    </p>
+                                                                </div>
+                                                                <div className="p-4 bg-zinc-50 rounded-xl">
+                                                                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                                                                        {t('audit_logs.label_user')}
+                                                                    </label>
+                                                                    <p className="font-bold text-black mt-1">
+                                                                        {log.user_name || t('audit_logs.system_user')}{' '}
+                                                                        <span className="text-zinc-400 font-normal">
+                                                                            (ID: {log.user_id})
+                                                                        </span>
+                                                                    </p>
+                                                                </div>
+                                                                <div className="p-4 bg-zinc-50 rounded-xl col-span-2">
+                                                                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                                                                        {t('audit_logs.label_action')}
+                                                                    </label>
+                                                                    <p className="font-bold text-black mt-1">
+                                                                        {log.action} on {log.entity} #{log.entity_id}
+                                                                    </p>
+                                                                </div>
+                                                                <div className="col-span-2 p-4 bg-zinc-50 rounded-xl">
+                                                                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                                                                        {t('audit_logs.label_description')}
+                                                                    </label>
+                                                                    <p className="text-zinc-700 mt-1">{log.details}</p>
+                                                                </div>
                                                             </div>
-                                                            <div className="p-4 bg-zinc-50 rounded-xl">
-                                                                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                                                                    {t('audit_logs.label_user')}
-                                                                </label>
-                                                                <p className="font-bold text-black mt-1">
-                                                                    {log.user_name || t('audit_logs.system_user')}{' '}
-                                                                    <span className="text-zinc-400 font-normal">
-                                                                        (ID: {log.user_id})
-                                                                    </span>
-                                                                </p>
-                                                            </div>
-                                                            <div className="p-4 bg-zinc-50 rounded-xl col-span-2">
-                                                                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                                                                    {t('audit_logs.label_action')}
-                                                                </label>
-                                                                <p className="font-bold text-black mt-1">
-                                                                    {log.action} on {log.entity} #{log.entity_id}
-                                                                </p>
-                                                            </div>
-                                                            <div className="col-span-2 p-4 bg-zinc-50 rounded-xl">
-                                                                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                                                                    {t('audit_logs.label_description')}
-                                                                </label>
-                                                                <p className="text-zinc-700 mt-1">{log.details}</p>
-                                                            </div>
-                                                        </div>
 
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                            <div>
-                                                                <h4 className="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-3">
-                                                                    {t('audit_logs.label_old_value')}
-                                                                </h4>
-                                                                <pre className="text-xs font-mono bg-rose-50 p-4 rounded-xl overflow-x-auto text-rose-900 min-h-[100px] border border-rose-100">
-                                                                    {log.old_value
-                                                                        ? JSON.stringify(log.old_value, null, 2)
-                                                                        : 'null'}
-                                                                </pre>
-                                                            </div>
-                                                            <div>
-                                                                <h4 className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-3">
-                                                                    {t('audit_logs.label_new_value')}
-                                                                </h4>
-                                                                <pre className="text-xs font-mono bg-emerald-50 p-4 rounded-xl overflow-x-auto text-emerald-900 min-h-[100px] border border-emerald-100">
-                                                                    {log.new_value
-                                                                        ? JSON.stringify(log.new_value, null, 2)
-                                                                        : 'null'}
-                                                                </pre>
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                <div>
+                                                                    <h4 className="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-3">
+                                                                        {t('audit_logs.label_old_value')}
+                                                                    </h4>
+                                                                    <pre className="text-xs font-mono bg-rose-50 p-4 rounded-xl overflow-x-auto text-rose-900 min-h-[100px] border border-rose-100">
+                                                                        {log.old_value
+                                                                            ? JSON.stringify(log.old_value, null, 2)
+                                                                            : 'null'}
+                                                                    </pre>
+                                                                </div>
+                                                                <div>
+                                                                    <h4 className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-3">
+                                                                        {t('audit_logs.label_new_value')}
+                                                                    </h4>
+                                                                    <pre className="text-xs font-mono bg-emerald-50 p-4 rounded-xl overflow-x-auto text-emerald-900 min-h-[100px] border border-emerald-100">
+                                                                        {log.new_value
+                                                                            ? JSON.stringify(log.new_value, null, 2)
+                                                                            : 'null'}
+                                                                    </pre>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                </DialogContent>
-                                            </Dialog>
+                                                    </DialogContent>
+                                                </Dialog>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))

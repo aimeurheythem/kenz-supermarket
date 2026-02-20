@@ -319,16 +319,18 @@ export default function Transactions() {
                                                 {sale.status}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 rtl:text-left ltr:text-right">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setSelectedSale(sale);
-                                                }}
-                                                className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 hover:bg-black hover:text-white transition-all"
-                                            >
-                                                <ArrowUpRight size={16} />
-                                            </button>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center justify-end rtl:justify-start">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedSale(sale);
+                                                    }}
+                                                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 hover:bg-black hover:text-white transition-all"
+                                                >
+                                                    <ArrowUpRight size={16} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))

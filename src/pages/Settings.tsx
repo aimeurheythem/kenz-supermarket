@@ -88,7 +88,6 @@ export default function Settings() {
         setShowRestoreConfirm(false);
         try {
             await restoreDatabase();
-            // Clear auth state and reload settings from restored DB
             const { logout } = useAuthStore.getState();
             logout();
             await loadSettings();
@@ -131,10 +130,10 @@ export default function Settings() {
 
     if (user?.role !== 'admin') {
         return (
-            <div className="flex flex-col items-center justify-center h-full text-[var(--color-text-muted)]">
+            <div className="flex flex-col items-center justify-center h-full text-zinc-400">
                 <SettingsIcon size={64} className="mb-4 opacity-50" />
-                <h2 className="text-xl font-semibold">{t('settings.access_denied')}</h2>
-                <p>{t('settings.admin_only')}</p>
+                <h2 className="text-xl font-bold text-black">{t('settings.access_denied')}</h2>
+                <p className="text-sm">{t('settings.admin_only')}</p>
             </div>
         );
     }
@@ -149,65 +148,100 @@ export default function Settings() {
     ];
 
     return (
-        <div className="space-y-6 animate-fadeIn max-w-5xl mx-auto pb-10">
-            <div className="border-b border-[var(--color-border)] pb-4">
-                <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">{t('settings.title')}</h1>
-                <p className="text-sm text-[var(--color-text-muted)] mt-1">{t('settings.subtitle')}</p>
-            </div>
+        <div className="relative flex flex-col items-start gap-8 p-6 lg:p-8 animate-fadeIn mt-4 max-w-5xl mx-auto">
+            {/* Grid Background */}
+            <div
+                className="absolute inset-0 pointer-events-none opacity-[0.15] rounded-[3rem]"
+                style={{
+                    backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 1px, transparent 1px)`,
+                    backgroundSize: '32px 32px',
+                    maskImage: 'radial-gradient(circle at top center, black, transparent 90%)',
+                    WebkitMaskImage: 'radial-gradient(circle at top center, black, transparent 90%)',
+                }}
+            />
 
-            <div className="flex flex-col md:flex-row gap-6">
-                <div className="w-full md:w-64 flex flex-col gap-1">
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={cn(
-                                'flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors text-left',
-                                activeTab === tab.id
-                                    ? 'bg-[var(--color-bg-card)] text-[var(--color-text-primary)] shadow-sm border border-[var(--color-border)]'
-                                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-card)]/50',
-                            )}
-                        >
-                            <tab.icon size={18} />
-                            {tab.label}
-                        </button>
-                    ))}
+            <div className="relative z-10 flex-1 w-full">
+                {/* Header Section */}
+                <div className="flex flex-col space-y-6 pb-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[12px] text-zinc-400 tracking-[0.3em] font-bold">
+                                {t('sidebar.settings')}
+                            </span>
+                            <h2 className="text-3xl font-black text-black tracking-tighter uppercase">
+                                {t('settings.title')}
+                            </h2>
+                        </div>
+                    </div>
                 </div>
 
-                <div className="flex-1 space-y-6">
-                    {activeTab === 'account' && (
-                        <AccountTab
-                            formData={formData}
-                            handleChange={handleChange}
-                            handleSave={handleSave}
-                            passwords={passwords}
-                            setPasswords={setPasswords}
-                            handlePasswordChange={handlePasswordChange}
-                            showDeleteConfirm={showDeleteConfirm}
-                            setShowDeleteConfirm={setShowDeleteConfirm}
-                            deletePassword={deletePassword}
-                            setDeletePassword={setDeletePassword}
-                            deleteConfirmText={deleteConfirmText}
-                            setDeleteConfirmText={setDeleteConfirmText}
-                            deleteError={deleteError}
-                            setDeleteError={setDeleteError}
-                            deleteLoading={deleteLoading}
-                            handleDeleteAccount={handleDeleteAccount}
-                        />
-                    )}
-                    {activeTab === 'general' && (
-                        <StoreInfoTab formData={formData} handleChange={handleChange} handleSave={handleSave} />
-                    )}
-                    {activeTab === 'localization' && (
-                        <LocalizationTab formData={formData} handleChange={handleChange} handleSave={handleSave} />
-                    )}
-                    {activeTab === 'sales' && (
-                        <TaxTab formData={formData} handleChange={handleChange} handleSave={handleSave} />
-                    )}
-                    {activeTab === 'receipt' && (
-                        <ReceiptTab formData={formData} handleChange={handleChange} handleSave={handleSave} />
-                    )}
-                    {activeTab === 'system' && <SystemTab handleBackup={handleBackup} handleRestore={handleRestore} />}
+                {/* Settings Container */}
+                <div className="rounded-[3rem] bg-white border-2 border-black/5 overflow-hidden">
+                    <div className="flex flex-col md:flex-row">
+                        {/* Sidebar Tabs */}
+                        <div className="w-full md:w-64 p-4 border-b md:border-b-0 md:border-r border-zinc-100">
+                            <div className="flex flex-col gap-1">
+                                {tabs.map((tab) => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        className={cn(
+                                            'flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-all text-left',
+                                            activeTab === tab.id
+                                                ? 'bg-black text-white shadow-lg shadow-black/20'
+                                                : 'text-zinc-500 hover:text-black hover:bg-zinc-50',
+                                        )}
+                                    >
+                                        <tab.icon size={18} />
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Content Area */}
+                        <div className="flex-1 p-6">
+                            {activeTab === 'account' && (
+                                <AccountTab
+                                    formData={formData}
+                                    handleChange={handleChange}
+                                    handleSave={handleSave}
+                                    passwords={passwords}
+                                    setPasswords={setPasswords}
+                                    handlePasswordChange={handlePasswordChange}
+                                    showDeleteConfirm={showDeleteConfirm}
+                                    setShowDeleteConfirm={setShowDeleteConfirm}
+                                    deletePassword={deletePassword}
+                                    setDeletePassword={setDeletePassword}
+                                    deleteConfirmText={deleteConfirmText}
+                                    setDeleteConfirmText={setDeleteConfirmText}
+                                    deleteError={deleteError}
+                                    setDeleteError={setDeleteError}
+                                    deleteLoading={deleteLoading}
+                                    handleDeleteAccount={handleDeleteAccount}
+                                />
+                            )}
+                            {activeTab === 'general' && (
+                                <StoreInfoTab formData={formData} handleChange={handleChange} handleSave={handleSave} />
+                            )}
+                            {activeTab === 'localization' && (
+                                <LocalizationTab
+                                    formData={formData}
+                                    handleChange={handleChange}
+                                    handleSave={handleSave}
+                                />
+                            )}
+                            {activeTab === 'sales' && (
+                                <TaxTab formData={formData} handleChange={handleChange} handleSave={handleSave} />
+                            )}
+                            {activeTab === 'receipt' && (
+                                <ReceiptTab formData={formData} handleChange={handleChange} handleSave={handleSave} />
+                            )}
+                            {activeTab === 'system' && (
+                                <SystemTab handleBackup={handleBackup} handleRestore={handleRestore} />
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
 

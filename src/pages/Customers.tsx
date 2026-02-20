@@ -107,7 +107,7 @@ export default function Customers() {
                     >
                         <div className="flex items-center justify-between relative z-10">
                             <span className="text-[10px] font-bold text-black/60 uppercase tracking-widest">
-                                {t('customers.stat_total')}
+                                {t('customers.stat_total', 'Total Customers')}
                             </span>
                             <div className="p-2 bg-black/5 rounded-full">
                                 <Users size={14} className="text-black" />
@@ -131,7 +131,7 @@ export default function Customers() {
                     >
                         <div className="flex items-center justify-between relative z-10">
                             <span className="text-[10px] font-bold text-rose-900/60 uppercase tracking-widest">
-                                {t('customers.stat_debt')}
+                                {t('customers.stat_debt', 'Total Debt')}
                             </span>
                             <div className="p-2 bg-rose-900/10 rounded-full">
                                 <Wallet size={14} className="text-rose-900" />
@@ -152,7 +152,7 @@ export default function Customers() {
                     >
                         <div className="flex items-center justify-between relative z-10">
                             <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                                {t('customers.stat_points')}
+                                {t('customers.stat_points', 'Total Points')}
                             </span>
                             <div className="p-2 bg-zinc-100 rounded-full">
                                 <Award size={14} className="text-yellow-500" />

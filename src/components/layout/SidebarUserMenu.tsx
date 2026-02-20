@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { LogOut, ChevronsUpDown, User } from 'lucide-react';
+import { LogOut, ChevronsUpDown, User, Settings, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { useLanguageSwitch } from '@/hooks/useLanguageSwitch';
@@ -23,18 +23,11 @@ interface SidebarUserMenuProps {
 
 export default function SidebarUserMenu({ user, collapsed, onLogoutClick }: SidebarUserMenuProps) {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const { languages, currentLang, currentLangData, changeLanguage } = useLanguageSwitch();
-    const [_isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-    const [_isLanguagesOpen, setIsLanguagesOpen] = useState(false);
-
-    const handleChangeLanguage = async (lang: string) => {
-        setIsUserMenuOpen(false);
-        setIsLanguagesOpen(false);
-        await changeLanguage(lang);
-    };
 
     return (
-        <div className="p-4 border-t border-black/[0.04] relative">
+        <div className="p-4">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <button
@@ -66,94 +59,66 @@ export default function SidebarUserMenu({ user, collapsed, onLogoutClick }: Side
                     </button>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent
-                    side="top"
-                    align={collapsed ? 'center' : 'start'}
-                    sideOffset={10}
-                    className={cn(
-                        'w-64 p-2 rounded-2xl bg-white border border-black/[0.05] shadow-xl shadow-black/5 animate-in slide-in-from-bottom-2 duration-300 z-[100]',
-                        collapsed && 'ml-2',
-                    )}
-                >
-                    {/* User Header in Menu */}
-                    <div className="p-3 mb-2 flex items-center gap-3 rounded-xl border border-black/[0.03] bg-black/[0.01]">
-                        <Avatar className="w-10 h-10 rounded-lg border border-black/[0.05] bg-black/[0.02]">
-                            <AvatarImage src="/default-avatar.png" alt={user?.full_name} className="object-cover" />
-                            <AvatarFallback className="bg-black/[0.05] text-black/20">
-                                <User size={18} />
-                            </AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col min-w-0">
-                            <span className="text-[14px] font-bold text-black truncate leading-tight">
-                                {user?.full_name}
-                            </span>
-                            <span className="text-[9px] text-black/30 font-bold uppercase tracking-[0.05em]">
-                                {user?.role}
-                            </span>
+                <DropdownMenuContent side="right" align="center" sideOffset={-5} className="w-56 p-2 mb-8 bg-secondary border-black/10">
+                    <div className="px-2 py-1.5">
+                        <div className="flex items-center gap-3 p-2 rounded-full border bg-white">
+                            <Avatar className="w-9 h-9 rounded-full">
+                                <AvatarImage src="/default-avatar.png" alt={user?.full_name} />
+                                <AvatarFallback className="bg-zinc-200 text-zinc-500">
+                                    <User size={16} />
+                                </AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col">
+                                <span className="text-sm font-semibold">{user?.full_name}</span>
+                                <span className="text-xs text-zinc-500 uppercase">{user?.role}</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="space-y-1">
-                        {/* Languages Submenu */}
-                        <DropdownMenuSub>
-                            <DropdownMenuSubTrigger
-                                className={cn(
-                                    'w-full flex items-center justify-between px-3 h-10 rounded-xl transition-all duration-200 group/lang outline-none focus:bg-black/[0.02] data-[state=open]:bg-black/[0.02] cursor-pointer',
-                                    'text-black/40 hover:text-black data-[state=open]:text-black',
-                                )}
-                            >
-                                <div className="flex items-center gap-2.5">
-                                    <div className="w-5 h-5 rounded-md bg-black/[0.04] flex items-center justify-center text-[9px] font-bold text-black/40 group-hover/lang:bg-black group-hover/lang:text-white transition-colors">
-                                        {currentLangData.flag}
-                                    </div>
-                                    <span className="text-[13px] font-bold">{t('common.language') || 'Language'}</span>
-                                </div>
-                            </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent
-                                className="min-w-[150px] p-1 bg-white border border-black/[0.05] rounded-xl shadow-lg animate-in fade-in-0 zoom-in-95"
-                                sideOffset={8}
-                            >
-                                {languages.map((lang) => (
-                                    <DropdownMenuItem
-                                        key={lang.code}
-                                        onClick={() => handleChangeLanguage(lang.code)}
-                                        className={cn(
-                                            'w-full flex items-center justify-between px-3 h-9 rounded-lg transition-all duration-200 font-bold cursor-pointer outline-none mb-0.5',
-                                            currentLang === lang.code
-                                                ? 'bg-black/[0.04] text-black'
-                                                : 'text-black/30 hover:text-black focus:bg-black/[0.02]',
-                                        )}
-                                    >
-                                        <span
-                                            className="text-[11px] uppercase tracking-wider"
-                                            style={{
-                                                fontFamily: lang.code === 'ar' ? '"Cairo", sans-serif' : 'inherit',
-                                            }}
-                                        >
-                                            {lang.label}
-                                        </span>
-                                        {currentLang === lang.code && (
-                                            <div className="w-1.5 h-1.5 rounded-full bg-black" />
-                                        )}
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuSubContent>
-                        </DropdownMenuSub>
+                    <DropdownMenuSeparator />
 
-                        <DropdownMenuSeparator className="bg-black/[0.03] mx-2" />
-
-                        <DropdownMenuItem
-                            onClick={onLogoutClick}
-                            className="w-full flex items-center gap-3 px-3 h-10 rounded-xl text-black/40 hover:text-red-500 hover:bg-red-50 focus:bg-red-50 transition-all duration-200 font-medium text-sm cursor-pointer outline-none group/logout"
-                        >
-                            <div className="w-8 h-8 rounded-lg bg-red-50/50 text-red-500 flex items-center justify-center shrink-0 group-hover/logout:bg-red-500 group-hover/logout:text-white transition-colors">
-                                <LogOut size={14} strokeWidth={2.5} />
+                    <DropdownMenuSub>
+                        <DropdownMenuSubTrigger className="px-2 py-2 cursor-pointer">
+                            <div className="flex items-center gap-2">
+                                <span className="text-lg">{currentLangData.flag}</span>
+                                <span className="text-sm">{t('common.language')}</span>
                             </div>
-                            <span className="text-[13px] font-bold group-hover/logout:text-red-500 transition-colors">
-                                {t('sidebar.logout')}
-                            </span>
-                        </DropdownMenuItem>
-                    </div>
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                            {languages.map((lang) => (
+                                <DropdownMenuItem
+                                    key={lang.code}
+                                    onClick={() => changeLanguage(lang.code)}
+                                    className="cursor-pointer"
+                                >
+                                    <span className="mr-2">{lang.label}</span>
+                                    {currentLang === lang.code && <span>✓</span>}
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer px-2 py-2">
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>{t('sidebar.settings')}</span>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem onClick={() => navigate('/security')} className="cursor-pointer px-2 py-2">
+                        <Shield className="mr-2 h-4 w-4" />
+                        <span>{t('sidebar.security')}</span>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem
+                        onClick={onLogoutClick}
+                        className="cursor-pointer px-2 py-2 text-red-600 focus:text-red-600"
+                    >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>{t('sidebar.logout')}</span>
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>

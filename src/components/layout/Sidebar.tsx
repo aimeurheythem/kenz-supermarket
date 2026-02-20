@@ -84,7 +84,6 @@ export default function Sidebar() {
                     roles: ['admin', 'manager', 'cashier'],
                 },
                 { label: t('sidebar.users'), path: '/users', icon: Users, roles: ['admin'] },
-                { label: t('sidebar.settings'), path: '/settings', icon: Settings, roles: ['admin'] },
             ],
         },
     ];

@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableSkeletonRows } from '@/components/common/TableSkeleton';
-import { Plus, Search, Filter, Download, DollarSign, TrendingUp, PieChart, Wallet } from 'lucide-react';
+import { Plus, Search, Filter, Download, DollarSign, TrendingUp, PieChart, Wallet, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Button from '@/components/common/Button';
 import { DeleteConfirmModal } from '@/components/common/DeleteConfirmModal';
 import Pagination from '@/components/common/Pagination';
@@ -22,16 +23,14 @@ export default function Expenses() {
     const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
     const [filterCategory, setFilterCategory] = useState<string>('all');
     const [showFilter, setShowFilter] = useState(false);
+    const searchInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         loadExpenses();
         loadStats();
     }, [loadExpenses, loadStats]);
 
-    const sortedCategories = useMemo(
-        () => [...stats.byCategory].sort((a, b) => b.total - a.total),
-        [stats.byCategory],
-    );
+    const sortedCategories = useMemo(() => [...stats.byCategory].sort((a, b) => b.total - a.total), [stats.byCategory]);
 
     const filteredExpenses = expenses
         .filter(
@@ -45,7 +44,6 @@ export default function Expenses() {
         totalItems: filteredExpenses.length,
     });
 
-    // Reset page when filters change
     useEffect(() => {
         resetPage();
     }, [searchTerm, filterCategory, resetPage]);
@@ -72,234 +70,323 @@ export default function Expenses() {
     };
 
     return (
-        <div className="space-y-8 animate-fadeIn pb-10">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-black text-black tracking-tight">{t('expenses.title')}</h1>
-                    <p className="text-zinc-500 font-medium mt-1">{t('expenses.subtitle')}</p>
-                </div>
-                <Button className="btn-page-action" icon={<Plus size={18} />} onClick={() => setIsModalOpen(true)}>
-                    {t('expenses.add_expense')}
-                </Button>
-            </div>
+        <div className="relative flex flex-col items-start gap-8 p-6 lg:p-8 animate-fadeIn mt-4">
+            {/* Grid Background */}
+            <div
+                className="absolute inset-0 pointer-events-none opacity-[0.15] rounded-[3rem]"
+                style={{
+                    backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 1px, transparent 1px)`,
+                    backgroundSize: '32px 32px',
+                    maskImage: 'radial-gradient(circle at top center, black, transparent 90%)',
+                    WebkitMaskImage: 'radial-gradient(circle at top center, black, transparent 90%)',
+                }}
+            />
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-black text-white rounded-[2rem] p-8 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-24 bg-zinc-800 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2" />
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-3 bg-white/10 rounded-xl backdrop-blur-md">
-                                <DollarSign size={20} />
-                            </div>
-                            <span className="text-sm font-bold uppercase tracking-widest opacity-60">
+            <div className="relative z-10 flex-1 flex flex-col min-w-0 w-full">
+                {/* Header Section */}
+                <div className="flex flex-col space-y-6 pb-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[12px] text-zinc-400 tracking-[0.3em] font-bold">
+                                {t('sidebar.expenses')}
+                            </span>
+                            <h2 className="text-3xl font-black text-black tracking-tighter uppercase">
+                                {t('expenses.title')}
+                            </h2>
+                        </div>
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-md border border-black shadow-lg shadow-black/20 hover:bg-neutral-800 transition-all active:scale-95"
+                        >
+                            <Plus size={16} />
+                            <span className="text-[10px] font-black uppercase tracking-widest">
+                                {t('expenses.add_expense')}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    {/* Total Expenses */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-black text-white border-2 border-black/10 flex flex-col justify-between aspect-[2/1] md:aspect-auto md:h-40 p-6 rounded-[3rem] relative overflow-hidden group cursor-pointer"
+                    >
+                        <div className="absolute top-0 right-0 p-24 bg-zinc-800 rounded-full blur-3xl opacity-30 -translate-y-1/2 translate-x-1/2" />
+                        <div className="flex items-center justify-between relative z-10">
+                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                                 {t('expenses.stat_total')}
                             </span>
-                        </div>
-                        <div className="flex items-end gap-2">
-                            <h2 className="text-5xl font-black tracking-tighter">{formatCurrency(stats.total)}</h2>
-                            <span className="text-zinc-400 font-bold mb-2">{t('expenses.stat_all_time')}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white border border-zinc-100 rounded-[2rem] p-8">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="p-3 bg-red-50 text-red-500 rounded-xl">
-                            <TrendingUp size={20} />
-                        </div>
-                        <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">
-                            {t('expenses.stat_top_category')}
-                        </span>
-                    </div>
-                    {sortedCategories.length > 0 ? (
-                        <div>
-                            <h3 className="text-2xl font-black text-black mb-1">
-                                {sortedCategories[0].category}
-                            </h3>
-                            <p className="text-zinc-400 font-medium">
-                                {formatCurrency(sortedCategories[0].total)}
-                            </p>
-                        </div>
-                    ) : (
-                        <p className="text-zinc-400 font-medium">{t('expenses.stat_no_data')}</p>
-                    )}
-                </div>
-
-                <div className="bg-white border border-zinc-100 rounded-[2rem] p-8">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="p-3 bg-blue-50 text-blue-500 rounded-xl">
-                            <PieChart size={20} />
-                        </div>
-                        <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">
-                            {t('expenses.stat_categories')}
-                        </span>
-                    </div>
-                    <div className="space-y-3">
-                        {sortedCategories.slice(0, 3).map((cat) => (
-                            <div key={cat.category} className="flex items-center justify-between">
-                                <span className="font-bold text-zinc-600 text-sm">{cat.category}</span>
-                                <span className="font-bold text-black text-sm">{formatCurrency(cat.total)}</span>
+                            <div className="p-2 bg-white/10 rounded-full">
+                                <DollarSign size={14} className="text-white" />
                             </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
+                        </div>
+                        <div className="relative z-10">
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-2xl font-black text-white tracking-tighter">
+                                    {formatCurrency(stats.total, false)}
+                                </span>
+                            </div>
+                            <span className="text-[10px] font-bold text-zinc-500 uppercase mt-1 block">
+                                {t('expenses.stat_all_time')}
+                            </span>
+                        </div>
+                    </motion.div>
 
-            {/* Expenses List */}
-            <div className="bg-white rounded-[2.5rem] border border-zinc-100 overflow-hidden min-h-[500px]">
-                {/* Toolbar */}
-                <div className="p-8 pb-0 flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="relative w-full md:w-96 group">
+                    {/* Top Category */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.05 }}
+                        className="bg-rose-100 border-2 border-rose-200 flex flex-col justify-between aspect-[2/1] md:aspect-auto md:h-40 p-6 rounded-[3rem] relative overflow-hidden group cursor-pointer"
+                    >
+                        <div className="flex items-center justify-between relative z-10">
+                            <span className="text-[10px] font-bold text-rose-900/60 uppercase tracking-widest">
+                                {t('expenses.stat_top_category')}
+                            </span>
+                            <div className="p-2 bg-rose-900/10 rounded-full">
+                                <TrendingUp size={14} className="text-rose-900" />
+                            </div>
+                        </div>
+                        <div className="relative z-10">
+                            {sortedCategories.length > 0 ? (
+                                <>
+                                    <span className="text-lg font-black text-rose-900 tracking-tight block truncate">
+                                        {sortedCategories[0].category}
+                                    </span>
+                                    <span className="text-sm font-bold text-rose-900/60">
+                                        {formatCurrency(sortedCategories[0].total)}
+                                    </span>
+                                </>
+                            ) : (
+                                <span className="text-sm font-bold text-rose-900/60">{t('expenses.stat_no_data')}</span>
+                            )}
+                        </div>
+                    </motion.div>
+
+                    {/* Categories Breakdown */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="bg-white border-2 border-black/10 flex flex-col justify-between aspect-[2/1] md:aspect-auto md:h-40 p-6 rounded-[3rem] relative overflow-hidden group cursor-pointer"
+                    >
+                        <div className="flex items-center justify-between relative z-10">
+                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                                {t('expenses.stat_categories')}
+                            </span>
+                            <div className="p-2 bg-zinc-100 rounded-full">
+                                <PieChart size={14} className="text-zinc-500" />
+                            </div>
+                        </div>
+                        <div className="relative z-10 space-y-1.5">
+                            {sortedCategories.slice(0, 3).map((cat) => (
+                                <div key={cat.category} className="flex items-center justify-between">
+                                    <span className="text-xs font-bold text-zinc-500 truncate">{cat.category}</span>
+                                    <span className="text-xs font-black text-black">
+                                        {formatCurrency(cat.total, false)}
+                                    </span>
+                                </div>
+                            ))}
+                            {sortedCategories.length === 0 && (
+                                <span className="text-xs font-bold text-zinc-400">{t('expenses.stat_no_data')}</span>
+                            )}
+                        </div>
+                    </motion.div>
+                </div>
+
+                {/* Search Bar & Action Buttons */}
+                <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+                    <div className="relative group flex-1 w-full">
                         <Search
-                            className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-black transition-colors"
-                            size={20}
+                            size={22}
+                            className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-black transition-colors"
                         />
                         <input
+                            ref={searchInputRef}
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder={t('expenses.search_placeholder')}
-                            className="w-full h-14 pl-14 pr-6 bg-zinc-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-black/5 transition-all font-bold placeholder:font-medium placeholder:text-zinc-400"
+                            className={cn(
+                                'w-full pl-16 pr-16 py-4 rounded-2xl',
+                                'bg-white border border-zinc-200 shadow-none',
+                                'text-black placeholder:text-zinc-300 text-base font-bold',
+                                'focus:outline-none focus:ring-0 focus:!outline-none focus-visible:!outline-none focus-visible:ring-0 focus:border-zinc-400 transition-all placeholder:transition-opacity focus:placeholder:opacity-50',
+                            )}
                         />
+                        {searchTerm && (
+                            <motion.button
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                onClick={() => {
+                                    setSearchTerm('');
+                                    searchInputRef.current?.focus();
+                                }}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-zinc-100 text-zinc-400 hover:bg-black hover:text-white transition-all duration-300"
+                            >
+                                <X size={16} strokeWidth={3} />
+                            </motion.button>
+                        )}
                     </div>
+
                     <div className="flex items-center gap-3">
                         <div className="relative">
-                            <Button
-                                variant="secondary"
-                                icon={<Filter size={18} />}
+                            <button
                                 onClick={() => setShowFilter(!showFilter)}
+                                className={cn(
+                                    'flex items-center gap-2 px-4 py-3.5 rounded-2xl border transition-all',
+                                    filterCategory !== 'all'
+                                        ? 'bg-rose-100 text-rose-700 border-rose-200 hover:bg-rose-200'
+                                        : 'bg-zinc-100 text-zinc-600 border-zinc-200 hover:bg-zinc-200 hover:text-black',
+                                )}
                             >
-                                {filterCategory === 'all' ? t('expenses.filter') : filterCategory}
-                            </Button>
-                            {showFilter && (
-                                <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl border border-zinc-100 shadow-xl z-50 p-2">
-                                    <button
-                                        onClick={() => {
-                                            setFilterCategory('all');
-                                            setShowFilter(false);
-                                        }}
-                                        className={cn(
-                                            'w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-colors',
-                                            filterCategory === 'all'
-                                                ? 'bg-black text-white'
-                                                : 'text-zinc-600 hover:bg-zinc-50',
-                                        )}
+                                <Filter size={16} />
+                                <span className="text-sm font-bold">
+                                    {filterCategory === 'all' ? t('expenses.filter') : filterCategory}
+                                </span>
+                            </button>
+                            <AnimatePresence>
+                                {showFilter && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95, y: -5 }}
+                                        className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl border border-zinc-200 shadow-xl z-50 p-2"
                                     >
-                                        {t('expenses.filter_all')}
-                                    </button>
-                                    {uniqueCategories.map((cat) => (
                                         <button
-                                            key={cat}
                                             onClick={() => {
-                                                setFilterCategory(cat);
+                                                setFilterCategory('all');
                                                 setShowFilter(false);
                                             }}
                                             className={cn(
-                                                'w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-colors',
-                                                filterCategory === cat
+                                                'w-full text-left px-4 py-2.5 rounded-lg text-sm font-bold transition-colors',
+                                                filterCategory === 'all'
                                                     ? 'bg-black text-white'
                                                     : 'text-zinc-600 hover:bg-zinc-50',
                                             )}
                                         >
-                                            {cat}
+                                            {t('expenses.filter_all')}
                                         </button>
-                                    ))}
-                                </div>
-                            )}
+                                        {uniqueCategories.map((cat) => (
+                                            <button
+                                                key={cat}
+                                                onClick={() => {
+                                                    setFilterCategory(cat);
+                                                    setShowFilter(false);
+                                                }}
+                                                className={cn(
+                                                    'w-full text-left px-4 py-2.5 rounded-lg text-sm font-bold transition-colors',
+                                                    filterCategory === cat
+                                                        ? 'bg-black text-white'
+                                                        : 'text-zinc-600 hover:bg-zinc-50',
+                                                )}
+                                            >
+                                                {cat}
+                                            </button>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
-                        <Button variant="secondary" icon={<Download size={18} />} onClick={handleExportExpenses}>
-                            {t('expenses.export')}
-                        </Button>
+                        <button
+                            onClick={handleExportExpenses}
+                            className="flex items-center gap-2 px-4 py-3.5 rounded-2xl bg-zinc-100 border border-zinc-200 hover:bg-zinc-200 hover:text-black transition-all text-zinc-600"
+                        >
+                            <Download size={16} />
+                            <span className="text-sm font-bold">{t('expenses.export')}</span>
+                        </button>
                     </div>
                 </div>
 
-                {/* Table */}
-                <div className="p-8">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="text-left border-b border-zinc-100">
-                                    <th className="pb-6 pl-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                                        {t('expenses.col_description')}
-                                    </th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                                        {t('expenses.col_category')}
-                                    </th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                                        {t('expenses.col_date')}
-                                    </th>
-                                    <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                                        {t('expenses.col_amount')}
-                                    </th>
-                                    <th className="pb-6 pr-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                                        {t('expenses.col_actions')}
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-zinc-50">
-                                {isLoading ? (
-                                    <TableSkeletonRows columns={5} rows={5} />
-                                ) : filteredExpenses.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={5} className="py-20 text-center">
-                                            <div className="flex flex-col items-center gap-4 opacity-50">
-                                                <div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center">
-                                                    <Wallet size={32} className="text-zinc-400" />
-                                                </div>
-                                                <p className="font-bold text-zinc-400">{t('expenses.no_expenses')}</p>
+                {/* Expenses Table */}
+                <div className="rounded-[3rem] bg-white border-2 border-black/5 overflow-hidden min-h-[500px] flex flex-col">
+                    <table className="w-full">
+                        <thead className="bg-zinc-50 border-b border-zinc-100">
+                            <tr>
+                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                    {t('expenses.col_description')}
+                                </th>
+                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                    {t('expenses.col_category')}
+                                </th>
+                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                    {t('expenses.col_date')}
+                                </th>
+                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                    {t('expenses.col_amount')}
+                                </th>
+                                <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                    {t('expenses.col_actions')}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-100">
+                            {isLoading ? (
+                                <TableSkeletonRows columns={5} rows={5} />
+                            ) : filteredExpenses.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-16">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center">
+                                                <Wallet size={24} className="text-zinc-300" />
                                             </div>
+                                            <p className="text-sm font-bold text-zinc-400">
+                                                {t('expenses.no_expenses')}
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : (
+                                paginatedExpenses.map((expense) => (
+                                    <tr key={expense.id} className="hover:bg-zinc-50 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <span className="text-sm font-bold text-black">{expense.description}</span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-zinc-100 text-[10px] font-bold text-zinc-600 uppercase tracking-wider">
+                                                {expense.category}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="text-sm text-zinc-500">
+                                                {new Date(expense.date).toLocaleDateString()}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="text-sm font-black text-black">
+                                                {formatCurrency(expense.amount)}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <button
+                                                onClick={() => setDeleteTarget(expense.id)}
+                                                className="text-zinc-400 hover:text-rose-500 font-bold text-[10px] uppercase tracking-wider transition-colors"
+                                            >
+                                                {t('expenses.delete_expense')}
+                                            </button>
                                         </td>
                                     </tr>
-                                ) : (
-                                    paginatedExpenses.map((expense) => (
-                                        <tr key={expense.id} className="group hover:bg-zinc-50/80 transition-colors">
-                                            <td className="py-6 pl-4">
-                                                <span className="font-bold text-black">{expense.description}</span>
-                                            </td>
-                                            <td className="py-6">
-                                                <span className="inline-flex items-center px-3 py-1 rounded-full bg-zinc-100 text-xs font-bold text-zinc-600">
-                                                    {expense.category}
-                                                </span>
-                                            </td>
-                                            <td className="py-6">
-                                                <span className="text-sm font-medium text-zinc-500">
-                                                    {new Date(expense.date).toLocaleDateString()}
-                                                </span>
-                                            </td>
-                                            <td className="py-6">
-                                                <span className="font-black text-black">
-                                                    {formatCurrency(expense.amount)}
-                                                </span>
-                                            </td>
-                                            <td className="py-6 pr-4 text-right">
-                                                <button
-                                                    onClick={() => setDeleteTarget(expense.id)}
-                                                    className="text-zinc-400 hover:text-red-500 font-bold text-xs uppercase tracking-wide transition-colors"
-                                                >
-                                                    {t('expenses.delete_expense')}
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
 
-                {/* Pagination */}
-                <div className="px-8">
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        totalItems={filteredExpenses.length}
-                        startIndex={startIndex}
-                        endIndex={endIndex}
-                        onPageChange={setCurrentPage}
-                        itemLabel={t('expenses.title')}
-                    />
+                    {/* Pagination */}
+                    <div className="mt-auto px-6 pb-6">
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalItems={filteredExpenses.length}
+                            startIndex={startIndex}
+                            endIndex={endIndex}
+                            onPageChange={setCurrentPage}
+                            itemLabel={t('expenses.title')}
+                        />
+                    </div>
                 </div>
             </div>
 

@@ -143,67 +143,85 @@ export default function Purchases() {
                 </div>
 
                 {/* Orders List */}
-                <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden">
+                <div className="rounded-[3rem] bg-white border-2 border-black/5 overflow-hidden">
                     <table className="w-full">
-                        <thead className="bg-[var(--color-bg-secondary)] border-b border-[var(--color-border)]">
+                        <thead className="bg-zinc-50 border-b border-zinc-100">
                             <tr>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">
+                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('purchases.col_po')}
                                 </th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">
+                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('purchases.col_supplier')}
                                 </th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">
+                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('purchases.col_date')}
                                 </th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase">
+                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('purchases.col_status')}
                                 </th>
-                                <th className="px-4 py-3 text-right text-xs font-semibold text-[var(--color-text-muted)] uppercase">
+                                <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('purchases.col_total')}
                                 </th>
-                                <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--color-text-muted)] uppercase">
+                                <th className="px-6 py-4 text-center text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('purchases.col_actions')}
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[var(--color-border)]">
+                        <tbody className="divide-y divide-zinc-100">
                             {orders.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-4 py-12 text-center text-[var(--color-text-muted)]">
-                                        {t('purchases.no_orders')}
+                                    <td colSpan={6} className="px-6 py-16 text-center">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center">
+                                                <Eye size={24} className="text-zinc-300" />
+                                            </div>
+                                            <p className="text-sm font-bold text-zinc-400">
+                                                {t('purchases.no_orders')}
+                                            </p>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : (
                                 paginatedOrders.map((order) => (
-                                    <tr key={order.id} className="hover:bg-[var(--color-bg-hover)] transition-colors">
-                                        <td className="px-4 py-3 text-sm font-medium text-[var(--color-text-primary)]">
-                                            PO-{order.id.toString().padStart(4, '0')}
+                                    <tr key={order.id} className="hover:bg-zinc-50 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <span className="text-sm font-bold text-black">
+                                                PO-{order.id.toString().padStart(4, '0')}
+                                            </span>
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
-                                            {order.supplier_name}
+                                        <td className="px-6 py-4">
+                                            <span className="text-sm font-medium text-zinc-600">
+                                                {order.supplier_name}
+                                            </span>
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
-                                            {formatDate(order.order_date)}
+                                        <td className="px-6 py-4">
+                                            <span className="text-sm text-zinc-500">
+                                                {formatDate(order.order_date)}
+                                            </span>
                                         </td>
-                                        <td className="px-4 py-3">
+                                        <td className="px-6 py-4">
                                             <span
                                                 className={cn(
-                                                    'px-2 py-0.5 rounded-full text-xs font-medium capitalize',
-                                                    getStatusColor(order.status),
+                                                    'inline-flex px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider',
+                                                    order.status === 'received' && 'bg-emerald-100 text-emerald-700',
+                                                    order.status === 'ordered' && 'bg-blue-100 text-blue-700',
+                                                    order.status === 'cancelled' && 'bg-rose-100 text-rose-700',
+                                                    order.status === 'pending' && 'bg-yellow-100 text-yellow-700',
                                                 )}
                                             >
                                                 {order.status}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 text-sm font-semibold text-right text-[var(--color-text-primary)]">
-                                            {formatCurrency(order.total_amount)}
+                                        <td className="px-6 py-4 text-right">
+                                            <span className="text-sm font-black text-black">
+                                                {formatCurrency(order.total_amount)}
+                                            </span>
                                         </td>
-                                        <td className="px-4 py-3 text-center">
+                                        <td className="px-6 py-4">
                                             <div className="flex items-center justify-center gap-2">
                                                 <button
                                                     onClick={() => setViewedOrder(order.id)}
-                                                    className="p-1.5 rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-active)] hover:text-[var(--color-text-primary)]"
+                                                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 hover:bg-black hover:text-white transition-all"
                                                     title={t('purchases.view_details')}
                                                 >
                                                     <Eye size={16} />
@@ -211,7 +229,7 @@ export default function Purchases() {
                                                 {order.status === 'ordered' || order.status === 'pending' ? (
                                                     <button
                                                         onClick={() => receiveOrder(order.id)}
-                                                        className="p-1.5 rounded-[var(--radius-sm)] text-[var(--color-success)] hover:bg-[var(--color-success-muted)]"
+                                                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all"
                                                         title={t('purchases.receive_items')}
                                                     >
                                                         <CheckCircle size={16} />
@@ -226,7 +244,7 @@ export default function Purchases() {
                     </table>
 
                     {/* Pagination */}
-                    <div className="px-4">
+                    <div className="px-6 pb-6">
                         <Pagination
                             currentPage={currentPage}
                             totalPages={totalPages}

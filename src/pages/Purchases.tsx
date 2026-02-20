@@ -6,6 +6,8 @@ import { usePurchaseStore } from '@/stores/usePurchaseStore';
 import { useSupplierStore } from '@/stores/useSupplierStore';
 import { useProductStore } from '@/stores/useProductStore';
 import Button from '@/components/common/Button';
+import Pagination from '@/components/common/Pagination';
+import { usePagination } from '@/hooks/usePagination';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import SearchInput from '@/components/common/SearchInput';
 import type { Product } from '@/lib/types';
@@ -30,6 +32,12 @@ export default function Purchases() {
         loadSuppliers();
         loadProducts();
     }, [loadOrders, loadSuppliers, loadProducts]);
+
+    const { currentPage, totalPages, startIndex, endIndex, setCurrentPage, paginate } = usePagination({
+        totalItems: orders.length,
+    });
+
+    const paginatedOrders = paginate(orders);
 
     useEffect(() => {
         if (viewedOrder) {
@@ -142,7 +150,7 @@ export default function Purchases() {
                                 </td>
                             </tr>
                         ) : (
-                            orders.map((order) => (
+                            paginatedOrders.map((order) => (
                                 <tr key={order.id} className="hover:bg-[var(--color-bg-hover)] transition-colors">
                                     <td className="px-4 py-3 text-sm font-medium text-[var(--color-text-primary)]">
                                         PO-{order.id.toString().padStart(4, '0')}
@@ -191,6 +199,19 @@ export default function Purchases() {
                         )}
                     </tbody>
                 </table>
+
+                {/* Pagination */}
+                <div className="px-4">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={orders.length}
+                        startIndex={startIndex}
+                        endIndex={endIndex}
+                        onPageChange={setCurrentPage}
+                        itemLabel={t('purchases.title')}
+                    />
+                </div>
             </div>
 
             {/* New Order Modal */}

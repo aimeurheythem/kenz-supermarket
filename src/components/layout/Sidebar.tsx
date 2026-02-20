@@ -113,7 +113,7 @@ export default function Sidebar() {
             >
                 <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-black flex items-center justify-center shrink-0 shadow-lg shadow-black/10">
-                        <img src="/kenzy-dash-logo-light.svg" alt="Logo" className="w-5 h-5 invert" />
+                        <img src="/kenzy-dash-logo-light.svg" alt="SuperMarket Pro" className="w-5 h-5 invert" />
                     </div>
                     {!collapsed && (
                         <motion.div
@@ -121,7 +121,9 @@ export default function Sidebar() {
                             animate={{ opacity: 1, x: 0 }}
                             className="flex flex-col"
                         >
-                            <span className="text-sm font-bold tracking-tight text-black leading-tight">Kenzy</span>
+                            <span className="text-sm font-bold tracking-tight text-black leading-tight">
+                                SuperMarket Pro
+                            </span>
                             <span className="text-[10px] uppercase tracking-[0.2em] text-black/30 font-medium">
                                 Dashboard
                             </span>

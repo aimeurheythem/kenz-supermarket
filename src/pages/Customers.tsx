@@ -5,6 +5,8 @@ import { Search, Plus, Trash2, Edit, Phone, Mail, MapPin, Award } from 'lucide-r
 import Button from '@/components/common/Button';
 import { DeleteConfirmModal } from '@/components/common/DeleteConfirmModal';
 import CustomerModal from '@/components/customers/CustomerModal';
+import Pagination from '@/components/common/Pagination';
+import { usePagination } from '@/hooks/usePagination';
 import { cn, formatCurrency } from '@/lib/utils';
 import type { Customer } from '@/lib/types';
 import { TableSkeletonRows } from '@/components/common/TableSkeleton';
@@ -27,6 +29,17 @@ export default function Customers() {
             c.phone?.includes(searchTerm) ||
             c.email?.toLowerCase().includes(searchTerm.toLowerCase()),
     );
+
+    const { currentPage, totalPages, startIndex, endIndex, setCurrentPage, paginate, resetPage } = usePagination({
+        totalItems: filteredCustomers.length,
+    });
+
+    // Reset page when search changes
+    useEffect(() => {
+        resetPage();
+    }, [searchTerm, resetPage]);
+
+    const paginatedCustomers = paginate(filteredCustomers);
 
     const handleDelete = (id: number) => {
         setDeleteTarget(id);
@@ -112,7 +125,7 @@ export default function Customers() {
                                     </td>
                                 </tr>
                             ) : (
-                                filteredCustomers.map((customer) => (
+                                paginatedCustomers.map((customer) => (
                                     <tr
                                         key={customer.id}
                                         className="group hover:bg-[var(--color-bg-hover)] transition-colors"
@@ -200,6 +213,19 @@ export default function Customers() {
                             )}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Pagination */}
+                <div className="px-4">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={filteredCustomers.length}
+                        startIndex={startIndex}
+                        endIndex={endIndex}
+                        onPageChange={setCurrentPage}
+                        itemLabel={t('customers.title')}
+                    />
                 </div>
             </div>
 

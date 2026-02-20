@@ -171,6 +171,51 @@ function createWindow() {
     mainWindow.on('unmaximize', () => {
         mainWindow.webContents.send('window:maximized-change', false);
     });
+
+    // ============================================
+    // PRINT IPC HANDLERS
+    // ============================================
+
+    /**
+     * print:receipt — Print using Electron's native webContents.print().
+     * Returns { success, failureReason } so the renderer can show feedback.
+     */
+    ipcMain.handle('print:receipt', async (_event, options = {}) => {
+        try {
+            return await new Promise((resolve) => {
+                mainWindow.webContents.print(
+                    {
+                        silent: options.silent || false,
+                        printBackground: true,
+                        deviceName: options.deviceName || '',
+                        margins: { marginType: 'none' },
+                        ...(options.pageSize ? { pageSize: options.pageSize } : {}),
+                    },
+                    (success, failureReason) => {
+                        resolve({
+                            success,
+                            failureReason: failureReason || '',
+                        });
+                    },
+                );
+            });
+        } catch (err) {
+            console.error('❌ Print failed:', err);
+            return { success: false, failureReason: err.message };
+        }
+    });
+
+    /**
+     * print:get-printers — List available printers for thermal printer selection.
+     */
+    ipcMain.handle('print:get-printers', async () => {
+        try {
+            return await mainWindow.webContents.getPrintersAsync();
+        } catch (err) {
+            console.error('❌ Failed to get printers:', err);
+            return [];
+        }
+    });
 }
 
 // ============================================

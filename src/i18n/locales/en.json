@@ -311,6 +311,24 @@
             "add_option": "+ Add Option",
             "add_customized": "Add Customized Products"
         },
+        "receipt": {
+            "title": "Payment Successful",
+            "subtitle": "Transaction completed",
+            "cashier": "Cashier",
+            "item": "Item",
+            "qty": "Qty",
+            "price": "Price",
+            "subtotal": "Subtotal",
+            "discount": "Discount",
+            "total": "Total",
+            "barcode_area": "Barcode Area",
+            "printing": "Printing...",
+            "print_success": "Receipt sent to printer",
+            "print_cancelled": "Print cancelled",
+            "print_failed": "Print failed: {{reason}}",
+            "print_complete": "Print dialog completed",
+            "print_error": "An error occurred while printing"
+        },
         "inventory": {
             "title": "In-Stock Inventory",
             "quick_select": "Quick select",
@@ -329,7 +347,7 @@
         "close": "Got it"
     },
     "footer": {
-        "copyright": "© 2024 SuperMarket App. All rights reserved.",
+        "copyright": "© {{year}} SuperMarket Pro. All rights reserved.",
         "privacy": "Privacy Policy",
         "terms": "Terms of Service",
         "status": "System Operational"
@@ -433,7 +451,12 @@
             "ml": "Ml",
             "box": "Box",
             "pack": "Pack"
-        }
+        },
+        "export_success": "Exported {{count}} products",
+        "export_low_stock_success": "Exported {{count}} low stock items",
+        "import_success": "Imported {{imported}} products, {{skipped}} skipped",
+        "csv_empty": "CSV file is empty or invalid",
+        "csv_parse_error": "Failed to parse CSV file"
     },
     "barcode_labels": {
         "label_management": "Label Management",
@@ -524,7 +547,11 @@
         "processing": "Processing...",
         "confirm_payment": "Confirm Payment",
         "payment_failed": "Payment failed",
-        "export_success": "Exported {{count}} debtor records"
+        "export_success": "Exported {{count}} debtor records",
+        "collection_health": "Collection Health",
+        "health_good": "Good",
+        "health_fair": "Fair",
+        "health_poor": "Poor"
     },
     "customers": {
         "title": "Customers",
@@ -666,7 +693,12 @@
         "session_active": "Active",
         "session_closed": "Closed",
         "session_diff": "Diff:",
-        "sales_tooltip": "Sales"
+        "sales_tooltip": "Sales",
+        "col_date": "Date",
+        "col_revenue": "Revenue",
+        "col_orders": "Orders",
+        "export_success": "Exported {{count}} sales records",
+        "export_cashier_success": "Exported {{count}} cashier records"
     },
     "settings": {
         "title": "Settings",
@@ -856,12 +888,12 @@
         "password_required": "Password is required for new users"
     },
     "onboarding": {
-        "app_name": "Kenzy Setup",
+        "app_name": "SuperMarket Pro Setup",
         "step_welcome": "Welcome",
         "step_store": "Store Info",
         "step_admin": "Admin Account",
         "step_preferences": "Preferences",
-        "welcome_title": "Welcome to Kenzy",
+        "welcome_title": "Welcome to SuperMarket Pro",
         "welcome_subtitle": "Let's set up your store in a few minutes.",
         "store_title": "Store Profile",
         "store_subtitle": "How should your store appear on receipts?",
@@ -944,7 +976,7 @@
     "db_init": {
         "initializing": "Initializing System...",
         "please_wait": "Please wait while we prepare the secure database and essential system resources.",
-        "version": "SuperMarket Pro v1.0"
+        "version": "SuperMarket Pro v{{version}}"
     },
     "customer_modal": {
         "edit_title": "Edit Customer",
@@ -1061,5 +1093,24 @@
         "contact_toast": "You can reach us via any of the channels above.",
         "contact_us": "Contact Us",
         "close": "Close"
+    },
+    "pagination": {
+        "showing": "Showing",
+        "to": "to",
+        "of": "of",
+        "prev": "Prev",
+        "next": "Next",
+        "items": "items"
+    },
+    "validation": {
+        "password_min_length": "Password must be at least 8 characters",
+        "password_lowercase": "Password must contain at least one lowercase letter",
+        "password_uppercase": "Password must contain at least one uppercase letter",
+        "password_digit": "Password must contain at least one digit",
+        "pin_length": "PIN must be 4-6 digits",
+        "pin_digits_only": "PIN must contain only digits",
+        "email_invalid": "Please enter a valid email address",
+        "amount_positive": "Amount must be greater than zero",
+        "amount_exceeds_debt": "Amount cannot exceed the outstanding debt"
     }
 }

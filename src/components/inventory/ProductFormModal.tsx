@@ -222,6 +222,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                             <div className="relative">
                                 <input
                                     type="number"
+                                    min="0"
                                     step="0.01"
                                     value={form.cost_price}
                                     onChange={(e) => setForm({ ...form, cost_price: parseFloat(e.target.value) || 0 })}
@@ -237,6 +238,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                             <div className="relative">
                                 <input
                                     type="number"
+                                    min="0"
                                     step="0.01"
                                     value={form.selling_price}
                                     onChange={(e) =>
@@ -256,6 +258,8 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                             <label className={labelClass}>{t('inventory.form.labels.initial_stock')}</label>
                             <input
                                 type="number"
+                                min="0"
+                                step="1"
                                 value={form.stock_quantity}
                                 onChange={(e) => setForm({ ...form, stock_quantity: parseInt(e.target.value) || 0 })}
                                 className={inputClass}
@@ -265,6 +269,8 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                             <label className={labelClass}>{t('inventory.form.labels.low_stock_alert')}</label>
                             <input
                                 type="number"
+                                min="0"
+                                step="1"
                                 value={form.reorder_level}
                                 onChange={(e) => setForm({ ...form, reorder_level: parseInt(e.target.value) || 0 })}
                                 className={inputClass + ' bg-red-100/10 text-red-600'}

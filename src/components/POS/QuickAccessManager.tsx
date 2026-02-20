@@ -289,6 +289,8 @@ function QuickAccessForm({ products, initialData, onSave, onCancel }: QuickAcces
                                 />
                                 <input
                                     type="number"
+                                    min="1"
+                                    step="1"
                                     placeholder="Qty"
                                     value={opt.qty}
                                     onChange={(e) => updateOption(idx, 'qty', parseInt(e.target.value))}
@@ -296,6 +298,8 @@ function QuickAccessForm({ products, initialData, onSave, onCancel }: QuickAcces
                                 />
                                 <input
                                     type="number"
+                                    min="0"
+                                    step="0.01"
                                     placeholder="Price"
                                     value={opt.price}
                                     onChange={(e) => updateOption(idx, 'price', parseFloat(e.target.value))}

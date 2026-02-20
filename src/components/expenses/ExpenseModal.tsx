@@ -82,6 +82,7 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
                             </div>
                             <input
                                 type="number"
+                                min="0.01"
                                 step="0.01"
                                 required
                                 value={formData.amount}

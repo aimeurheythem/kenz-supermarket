@@ -57,7 +57,7 @@ export default function Settings() {
             toast.error(t('settings.password_mismatch'));
             return;
         }
-        const validation = validatePassword(passwords.new);
+        const validation = validatePassword(passwords.new, t);
         if (!validation.valid) {
             toast.error(validation.message);
             return;

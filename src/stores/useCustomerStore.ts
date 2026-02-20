@@ -17,6 +17,7 @@ interface CustomerStore {
     loadTransactions: (customerId: number) => Promise<void>;
     makePayment: (customerId: number, amount: number) => Promise<void>;
     getDebtors: () => Promise<Customer[]>;
+    getCollectionStats: () => Promise<{ totalDebted: number; totalCollected: number }>;
 }
 
 export const useCustomerStore = create<CustomerStore>((set, get) => ({
@@ -108,5 +109,9 @@ export const useCustomerStore = create<CustomerStore>((set, get) => ({
 
     getDebtors: async () => {
         return await CustomerRepo.getDebtors();
+    },
+
+    getCollectionStats: async () => {
+        return await CustomerRepo.getCollectionStats();
     },
 }));

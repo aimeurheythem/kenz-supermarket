@@ -4,6 +4,8 @@ import { useReportStore } from '@/stores/useReportStore';
 import { Sale } from '@/lib/types';
 import SaleDetailModal from '@/components/reports/SaleDetailModal';
 import Button from '@/components/common/Button';
+import Pagination from '@/components/common/Pagination';
+import { usePagination } from '@/hooks/usePagination';
 import { Filter, Search, ArrowUpRight, ArrowDownLeft, Clock } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { cn } from '@/lib/utils';
@@ -25,6 +27,17 @@ export default function Transactions() {
             sale.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             sale.id.toString().includes(searchTerm),
     );
+
+    const { currentPage, totalPages, startIndex, endIndex, setCurrentPage, paginate, resetPage } = usePagination({
+        totalItems: filteredSales.length,
+    });
+
+    // Reset page when filters change
+    useEffect(() => {
+        resetPage();
+    }, [searchTerm, period, resetPage]);
+
+    const paginatedSales = paginate(filteredSales);
 
     // Calculate quick stats
     const totalRevenue = filteredSales.reduce((sum, sale) => sum + (sale.status === 'completed' ? sale.total : 0), 0);
@@ -181,7 +194,7 @@ export default function Transactions() {
                                     </td>
                                 </tr>
                             ) : (
-                                filteredSales.map((sale) => (
+                                paginatedSales.map((sale) => (
                                     <tr
                                         key={sale.id}
                                         className="group hover:bg-[var(--color-bg-hover)] transition-colors cursor-pointer"
@@ -259,10 +272,17 @@ export default function Transactions() {
                     </table>
                 </div>
 
-                {/* Footer / Pagination (Placeholder) */}
-                <div className="p-4 border-t border-[var(--color-border)] bg-[var(--color-bg-secondary)] flex justify-between items-center text-xs text-[var(--color-text-muted)]">
-                    <span>{t('transactions.showing', { count: filteredSales.length })}</span>
-                    <span>{t('transactions.recent_records')}</span>
+                {/* Pagination */}
+                <div className="px-4">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={filteredSales.length}
+                        startIndex={startIndex}
+                        endIndex={endIndex}
+                        onPageChange={setCurrentPage}
+                        itemLabel={t('transactions.title')}
+                    />
                 </div>
             </div>
 

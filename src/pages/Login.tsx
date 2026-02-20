@@ -8,6 +8,8 @@ import type { User } from '@/lib/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.0.0';
+
 type Tab = 'owner' | 'cashier';
 type CashierStep = 'select' | 'pin' | 'cash';
 
@@ -293,10 +295,8 @@ export default function Login() {
                         <ShoppingCart className="w-7 h-7" style={{ color: '#0f172a' }} strokeWidth={2} />
                     </div>
                     <div>
-                        <h1 className="text-white text-2xl font-bold tracking-tight leading-tight">Kenz</h1>
-                        <p className="text-white/40 text-xs font-medium tracking-widest uppercase mt-1">
-                            Supermarket Pro
-                        </p>
+                        <h1 className="text-white text-2xl font-bold tracking-tight leading-tight">SuperMarket</h1>
+                        <p className="text-white/40 text-xs font-medium tracking-widest uppercase mt-1">Pro</p>
                     </div>
                 </div>
 
@@ -340,7 +340,7 @@ export default function Login() {
 
                 {/* Footer */}
                 <div className="relative z-10 px-10 pb-8 text-center">
-                    <p className="text-white/20 text-xs">© {new Date().getFullYear()} Kenz Inc.</p>
+                    <p className="text-white/20 text-xs">© {new Date().getFullYear()} SuperMarket Pro</p>
                 </div>
             </div>
 
@@ -358,7 +358,7 @@ export default function Login() {
                         <ShoppingCart className="w-7 h-7" style={{ color: '#0f172a' }} />
                     </div>
                     <p className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>
-                        Kenz Supermarket Pro
+                        SuperMarket Pro
                     </p>
                 </div>
 
@@ -827,7 +827,7 @@ export default function Login() {
                 </div>
 
                 <p className="mt-8 text-xs" style={{ color: 'var(--text-placeholder)' }}>
-                    © {new Date().getFullYear()} Kenz Inc. &nbsp;·&nbsp; v1.0.0
+                    © {new Date().getFullYear()} SuperMarket Pro &nbsp;·&nbsp; v{APP_VERSION}
                 </p>
             </div>
 

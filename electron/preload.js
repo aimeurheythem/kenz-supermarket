@@ -47,4 +47,21 @@ contextBridge.exposeInMainWorld('electronAPI', {
      * @returns {{ success: boolean, error?: string }}
      */
     importDatabase: (data) => ipcRenderer.invoke('db:import', data),
+
+    // ========================
+    // Printing
+    // ========================
+
+    /**
+     * Print the current page using Electron's native print API.
+     * @param {{ silent?: boolean, deviceName?: string, pageSize?: { width: number, height: number } }} options
+     * @returns {{ success: boolean, failureReason: string }}
+     */
+    printReceipt: (options) => ipcRenderer.invoke('print:receipt', options),
+
+    /**
+     * List available system printers (for thermal printer selection).
+     * @returns {Array<{ name: string, displayName: string, description: string, status: number, isDefault: boolean }>}
+     */
+    getPrinters: () => ipcRenderer.invoke('print:get-printers'),
 });

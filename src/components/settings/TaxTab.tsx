@@ -41,6 +41,7 @@ export default function TaxTab({ formData, handleChange, handleSave }: TaxTabPro
                         className="w-full px-3 py-2.5 rounded-lg bg-[var(--color-bg-input)] border border-[var(--color-border)] focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all"
                         placeholder="0"
                         min="0"
+                        max="100"
                         step="0.01"
                     />
                     <p className="text-xs text-[var(--color-text-muted)] mt-1">{t('settings.tax_rate_hint')}</p>

@@ -58,31 +58,57 @@ export function formatDate(date: string | Date) {
 }
 
 // ============================================
-// PASSWORD & PIN VALIDATION
+// PASSWORD, PIN & EMAIL VALIDATION
 // ============================================
 
-export function validatePassword(password: string): { valid: boolean; message: string } {
+type TFunc = (key: string, opts?: Record<string, unknown>) => string;
+
+const fallback: TFunc = (k) => k;
+
+export function validatePassword(password: string, t: TFunc = fallback): { valid: boolean; message: string } {
     if (password.length < 8) {
-        return { valid: false, message: 'Password must be at least 8 characters' };
+        return { valid: false, message: t('validation.password_min_length') };
     }
     if (!/[a-z]/.test(password)) {
-        return { valid: false, message: 'Password must contain at least one lowercase letter' };
+        return { valid: false, message: t('validation.password_lowercase') };
     }
     if (!/[A-Z]/.test(password)) {
-        return { valid: false, message: 'Password must contain at least one uppercase letter' };
+        return { valid: false, message: t('validation.password_uppercase') };
     }
     if (!/[0-9]/.test(password)) {
-        return { valid: false, message: 'Password must contain at least one digit' };
+        return { valid: false, message: t('validation.password_digit') };
     }
     return { valid: true, message: '' };
 }
 
-export function validatePin(pin: string): { valid: boolean; message: string } {
+export function validatePin(pin: string, t: TFunc = fallback): { valid: boolean; message: string } {
     if (pin.length < 4 || pin.length > 6) {
-        return { valid: false, message: 'PIN must be 4-6 digits' };
+        return { valid: false, message: t('validation.pin_length') };
     }
     if (!/^\d+$/.test(pin)) {
-        return { valid: false, message: 'PIN must contain only digits' };
+        return { valid: false, message: t('validation.pin_digits_only') };
+    }
+    return { valid: true, message: '' };
+}
+
+export function validateEmail(email: string, t: TFunc = fallback): { valid: boolean; message: string } {
+    if (!email) return { valid: true, message: '' }; // optional field
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return { valid: false, message: t('validation.email_invalid') };
+    }
+    return { valid: true, message: '' };
+}
+
+export function validatePaymentAmount(
+    amount: number,
+    maxDebt: number,
+    t: TFunc = fallback,
+): { valid: boolean; message: string } {
+    if (isNaN(amount) || amount <= 0) {
+        return { valid: false, message: t('validation.amount_positive') };
+    }
+    if (amount > maxDebt) {
+        return { valid: false, message: t('validation.amount_exceeds_debt') };
     }
     return { valid: true, message: '' };
 }

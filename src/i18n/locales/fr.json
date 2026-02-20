@@ -311,6 +311,24 @@
             "add_option": "+ Ajouter une option",
             "add_customized": "Ajouter produits personnalisés"
         },
+        "receipt": {
+            "title": "Paiement Réussi",
+            "subtitle": "Transaction terminée",
+            "cashier": "Caissier",
+            "item": "Article",
+            "qty": "Qté",
+            "price": "Prix",
+            "subtotal": "Sous-total",
+            "discount": "Remise",
+            "total": "Total",
+            "barcode_area": "Zone code-barres",
+            "printing": "Impression...",
+            "print_success": "Reçu envoyé à l'imprimante",
+            "print_cancelled": "Impression annulée",
+            "print_failed": "Échec d'impression : {{reason}}",
+            "print_complete": "Boîte de dialogue d'impression terminée",
+            "print_error": "Une erreur est survenue lors de l'impression"
+        },
         "inventory": {
             "title": "Inventaire en Stock",
             "quick_select": "Sélection rapide",
@@ -329,7 +347,7 @@
         "close": "D'accord"
     },
     "footer": {
-        "copyright": "© 2024 SuperMarket App. Tous droits réservés.",
+        "copyright": "© {{year}} SuperMarket Pro. Tous droits réservés.",
         "privacy": "Politique de confidentialité",
         "terms": "Conditions d'utilisation",
         "status": "Système opérationnel"
@@ -433,7 +451,12 @@
             "ml": "Ml",
             "box": "Boîte",
             "pack": "Paquet"
-        }
+        },
+        "export_success": "{{count}} produits exportés",
+        "export_low_stock_success": "{{count}} articles en rupture exportés",
+        "import_success": "{{imported}} produits importés, {{skipped}} ignorés",
+        "csv_empty": "Le fichier CSV est vide ou invalide",
+        "csv_parse_error": "Échec de l'analyse du fichier CSV"
     },
     "barcode_labels": {
         "label_management": "Gestion des Étiquettes",
@@ -524,7 +547,11 @@
         "processing": "Traitement en cours...",
         "confirm_payment": "Confirmer le Paiement",
         "payment_failed": "Échec du paiement",
-        "export_success": "{{count}} enregistrements exportés"
+        "export_success": "{{count}} enregistrements exportés",
+        "collection_health": "Santé du Recouvrement",
+        "health_good": "Bon",
+        "health_fair": "Moyen",
+        "health_poor": "Faible"
     },
     "customers": {
         "title": "Clients",
@@ -666,7 +693,12 @@
         "session_active": "Active",
         "session_closed": "Fermée",
         "session_diff": "Diff :",
-        "sales_tooltip": "Ventes"
+        "sales_tooltip": "Ventes",
+        "col_date": "Date",
+        "col_revenue": "Revenus",
+        "col_orders": "Commandes",
+        "export_success": "{{count}} enregistrements de ventes exportés",
+        "export_cashier_success": "{{count}} enregistrements de caissiers exportés"
     },
     "settings": {
         "title": "Paramètres",
@@ -856,12 +888,12 @@
         "password_required": "Le mot de passe est requis pour les nouveaux utilisateurs"
     },
     "onboarding": {
-        "app_name": "Configuration Kenzy",
+        "app_name": "Configuration SuperMarket Pro",
         "step_welcome": "Bienvenue",
         "step_store": "Infos Magasin",
         "step_admin": "Compte Admin",
         "step_preferences": "Préférences",
-        "welcome_title": "Bienvenue sur Kenzy",
+        "welcome_title": "Bienvenue sur SuperMarket Pro",
         "welcome_subtitle": "Configurons votre magasin en quelques minutes.",
         "store_title": "Profil du Magasin",
         "store_subtitle": "Comment votre magasin doit-il apparaître sur les reçus ?",
@@ -944,7 +976,7 @@
     "db_init": {
         "initializing": "Initialisation du Système...",
         "please_wait": "Veuillez patienter pendant la préparation de la base de données sécurisée et des ressources système essentielles.",
-        "version": "SuperMarket Pro v1.0"
+        "version": "SuperMarket Pro v{{version}}"
     },
     "customer_modal": {
         "edit_title": "Modifier le Client",
@@ -1061,5 +1093,24 @@
         "contact_toast": "Vous pouvez nous joindre via l'un des canaux ci-dessus.",
         "contact_us": "Nous Contacter",
         "close": "Fermer"
+    },
+    "pagination": {
+        "showing": "Affichage de",
+        "to": "à",
+        "of": "sur",
+        "prev": "Préc",
+        "next": "Suiv",
+        "items": "éléments"
+    },
+    "validation": {
+        "password_min_length": "Le mot de passe doit contenir au moins 8 caractères",
+        "password_lowercase": "Le mot de passe doit contenir au moins une lettre minuscule",
+        "password_uppercase": "Le mot de passe doit contenir au moins une lettre majuscule",
+        "password_digit": "Le mot de passe doit contenir au moins un chiffre",
+        "pin_length": "Le PIN doit contenir 4 à 6 chiffres",
+        "pin_digits_only": "Le PIN ne doit contenir que des chiffres",
+        "email_invalid": "Veuillez entrer une adresse e-mail valide",
+        "amount_positive": "Le montant doit être supérieur à zéro",
+        "amount_exceeds_debt": "Le montant ne peut pas dépasser la dette en cours"
     }
 }

@@ -7,7 +7,7 @@ import { Store, User, Settings as SettingsIcon, Check, ArrowRight, Globe } from 
 import { useSettingsStore } from '@/stores/useSettingsStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useUserStore } from '@/stores/useUserStore';
-import { cn, validatePassword } from '@/lib/utils';
+import { cn, validatePassword, validateEmail } from '@/lib/utils';
 
 // Step definitions
 const STEPS = [
@@ -128,12 +128,12 @@ export default function Onboarding() {
             case 0:
                 return true; // Language selection is always valid (has defaults)
             case 1:
-                return formData.storeName.length > 0;
+                return formData.storeName.length > 0 && validateEmail(formData.storeEmail, t).valid;
             case 2:
                 return (
                     formData.adminName.length > 0 &&
                     formData.adminUsername.length > 0 &&
-                    validatePassword(formData.adminPassword).valid &&
+                    validatePassword(formData.adminPassword, t).valid &&
                     formData.adminPassword === formData.adminConfirmPassword
                 );
             case 3:
@@ -296,9 +296,19 @@ export default function Onboarding() {
                                                 onChange={(e) =>
                                                     setFormData({ ...formData, storeEmail: e.target.value })
                                                 }
-                                                className="w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium"
+                                                className={cn(
+                                                    'w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium',
+                                                    formData.storeEmail &&
+                                                        !validateEmail(formData.storeEmail, t).valid &&
+                                                        'border-red-500 focus:border-red-500',
+                                                )}
                                                 placeholder={t('onboarding.placeholder_email')}
                                             />
+                                            {formData.storeEmail && !validateEmail(formData.storeEmail, t).valid && (
+                                                <p className="text-xs text-red-500 mt-1 ml-1">
+                                                    {validateEmail(formData.storeEmail, t).message}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                     <div>
@@ -365,15 +375,15 @@ export default function Onboarding() {
                                                 className={cn(
                                                     'w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium',
                                                     formData.adminPassword &&
-                                                        !validatePassword(formData.adminPassword).valid &&
+                                                        !validatePassword(formData.adminPassword, t).valid &&
                                                         'border-red-500 focus:border-red-500',
                                                 )}
                                                 placeholder={t('onboarding.placeholder_password')}
                                             />
                                             {formData.adminPassword &&
-                                                !validatePassword(formData.adminPassword).valid && (
+                                                !validatePassword(formData.adminPassword, t).valid && (
                                                     <p className="text-xs text-red-500 mt-1 ml-1">
-                                                        {validatePassword(formData.adminPassword).message}
+                                                        {validatePassword(formData.adminPassword, t).message}
                                                     </p>
                                                 )}
                                         </div>
@@ -479,6 +489,9 @@ export default function Onboarding() {
                                             </label>
                                             <input
                                                 type="number"
+                                                min="0"
+                                                max="100"
+                                                step="0.01"
                                                 value={formData.taxRate}
                                                 onChange={(e) => setFormData({ ...formData, taxRate: e.target.value })}
                                                 className="w-full p-4 rounded-xl bg-zinc-50 border-2 border-transparent focus:bg-white focus:border-black outline-none transition-all font-medium"

@@ -311,6 +311,24 @@
             "add_option": "+ إضافة خيار",
             "add_customized": "إضافة منتجات مخصصة"
         },
+        "receipt": {
+            "title": "تم الدفع بنجاح",
+            "subtitle": "تمت المعاملة",
+            "cashier": "الكاشير",
+            "item": "المنتج",
+            "qty": "الكمية",
+            "price": "السعر",
+            "subtotal": "المجموع الفرعي",
+            "discount": "الخصم",
+            "total": "المجموع",
+            "barcode_area": "منطقة الباركود",
+            "printing": "جاري الطباعة...",
+            "print_success": "تم إرسال الإيصال إلى الطابعة",
+            "print_cancelled": "تم إلغاء الطباعة",
+            "print_failed": "فشل الطباعة: {{reason}}",
+            "print_complete": "تم إكمال مربع حوار الطباعة",
+            "print_error": "حدث خطأ أثناء الطباعة"
+        },
         "inventory": {
             "title": "المخزون المتاح",
             "quick_select": "تحديد سريع",
@@ -329,7 +347,7 @@
         "close": "حسناً"
     },
     "footer": {
-        "copyright": "© 2024 تطبيق SuperMarket. جميع الحقوق محفوظة.",
+        "copyright": "© {{year}} SuperMarket Pro. جميع الحقوق محفوظة.",
         "privacy": "سياسة الخصوصية",
         "terms": "شروط الخدمة",
         "status": "النظام يعمل"
@@ -433,7 +451,12 @@
             "ml": "مل",
             "box": "صندوق",
             "pack": "عبوة"
-        }
+        },
+        "export_success": "تم تصدير {{count}} منتج",
+        "export_low_stock_success": "تم تصدير {{count}} عنصر منخفض المخزون",
+        "import_success": "تم استيراد {{imported}} منتج، تم تخطي {{skipped}}",
+        "csv_empty": "ملف CSV فارغ أو غير صالح",
+        "csv_parse_error": "فشل في تحليل ملف CSV"
     },
     "barcode_labels": {
         "label_management": "إدارة الملصقات",
@@ -524,7 +547,11 @@
         "processing": "جاري المعالجة...",
         "confirm_payment": "تأكيد الدفع",
         "payment_failed": "فشل الدفع",
-        "export_success": "تم تصدير {{count}} سجل"
+        "export_success": "تم تصدير {{count}} سجل",
+        "collection_health": "صحة التحصيل",
+        "health_good": "جيد",
+        "health_fair": "متوسط",
+        "health_poor": "ضعيف"
     },
     "customers": {
         "title": "العملاء",
@@ -666,7 +693,12 @@
         "session_active": "نشطة",
         "session_closed": "مغلقة",
         "session_diff": "الفرق:",
-        "sales_tooltip": "المبيعات"
+        "sales_tooltip": "المبيعات",
+        "col_date": "التاريخ",
+        "col_revenue": "الإيرادات",
+        "col_orders": "الطلبات",
+        "export_success": "تم تصدير {{count}} سجل مبيعات",
+        "export_cashier_success": "تم تصدير {{count}} سجل كاشير"
     },
     "settings": {
         "title": "الإعدادات",
@@ -856,12 +888,12 @@
         "password_required": "كلمة المرور مطلوبة للمستخدمين الجدد"
     },
     "onboarding": {
-        "app_name": "إعداد Kenzy",
+        "app_name": "إعداد SuperMarket Pro",
         "step_welcome": "مرحبا",
         "step_store": "معلومات المتجر",
         "step_admin": "حساب المسؤول",
         "step_preferences": "التفضيلات",
-        "welcome_title": "مرحباً بك في Kenzy",
+        "welcome_title": "مرحباً بك في SuperMarket Pro",
         "welcome_subtitle": "لنقم بإعداد متجرك في بضع دقائق.",
         "store_title": "ملف المتجر",
         "store_subtitle": "كيف يجب أن يظهر متجرك على الإيصالات؟",
@@ -944,7 +976,7 @@
     "db_init": {
         "initializing": "جاري تهيئة النظام...",
         "please_wait": "يرجى الانتظار بينما نقوم بإعداد قاعدة البيانات والبيانات الأساسية.",
-        "version": "SuperMarket Pro v1.0"
+        "version": "SuperMarket Pro v{{version}}"
     },
     "customer_modal": {
         "edit_title": "تعديل العميل",
@@ -1061,5 +1093,24 @@
         "contact_toast": "يمكنك التواصل معنا عبر أي من القنوات أعلاه.",
         "contact_us": "اتصل بنا",
         "close": "إغلاق"
+    },
+    "pagination": {
+        "showing": "عرض",
+        "to": "إلى",
+        "of": "من",
+        "prev": "السابق",
+        "next": "التالي",
+        "items": "عناصر"
+    },
+    "validation": {
+        "password_min_length": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+        "password_lowercase": "يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل",
+        "password_uppercase": "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل",
+        "password_digit": "يجب أن تحتوي كلمة المرور على رقم واحد على الأقل",
+        "pin_length": "يجب أن يتكون الرمز السري من 4 إلى 6 أرقام",
+        "pin_digits_only": "يجب أن يحتوي الرمز السري على أرقام فقط",
+        "email_invalid": "يرجى إدخال عنوان بريد إلكتروني صالح",
+        "amount_positive": "يجب أن يكون المبلغ أكبر من صفر",
+        "amount_exceeds_debt": "لا يمكن أن يتجاوز المبلغ الدين المستحق"
     }
 }

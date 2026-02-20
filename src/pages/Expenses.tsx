@@ -4,6 +4,8 @@ import { TableSkeletonRows } from '@/components/common/TableSkeleton';
 import { Plus, Search, Filter, Download, DollarSign, TrendingUp, PieChart, Wallet } from 'lucide-react';
 import Button from '@/components/common/Button';
 import { DeleteConfirmModal } from '@/components/common/DeleteConfirmModal';
+import Pagination from '@/components/common/Pagination';
+import { usePagination } from '@/hooks/usePagination';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useExpenseStore } from '@/stores/useExpenseStore';
 import { exportToCsv } from '@/lib/csv';
@@ -31,6 +33,17 @@ export default function Expenses() {
                 e.category.toLowerCase().includes(searchTerm.toLowerCase()),
         )
         .filter((e) => filterCategory === 'all' || e.category === filterCategory);
+
+    const { currentPage, totalPages, startIndex, endIndex, setCurrentPage, paginate, resetPage } = usePagination({
+        totalItems: filteredExpenses.length,
+    });
+
+    // Reset page when filters change
+    useEffect(() => {
+        resetPage();
+    }, [searchTerm, filterCategory, resetPage]);
+
+    const paginatedExpenses = paginate(filteredExpenses);
 
     const uniqueCategories = [...new Set(expenses.map((e) => e.category))];
 
@@ -233,7 +246,7 @@ export default function Expenses() {
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredExpenses.map((expense) => (
+                                    paginatedExpenses.map((expense) => (
                                         <tr key={expense.id} className="group hover:bg-zinc-50/80 transition-colors">
                                             <td className="py-6 pl-4">
                                                 <span className="font-bold text-black">{expense.description}</span>
@@ -267,6 +280,19 @@ export default function Expenses() {
                             </tbody>
                         </table>
                     </div>
+                </div>
+
+                {/* Pagination */}
+                <div className="px-8">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={filteredExpenses.length}
+                        startIndex={startIndex}
+                        endIndex={endIndex}
+                        onPageChange={setCurrentPage}
+                        itemLabel={t('expenses.title')}
+                    />
                 </div>
             </div>
 

@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TableSkeletonRows } from '@/components/common/TableSkeleton';
-import { Wallet, Search, Filter, Download, AlertCircle, CheckCircle2, Banknote, Users } from 'lucide-react';
-import { cn, formatCurrency } from '@/lib/utils';
+import { Wallet, Search, Filter, Download, AlertCircle, CheckCircle2, Banknote, Users, TrendingUp } from 'lucide-react';
+import { cn, formatCurrency, validatePaymentAmount } from '@/lib/utils';
 import { useCustomerStore } from '@/stores/useCustomerStore';
 import { toast } from 'sonner';
 import { exportToCsv } from '@/lib/csv';
@@ -13,11 +13,12 @@ import Portal from '@/components/common/Portal';
 
 export default function Credit() {
     const { t } = useTranslation();
-    const { getDebtors } = useCustomerStore();
+    const { getDebtors, getCollectionStats } = useCustomerStore();
 
     // State
     const [debtors, setDebtors] = useState<Customer[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [collectionRate, setCollectionRate] = useState<number | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedDebtor, setSelectedDebtor] = useState<Customer | null>(null);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -27,14 +28,16 @@ export default function Credit() {
     const loadDebtors = useCallback(async () => {
         setIsLoading(true);
         try {
-            const data = await getDebtors();
+            const [data, stats] = await Promise.all([getDebtors(), getCollectionStats()]);
             setDebtors(data);
+            const rate = stats.totalDebted > 0 ? (stats.totalCollected / stats.totalDebted) * 100 : 100;
+            setCollectionRate(Math.min(rate, 100));
         } catch (error) {
             console.error('Failed to load debtors:', error);
         } finally {
             setIsLoading(false);
         }
-    }, [getDebtors]);
+    }, [getDebtors, getCollectionStats]);
 
     // Initial Load
     useEffect(() => {
@@ -101,7 +104,7 @@ export default function Credit() {
                 </div>
 
                 {/* Quick Stats */}
-                <div className="space-y-6">
+                <div className="space-y-4">
                     <div className="bg-white rounded-[2.5rem] p-8 border border-zinc-100 flex flex-col justify-between">
                         <div className="flex items-center gap-4">
                             <div className="p-3 bg-red-50 text-red-500 rounded-2xl">
@@ -112,6 +115,62 @@ export default function Credit() {
                             </span>
                         </div>
                         <span className="text-4xl font-black text-black tracking-tighter">{debtorCount}</span>
+                    </div>
+
+                    <div className="bg-white rounded-[2.5rem] p-8 border border-zinc-100 flex flex-col gap-4">
+                        <div className="flex items-center gap-4">
+                            <div
+                                className={cn(
+                                    'p-3 rounded-2xl',
+                                    collectionRate !== null && collectionRate >= 70
+                                        ? 'bg-emerald-50 text-emerald-500'
+                                        : collectionRate !== null && collectionRate >= 40
+                                          ? 'bg-amber-50 text-amber-500'
+                                          : 'bg-red-50 text-red-500',
+                                )}
+                            >
+                                <TrendingUp size={20} />
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                                {t('credit.collection_health')}
+                            </span>
+                        </div>
+                        <div className="space-y-2">
+                            <div className="flex items-baseline justify-between">
+                                <span className="text-3xl font-black text-black tracking-tighter">
+                                    {collectionRate !== null ? `${collectionRate.toFixed(0)}%` : '—'}
+                                </span>
+                                <span
+                                    className={cn(
+                                        'text-xs font-bold',
+                                        collectionRate !== null && collectionRate >= 70
+                                            ? 'text-emerald-500'
+                                            : collectionRate !== null && collectionRate >= 40
+                                              ? 'text-amber-500'
+                                              : 'text-red-500',
+                                    )}
+                                >
+                                    {collectionRate !== null && collectionRate >= 70
+                                        ? t('credit.health_good')
+                                        : collectionRate !== null && collectionRate >= 40
+                                          ? t('credit.health_fair')
+                                          : t('credit.health_poor')}
+                                </span>
+                            </div>
+                            <div className="w-full h-2 bg-zinc-100 rounded-full overflow-hidden">
+                                <div
+                                    className={cn(
+                                        'h-full rounded-full transition-all duration-700',
+                                        collectionRate !== null && collectionRate >= 70
+                                            ? 'bg-emerald-500'
+                                            : collectionRate !== null && collectionRate >= 40
+                                              ? 'bg-amber-500'
+                                              : 'bg-red-500',
+                                    )}
+                                    style={{ width: `${collectionRate ?? 0}%` }}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -307,11 +366,18 @@ function PaymentModal({
     const [amount, setAmount] = useState(customer.total_debt.toString());
     const [isLoading, setIsLoading] = useState(false);
 
+    const parsedAmount = parseFloat(amount);
+    const amountValidation = validatePaymentAmount(parsedAmount, customer.total_debt, t);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!amountValidation.valid) {
+            toast.error(amountValidation.message);
+            return;
+        }
         setIsLoading(true);
         try {
-            await makePayment(customer.id, parseFloat(amount));
+            await makePayment(customer.id, parsedAmount);
             onSuccess();
         } catch (error) {
             console.error(error);
@@ -364,10 +430,20 @@ function PaymentModal({
                                     <input
                                         type="number"
                                         step="0.01"
+                                        min="0.01"
+                                        max={customer.total_debt}
                                         value={amount}
                                         onChange={(e) => setAmount(e.target.value)}
-                                        className="w-full h-16 pl-10 pr-4 rounded-2xl bg-white border-2 border-zinc-100 text-2xl font-black text-black focus:border-black focus:outline-none transition-colors"
+                                        className={cn(
+                                            'w-full h-16 pl-10 pr-4 rounded-2xl bg-white border-2 text-2xl font-black text-black focus:outline-none transition-colors',
+                                            !amountValidation.valid && amount
+                                                ? 'border-red-300 focus:border-red-500'
+                                                : 'border-zinc-100 focus:border-black',
+                                        )}
                                     />
+                                    {!amountValidation.valid && amount && (
+                                        <p className="text-xs text-red-500 mt-1 ml-1">{amountValidation.message}</p>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -384,7 +460,7 @@ function PaymentModal({
                             </Button>
                             <Button
                                 type="submit"
-                                disabled={isLoading}
+                                disabled={isLoading || !amountValidation.valid}
                                 className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black border-none shadow-lg shadow-yellow-400/20"
                             >
                                 {isLoading ? t('credit.processing') : t('credit.confirm_payment')}

@@ -6,6 +6,8 @@ import { useProductStore } from '@/stores/useProductStore';
 import { useStockStore } from '@/stores/useStockStore';
 import SearchInput from '@/components/common/SearchInput';
 import Button from '@/components/common/Button';
+import Pagination from '@/components/common/Pagination';
+import { usePagination } from '@/hooks/usePagination';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { Product } from '@/lib/types';
 
@@ -32,6 +34,33 @@ export default function StockControl() {
         if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
         return true;
     });
+
+    const {
+        currentPage: stockPage,
+        totalPages: stockTotalPages,
+        startIndex: stockStart,
+        endIndex: stockEnd,
+        setCurrentPage: setStockPage,
+        paginate: paginateStock,
+        resetPage: resetStockPage,
+    } = usePagination({ totalItems: filtered.length });
+
+    const {
+        currentPage: mvtPage,
+        totalPages: mvtTotalPages,
+        startIndex: mvtStart,
+        endIndex: mvtEnd,
+        setCurrentPage: setMvtPage,
+        paginate: paginateMvt,
+    } = usePagination({ totalItems: movements.length });
+
+    // Reset stock page when search/filter changes
+    useEffect(() => {
+        resetStockPage();
+    }, [search, showLowOnly, resetStockPage]);
+
+    const paginatedProducts = paginateStock(filtered);
+    const paginatedMovements = paginateMvt(movements);
 
     const handleAdjust = async () => {
         if (!adjustModal || adjustQty <= 0) return;
@@ -161,7 +190,7 @@ export default function StockControl() {
                             </div>
                         ) : (
                             <div className="divide-y divide-[var(--color-border)]">
-                                {filtered.map((product) => {
+                                {paginatedProducts.map((product) => {
                                     const isLow = product.stock_quantity <= product.reorder_level;
                                     const pct = Math.min(
                                         100,
@@ -236,6 +265,16 @@ export default function StockControl() {
                             </div>
                         )}
                     </div>
+
+                    <Pagination
+                        currentPage={stockPage}
+                        totalPages={stockTotalPages}
+                        totalItems={filtered.length}
+                        startIndex={stockStart}
+                        endIndex={stockEnd}
+                        onPageChange={setStockPage}
+                        itemLabel={t('stock_control.title')}
+                    />
                 </div>
 
                 {/* Movement History */}
@@ -255,7 +294,7 @@ export default function StockControl() {
                             </div>
                         ) : (
                             <div className="divide-y divide-[var(--color-border)] max-h-[500px] overflow-y-auto">
-                                {movements.map((mvt) => {
+                                {paginatedMovements.map((mvt) => {
                                     const Icon = getMovementIcon(mvt.type);
                                     return (
                                         <div key={mvt.id} className="flex items-center gap-3 px-4 py-3">
@@ -284,6 +323,16 @@ export default function StockControl() {
                             </div>
                         )}
                     </div>
+
+                    <Pagination
+                        currentPage={mvtPage}
+                        totalPages={mvtTotalPages}
+                        totalItems={movements.length}
+                        startIndex={mvtStart}
+                        endIndex={mvtEnd}
+                        onPageChange={setMvtPage}
+                        itemLabel={t('stock_control.recent_movements')}
+                    />
                 </div>
             </div>
 
@@ -329,6 +378,7 @@ export default function StockControl() {
                                 <input
                                     type="number"
                                     min="1"
+                                    step="1"
                                     value={adjustQty || ''}
                                     onChange={(e) => setAdjustQty(parseInt(e.target.value) || 0)}
                                     className={inputClass}

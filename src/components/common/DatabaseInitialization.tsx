@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.0.0';
+
 export default function DatabaseInitialization({ error }: { error?: string | null }) {
     const { t } = useTranslation();
 
@@ -89,7 +91,7 @@ export default function DatabaseInitialization({ error }: { error?: string | nul
             <div className="absolute bottom-12 flex flex-col items-center gap-2">
                 <div className="h-[1px] w-8 bg-black/10" />
                 <span className="text-[10px] uppercase tracking-[0.2em] text-black/20 font-medium">
-                    {t('db_init.version')}
+                    {t('db_init.version', { version: APP_VERSION })}
                 </span>
             </div>
         </motion.div>

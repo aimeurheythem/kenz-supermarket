@@ -11,7 +11,8 @@ import { DeleteConfirmModal } from '@/components/common/DeleteConfirmModal';
 import InventoryFilters from '@/components/inventory/InventoryFilters';
 import InventoryGrid from '@/components/inventory/InventoryGrid';
 import InventoryList from '@/components/inventory/InventoryList';
-import InventoryPagination from '@/components/inventory/InventoryPagination';
+import Pagination from '@/components/common/Pagination';
+import { usePagination } from '@/hooks/usePagination';
 import type { Product } from '@/lib/types';
 import { getProductStyle } from '@/lib/product-styles';
 import { useTranslation } from 'react-i18next';
@@ -43,9 +44,11 @@ export default function Inventory() {
     const [isImporting, setIsImporting] = useState(false);
     const csvInputRef = useRef<HTMLInputElement>(null);
 
-    // Pagination State
-    const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 16;
+    const { currentPage, totalPages, startIndex, endIndex, setCurrentPage, paginate, resetPage } = usePagination({
+        totalItems: products.length,
+        pageSize: ITEMS_PER_PAGE,
+    });
 
     useEffect(() => {
         loadCategories();
@@ -69,11 +72,11 @@ export default function Inventory() {
                 low_stock: lowStockOnly || undefined,
             });
             loadProducts();
-            setCurrentPage(1);
+            resetPage();
         }, 300);
 
         return () => clearTimeout(timer);
-    }, [search, categoryFilter, lowStockOnly, loadProducts, setFilters]);
+    }, [search, categoryFilter, lowStockOnly, loadProducts, setFilters, resetPage]);
 
     const handleEdit = (product: Product) => {
         setEditingProduct(product);
@@ -119,7 +122,7 @@ export default function Inventory() {
             products as unknown as Record<string, unknown>[],
             `inventory_${new Date().toISOString().split('T')[0]}.csv`,
         );
-        toast.success(t('inventory.export_success', `Exported ${products.length} products`));
+        toast.success(t('inventory.export_success', { count: products.length }));
     };
 
     const handleExportLowStock = () => {
@@ -136,7 +139,7 @@ export default function Inventory() {
             lowStockProducts as unknown as Record<string, unknown>[],
             `low_stock_${new Date().toISOString().split('T')[0]}.csv`,
         );
-        toast.success(t('inventory.export_low_stock_success', `Exported ${lowStockProducts.length} low stock items`));
+        toast.success(t('inventory.export_low_stock_success', { count: lowStockProducts.length }));
     };
 
     const handleImportCsv = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -146,7 +149,7 @@ export default function Inventory() {
         try {
             const rows = await parseCsvFile(file);
             if (rows.length === 0) {
-                toast.error('CSV file is empty or invalid');
+                toast.error(t('inventory.csv_empty'));
                 return;
             }
             let imported = 0;
@@ -176,9 +179,9 @@ export default function Inventory() {
             }
             await loadProducts();
             await loadLowStock();
-            toast.success(`Imported ${imported} products${skipped > 0 ? `, ${skipped} skipped` : ''}`);
+            toast.success(t('inventory.import_success', { imported, skipped }));
         } catch {
-            toast.error('Failed to parse CSV file');
+            toast.error(t('inventory.csv_parse_error'));
         } finally {
             setIsImporting(false);
             if (csvInputRef.current) csvInputRef.current.value = '';
@@ -188,7 +191,7 @@ export default function Inventory() {
     // Calculations for stats
     const totalValue = products.reduce((sum, p) => sum + p.selling_price * p.stock_quantity, 0);
 
-    const paginatedProducts = products.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+    const paginatedProducts = paginate(products);
 
     return (
         <div className="relative flex flex-col h-full gap-8 p-6 lg:p-8 animate-fadeIn mt-4 min-h-[85vh]">
@@ -356,11 +359,14 @@ export default function Inventory() {
                             )}
                         </motion.div>
 
-                        <InventoryPagination
+                        <Pagination
                             currentPage={currentPage}
-                            setCurrentPage={setCurrentPage}
+                            totalPages={totalPages}
                             totalItems={products.length}
-                            itemsPerPage={ITEMS_PER_PAGE}
+                            startIndex={startIndex}
+                            endIndex={endIndex}
+                            onPageChange={setCurrentPage}
+                            itemLabel={t('inventory.title')}
                         />
                     </>
                 )}
@@ -378,7 +384,7 @@ export default function Inventory() {
                         setSearch('');
                         setCategoryFilter(null);
                         setLowStockOnly(false);
-                        setCurrentPage(1);
+                        resetPage();
                         loadProducts();
                     }
                     handleCloseForm();

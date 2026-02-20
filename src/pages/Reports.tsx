@@ -19,6 +19,8 @@ import { formatCurrency, formatDate, cn } from '@/lib/utils';
 import { useReportStore } from '@/stores/useReportStore';
 import { useUserStore } from '@/stores/useUserStore';
 import Button from '@/components/common/Button';
+import { exportToCsv } from '@/lib/csv';
+import { toast } from 'sonner';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -66,43 +68,29 @@ export default function Reports() {
     const topCashier = useMemo(() => cashierPerformance[0], [cashierPerformance]);
 
     const handleExport = () => {
-        const headers = ['Date', 'Revenue', 'Orders'];
-        const rows = salesData.map((d) => [d.date, d.revenue, d.orders]);
-        const csvContent =
-            'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement('a');
-        link.setAttribute('href', encodedUri);
-        link.setAttribute('download', `sales_report_${period}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const headers = [
+            { key: 'date', label: t('reports.col_date', 'Date') },
+            { key: 'revenue', label: t('reports.col_revenue', 'Revenue') },
+            { key: 'orders', label: t('reports.col_orders', 'Orders') },
+        ];
+        exportToCsv(headers, salesData as unknown as Record<string, unknown>[], `sales_report_${period}.csv`);
+        toast.success(t('reports.export_success', { count: salesData.length }));
     };
 
     const handleExportCashierReport = () => {
         const headers = [
-            t('reports.tab_cashiers'),
-            t('reports.cashier_total_sales'),
-            t('reports.cashier_transactions'),
-            t('reports.cashier_avg_order'),
-            t('reports.cashier_sessions'),
+            { key: 'cashier_name', label: t('reports.tab_cashiers') },
+            { key: 'total_sales', label: t('reports.cashier_total_sales') },
+            { key: 'total_transactions', label: t('reports.cashier_transactions') },
+            { key: 'average_order', label: t('reports.cashier_avg_order') },
+            { key: 'total_sessions', label: t('reports.cashier_sessions') },
         ];
-        const rows = cashierPerformance.map((c) => [
-            c.cashier_name,
-            c.total_sales,
-            c.total_transactions,
-            c.average_order,
-            c.total_sessions,
-        ]);
-        const csvContent =
-            'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement('a');
-        link.setAttribute('href', encodedUri);
-        link.setAttribute('download', `cashier_report_${period}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        exportToCsv(
+            headers,
+            cashierPerformance as unknown as Record<string, unknown>[],
+            `cashier_report_${period}.csv`,
+        );
+        toast.success(t('reports.export_cashier_success', { count: cashierPerformance.length }));
     };
 
     return (

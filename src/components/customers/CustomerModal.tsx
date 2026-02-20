@@ -148,6 +148,8 @@ export default function CustomerModal({ customer, isOpen, onClose }: CustomerMod
                         </label>
                         <input
                             type="number"
+                            min="0"
+                            step="1"
                             value={formData.loyalty_points}
                             onChange={(e) =>
                                 setFormData({ ...formData, loyalty_points: parseInt(e.target.value) || 0 })

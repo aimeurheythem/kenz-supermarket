@@ -9,7 +9,7 @@ export default function Footer() {
         <footer className="w-full py-6 mt-auto bg-primary">
             <div className="max-w-[1600px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-400 font-medium">
                 <div className="flex items-center gap-1">
-                    <span>{t('footer.copyright')}</span>
+                    <span>{t('footer.copyright', { year: new Date().getFullYear() })}</span>
                 </div>
 
                 <div className="flex items-center gap-6">

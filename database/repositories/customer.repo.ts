@@ -134,4 +134,19 @@ export const CustomerRepo = {
     async getDebtors(): Promise<Customer[]> {
         return query<Customer>('SELECT * FROM customers WHERE total_debt > 0 ORDER BY total_debt DESC');
     },
+
+    async getCollectionStats(): Promise<{ totalDebted: number; totalCollected: number }> {
+        const rows = await query<{ type: string; total: number }>(
+            `SELECT type, COALESCE(SUM(amount), 0) as total
+             FROM customer_transactions
+             GROUP BY type`,
+        );
+        let totalDebted = 0;
+        let totalCollected = 0;
+        for (const row of rows) {
+            if (row.type === 'debt') totalDebted = row.total;
+            if (row.type === 'payment') totalCollected = row.total;
+        }
+        return { totalDebted, totalCollected };
+    },
 };

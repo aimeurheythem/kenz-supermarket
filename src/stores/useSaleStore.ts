@@ -103,23 +103,28 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
         const existing = cart.find((c) => c.product.id === item.product.id);
         const currentQty = existing ? existing.quantity : 0;
 
+        // Clamp discount: must be non-negative and not exceed item total
+        const itemTotal = item.product.selling_price * item.quantity;
+        const safeDiscount = Math.max(0, Math.min(item.discount, itemTotal));
+        const safeItem = safeDiscount !== item.discount ? { ...item, discount: safeDiscount } : item;
+
         // Fetch fresh stock from DB to avoid stale data
         const freshProduct = await ProductRepo.getById(item.product.id);
         const availableStock = freshProduct?.stock_quantity ?? item.product.stock_quantity;
 
-        if (currentQty + item.quantity > availableStock) {
-            set({ stockError: { productName: item.product.name, available: availableStock } });
+        if (currentQty + safeItem.quantity > availableStock) {
+            set({ stockError: { productName: safeItem.product.name, available: availableStock } });
             return;
         }
 
         if (existing) {
             set({
                 cart: cart.map((c) =>
-                    c.product.id === item.product.id ? { ...c, quantity: c.quantity + item.quantity } : c,
+                    c.product.id === safeItem.product.id ? { ...c, quantity: c.quantity + safeItem.quantity } : c,
                 ),
             });
         } else {
-            set({ cart: [...cart, item] });
+            set({ cart: [...cart, safeItem] });
         }
     },
 

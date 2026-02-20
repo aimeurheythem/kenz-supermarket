@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { TableSkeletonCells } from '@/components/common/TableSkeleton';
+import Pagination from '@/components/common/Pagination';
+import { usePagination } from '@/hooks/usePagination';
 import { Search, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -32,6 +34,25 @@ export default function AuditLogs() {
     useEffect(() => {
         loadLogs();
     }, [loadLogs]);
+
+    const filteredLogs = logs.filter(
+        (log) =>
+            !filters.search ||
+            log.details?.toLowerCase().includes(filters.search.toLowerCase()) ||
+            log.user_name?.toLowerCase().includes(filters.search.toLowerCase()) ||
+            log.entity?.toLowerCase().includes(filters.search.toLowerCase()),
+    );
+
+    const { currentPage, totalPages, startIndex, endIndex, setCurrentPage, paginate, resetPage } = usePagination({
+        totalItems: filteredLogs.length,
+    });
+
+    // Reset page when filters change
+    useEffect(() => {
+        resetPage();
+    }, [filters, resetPage]);
+
+    const paginatedLogs = paginate(filteredLogs);
 
     return (
         <div className="p-6 max-w-[1600px] mx-auto space-y-6">
@@ -107,14 +128,14 @@ export default function AuditLogs() {
                             <TableBody>
                                 {loading ? (
                                     <TableSkeletonCells columns={6} rows={6} />
-                                ) : logs.length === 0 ? (
+                                ) : filteredLogs.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={6} className="text-center py-8 text-zinc-500">
                                             {t('audit_logs.no_logs')}
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    logs.map((log) => (
+                                    paginatedLogs.map((log) => (
                                         <TableRow key={log.id} className="hover:bg-zinc-50/50">
                                             <TableCell className="font-mono text-xs text-zinc-500">
                                                 {format(new Date(log.created_at), 'MMM dd, HH:mm:ss')}
@@ -236,6 +257,17 @@ export default function AuditLogs() {
                         </Table>
                     </div>
                 </CardContent>
+                <div className="px-6">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={filteredLogs.length}
+                        startIndex={startIndex}
+                        endIndex={endIndex}
+                        onPageChange={setCurrentPage}
+                        itemLabel={t('audit_logs.title')}
+                    />
+                </div>
             </Card>
         </div>
     );

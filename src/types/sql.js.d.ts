@@ -52,8 +52,27 @@ declare global {
             getDatabasePath: () => Promise<string>;
             exportDatabase: () => Promise<ArrayBuffer | null>;
             importDatabase: (data: Uint8Array) => Promise<{ success: boolean; error?: string }>;
+
+            // Printing
+            printReceipt: (options?: {
+                silent?: boolean;
+                deviceName?: string;
+                pageSize?: { width: number; height: number };
+            }) => Promise<{ success: boolean; failureReason: string }>;
+            getPrinters: () => Promise<
+                Array<{
+                    name: string;
+                    displayName: string;
+                    description: string;
+                    status: number;
+                    isDefault: boolean;
+                }>
+            >;
         };
     }
+
+    // Vite build-time constant (from package.json version)
+    const __APP_VERSION__: string;
 }
 
 export {};

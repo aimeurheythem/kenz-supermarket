@@ -19,6 +19,8 @@ import { useUserStore } from '@/stores/useUserStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import SearchInput from '@/components/common/SearchInput';
 import Button from '@/components/common/Button';
+import Pagination from '@/components/common/Pagination';
+import { usePagination } from '@/hooks/usePagination';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -66,6 +68,17 @@ export default function Users() {
             u.username.toLowerCase().includes(search.toLowerCase()),
     );
 
+    const { currentPage, totalPages, startIndex, endIndex, setCurrentPage, paginate, resetPage } = usePagination({
+        totalItems: filtered.length,
+    });
+
+    // Reset page when search changes
+    useEffect(() => {
+        resetPage();
+    }, [search, resetPage]);
+
+    const paginatedUsers = paginate(filtered);
+
     const cashiers = users.filter((u) => u.role === 'cashier');
 
     const handleEdit = (user: User) => {
@@ -105,13 +118,13 @@ export default function Users() {
 
         // Validate password when provided
         if (form.password) {
-            const pwResult = validatePassword(form.password);
+            const pwResult = validatePassword(form.password, t);
             if (!pwResult.valid) return toast.error(pwResult.message);
         }
 
         // Validate PIN when provided
         if (form.pin_code) {
-            const pinResult = validatePin(form.pin_code);
+            const pinResult = validatePin(form.pin_code, t);
             if (!pinResult.valid) return toast.error(pinResult.message);
         }
 
@@ -123,7 +136,7 @@ export default function Users() {
 
             updateUser(editingUser.id, updateData);
         } else {
-            if (!form.password) return toast.error('Password is required for new users');
+            if (!form.password) return toast.error(t('users.password_required'));
             addUser(form);
         }
         handleCloseForm();
@@ -272,7 +285,7 @@ export default function Users() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--color-border)]">
-                        {filtered.map((user) => (
+                        {paginatedUsers.map((user) => (
                             <tr key={user.id} className="hover:bg-[var(--color-bg-hover)] transition-colors">
                                 <td className="px-4 py-3">
                                     <div className="flex items-center gap-3">
@@ -354,6 +367,19 @@ export default function Users() {
                         ))}
                     </tbody>
                 </table>
+
+                {/* Pagination */}
+                <div className="px-4">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={filtered.length}
+                        startIndex={startIndex}
+                        endIndex={endIndex}
+                        onPageChange={setCurrentPage}
+                        itemLabel={t('users.title')}
+                    />
+                </div>
             </div>
 
             {/* User Form Modal */}
@@ -432,6 +458,7 @@ export default function Users() {
                                 <input
                                     type="password"
                                     inputMode="numeric"
+                                    minLength={4}
                                     maxLength={6}
                                     value={form.pin_code}
                                     onChange={(e) => setForm({ ...form, pin_code: e.target.value.replace(/\D/g, '') })}

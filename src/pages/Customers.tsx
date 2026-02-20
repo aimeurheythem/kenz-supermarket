@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useCustomerStore } from '@/stores/useCustomerStore';
 import { useTranslation } from 'react-i18next';
-import { Search, Plus, Trash2, Edit, Phone, Mail, MapPin, Award } from 'lucide-react';
-import Button from '@/components/common/Button';
+import { Search, Plus, Trash2, Edit, Phone, Mail, MapPin, Award, Users, UserCheck, Wallet, X } from 'lucide-react';
 import { DeleteConfirmModal } from '@/components/common/DeleteConfirmModal';
 import CustomerModal from '@/components/customers/CustomerModal';
 import Pagination from '@/components/common/Pagination';
@@ -11,6 +10,7 @@ import { cn, formatCurrency } from '@/lib/utils';
 import type { Customer } from '@/lib/types';
 import { TableSkeletonRows } from '@/components/common/TableSkeleton';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Customers() {
     const { t } = useTranslation();
@@ -20,6 +20,7 @@ export default function Customers() {
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         loadCustomers();
@@ -36,7 +37,6 @@ export default function Customers() {
         totalItems: filteredCustomers.length,
     });
 
-    // Reset page when search changes
     useEffect(() => {
         resetPage();
     }, [searchTerm, resetPage]);
@@ -54,95 +54,206 @@ export default function Customers() {
         setDeleteTarget(null);
     };
 
-    return (
-        <div className="space-y-6 animate-fadeIn pb-10">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-[var(--color-text-primary)] tracking-tight">
-                        {t('customers.title')}
-                    </h1>
-                    <p className="text-[var(--color-text-muted)] text-sm mt-1">{t('customers.subtitle')}</p>
-                </div>
-                <Button
-                    className="btn-page-action"
-                    icon={<Plus size={18} />}
-                    onClick={() => {
-                        setSelectedCustomer(null);
-                        setIsModalOpen(true);
-                    }}
-                >
-                    {t('customers.add_customer')}
-                </Button>
-            </div>
+    const totalCustomers = customers.length;
+    const totalDebt = customers.reduce((sum, c) => sum + (c.total_debt || 0), 0);
+    const totalPoints = customers.reduce((sum, c) => sum + (c.loyalty_points || 0), 0);
 
-            {/* Content */}
-            <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl overflow-hidden shadow-sm">
-                {/* Toolbar */}
-                <div className="p-4 border-b border-[var(--color-border)] flex items-center gap-4 bg-[var(--color-bg-secondary)]">
-                    <div className="relative flex-1 max-w-md">
-                        <Search
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
-                            size={14}
-                        />
-                        <input
-                            type="text"
-                            placeholder={t('customers.search_placeholder')}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg pl-9 pr-3 py-2 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-placeholder)] focus:outline-none focus:border-[var(--color-border-hover)] transition-colors"
-                        />
+    return (
+        <div className="relative flex flex-col items-start gap-8 p-6 lg:p-8 animate-fadeIn mt-4">
+            {/* Grid Background */}
+            <div
+                className="absolute inset-0 pointer-events-none opacity-[0.15] rounded-[3rem]"
+                style={{
+                    backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 1px, transparent 1px)`,
+                    backgroundSize: '32px 32px',
+                    maskImage: 'radial-gradient(circle at top center, black, transparent 90%)',
+                    WebkitMaskImage: 'radial-gradient(circle at top center, black, transparent 90%)',
+                }}
+            />
+
+            <div className="relative z-10 flex-1 flex flex-col min-w-0 w-full">
+                {/* Header Section */}
+                <div className="flex flex-col space-y-6 pb-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[12px] text-zinc-400 tracking-[0.3em] font-bold">
+                                {t('sidebar.customers')}
+                            </span>
+                            <h2 className="text-3xl font-black text-black tracking-tighter uppercase">
+                                {t('customers.title')}
+                            </h2>
+                        </div>
+                        <button
+                            onClick={() => {
+                                setSelectedCustomer(null);
+                                setIsModalOpen(true);
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-md border border-black shadow-lg shadow-black/20 hover:bg-neutral-800 transition-all active:scale-95"
+                        >
+                            <Plus size={16} />
+                            <span className="text-[10px] font-black uppercase tracking-widest">
+                                {t('customers.add_customer')}
+                            </span>
+                        </button>
                     </div>
                 </div>
 
-                {/* Table */}
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm">
-                        <thead className="bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] border-b border-[var(--color-border)]">
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-yellow-300 border-2 border-black/10 flex flex-col justify-between aspect-[2/1] md:aspect-auto md:h-36 p-6 rounded-[3rem] relative overflow-hidden group cursor-pointer"
+                    >
+                        <div className="flex items-center justify-between relative z-10">
+                            <span className="text-[10px] font-bold text-black/60 uppercase tracking-widest">
+                                {t('customers.stat_total')}
+                            </span>
+                            <div className="p-2 bg-black/5 rounded-full">
+                                <Users size={14} className="text-black" />
+                            </div>
+                        </div>
+                        <div className="relative z-10">
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-2xl font-black text-black tracking-tighter">
+                                    {totalCustomers}
+                                </span>
+                                <span className="text-[10px] font-bold text-black/60 uppercase">Customers</span>
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.05 }}
+                        className="bg-rose-100 border-2 border-rose-200 flex flex-col justify-between aspect-[2/1] md:aspect-auto md:h-36 p-6 rounded-[3rem] relative overflow-hidden group cursor-pointer"
+                    >
+                        <div className="flex items-center justify-between relative z-10">
+                            <span className="text-[10px] font-bold text-rose-900/60 uppercase tracking-widest">
+                                {t('customers.stat_debt')}
+                            </span>
+                            <div className="p-2 bg-rose-900/10 rounded-full">
+                                <Wallet size={14} className="text-rose-900" />
+                            </div>
+                        </div>
+                        <div className="relative z-10">
+                            <span className="text-2xl font-black text-rose-900 tracking-tighter">
+                                {formatCurrency(totalDebt, false)}
+                            </span>
+                        </div>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="bg-white border-2 border-black/10 flex flex-col justify-between aspect-[2/1] md:aspect-auto md:h-36 p-6 rounded-[3rem] relative overflow-hidden group cursor-pointer"
+                    >
+                        <div className="flex items-center justify-between relative z-10">
+                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                                {t('customers.stat_points')}
+                            </span>
+                            <div className="p-2 bg-zinc-100 rounded-full">
+                                <Award size={14} className="text-yellow-500" />
+                            </div>
+                        </div>
+                        <div className="relative z-10">
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-2xl font-black text-black tracking-tighter">
+                                    {totalPoints.toLocaleString()}
+                                </span>
+                                <span className="text-[10px] font-bold text-zinc-400 uppercase">Points</span>
+                            </div>
+                        </div>
+                    </motion.div>
+                </div>
+
+                {/* Search Bar */}
+                <div className="relative group mb-6">
+                    <Search
+                        size={22}
+                        className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-black transition-colors"
+                    />
+                    <input
+                        ref={searchInputRef}
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder={t('customers.search_placeholder')}
+                        className={cn(
+                            'w-full pl-16 pr-16 py-4 rounded-2xl',
+                            'bg-white border border-zinc-200 shadow-none',
+                            'text-black placeholder:text-zinc-300 text-base font-bold',
+                            'focus:outline-none focus:ring-0 focus:!outline-none focus-visible:!outline-none focus-visible:ring-0 focus:border-zinc-400 transition-all placeholder:transition-opacity focus:placeholder:opacity-50',
+                        )}
+                    />
+                    {searchTerm && (
+                        <motion.button
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            onClick={() => {
+                                setSearchTerm('');
+                                searchInputRef.current?.focus();
+                            }}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-zinc-100 text-zinc-400 hover:bg-black hover:text-white transition-all duration-300"
+                        >
+                            <X size={16} strokeWidth={3} />
+                        </motion.button>
+                    )}
+                </div>
+
+                {/* Customers Table */}
+                <div className="rounded-[3rem] bg-white border-2 border-black/5 overflow-hidden">
+                    <table className="w-full">
+                        <thead className="bg-zinc-50 border-b border-zinc-100">
                             <tr>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">
+                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('customers.col_customer')}
                                 </th>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">
+                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('customers.col_contact')}
                                 </th>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">
+                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('customers.col_loyalty')}
                                 </th>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider">
+                                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('customers.col_debt')}
                                 </th>
-                                <th className="px-6 py-3 font-medium text-xs uppercase tracking-wider text-right">
+                                <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('customers.col_actions')}
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[var(--color-border)]">
+                        <tbody className="divide-y divide-zinc-100">
                             {isLoadingCustomers ? (
                                 <TableSkeletonRows columns={5} rows={5} />
                             ) : filteredCustomers.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-[var(--color-text-muted)]">
-                                        No customers found.
+                                    <td colSpan={5} className="px-6 py-16">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center">
+                                                <Users size={24} className="text-zinc-300" />
+                                            </div>
+                                            <p className="text-sm font-bold text-zinc-400">
+                                                {t('customers.no_customers')}
+                                            </p>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : (
                                 paginatedCustomers.map((customer) => (
-                                    <tr
-                                        key={customer.id}
-                                        className="group hover:bg-[var(--color-bg-hover)] transition-colors"
-                                    >
+                                    <tr key={customer.id} className="group hover:bg-zinc-50 transition-colors">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-[var(--color-bg-tertiary)] flex items-center justify-center text-xs font-bold text-[var(--color-text-secondary)]">
+                                                <div className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center text-sm font-bold text-zinc-600">
                                                     {customer.full_name.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <p className="text-[var(--color-text-primary)] font-medium">
-                                                        {customer.full_name}
-                                                    </p>
+                                                    <p className="text-sm font-bold text-black">{customer.full_name}</p>
                                                     {customer.address && (
-                                                        <div className="flex items-center gap-1 text-[var(--color-text-muted)] text-xs mt-0.5">
+                                                        <div className="flex items-center gap-1 text-zinc-400 text-xs mt-0.5">
                                                             <MapPin size={10} />
                                                             <span className="truncate max-w-[150px]">
                                                                 {customer.address}
@@ -155,14 +266,14 @@ export default function Customers() {
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col gap-1">
                                                 {customer.phone && (
-                                                    <div className="flex items-center gap-1.5 text-[var(--color-text-secondary)] text-xs">
-                                                        <Phone size={12} className="text-[var(--color-text-muted)]" />
+                                                    <div className="flex items-center gap-1.5 text-zinc-600 text-xs">
+                                                        <Phone size={12} className="text-zinc-300" />
                                                         <span>{customer.phone}</span>
                                                     </div>
                                                 )}
                                                 {customer.email && (
-                                                    <div className="flex items-center gap-1.5 text-[var(--color-text-muted)] text-xs">
-                                                        <Mail size={12} className="text-[var(--color-text-muted)]" />
+                                                    <div className="flex items-center gap-1.5 text-zinc-400 text-xs">
+                                                        <Mail size={12} className="text-zinc-300" />
                                                         <span>{customer.email}</span>
                                                     </div>
                                                 )}
@@ -170,11 +281,13 @@ export default function Customers() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
-                                                <Award size={16} className="text-yellow-500" />
-                                                <span className="text-[var(--color-text-primary)] font-medium">
+                                                <div className="p-1.5 bg-yellow-100 rounded-lg">
+                                                    <Award size={14} className="text-yellow-600" />
+                                                </div>
+                                                <span className="text-sm font-bold text-black">
                                                     {customer.loyalty_points}
                                                 </span>
-                                                <span className="text-[var(--color-text-muted)] text-xs">
+                                                <span className="text-[10px] text-zinc-400 font-bold uppercase">
                                                     {t('customers.pts')}
                                                 </span>
                                             </div>
@@ -182,29 +295,27 @@ export default function Customers() {
                                         <td className="px-6 py-4">
                                             <span
                                                 className={cn(
-                                                    'font-bold',
-                                                    (customer.total_debt || 0) > 0
-                                                        ? 'text-red-500'
-                                                        : 'text-[var(--color-text-muted)]',
+                                                    'text-sm font-black',
+                                                    (customer.total_debt || 0) > 0 ? 'text-rose-500' : 'text-zinc-400',
                                                 )}
                                             >
                                                 {formatCurrency(customer.total_debt || 0)}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex items-center justify-end gap-2">
                                                 <button
                                                     onClick={() => {
                                                         setSelectedCustomer(customer);
                                                         setIsModalOpen(true);
                                                     }}
-                                                    className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)] rounded-lg transition-colors"
+                                                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 hover:bg-black hover:text-white transition-all"
                                                 >
                                                     <Edit size={14} />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(customer.id)}
-                                                    className="p-2 text-[var(--color-text-muted)] hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 hover:bg-rose-500 hover:text-white transition-all"
                                                 >
                                                     <Trash2 size={14} />
                                                 </button>
@@ -215,19 +326,19 @@ export default function Customers() {
                             )}
                         </tbody>
                     </table>
-                </div>
 
-                {/* Pagination */}
-                <div className="px-4">
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        totalItems={filteredCustomers.length}
-                        startIndex={startIndex}
-                        endIndex={endIndex}
-                        onPageChange={setCurrentPage}
-                        itemLabel={t('customers.title')}
-                    />
+                    {/* Pagination */}
+                    <div className="px-6 pb-6">
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalItems={filteredCustomers.length}
+                            startIndex={startIndex}
+                            endIndex={endIndex}
+                            onPageChange={setCurrentPage}
+                            itemLabel={t('customers.title')}
+                        />
+                    </div>
                 </div>
             </div>
 

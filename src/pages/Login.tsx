@@ -147,7 +147,7 @@ function TestimonialCard({ name, role, quote }: { name: string; role: string; qu
     return (
         <div
             className="flex-shrink-0 flex flex-col gap-5 w-[220px] rounded-[3rem] px-5.5 py-3.5 select-none"
-            style={{ background: 'rgba(255,255,255,0.05)', border: '3px solid rgba(255, 196, 0, 0.23)' }}
+            style={{ background: 'rgba(255, 255, 255, 0.15)' }}
         >
             <p className="text-white/70 text-xs leading-relaxed">&ldquo;{quote}&rdquo;</p>
             <div className="flex items-center gap-2 mt-1">
@@ -286,8 +286,24 @@ export default function Login() {
                 className="hidden lg:flex lg:w-[38%] xl:w-[36%] flex-col relative overflow-hidden m-1.5 rounded-[1.5rem]"
                 style={{ background: 'linear-gradient(160deg, #000000ff 0%, #000000ff 60%, #2e250cff 100%)' }}
             >
+                {/* Decorative SVG Elements */}
+                <img
+                    src="/element1-nobg.svg"
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute -top-[15%] -right-[15%] w-[65%] pointer-events-none select-none"
+                    style={{ opacity: 0.12, filter: 'blur(1px)' }}
+                />
+                <img
+                    src="/element2-nobg.svg"
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute -bottom-[10%] -left-[15%] w-[60%] pointer-events-none select-none"
+                    style={{ opacity: 0.1, filter: 'blur(1px)' }}
+                />
+
                 {/* Branding */}
-                <div className="relative z-10 flex flex-col items-center pt-12 pb-6 px-10 text-center gap-3">
+                <div className="relative z-10 flex flex-col items-start pt-12 pb-6 px-10 text-left gap-3">
                     <div
                         className="w-14 h-14 rounded-full flex items-center justify-center"
                         style={{ background: 'var(--accent)' }}
@@ -392,10 +408,10 @@ export default function Login() {
                             style={
                                 tab === 'owner'
                                     ? {
-                                          background: '#ffffff',
-                                          color: 'var(--text-primary)',
-                                          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-                                      }
+                                        background: '#ffffff',
+                                        color: 'var(--text-primary)',
+                                        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                                    }
                                     : { color: 'var(--text-muted)' }
                             }
                         >
@@ -409,10 +425,10 @@ export default function Login() {
                             style={
                                 tab === 'cashier'
                                     ? {
-                                          background: '#ffffff',
-                                          color: 'var(--text-primary)',
-                                          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-                                      }
+                                        background: '#ffffff',
+                                        color: 'var(--text-primary)',
+                                        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                                    }
                                     : { color: 'var(--text-muted)' }
                             }
                         >

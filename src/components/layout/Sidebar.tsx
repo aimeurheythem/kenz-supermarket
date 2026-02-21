@@ -110,20 +110,20 @@ export default function Sidebar() {
                     collapsed ? 'justify-center px-0' : 'px-6',
                 )}
             >
-                <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-black flex items-center justify-center shrink-0 shadow-lg shadow-black/10">
-                        <img src="/kenzy-dash-logo-light.svg" alt="SuperMarket Pro" className="w-5 h-5 invert" />
+                <div className="flex items-center gap-0">
+                    <div className="w-20 h-20 rounded-xl bg-transparent flex items-center justify-center shrink-0">
+                        <img src="/1.svg" alt="Kenzy Pro" className="w-20 h-20" />
                     </div>
                     {!collapsed && (
                         <motion.div
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="flex flex-col"
+                            className="flex flex-col -ml-2"
                         >
-                            <span className="text-sm font-bold tracking-tight text-black leading-tight">
-                                SuperMarket Pro
+                            <span className="text-base font-bold tracking-tight text-black leading-tight">
+                                Kenzy Pro
                             </span>
-                            <span className="text-[10px] uppercase tracking-[0.2em] text-black/30 font-medium">
+                            <span className="text-[9px] uppercase tracking-[0.15em] text-black/30 font-medium">
                                 Dashboard
                             </span>
                         </motion.div>

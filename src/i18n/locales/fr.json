@@ -376,7 +376,7 @@
         }
     },
     "footer": {
-        "copyright": "© {{year}} SuperMarket Pro. Tous droits réservés.",
+        "copyright": "© {{year}} Kenzy Pro. Tous droits réservés.",
         "privacy": "Politique de confidentialité",
         "terms": "Conditions d'utilisation",
         "status": "Système opérationnel"
@@ -926,12 +926,12 @@
         "password_required": "Le mot de passe est requis pour les nouveaux utilisateurs"
     },
     "onboarding": {
-        "app_name": "Configuration SuperMarket Pro",
+        "app_name": "Configuration Kenzy Pro",
         "step_welcome": "Bienvenue",
         "step_store": "Infos Magasin",
         "step_admin": "Compte Admin",
         "step_preferences": "Préférences",
-        "welcome_title": "Bienvenue sur SuperMarket Pro",
+        "welcome_title": "Bienvenue sur Kenzy Pro",
         "welcome_subtitle": "Configurons votre magasin en quelques minutes.",
         "store_title": "Profil du Magasin",
         "store_subtitle": "Comment votre magasin doit-il apparaître sur les reçus ?",
@@ -1014,7 +1014,7 @@
     "db_init": {
         "initializing": "Initialisation du Système...",
         "please_wait": "Veuillez patienter pendant la préparation de la base de données sécurisée et des ressources système essentielles.",
-        "version": "SuperMarket Pro v{{version}}"
+        "version": "Kenzy Pro v{{version}}"
     },
     "customer_modal": {
         "edit_title": "Modifier le Client",

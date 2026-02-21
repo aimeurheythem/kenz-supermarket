@@ -219,7 +219,7 @@ export default function ReceiptPreview({ sale, items, onClose, onPrint }: Receip
     const { user } = useAuthStore();
     const [isPrinting, setIsPrinting] = useState(false);
 
-    const storeName = useSettingsStore(selectSetting('store.name', 'SuperMarket Pro'));
+    const storeName = useSettingsStore(selectSetting('store.name', 'Kenzy Pro'));
     const storeAddress = useSettingsStore(selectSetting('store.address', 'Store Address'));
     const storePhone = useSettingsStore(selectSetting('store.phone', ''));
     const storeEmail = useSettingsStore(selectSetting('store.email', ''));

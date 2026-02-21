@@ -376,7 +376,7 @@
         }
     },
     "footer": {
-        "copyright": "© {{year}} SuperMarket Pro. All rights reserved.",
+        "copyright": "© {{year}} Kenzy Pro. All rights reserved.",
         "privacy": "Privacy Policy",
         "terms": "Terms of Service",
         "status": "System Operational"
@@ -926,12 +926,12 @@
         "password_required": "Password is required for new users"
     },
     "onboarding": {
-        "app_name": "SuperMarket Pro Setup",
+        "app_name": "Kenzy Pro Setup",
         "step_welcome": "Welcome",
         "step_store": "Store Info",
         "step_admin": "Admin Account",
         "step_preferences": "Preferences",
-        "welcome_title": "Welcome to SuperMarket Pro",
+        "welcome_title": "Welcome to Kenzy Pro",
         "welcome_subtitle": "Let's set up your store in a few minutes.",
         "store_title": "Store Profile",
         "store_subtitle": "How should your store appear on receipts?",
@@ -1014,7 +1014,7 @@
     "db_init": {
         "initializing": "Initializing System...",
         "please_wait": "Please wait while we prepare the secure database and essential system resources.",
-        "version": "SuperMarket Pro v{{version}}"
+        "version": "Kenzy Pro v{{version}}"
     },
     "customer_modal": {
         "edit_title": "Edit Customer",

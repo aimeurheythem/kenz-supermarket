@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 
-const APP_NAME = 'SuperMarket Pro';
+const APP_NAME = 'Kenzy Pro';
 
 /**
- * Sets document.title to `<pageTitle> — SuperMarket Pro` while
+ * Sets document.title to `<pageTitle> — Kenzy Pro` while
  * the component is mounted, and restores the base title on unmount.
  */
 export function usePageTitle(pageTitle?: string) {

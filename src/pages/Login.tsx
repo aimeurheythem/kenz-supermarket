@@ -190,7 +190,7 @@ export default function Login() {
     const { t } = useTranslation();
     const electron = useElectron();
 
-    // ── window maximized state (for rounded corners + controls)
+    // window maximized state (for rounded corners + controls)
     const [isMaximized, setIsMaximized] = useState(false);
     useEffect(() => {
         electron.isMaximized().then(setIsMaximized);
@@ -200,7 +200,7 @@ export default function Login() {
         document.documentElement.classList.toggle('maximized', isMaximized);
     }, [isMaximized]);
 
-    // â”€â”€ owner form
+    // owner form
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -208,10 +208,10 @@ export default function Login() {
     const [ownerError, setOwnerError] = useState('');
     const [ownerLoading, setOwnerLoading] = useState(false);
 
-    // â”€â”€ tabs
+    // tabs
     const [tab, setTab] = useState<Tab>('owner');
 
-    // â”€â”€ cashier form
+    // cashier form
     const [cashiers, setCashiers] = useState<User[]>([]);
     const [selectedCashier, setSelectedCashier] = useState<User | null>(null);
     const [cashierStep, setCashierStep] = useState<CashierStep>('select');
@@ -220,7 +220,7 @@ export default function Login() {
     const [cashierError, setCashierError] = useState('');
     const [cashierLoading, setCashierLoading] = useState(false);
 
-    // â”€â”€ forgot password dialog
+    // forgot password dialog
     const [showForgotPassword, setShowForgotPassword] = useState(false);
 
     // load cashiers when switching to cashier tab
@@ -243,7 +243,7 @@ export default function Login() {
         setOwnerError('');
     };
 
-    // â”€â”€ owner login
+    // owner login
     const handleOwnerSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setOwnerError('');
@@ -277,7 +277,7 @@ export default function Login() {
         }
     };
 
-    // â”€â”€ cashier: opening cash + start session
+    // cashier: opening cash + start session
     const handleCashSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedCashier) return;
@@ -375,16 +375,11 @@ export default function Login() {
                 />
 
                 {/* Branding */}
-                <div className="relative z-10 flex flex-col items-start pt-12 pb-6 px-10 text-left gap-3">
-                    <div
-                        className="w-14 h-14 rounded-full flex items-center justify-center"
-                        style={{ background: 'var(--accent)' }}
-                    >
-                        <ShoppingCart className="w-7 h-7" style={{ color: '#0f172a' }} strokeWidth={2} />
-                    </div>
-                    <div>
-                        <h1 className="text-slate-800 text-2xl font-bold tracking-tight leading-tight">SuperMarket</h1>
-                        <p className="text-slate-500 text-xs font-medium tracking-widest uppercase mt-1">Pro</p>
+                <div className="relative z-10 flex flex-col items-start pt-12 pb-6 px-10 text-left gap-1">
+                    <img src="/1.svg" alt="Kenzy Pro" className="w-40 h-40" />
+                    <div className="-mt-2">
+                        <h1 className="text-slate-800 text-2xl font-bold tracking-tight leading-tight">Kenzy</h1>
+                        <p className="text-amber-600 text-xs font-bold tracking-widest uppercase mt-0">Pro</p>
                     </div>
                 </div>
 
@@ -428,7 +423,7 @@ export default function Login() {
 
                 {/* Footer */}
                 <div className="relative z-10 px-10 pb-8 text-center">
-                    <p className="text-slate-400 text-xs">© {new Date().getFullYear()} SuperMarket Pro</p>
+                    <p className="text-slate-400 text-xs">© {new Date().getFullYear()} Kenzy Pro</p>
                 </div>
             </div>
 
@@ -438,15 +433,10 @@ export default function Login() {
                 style={{ background: 'transparent' }}
             >
                 {/* Mobile logo */}
-                <div className="lg:hidden flex flex-col items-center gap-3 mb-10">
-                    <div
-                        className="w-14 h-14 rounded-xl flex items-center justify-center"
-                        style={{ background: 'var(--accent)' }}
-                    >
-                        <ShoppingCart className="w-7 h-7" style={{ color: '#0f172a' }} />
-                    </div>
-                    <p className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>
-                        SuperMarket Pro
+                <div className="lg:hidden flex flex-col items-center gap-0 mb-8">
+                    <img src="/1.svg" alt="Kenzy Pro" className="w-16 h-16" />
+                    <p className="font-bold text-base mt-1" style={{ color: 'var(--text-primary)' }}>
+                        Kenzy Pro
                     </p>
                 </div>
 
@@ -916,7 +906,7 @@ export default function Login() {
                 </div>
 
                 <p className="mt-8 text-xs" style={{ color: 'var(--text-placeholder)' }}>
-                    © {new Date().getFullYear()} SuperMarket Pro &nbsp;·&nbsp; v{APP_VERSION}
+                    © {new Date().getFullYear()} Kenzy Pro &nbsp;·&nbsp; v{APP_VERSION}
                 </p>
             </div>
 

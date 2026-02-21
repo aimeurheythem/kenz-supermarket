@@ -376,7 +376,7 @@
         }
     },
     "footer": {
-        "copyright": "© {{year}} SuperMarket Pro. جميع الحقوق محفوظة.",
+        "copyright": "© {{year}} Kenzy Pro. جميع الحقوق محفوظة.",
         "privacy": "سياسة الخصوصية",
         "terms": "شروط الخدمة",
         "status": "النظام يعمل"
@@ -926,12 +926,12 @@
         "password_required": "كلمة المرور مطلوبة للمستخدمين الجدد"
     },
     "onboarding": {
-        "app_name": "إعداد SuperMarket Pro",
+        "app_name": "إعداد Kenzy Pro",
         "step_welcome": "مرحبا",
         "step_store": "معلومات المتجر",
         "step_admin": "حساب المسؤول",
         "step_preferences": "التفضيلات",
-        "welcome_title": "مرحباً بك في SuperMarket Pro",
+        "welcome_title": "مرحباً بك في Kenzy Pro",
         "welcome_subtitle": "لنقم بإعداد متجرك في بضع دقائق.",
         "store_title": "ملف المتجر",
         "store_subtitle": "كيف يجب أن يظهر متجرك على الإيصالات؟",
@@ -1014,7 +1014,7 @@
     "db_init": {
         "initializing": "جاري تهيئة النظام...",
         "please_wait": "يرجى الانتظار بينما نقوم بإعداد قاعدة البيانات والبيانات الأساسية.",
-        "version": "SuperMarket Pro v{{version}}"
+        "version": "Kenzy Pro v{{version}}"
     },
     "customer_modal": {
         "edit_title": "تعديل العميل",

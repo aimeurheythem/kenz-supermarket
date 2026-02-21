@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { EtheralShadow } from '@/components/etheral-shadow';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { Eye, EyeOff, Users, Shield, ShoppingCart, KeyRound, ChevronDown, ArrowLeft, Delete, Minus, Square, X, Copy } from 'lucide-react';
 import { useElectron } from '@/hooks/useElectron';
@@ -289,12 +290,21 @@ export default function Login() {
 
     return (
         <div
-            className="min-h-screen w-full flex overflow-hidden relative"
-            style={{ fontFamily: 'var(--font-primary)', background: 'var(--bg-primary)' }}
+            className="h-screen w-screen flex overflow-hidden relative"
+            style={{ fontFamily: 'var(--font-primary)' }}
         >
+            {/* Background Layer */}
+            <div className="absolute inset-0 z-0 pointer-events-none">
+                <EtheralShadow
+                    color="rgba(15, 23, 42, 0.75)"
+                    animation={{ scale: 30, speed: 10 }}
+                    noise={{ opacity: 0.04, scale: 0.5 }}
+                />
+            </div>
+
             {/* Window Controls */}
             {electron.isElectron && (
-                <div className="fixed top-0 ltr:right-0 rtl:left-0 h-10 flex items-center gap-0.5 px-3 z-[9999]">
+                <div className="fixed top-0 ltr:right-0 rtl:left-0 h-10 flex items-center gap-0.5 px-3 z-[10000]">
                     <button
                         onClick={() => electron.minimize()}
                         className="group flex items-center justify-center w-10 min-h-full hover:bg-black/[0.08] active:bg-black/[0.12] transition-colors duration-200"

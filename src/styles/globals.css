@@ -300,6 +300,28 @@ body,
     border-radius: 12px;
 }
 
+/* Global Draggable Region */
+html {
+    -webkit-app-region: drag;
+}
+
+/* Exclude all interactive elements from dragging so they remain clickable */
+button,
+input,
+textarea,
+select,
+a,
+[role="button"],
+.app-no-drag {
+    -webkit-app-region: no-drag !important;
+}
+
+/* Specific regions that should not be draggable to allow for scrolling/selection */
+main,
+.scrollable {
+    -webkit-app-region: no-drag;
+}
+
 /* Remove rounded corners when maximized — fills the entire screen */
 html.maximized,
 html.maximized body,
@@ -687,6 +709,7 @@ html.maximized #root {
     color: #000 !important;
     border-color: #fde047 !important;
 }
+
 .btn-page-action:hover {
     background-color: #facc15 !important;
 }
@@ -720,14 +743,17 @@ textarea:focus {
     0% {
         transform: translateX(0);
     }
+
     100% {
         transform: translateX(-50%);
     }
 }
+
 @keyframes marquee-right {
     0% {
         transform: translateX(-50%);
     }
+
     100% {
         transform: translateX(0);
     }
@@ -763,7 +789,7 @@ textarea:focus {
     }
 
     /* Hide everything by default when printing */
-    body > *:not(#portal-root) {
+    body>*:not(#portal-root) {
         display: none !important;
     }
 

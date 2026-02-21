@@ -1,8 +1,22 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { EtheralShadow } from '@/components/etheral-shadow';
+import { ShaderBackground } from '@/components/modern-background';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { Eye, EyeOff, Users, Shield, ShoppingCart, KeyRound, ChevronDown, ArrowLeft, Delete, Minus, Square, X, Copy } from 'lucide-react';
+import {
+    Eye,
+    EyeOff,
+    Users,
+    Shield,
+    ShoppingCart,
+    KeyRound,
+    ChevronDown,
+    ArrowLeft,
+    Delete,
+    Minus,
+    Square,
+    X,
+    Copy,
+} from 'lucide-react';
 import { useElectron } from '@/hooks/useElectron';
 import { useTranslation } from 'react-i18next';
 import { UserRepo } from '../../database';
@@ -149,9 +163,9 @@ function TestimonialCard({ name, role, quote }: { name: string; role: string; qu
     return (
         <div
             className="flex-shrink-0 flex flex-col gap-5 w-[220px] rounded-[3rem] px-5.5 py-3.5 select-none"
-            style={{ background: 'rgba(255, 255, 255, 0.15)' }}
+            style={{ background: 'rgba(15, 23, 42, 0.1)' }}
         >
-            <p className="text-white/70 text-xs leading-relaxed">&ldquo;{quote}&rdquo;</p>
+            <p className="text-slate-700 text-xs leading-relaxed">&ldquo;{quote}&rdquo;</p>
             <div className="flex items-center gap-2 mt-1">
                 <div
                     className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
@@ -160,8 +174,8 @@ function TestimonialCard({ name, role, quote }: { name: string; role: string; qu
                     {initials}
                 </div>
                 <div>
-                    <p className="text-white/80 text-[11px] font-semibold leading-none">{name}</p>
-                    <p className="text-white/35 text-[10px] mt-0.5">{role}</p>
+                    <p className="text-slate-800 text-[11px] font-semibold leading-none">{name}</p>
+                    <p className="text-slate-500 text-[10px] mt-0.5">{role}</p>
                 </div>
             </div>
         </div>
@@ -248,7 +262,7 @@ export default function Login() {
         }
     };
 
-    // â”€â”€ cashier: PIN verify
+    // cashier: PIN verify
     const handlePinSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedCashier) return;
@@ -289,17 +303,10 @@ export default function Login() {
     };
 
     return (
-        <div
-            className="h-screen w-screen flex overflow-hidden relative"
-            style={{ fontFamily: 'var(--font-primary)' }}
-        >
+        <div className="h-screen w-screen flex overflow-hidden relative" style={{ fontFamily: 'var(--font-primary)' }}>
             {/* Background Layer */}
             <div className="absolute inset-0 z-0 pointer-events-none">
-                <EtheralShadow
-                    color="rgba(15, 23, 42, 0.75)"
-                    animation={{ scale: 30, speed: 10 }}
-                    noise={{ opacity: 0.04, scale: 0.5 }}
-                />
+                <ShaderBackground />
             </div>
 
             {/* Window Controls */}
@@ -310,7 +317,11 @@ export default function Login() {
                         className="group flex items-center justify-center w-10 min-h-full hover:bg-black/[0.08] active:bg-black/[0.12] transition-colors duration-200"
                         title="Minimize"
                     >
-                        <Minus size={15} strokeWidth={2} className="text-black/40 group-hover:text-black transition-colors" />
+                        <Minus
+                            size={15}
+                            strokeWidth={2}
+                            className="text-black/40 group-hover:text-black transition-colors"
+                        />
                     </button>
                     <button
                         onClick={() => electron.maximize()}
@@ -318,9 +329,17 @@ export default function Login() {
                         title={isMaximized ? 'Restore' : 'Maximize'}
                     >
                         {isMaximized ? (
-                            <Copy size={13} strokeWidth={2} className="text-black/40 group-hover:text-black transition-colors" />
+                            <Copy
+                                size={13}
+                                strokeWidth={2}
+                                className="text-black/40 group-hover:text-black transition-colors"
+                            />
                         ) : (
-                            <Square size={13} strokeWidth={2} className="text-black/40 group-hover:text-black transition-colors" />
+                            <Square
+                                size={13}
+                                strokeWidth={2}
+                                className="text-black/40 group-hover:text-black transition-colors"
+                            />
                         )}
                     </button>
                     <button
@@ -328,30 +347,31 @@ export default function Login() {
                         className="group flex items-center justify-center w-11 min-h-full hover:bg-[#E81123] active:bg-[#AC0F1C] transition-colors duration-200"
                         title="Close"
                     >
-                        <X size={16} strokeWidth={2} className="text-black/40 group-hover:text-white transition-colors" />
+                        <X
+                            size={16}
+                            strokeWidth={2}
+                            className="text-black/40 group-hover:text-white transition-colors"
+                        />
                     </button>
                 </div>
             )}
             {/* LEFT PANEL */}
             {/* ── LEFT PANEL ── */}
-            <div
-                className="hidden lg:flex lg:w-[38%] xl:w-[36%] flex-col relative overflow-hidden m-1.5 rounded-[1.5rem]"
-                style={{ background: 'linear-gradient(160deg, #000000ff 0%, #000000ff 60%, #2e250cff 100%)' }}
-            >
+            <div className="hidden lg:flex lg:w-[38%] xl:w-[36%] flex-col relative overflow-hidden m-1.5 rounded-[1.5rem]">
                 {/* Decorative SVG Elements */}
                 <img
                     src="/element1-nobg.svg"
                     alt=""
                     aria-hidden="true"
                     className="absolute -top-[15%] -right-[15%] w-[65%] pointer-events-none select-none"
-                    style={{ opacity: 0.12, filter: 'blur(1px)' }}
+                    style={{ opacity: 0.15, filter: 'blur(0.5px)' }}
                 />
                 <img
                     src="/element2-nobg.svg"
                     alt=""
                     aria-hidden="true"
                     className="absolute -bottom-[10%] -left-[15%] w-[60%] pointer-events-none select-none"
-                    style={{ opacity: 0.1, filter: 'blur(1px)' }}
+                    style={{ opacity: 0.12, filter: 'blur(0.5px)' }}
                 />
 
                 {/* Branding */}
@@ -363,8 +383,8 @@ export default function Login() {
                         <ShoppingCart className="w-7 h-7" style={{ color: '#0f172a' }} strokeWidth={2} />
                     </div>
                     <div>
-                        <h1 className="text-white text-2xl font-bold tracking-tight leading-tight">SuperMarket</h1>
-                        <p className="text-white/40 text-xs font-medium tracking-widest uppercase mt-1">Pro</p>
+                        <h1 className="text-slate-800 text-2xl font-bold tracking-tight leading-tight">SuperMarket</h1>
+                        <p className="text-slate-500 text-xs font-medium tracking-widest uppercase mt-1">Pro</p>
                     </div>
                 </div>
 
@@ -408,14 +428,14 @@ export default function Login() {
 
                 {/* Footer */}
                 <div className="relative z-10 px-10 pb-8 text-center">
-                    <p className="text-white/20 text-xs">© {new Date().getFullYear()} SuperMarket Pro</p>
+                    <p className="text-slate-400 text-xs">© {new Date().getFullYear()} SuperMarket Pro</p>
                 </div>
             </div>
 
             {/* RIGHT PANEL */}
             <div
-                className="flex-1 flex flex-col items-center justify-center px-6 py-12"
-                style={{ background: 'var(--bg-primary)' }}
+                className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative z-10"
+                style={{ background: 'transparent' }}
             >
                 {/* Mobile logo */}
                 <div className="lg:hidden flex flex-col items-center gap-3 mb-10">
@@ -435,9 +455,10 @@ export default function Login() {
                     className="w-full rounded-2xl p-8"
                     style={{
                         maxWidth: tab === 'cashier' && cashierStep !== 'select' ? '360px' : '360px',
-                        background: '#ffffff',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.06)',
-                        border: '1px solid var(--border-default)',
+                        background: 'rgba(255, 255, 255, 0.85)',
+                        backdropFilter: 'blur(20px)',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                        border: '1px solid rgba(255,255,255,0.5)',
                     }}
                 >
                     {/* Heading */}
@@ -460,10 +481,10 @@ export default function Login() {
                             style={
                                 tab === 'owner'
                                     ? {
-                                        background: '#ffffff',
-                                        color: 'var(--text-primary)',
-                                        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-                                    }
+                                          background: '#ffffff',
+                                          color: 'var(--text-primary)',
+                                          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                                      }
                                     : { color: 'var(--text-muted)' }
                             }
                         >
@@ -477,10 +498,10 @@ export default function Login() {
                             style={
                                 tab === 'cashier'
                                     ? {
-                                        background: '#ffffff',
-                                        color: 'var(--text-primary)',
-                                        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-                                    }
+                                          background: '#ffffff',
+                                          color: 'var(--text-primary)',
+                                          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                                      }
                                     : { color: 'var(--text-muted)' }
                             }
                         >

@@ -297,6 +297,14 @@ body,
     height: 100%;
     width: 100%;
     overflow: hidden;
+    border-radius: 12px;
+}
+
+/* Remove rounded corners when maximized — fills the entire screen */
+html.maximized,
+html.maximized body,
+html.maximized #root {
+    border-radius: 0;
 }
 
 /* =============================================

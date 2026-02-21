@@ -1,7 +1,8 @@
 ﻿import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { Eye, EyeOff, Users, Shield, ShoppingCart, KeyRound, ChevronDown, ArrowLeft, Delete } from 'lucide-react';
+import { Eye, EyeOff, Users, Shield, ShoppingCart, KeyRound, ChevronDown, ArrowLeft, Delete, Minus, Square, X, Copy } from 'lucide-react';
+import { useElectron } from '@/hooks/useElectron';
 import { useTranslation } from 'react-i18next';
 import { UserRepo } from '../../database';
 import type { User } from '@/lib/types';
@@ -172,6 +173,17 @@ export default function Login() {
     const location = useLocation();
     const from = location.state?.from?.pathname || '/';
     const { t } = useTranslation();
+    const electron = useElectron();
+
+    // ── window maximized state (for rounded corners + controls)
+    const [isMaximized, setIsMaximized] = useState(false);
+    useEffect(() => {
+        electron.isMaximized().then(setIsMaximized);
+        electron.onMaximizedChange(setIsMaximized);
+    }, []);
+    useEffect(() => {
+        document.documentElement.classList.toggle('maximized', isMaximized);
+    }, [isMaximized]);
 
     // â”€â”€ owner form
     const [username, setUsername] = useState('');
@@ -277,9 +289,39 @@ export default function Login() {
 
     return (
         <div
-            className="min-h-screen w-full flex overflow-hidden"
+            className="min-h-screen w-full flex overflow-hidden relative"
             style={{ fontFamily: 'var(--font-primary)', background: 'var(--bg-primary)' }}
         >
+            {/* Window Controls */}
+            {electron.isElectron && (
+                <div className="fixed top-0 ltr:right-0 rtl:left-0 h-10 flex items-center gap-0.5 px-3 z-[9999]">
+                    <button
+                        onClick={() => electron.minimize()}
+                        className="group flex items-center justify-center w-10 min-h-full hover:bg-black/[0.08] active:bg-black/[0.12] transition-colors duration-200"
+                        title="Minimize"
+                    >
+                        <Minus size={15} strokeWidth={2} className="text-black/40 group-hover:text-black transition-colors" />
+                    </button>
+                    <button
+                        onClick={() => electron.maximize()}
+                        className="group flex items-center justify-center w-10 min-h-full hover:bg-black/[0.08] active:bg-black/[0.12] transition-colors duration-200"
+                        title={isMaximized ? 'Restore' : 'Maximize'}
+                    >
+                        {isMaximized ? (
+                            <Copy size={13} strokeWidth={2} className="text-black/40 group-hover:text-black transition-colors" />
+                        ) : (
+                            <Square size={13} strokeWidth={2} className="text-black/40 group-hover:text-black transition-colors" />
+                        )}
+                    </button>
+                    <button
+                        onClick={() => electron.close()}
+                        className="group flex items-center justify-center w-11 min-h-full hover:bg-[#E81123] active:bg-[#AC0F1C] transition-colors duration-200"
+                        title="Close"
+                    >
+                        <X size={16} strokeWidth={2} className="text-black/40 group-hover:text-white transition-colors" />
+                    </button>
+                </div>
+            )}
             {/* LEFT PANEL */}
             {/* ── LEFT PANEL ── */}
             <div

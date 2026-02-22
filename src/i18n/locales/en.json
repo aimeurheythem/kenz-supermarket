@@ -312,7 +312,8 @@
             "pay_card": "Card",
             "pay_mobile": "E-Pay",
             "coming_soon": "Coming\nsoon",
-            "empty_alert_hint": "Please add products to the cart before checking out."
+            "empty_alert_hint": "Please add products to the cart before checking out.",
+            "processing": "Processing..."
         },
         "simulation": {
             "printing": "Printing Bill",
@@ -373,6 +374,14 @@
             "products_available": "{{count}} Products Available",
             "low_stock": "Low Stock",
             "only_units_available": "Only {{count}} units of \"{{name}}\" in stock."
+        },
+        "scroll_more": "Scroll to see more",
+        "scan": "Scan",
+        "end_shift": "End Shift",
+        "scan_product": "Scan Product",
+        "print": {
+            "yes": "Receipt",
+            "no": "No Receipt"
         }
     },
     "footer": {

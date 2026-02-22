@@ -1,6 +1,6 @@
 // POS.tsx — Orchestrator
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Search, X, Barcode, LogOut } from 'lucide-react';
+import { Search, X, Barcode, LogOut, Globe } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useProductStore } from '@/stores/useProductStore';
 import { useSaleStore, selectCartTotal } from '@/stores/useSaleStore';
@@ -20,10 +20,11 @@ import ProductGrid from '@/components/POS/ProductGrid';
 import EmptyCartDialog from '@/components/POS/EmptyCartDialog';
 import StockErrorDialog from '@/components/POS/StockErrorDialog';
 import QuickAccessManager from '@/components/POS/QuickAccessManager';
-import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import LogoutConfirmModal from '@/components/layout/LogoutConfirmModal';
 import { toast } from 'sonner';
 import { getProductStyle } from '@/lib/product-styles';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { useLanguageSwitch } from '@/hooks/useLanguageSwitch';
 
 export default function POS() {
     const { t, i18n } = useTranslation();
@@ -55,6 +56,9 @@ export default function POS() {
     const [showScanner, setShowScanner] = useState(false);
     const [showEmptyCartAlert, setShowEmptyCartAlert] = useState(false);
     const [showEndShiftConfirm, setShowEndShiftConfirm] = useState(false);
+    const [showLangMenu, setShowLangMenu] = useState(false);
+    const langMenuRef = useRef<HTMLDivElement>(null);
+    const { languages, currentLang, changeLanguage } = useLanguageSwitch();
 
     const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -88,6 +92,17 @@ export default function POS() {
         loadProducts();
         fetchItems();
     }, [loadProducts, fetchItems]);
+
+    useEffect(() => {
+        if (!showLangMenu) return;
+        const handler = (e: MouseEvent) => {
+            if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
+                setShowLangMenu(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [showLangMenu]);
 
     const filteredProducts = useMemo(
         () =>
@@ -159,7 +174,7 @@ export default function POS() {
         handleFinalizeCheckout();
     }, [cart.length, handleFinalizeCheckout]);
 
-    const confirmEndShift = () => {
+    const confirmEndShift = async () => {
         closeCashierSession(0, 'Shift ended by cashier');
         logout();
         setShowEndShiftConfirm(false);
@@ -246,6 +261,43 @@ export default function POS() {
                                     {t('pos.scan', 'Scan')}
                                 </span>
                             </button>
+
+                            {/* Language Switcher */}
+                            <div className="relative" ref={langMenuRef}>
+                                <button
+                                    onClick={() => setShowLangMenu((v) => !v)}
+                                    className="flex items-center gap-2 px-4 py-2 border border-zinc-200 text-zinc-600 rounded-lg hover:bg-zinc-100 transition-all active:scale-95"
+                                >
+                                    <Globe size={16} />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">
+                                        {currentLang.toUpperCase()}
+                                    </span>
+                                </button>
+                                {showLangMenu && (
+                                    <div className="absolute top-full mt-2 right-0 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 overflow-hidden min-w-[140px]">
+                                        {languages.map((lang) => (
+                                            <button
+                                                key={lang.code}
+                                                onClick={() => {
+                                                    setShowLangMenu(false);
+                                                    changeLanguage(lang.code);
+                                                }}
+                                                className={cn(
+                                                    'w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold transition-colors',
+                                                    currentLang === lang.code
+                                                        ? 'bg-yellow-400 text-black'
+                                                        : 'text-zinc-600 hover:bg-zinc-50',
+                                                )}
+                                            >
+                                                <span className="text-xs font-black tracking-widest">{lang.flag}</span>
+                                                <span style={{ fontFamily: lang.code === 'ar' ? '"Cairo", sans-serif' : 'inherit' }}>
+                                                    {lang.label}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                             <button
                                 onClick={() => setShowEndShiftConfirm(true)}
                                 className="flex items-center gap-2 px-4 py-2 border border-zinc-200 text-zinc-600 rounded-lg hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all active:scale-95"
@@ -348,14 +400,10 @@ export default function POS() {
 
             <EmptyCartDialog isOpen={showEmptyCartAlert} onClose={() => setShowEmptyCartAlert(false)} />
 
-            <ConfirmDialog
+            <LogoutConfirmModal
                 isOpen={showEndShiftConfirm}
                 onClose={() => setShowEndShiftConfirm(false)}
-                onConfirm={confirmEndShift}
-                title="End Shift"
-                description="Are you sure you want to end your shift?"
-                confirmLabel="End Shift"
-                variant="warning"
+                onLogout={confirmEndShift}
             />
         </div>
     );

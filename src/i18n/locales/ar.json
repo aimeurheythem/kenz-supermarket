@@ -312,7 +312,8 @@
             "pay_card": "بطاقة",
             "pay_mobile": "دفع إلكتروني",
             "coming_soon": "قريباً",
-            "empty_alert_hint": "يرجى إضافة منتجات إلى السلة قبل إتمام الطلب."
+            "empty_alert_hint": "يرجى إضافة منتجات إلى السلة قبل إتمام الطلب.",
+            "processing": "جاري المعالجة..."
         },
         "simulation": {
             "printing": "طباعة الفاتورة",
@@ -373,6 +374,14 @@
             "products_available": "{{count}} منتجات متاحة",
             "low_stock": "مخزون منخفض",
             "only_units_available": "يتوفر فقط {{count}} وحدات من \"{{name}}\" في المخزون."
+        },
+        "scroll_more": "مرر لرؤية المزيد",
+        "scan": "مسح ضوئي",
+        "end_shift": "إنهاء الوردية",
+        "scan_product": "مسح المنتج",
+        "print": {
+            "yes": "إيصال",
+            "no": "بدون إيصال"
         }
     },
     "footer": {

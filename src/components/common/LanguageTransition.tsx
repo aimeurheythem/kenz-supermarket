@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useLayoutStore } from '@/stores/useLayoutStore';
 import { useEffect } from 'react';
+import Portal from '@/components/common/Portal';
 
 export default function LanguageTransition() {
     const { t, i18n } = useTranslation();
@@ -17,7 +18,8 @@ export default function LanguageTransition() {
     const isArabic = i18n.language === 'ar';
 
     return (
-        <AnimatePresence>
+        <Portal>
+            <AnimatePresence>
             {isLanguageSwitching && (
                 <motion.div
                     initial={{ opacity: 0 }}
@@ -113,5 +115,6 @@ export default function LanguageTransition() {
                 </motion.div>
             )}
         </AnimatePresence>
+        </Portal>
     );
 }

@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Toaster } from 'sonner';
 import AppShell from './components/layout/AppShell';
+import LanguageTransition from './components/common/LanguageTransition';
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
 import Suppliers from './pages/Suppliers';
@@ -153,6 +154,7 @@ export default function App() {
 
     return (
         <>
+            <LanguageTransition />
             <ErrorBoundary>
                 <Routes>
                     <Route path="/onboarding" element={<Onboarding />} />

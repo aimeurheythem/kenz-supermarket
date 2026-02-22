@@ -312,7 +312,8 @@
             "pay_card": "Carte",
             "pay_mobile": "E-Paiement",
             "coming_soon": "Bientôt\ndispo",
-            "empty_alert_hint": "Veuillez ajouter des produits au panier avant de valider."
+            "empty_alert_hint": "Veuillez ajouter des produits au panier avant de valider.",
+            "processing": "Traitement..."
         },
         "simulation": {
             "printing": "Impression du Ticket",
@@ -373,6 +374,14 @@
             "products_available": "{{count}} Produits Disponibles",
             "low_stock": "Stock Faible",
             "only_units_available": "Seulement {{count}} unités de \"{{name}}\" en stock."
+        },
+        "scroll_more": "Défiler pour voir plus",
+        "scan": "Scanner",
+        "end_shift": "Fin de service",
+        "scan_product": "Scanner un produit",
+        "print": {
+            "yes": "Reçu",
+            "no": "Sans reçu"
         }
     },
     "footer": {

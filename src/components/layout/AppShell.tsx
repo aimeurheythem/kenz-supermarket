@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TitleBar from './TitleBar';
 import Footer from './Footer';
-import LanguageTransition from '../common/LanguageTransition';
 
 interface AppShellProps {
     children: ReactNode;
@@ -15,7 +14,6 @@ export default function AppShell({ children }: AppShellProps) {
 
     return (
         <div className="h-screen w-screen flex overflow-hidden bg-secondary text-secondary selection:bg-accent-light">
-            <LanguageTransition />
             <Sidebar />
             <div className="flex-1 flex flex-col min-w-0 bg-primary overflow-hidden animate-fadeIn relative">
                 {!isPOS && <TitleBar />}

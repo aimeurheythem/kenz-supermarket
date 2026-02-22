@@ -220,8 +220,8 @@ export default function QuickAccess({ user, items, products, cart, addToCart, se
                 </div>
             ) : (
                 // Fallback to instructions if no items configured
-                <div className="col-span-full py-12 border-2 border-dashed border-zinc-100 rounded-[3rem] flex flex-col items-center justify-center text-center space-y-4">
-                    <div className="p-4 bg-zinc-50 rounded-full text-zinc-300">
+                <div className="col-span-full py-12 border-2 border-dashed border-zinc-300 rounded-[3rem] flex flex-col items-center justify-center text-center space-y-4">
+                    <div className="p-4 text-zinc-400">
                         <Zap size={32} />
                     </div>
                     <div>

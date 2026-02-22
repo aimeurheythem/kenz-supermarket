@@ -47,8 +47,8 @@ export default function QuickAccess({ user, items, products, cart, addToCart, se
                 <span className="text-[12px] text-black uppercase tracking-[0.3em] font-bold">
                     {t('pos.quick_access.title')}
                 </span>
-                {user?.role === 'admin' && (
-                    <button
+                {/* Quick Access Manager button — visible to all */}
+                <button
                         onClick={() => setIsManagerOpen(true)}
                         className="group flex items-center gap-0 hover:gap-2 p-2 bg-black hover:bg-yellow-400 cursor-pointer rounded-xl transition-all duration-300 ease-in-out text-white hover:text-black overflow-hidden"
                     >
@@ -57,7 +57,6 @@ export default function QuickAccess({ user, items, products, cart, addToCart, se
                             {t('pos.quick_access.add_customized')}
                         </span>
                     </button>
-                )}
             </div>
 
             {items.length > 0 ? (
@@ -233,14 +232,12 @@ export default function QuickAccess({ user, items, products, cart, addToCart, se
                             {t('pos.quick_access.no_items_hint')}
                         </p>
                     </div>
-                    {user?.role === 'admin' && (
-                        <Button
+                    <Button
                             onClick={() => setIsManagerOpen(true)}
                             className="px-8 h-12"
                         >
                             {t('pos.quick_access.add_first')}
                         </Button>
-                    )}
                 </div>
             )}
         </div>

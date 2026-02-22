@@ -187,6 +187,8 @@ export default function Login() {
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from?.pathname || '/';
+    // Admins/managers should never be sent to /pos (that's cashier-only)
+    const ownerFrom = from === '/pos' ? '/' : from;
     const { t } = useTranslation();
     const electron = useElectron();
 
@@ -251,7 +253,7 @@ export default function Login() {
         try {
             const success = await login(username, password);
             if (success) {
-                navigate(from, { replace: true });
+                navigate(ownerFrom, { replace: true });
             } else {
                 setOwnerError(t('login.errors.invalid_credentials'));
             }

@@ -1,6 +1,7 @@
-import { ShoppingCart, Trash2, CreditCard, Banknote, Smartphone, X, Printer, Wallet } from 'lucide-react';
+import { ShoppingCart, Trash2, CreditCard, Banknote, Smartphone, X, Printer, Wallet, ChevronsDown } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import CustomerSelector from '@/components/POS/CustomerSelector';
 import type { CartItem, Customer } from '@/lib/types';
@@ -38,14 +39,25 @@ export default function CartPanel({
     getProductStyle,
 }: CartPanelProps) {
     const { t } = useTranslation();
+    const [canScrollMore, setCanScrollMore] = useState(false);
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+        const check = () => setCanScrollMore(el.scrollTop + el.clientHeight < el.scrollHeight - 20);
+        // Use a small timeout to let the DOM paint before measuring
+        const id = setTimeout(check, 50);
+        return () => clearTimeout(id);
+    }, [cart]);
 
     return (
-        <div className="relative z-10 w-full lg:w-[450px] lg:sticky lg:top-8 flex flex-col bg-white rounded-[3rem] border-2 border-gray-200 shadow-none overflow-hidden">
-            <div className="p-10 pb-0">
-                <div className="mb-6">
+        <div className="relative z-10 w-full h-full flex flex-col bg-white overflow-hidden">
+            <div className="p-6 pb-0">
+                <div className="mb-4">
                     <CustomerSelector selectedCustomer={selectedCustomer} onSelect={setSelectedCustomer} />
                 </div>
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-5">
                     <div className="flex flex-col gap-1">
                         <span className="text-[10px] text-zinc-400 uppercase tracking-[0.2em] font-bold">
                             {t('pos.cart.new_order')}
@@ -72,7 +84,16 @@ export default function CartPanel({
                 </div>
             </div>
 
-            <div className="px-10 space-y-4">
+            <div className="relative h-0 grow overflow-hidden">
+                <div
+                    ref={scrollRef}
+                    className="h-full overflow-y-auto scrollable scrollbar-hide px-6 space-y-4"
+                    style={{ touchAction: 'pan-y' }}
+                    onScroll={(e) => {
+                        const el = e.currentTarget;
+                        setCanScrollMore(el.scrollTop + el.clientHeight < el.scrollHeight - 20);
+                    }}
+                >
                 {cart.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center space-y-4 opacity-10">
                         <ShoppingCart size={80} className="text-black" strokeWidth={1} />
@@ -95,29 +116,51 @@ export default function CartPanel({
                                         <span className="text-sm font-black text-black uppercase tracking-tight truncate">
                                             {item.product.name}
                                         </span>
-                                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                                        <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
                                             {formatCurrency(item.product.selling_price)}
                                         </span>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm font-black text-black tracking-tighter">
+                                <div className="flex items-center gap-3">
+                                    <span className="text-base font-black text-black tracking-tighter">
                                         {formatCurrency(item.product.selling_price * item.quantity)}
                                     </span>
                                     <button
                                         onClick={() => removeFromCart(item.product.id)}
-                                        className="p-1.5 text-zinc-300 hover:text-red-500 transition-colors"
+                                        className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl bg-red-50 text-red-400 hover:bg-red-500 hover:text-white active:scale-95 transition-all duration-200"
                                     >
-                                        <X size={14} />
+                                        <Trash2 size={18} strokeWidth={2.5} />
                                     </button>
                                 </div>
                             </div>
                         ))}
                     </div>
                 )}
+                </div>
+
+                {/* Fade overlay + scroll hint */}
+                {cart.length > 0 && (
+                    <div
+                        className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none transition-opacity duration-300"
+                        style={{ opacity: canScrollMore ? 1 : 0 }}
+                    >
+                        <div
+                            className="h-24"
+                            style={{
+                                background: 'linear-gradient(to top, #ffffff 0%, #ffffff 10%, rgba(255,255,255,0) 100%)',
+                            }}
+                        />
+                        <div className="absolute bottom-3 left-0 right-0 flex flex-col items-center gap-1">
+                            <ChevronsDown size={14} className="text-zinc-400 animate-bounce" />
+                            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-[0.25em]">
+                                {t('pos.scroll_more', 'Scroll to see more')}
+                            </span>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            <div className="p-10 pt-6 space-y-8 bg-zinc-50/50">
+            <div className="p-6 pt-4 space-y-5 bg-zinc-50/50">
                 <div className="space-y-4">
                     <div className="flex items-center justify-between text-[10px] font-black text-zinc-400 uppercase tracking-widest">
                         <span>{t('pos.cart.subtotal')}</span>
@@ -148,13 +191,13 @@ export default function CartPanel({
                             key={method.key}
                             onClick={() => setPaymentMethod(method.key)}
                             className={cn(
-                                'flex-1 flex flex-col items-center gap-3 py-5 rounded-[2rem] transition-all duration-300 relative group overflow-hidden',
+                                'flex-1 flex flex-col items-center gap-2 py-3 rounded-[1.5rem] transition-all duration-300 relative group overflow-hidden',
                                 paymentMethod === method.key
                                     ? 'bg-yellow-400 text-black'
                                     : 'bg-zinc-100 text-zinc-400 hover:bg-zinc-200',
                             )}
                         >
-                            <method.icon size={24} strokeWidth={paymentMethod === method.key ? 3 : 2.5} />
+                            <method.icon size={18} strokeWidth={paymentMethod === method.key ? 3 : 2.5} />
                             <span
                                 className={cn(
                                     'text-[10px] font-black uppercase tracking-widest transition-opacity',
@@ -204,7 +247,7 @@ export default function CartPanel({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className={cn(
-                        'w-full py-6 rounded-[2.5rem] font-black text-sm uppercase tracking-[0.3em] transition-all',
+                        'w-full py-4 rounded-[2rem] font-black text-sm uppercase tracking-[0.3em] transition-all',
                         isCheckingOut || cart.length === 0
                             ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed shadow-none'
                             : 'bg-yellow-400 text-black hover:bg-yellow-300 shadow-xl shadow-yellow-400/20',

@@ -158,6 +158,21 @@ export default function App() {
                     <Route path="/onboarding" element={<Onboarding />} />
                     <Route path="/login" element={<Login />} />
 
+                    {/* POS - No Sidebar */}
+                    <Route
+                        path="/pos"
+                        element={
+                            <RequireAuth>
+                                <RequirePermission permission="use_pos">
+                                    <div className="h-screen w-screen overflow-hidden bg-primary">
+                                        <POS />
+                                    </div>
+                                </RequirePermission>
+                            </RequireAuth>
+                        }
+                    />
+
+                    {/* Main App with Sidebar */}
                     <Route
                         path="/*"
                         element={
@@ -165,16 +180,6 @@ export default function App() {
                                 <ErrorBoundary>
                                     <AppShell>
                                         <Routes>
-                                            {/* Cashier-only routes */}
-                                            <Route
-                                                path="/pos"
-                                                element={
-                                                    <RequirePermission permission="use_pos">
-                                                        <POS />
-                                                    </RequirePermission>
-                                                }
-                                            />
-
                                             {/* Admin/Manager routes */}
                                             <Route
                                                 path="/"

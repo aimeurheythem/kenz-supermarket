@@ -1,6 +1,6 @@
 // POS.tsx — Orchestrator
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Search, X, Barcode } from 'lucide-react';
+import { Search, X, Barcode, LogOut } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useProductStore } from '@/stores/useProductStore';
 import { useSaleStore, selectCartTotal } from '@/stores/useSaleStore';
@@ -40,7 +40,7 @@ export default function POS() {
         isLoading: isCheckingOut,
     } = useSaleStore();
     const cartTotal = useSaleStore(selectCartTotal);
-    const { user, currentSession, getCurrentSessionId, closeCashierSession } = useAuthStore();
+    const { user, currentSession, getCurrentSessionId, closeCashierSession, logout } = useAuthStore();
     const { items: quickAccessItems, fetchItems, addItem, updateItem, deleteItem } = useQuickAccessStore();
 
     const [searchQuery, setSearchQuery] = useState('');
@@ -81,7 +81,7 @@ export default function POS() {
             },
             [barcodeMap, addToCart, t],
         ),
-        !showScanner, // disable hardware scanner while camera scanner is open
+        !showScanner,
     );
 
     useEffect(() => {
@@ -161,156 +161,160 @@ export default function POS() {
 
     const confirmEndShift = () => {
         closeCashierSession(0, 'Shift ended by cashier');
+        logout();
         setShowEndShiftConfirm(false);
     };
 
-    const handleScan = useCallback(async (code: string) => {
-        // In-memory lookup first (instant), fallback to DB if products not loaded yet
-        const product = barcodeMap.get(code) ?? await getByBarcode(code);
-        if (product) {
-            await addToCart({ product, quantity: 1, discount: 0 });
-            setShowScanner(false);
-            toast.success(product.name, { description: t('pos.scan.added', 'Added to cart'), duration: 1500 });
-        } else {
-            toast.warning(t('pos.scan.not_found', 'Product not found with barcode: ') + code);
-        }
-    }, [barcodeMap, getByBarcode, addToCart, t]);
+    const handleScan = useCallback(
+        async (code: string) => {
+            const product = barcodeMap.get(code) ?? (await getByBarcode(code));
+            if (product) {
+                await addToCart({ product, quantity: 1, discount: 0 });
+                setShowScanner(false);
+                toast.success(product.name, { description: t('pos.scan.added', 'Added to cart'), duration: 1500 });
+            } else {
+                toast.warning(t('pos.scan.not_found', 'Product not found with barcode: ') + code);
+            }
+        },
+        [barcodeMap, getByBarcode, addToCart, t],
+    );
 
     return (
-        <div className="relative flex flex-col lg:flex-row items-start gap-8 p-6 lg:p-8 animate-fadeIn mt-4">
-            {/* Grid Background */}
+        <div className="relative h-full w-full flex flex-col animate-fadeIn bg-primary overflow-hidden">
+            {/* Grid Background — solid at the top, fades to transparent mid-page */}
             <div
-                className="absolute inset-0 pointer-events-none opacity-[0.15] rounded-[3rem]"
+                className="absolute inset-0 pointer-events-none -z-10"
                 style={{
-                    backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 1px, transparent 1px)`,
-                    backgroundSize: '32px 32px',
-                    maskImage: 'radial-gradient(circle at top center, black, transparent 90%)',
-                    WebkitMaskImage: 'radial-gradient(circle at top center, black, transparent 90%)',
+                    backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px)`,
+                    backgroundSize: '40px 40px',
+                    maskImage: 'linear-gradient(to bottom, black 0%, black 20%, transparent 65%)',
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 20%, transparent 65%)',
                 }}
             />
 
-            {/* Left Column: Product Selection */}
-            <div className="relative z-10 flex-1 flex flex-col min-w-0">
-                {/* Header Section */}
-                <div className="flex flex-col space-y-6 pb-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[12px] text-zinc-400 tracking-[0.3em] font-bold">
+            {/* Main Content Area */}
+            <div className="h-0 grow flex flex-row overflow-hidden">
+                {/* LEFT: Products Section */}
+                <div className="flex-1 flex flex-col min-w-0 overflow-hidden p-4 xl:p-6">
+                    {/* Header */}
+                    <div className="flex flex-row items-center justify-between gap-4 mb-4">
+                        <div className="flex flex-col gap-1 shrink-0">
+                            <span className="text-[10px] text-zinc-400 tracking-[0.3em] font-bold">
                                 {t('pos.system')}
                             </span>
-                            <h2 className="text-3xl font-black text-black tracking-tighter uppercase">
+                            <h2 className="text-2xl sm:text-3xl font-black text-black tracking-tighter uppercase">
                                 {t('pos.title')}
                             </h2>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3 flex-1 justify-end">
+                            {/* Inline Search */}
+                            <div className="relative flex-1 max-w-sm">
+                                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                                <input
+                                    ref={searchInputRef}
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder={t('pos.search_placeholder')}
+                                    className="w-full pl-9 pr-8 py-2.5 rounded-xl bg-white border border-zinc-200 text-black placeholder:text-zinc-300 text-sm font-bold focus:outline-none focus:border-zinc-400 transition-colors"
+                                />
+                                {searchQuery && (
+                                    <motion.button
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        onClick={() => setSearchQuery('')}
+                                        className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full bg-zinc-100 text-zinc-400 hover:bg-black hover:text-white transition-all"
+                                    >
+                                        <X size={12} strokeWidth={3} />
+                                    </motion.button>
+                                )}
+                            </div>
                             {currentSession?.session && (
-                                <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full border-0 shadow-none transition-all hover:bg-zinc-50 group">
+                                <div className="hidden sm:flex items-center gap-2">
                                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                    <span className="text-[10px] font-black text-black uppercase tracking-widest">
+                                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
                                         {user?.full_name}
                                     </span>
                                 </div>
                             )}
                             <button
                                 onClick={() => setShowScanner(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-md border border-black shadow-lg shadow-black/20 hover:bg-neutral-800 transition-all active:scale-95"
+                                className="flex items-center gap-2 px-4 py-2 border border-zinc-200 text-zinc-600 rounded-lg hover:bg-zinc-100 transition-all active:scale-95"
                             >
                                 <Barcode size={16} />
                                 <span className="text-[10px] font-black uppercase tracking-widest">
                                     {t('pos.scan', 'Scan')}
                                 </span>
                             </button>
+                            <button
+                                onClick={() => setShowEndShiftConfirm(true)}
+                                className="flex items-center gap-2 px-4 py-2 border border-zinc-200 text-zinc-600 rounded-lg hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all active:scale-95"
+                            >
+                                <LogOut size={16} />
+                                <span className="text-[10px] font-black uppercase tracking-widest">
+                                    {t('pos.end_shift', 'End Shift')}
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Products Scrollable Area */}
+                    <div className="h-0 grow overflow-y-auto scrollable scrollbar-hide" style={{ touchAction: 'pan-y' }}>
+                        <div className="space-y-6 pb-4">
+                            {!searchQuery && (
+                                <InventoryPreview
+                                    products={products}
+                                    cart={cart}
+                                    formatCurrency={formatCurrency}
+                                    i18n={i18n}
+                                    handleAddProduct={handleAddProduct}
+                                />
+                            )}
+
+                            {!searchQuery && (
+                                <QuickAccess
+                                    user={user}
+                                    items={quickAccessItems}
+                                    products={products}
+                                    cart={cart}
+                                    addToCart={addToCart}
+                                    setIsManagerOpen={setIsManagerOpen}
+                                />
+                            )}
+
+                            {searchQuery && (
+                                <ProductGrid
+                                    products={filteredProducts}
+                                    cart={cart}
+                                    handleAddProduct={handleAddProduct}
+                                    getProductStyle={getProductStyle}
+                                    formatCurrency={formatCurrency}
+                                    searchQuery={searchQuery}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>
 
-                {/* Search Bar */}
-                <div className="relative group">
-                    <Search
-                        size={22}
-                        className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-black transition-colors"
+                {/* RIGHT: Cart Sidebar — 30% full height */}
+                <div className="w-[30%] h-full shrink-0 flex flex-col border-l border-zinc-200">
+                    <CartPanel
+                        cart={cart}
+                        cartTotal={cartTotal}
+                        clearCart={clearCart}
+                        removeFromCart={removeFromCart}
+                        paymentMethod={paymentMethod}
+                        setPaymentMethod={setPaymentMethod}
+                        selectedCustomer={selectedCustomer}
+                        setSelectedCustomer={setSelectedCustomer}
+                        printReceipt={printReceipt}
+                        setPrintReceipt={setPrintReceipt}
+                        handleBeforeCheckout={handleBeforeCheckout}
+                        isCheckingOut={isCheckingOut}
+                        getProductStyle={getProductStyle}
                     />
-                    <input
-                        ref={searchInputRef}
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder={t('pos.search_placeholder')}
-                        className={cn(
-                            'w-full pl-16 pr-16 py-5 rounded-[2.5rem]',
-                            'bg-white border border-zinc-200 shadow-none',
-                            'text-black placeholder:text-zinc-300 text-lg font-bold',
-                            'focus:outline-none focus:ring-0 focus:!outline-none focus-visible:!outline-none focus-visible:ring-0 focus:border-zinc-400 transition-all placeholder:transition-opacity focus:placeholder:opacity-50',
-                        )}
-                    />
-                    {searchQuery && (
-                        <motion.button
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            onClick={() => {
-                                setSearchQuery('');
-                                searchInputRef.current?.focus();
-                            }}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-zinc-100 text-zinc-400 hover:bg-black hover:text-white transition-all duration-300"
-                        >
-                            <X size={16} strokeWidth={3} />
-                        </motion.button>
-                    )}
-                </div>
-
-                {/* Product Grid Area */}
-                <div className="space-y-12 w-full mt-8">
-                    {!searchQuery && (
-                        <InventoryPreview
-                            products={products}
-                            cart={cart}
-                            formatCurrency={formatCurrency}
-                            i18n={i18n}
-                            handleAddProduct={handleAddProduct}
-                        />
-                    )}
-
-                    {!searchQuery && (
-                        <QuickAccess
-                            user={user}
-                            items={quickAccessItems}
-                            products={products}
-                            cart={cart}
-                            addToCart={addToCart}
-                            setIsManagerOpen={setIsManagerOpen}
-                        />
-                    )}
-
-                    {searchQuery && (
-                        <ProductGrid
-                            products={filteredProducts}
-                            cart={cart}
-                            handleAddProduct={handleAddProduct}
-                            getProductStyle={getProductStyle}
-                            formatCurrency={formatCurrency}
-                            searchQuery={searchQuery}
-                        />
-                    )}
                 </div>
             </div>
-
-            {/* Right Column: Cart Panel */}
-            <CartPanel
-                cart={cart}
-                cartTotal={cartTotal}
-                clearCart={clearCart}
-                removeFromCart={removeFromCart}
-                paymentMethod={paymentMethod}
-                setPaymentMethod={setPaymentMethod}
-                selectedCustomer={selectedCustomer}
-                setSelectedCustomer={setSelectedCustomer}
-                printReceipt={printReceipt}
-                setPrintReceipt={setPrintReceipt}
-                handleBeforeCheckout={handleBeforeCheckout}
-                isCheckingOut={isCheckingOut}
-                getProductStyle={getProductStyle}
-            />
 
             {/* Modals */}
             {showSimulation && <CheckoutSimulation total={cartTotal} onComplete={handleFinalizeCheckout} />}

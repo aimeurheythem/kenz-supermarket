@@ -311,7 +311,7 @@ input,
 textarea,
 select,
 a,
-[role="button"],
+[role='button'],
 .app-no-drag {
     -webkit-app-region: no-drag !important;
 }
@@ -760,8 +760,52 @@ textarea:focus {
 }
 
 /* =============================================
-   DISABLED STATES
-   ============================================= */
+    RESPONSIVE UTILITIES
+    ============================================= */
+
+/* Responsive text utilities */
+@media (max-width: 640px) {
+    .text-balance {
+        text-wrap: balance;
+    }
+}
+
+/* Hide scrollbar but allow scrolling on mobile */
+.scrollbar-touch {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-touch::-webkit-scrollbar {
+    display: none;
+}
+
+/* Touch-friendly tap targets */
+@media (pointer: coarse) {
+    .tap-target {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* Responsive grid helpers */
+.grid-responsive {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+}
+
+/* Force horizontal scroll on tables */
+.table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll table {
+    min-width: 600px;
+}
+
+/* =============================================
+    DISABLED STATES
+    ============================================= */
 .disabled,
 [disabled] {
     opacity: 0.5;
@@ -789,7 +833,7 @@ textarea:focus {
     }
 
     /* Hide everything by default when printing */
-    body>*:not(#portal-root) {
+    body > *:not(#portal-root) {
         display: none !important;
     }
 

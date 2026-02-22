@@ -41,7 +41,7 @@ export default function InventoryGrid({
                         key={product.id}
                         layout
                         className={cn(
-                            'group relative flex flex-col p-5 rounded-[3rem] bg-white transition-all overflow-visible',
+                            'group relative flex flex-col p-3 sm:p-5 rounded-2xl sm:rounded-[3rem] bg-white transition-all overflow-visible',
                             isOutStock
                                 ? 'border-2 border-red-400/50'
                                 : isLowStock
@@ -50,11 +50,11 @@ export default function InventoryGrid({
                         )}
                     >
                         {/* Header Row: Icon + Title + Actions */}
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-4 overflow-hidden">
+                        <div className="flex items-start justify-between mb-3 sm:mb-4">
+                            <div className="flex items-center gap-2 sm:gap-4 overflow-hidden">
                                 {/* Icon - No Background */}
-                                <div className="w-14 h-14 rounded-[1.2rem] bg-gray-50 flex items-center justify-center shrink-0">
-                                    <ShoppingBag size={24} className="text-black" />
+                                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-[1.2rem] bg-gray-50 flex items-center justify-center shrink-0">
+                                    <ShoppingBag size={20} className="text-black" />
                                 </div>
 
                                 {/* Title & Category */}

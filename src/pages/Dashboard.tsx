@@ -136,9 +136,9 @@ export default function Dashboard() {
     const displayUser = selectedCashier || authUser;
 
     return (
-        <div className="space-y-8 animate-fadeIn pb-12 h-full flex flex-col mt-8">
+        <div className="space-y-4 sm:space-y-6 lg:space-y-8 animate-fadeIn pb-8 sm:pb-12 h-full flex flex-col mt-4 sm:mt-8">
             {/* NEW: Welcome Card (Full Width) */}
-            <div className="relative overflow-hidden bg-white border-2 border-gray-200 p-8 rounded-[4rem] animate-fadeIn flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all duration-300">
+            <div className="relative overflow-hidden bg-white border-2 border-gray-200 p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-[4rem] animate-fadeIn flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 transition-all duration-300">
                 {/* Grid Background */}
                 <div
                     className="absolute inset-0 pointer-events-none opacity-40"
@@ -151,28 +151,30 @@ export default function Dashboard() {
                 />
 
                 <div className="relative z-10 flex flex-col gap-1">
-                    <div className="flex items-center gap-3">
-                        <span className="text-[15px] text-black uppercase tracking-[0.3em] mb-1">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <span className="text-[12px] sm:text-[15px] text-black uppercase tracking-[0.3em] mb-1">
                             {t('dashboard.decorative_label')}
                         </span>
                         <CashierSelector selectedCashier={selectedCashier} onSelect={setSelectedCashier} />
                     </div>
-                    <h2 className="text-3xl font-bold text-black tracking-tight font-sans flex items-center gap-3">
+                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-black tracking-tight font-sans flex items-center gap-2 sm:gap-3">
                         {getGreeting()}, {displayUser?.full_name || 'User'}!
-                        <div className="bg-yellow-100 p-2 rounded-full transform hover:rotate-12 transition-transform duration-300">
-                            <Hand className="w-8 h-8 text-yellow-500 rotate-[20deg]" strokeWidth={2.5} />
+                        <div className="bg-yellow-100 p-1.5 sm:p-2 rounded-full transform hover:rotate-12 transition-transform duration-300">
+                            <Hand className="w-5 h-5 sm:w-8 sm:h-8 text-yellow-500 rotate-[20deg]" strokeWidth={2.5} />
                         </div>
                     </h2>
-                    <p className="text-zinc-500 text-sm font-medium">{t('dashboard.welcome_card.message')}</p>
+                    <p className="text-zinc-500 text-xs sm:text-sm font-medium">
+                        {t('dashboard.welcome_card.message')}
+                    </p>
                 </div>
 
                 {/* Right Side Content: Minimal Date/Time */}
-                <div className="relative z-10 flex items-center gap-6">
+                <div className="relative z-10 flex items-center gap-4 sm:gap-6">
                     <div className="flex flex-col items-end">
                         <span className="text-[10px] uppercase tracking-[0.2em] text-black">
                             {t('dashboard.welcome_card.current_time')}
                         </span>
-                        <div className="text-2xl text-black font-sans py-1">
+                        <div className="text-lg sm:text-2xl text-black font-sans py-1">
                             {new Date().toLocaleTimeString(i18n.language, {
                                 hour: '2-digit',
                                 minute: '2-digit',
@@ -198,18 +200,18 @@ export default function Dashboard() {
             </div>
 
             {/* Main Layout Grid: 70% Left, 30% Right */}
-            <div className="grid grid-cols-1 xl:grid-cols-10 gap-6 flex-1 min-h-0">
+            <div className="grid grid-cols-1 lg:grid-cols-10 gap-4 sm:gap-6 flex-1 min-h-0">
                 {/* LEFT SECTION (70%) */}
-                <div className="xl:col-span-7 space-y-6 flex flex-col">
+                <div className="lg:col-span-7 space-y-4 sm:space-y-6 flex flex-col">
                     {/* 1. Recent Sales */}
                     <RecentSales />
 
                     {/* 2. Shortcuts Grid (Moved here) */}
-                    <div className="flex flex-col gap-4">
-                        <h3 className="text-xl font-bold text-black tracking-tight">
+                    <div className="flex flex-col gap-3 sm:gap-4">
+                        <h3 className="text-lg sm:text-xl font-bold text-black tracking-tight">
                             {t('dashboard.shortcuts.title')}
                         </h3>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                             {shortcuts.map((shortcut) => (
                                 <div
                                     key={shortcut.label}
@@ -242,11 +244,11 @@ export default function Dashboard() {
                     {/* 2. Sales Analytics Section */}
                     <SalesAnalytics userId={cashierUserId} />
                 </div>
-                <div className="xl:col-span-3 h-full flex flex-col gap-6">
+                <div className="lg:col-span-3 h-full flex flex-col gap-4 sm:gap-6">
                     {/* Revenue, Profit & Stock Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-1 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3 sm:gap-6">
                         {/* Revenue Card */}
-                        <motion.div className="bg-white border-2 border-black/10 flex flex-col justify-between aspect-[2/1] md:aspect-auto md:h-40 p-6 rounded-[2.5rem] relative overflow-hidden group cursor-pointer">
+                        <motion.div className="bg-white border-2 border-black/10 flex flex-col justify-between aspect-[2/1] sm:aspect-[2/1] lg:aspect-[2/1] xl:h-40 p-4 sm:p-6 rounded-2xl sm:rounded-[2.5rem] relative overflow-hidden group cursor-pointer">
                             <div className="flex items-center justify-between relative z-10">
                                 <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                                     {t('dashboard.stats.today_revenue')}
@@ -258,7 +260,7 @@ export default function Dashboard() {
 
                             <div className="relative z-10">
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-3xl font-black text-black tracking-tighter">
+                                    <span className="text-2xl sm:text-3xl font-black text-black tracking-tighter">
                                         {formatCurrency(totalRevenue, false)}
                                     </span>
                                     <span className="text-[10px] font-bold text-zinc-400 uppercase">
@@ -269,7 +271,7 @@ export default function Dashboard() {
                         </motion.div>
 
                         {/* Net Profit Card */}
-                        <motion.div className="bg-black text-white flex flex-col justify-between aspect-[2/1] md:aspect-auto md:h-40 p-6 rounded-[2.5rem] relative overflow-hidden group cursor-pointer">
+                        <motion.div className="bg-black text-white flex flex-col justify-between aspect-[2/1] sm:aspect-[2/1] lg:aspect-[2/1] xl:h-40 p-4 sm:p-6 rounded-2xl sm:rounded-[2.5rem] relative overflow-hidden group cursor-pointer">
                             <div className="absolute top-0 right-0 p-16 bg-zinc-800 rounded-full blur-2xl opacity-20 -translate-y-1/2 translate-x-1/2" />
 
                             <div className="flex items-center justify-between relative z-10">
@@ -283,7 +285,7 @@ export default function Dashboard() {
 
                             <div className="relative z-10">
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-3xl font-black text-white tracking-tighter">
+                                    <span className="text-2xl sm:text-3xl font-black text-white tracking-tighter">
                                         {formatCurrency(netProfit, false)}
                                     </span>
                                     <span className="text-[10px] font-bold text-zinc-500 uppercase">
@@ -303,7 +305,7 @@ export default function Dashboard() {
                         </motion.div>
 
                         {/* Stock Card */}
-                        <motion.div className="bg-yellow-300 border-2 border-black/10 flex flex-col justify-between aspect-[2/1] md:aspect-auto md:h-40 p-6 rounded-[2.5rem] relative overflow-hidden group cursor-pointer">
+                        <motion.div className="bg-yellow-300 border-2 border-black/10 flex flex-col justify-between aspect-[2/1] sm:aspect-[2/1] lg:aspect-[2/1] xl:h-40 p-4 sm:p-6 rounded-2xl sm:rounded-[2.5rem] relative overflow-hidden group cursor-pointer">
                             <div className="flex items-center justify-between relative z-10">
                                 <span className="text-[10px] font-bold text-black/60 uppercase tracking-widest">
                                     {t('dashboard.stats.total_products')}
@@ -315,7 +317,7 @@ export default function Dashboard() {
 
                             <div className="relative z-10">
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-3xl font-black text-black tracking-tighter">
+                                    <span className="text-2xl sm:text-3xl font-black text-black tracking-tighter">
                                         {totalProducts.toLocaleString()}
                                     </span>
                                     <span className="text-[10px] font-bold text-black/60 uppercase">Items</span>
@@ -330,7 +332,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* Unified Top Products Carousel Card */}
-                    <div className="rounded-[3rem] p-8 min-h-[400px] flex-1 flex flex-col relative overflow-hidden transition-all duration-700">
+                    <div className="rounded-2xl sm:rounded-[3rem] p-4 sm:p-6 lg:p-8 min-h-[300px] sm:min-h-[400px] flex-1 flex flex-col relative overflow-hidden transition-all duration-700">
                         {/* Dynamic Background Overlays */}
                         {topProducts.length > 0 ? (
                             topProducts.map((product, idx) => (
@@ -347,9 +349,9 @@ export default function Dashboard() {
                             <div className="absolute inset-0 bg-zinc-100" />
                         )}
 
-                        <div className="flex items-start justify-between mb-8 relative z-20">
+                        <div className="flex items-start justify-between mb-4 sm:mb-8 relative z-20">
                             <div>
-                                <h2 className="text-[2rem] font-bold text-black uppercase tracking-tight leading-none">
+                                <h2 className="text-xl sm:text-2xl lg:text-[2rem] font-bold text-black uppercase tracking-tight leading-none">
                                     {t('dashboard.top_performance.title')}
                                 </h2>
                                 <p className="text-[9px] text-black/40 uppercase tracking-[0.2em] mt-2">
@@ -374,28 +376,30 @@ export default function Dashboard() {
                                         )}
                                     >
                                         {/* Rank Badge + Icon */}
-                                        <div className="mb-4 relative">
+                                        <div className="mb-2 sm:mb-4 relative">
                                             <Award
-                                                size={150}
+                                                size={100}
                                                 className={cn(RANK_COLORS[idx]?.iconColor ?? 'text-zinc-400', 'filter')}
                                             />
-                                            <div className="absolute inset-0 flex items-center justify-center mb-10">
-                                                <span className="text-5xl font-black text-black/20">#{idx + 1}</span>
+                                            <div className="absolute inset-0 flex items-center justify-center mb-8 sm:mb-10">
+                                                <span className="text-3xl sm:text-5xl font-black text-black/20">
+                                                    #{idx + 1}
+                                                </span>
                                             </div>
                                         </div>
 
                                         {/* Product Info */}
                                         <div className="text-center">
-                                            <h3 className="text-4xl font-black text-black tracking-tight mb-4">
+                                            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-black tracking-tight mb-2 sm:mb-4">
                                                 {product.name}
                                             </h3>
-                                            <div className="flex flex-col items-center gap-2">
-                                                <div className="px-6 py-2">
-                                                    <span className="text-3xl text-black">
+                                            <div className="flex flex-col items-center gap-1 sm:gap-2">
+                                                <div className="px-4 sm:px-6 py-1 sm:py-2">
+                                                    <span className="text-xl sm:text-2xl lg:text-3xl text-black">
                                                         +{formatCurrency(product.profit, false)} {getCurrencySymbol()}
                                                     </span>
                                                 </div>
-                                                <span className="text-xs text-black/50 uppercase tracking-widest mt-2">
+                                                <span className="text-xs text-black/50 uppercase tracking-widest mt-1 sm:mt-2">
                                                     {t('dashboard.top_performance.monthly_profit')}
                                                 </span>
                                                 <span className="text-[10px] text-black/30 uppercase tracking-wider">

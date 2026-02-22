@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
     LayoutDashboard,
-    ShoppingCart,
     Package,
     ClipboardList,
     Truck,
@@ -46,12 +45,6 @@ export default function Sidebar() {
         {
             title: t('sidebar.operations') || 'Operations',
             items: [
-                {
-                    label: t('sidebar.pos_sales'),
-                    path: '/pos',
-                    icon: ShoppingCart,
-                    roles: ['admin', 'manager', 'cashier'],
-                },
                 { label: t('sidebar.inventory'), path: '/inventory', icon: Package, roles: ['admin', 'manager'] },
                 { label: t('sidebar.barcodes'), path: '/barcodes', icon: ScanBarcode, roles: ['admin', 'manager'] },
                 { label: t('sidebar.stock_control'), path: '/stock', icon: ClipboardList, roles: ['admin', 'manager'] },
@@ -111,8 +104,8 @@ export default function Sidebar() {
                 )}
             >
                 <div className="flex items-center gap-0">
-                    <div className="w-20 h-20 rounded-xl bg-transparent flex items-center justify-center shrink-0">
-                        <img src="/1.svg" alt="Kenzy Pro" className="w-20 h-20" />
+                    <div className="shrink-0">
+                        <img src="/1.svg" alt="Kenzy Pro" className="w-20 h-20" style={{ background: 'none', backgroundColor: 'transparent', mixBlendMode: 'multiply' }} />
                     </div>
                     {!collapsed && (
                         <motion.div

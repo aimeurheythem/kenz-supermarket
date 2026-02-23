@@ -331,7 +331,7 @@ export default function Dashboard() {
                         </motion.div>
                     </div>
 
-                    {/* Unified Top Products Carousel Card */}
+                    {/* Top Products Carousel Card */}
                     <div className="rounded-2xl sm:rounded-[3rem] p-4 sm:p-6 lg:p-8 min-h-[300px] sm:min-h-[400px] flex-1 flex flex-col relative overflow-hidden transition-all duration-700">
                         {/* Dynamic Background Overlays */}
                         {topProducts.length > 0 ? (
@@ -354,7 +354,7 @@ export default function Dashboard() {
                                 <h2 className="text-xl sm:text-2xl lg:text-[2rem] font-bold text-black uppercase tracking-tight leading-none">
                                     {t('dashboard.top_performance.title')}
                                 </h2>
-                                <p className="text-[9px] text-black/40 uppercase tracking-[0.2em] mt-2">
+                                <p className="text-[9px] text-black/70 uppercase tracking-[0.2em] mt-2">
                                     {t('dashboard.top_performance.subtitle')}
                                 </p>
                             </div>
@@ -381,8 +381,8 @@ export default function Dashboard() {
                                                 size={100}
                                                 className={cn(RANK_COLORS[idx]?.iconColor ?? 'text-zinc-400', 'filter')}
                                             />
-                                            <div className="absolute inset-0 flex items-center justify-center mb-8 sm:mb-10">
-                                                <span className="text-3xl sm:text-5xl font-black text-black/20">
+                                            <div className="absolute inset-0 flex items-center justify-center mb-8">
+                                                <span className="text-3xl font-black text-black/40">
                                                     #{idx + 1}
                                                 </span>
                                             </div>

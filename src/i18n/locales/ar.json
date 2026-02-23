@@ -127,13 +127,6 @@
             "none": "لم يتم العثور على صناديق"
         },
         "shortcuts": {
-            "no_sales": "لا توجد مبيعات بعد",
-            "units_in_stock": "{{count}} وحدة في المخزون",
-            "avg_order": "{{amount}} متوسط",
-            "needs_attention": "يحتاج إلى اهتمام",
-            "all_stocked": "الكل متوفر"
-        },
-        "shortcuts": {
             "title": "إجراءات سريعة",
             "pos": "نظام نقاط البيع",
             "inventory": "المخزون",

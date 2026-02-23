@@ -5,6 +5,7 @@ import {
     LayoutGrid,
     List as ListIcon,
     Download,
+    Tag,
     X,
     ChevronLeft,
     ChevronRight,
@@ -21,6 +22,9 @@ interface InventoryFiltersProps {
     lowStockOnly: boolean;
     setLowStockOnly: (value: boolean) => void;
     lowStockCount: number;
+    uncategorizedOnly: boolean;
+    setUncategorizedOnly: (value: boolean) => void;
+    uncategorizedCount: number;
     categoryFilter: number | null;
     setCategoryFilter: (value: number | null) => void;
     viewMode: 'grid' | 'list';
@@ -36,6 +40,9 @@ export default function InventoryFilters({
     lowStockOnly,
     setLowStockOnly,
     lowStockCount,
+    uncategorizedOnly,
+    setUncategorizedOnly,
+    uncategorizedCount,
     categoryFilter,
     setCategoryFilter,
     viewMode,
@@ -168,6 +175,46 @@ export default function InventoryFilters({
                     <Download size={20} />
                     <span>{t('inventory.filters.export_low_stock')}</span>
                 </button>
+
+                {/* Uncategorized Filter Toggle */}
+                <button
+                    onClick={() => setUncategorizedOnly(!uncategorizedOnly)}
+                    className={cn(
+                        'group relative overflow-hidden flex items-center gap-3 px-6 py-5 rounded-[2.5rem] font-bold transition-all border-2 whitespace-nowrap',
+                        uncategorizedOnly
+                            ? 'bg-violet-500 text-white border-violet-500'
+                            : 'bg-white text-zinc-400 border-black/30 hover:border-black/30',
+                    )}
+                >
+                    <div
+                        className={cn(
+                            'absolute inset-0 bg-violet-500 transition-transform duration-300 ease-out origin-bottom translate-y-[102%] group-hover:translate-y-0',
+                            uncategorizedOnly && 'hidden',
+                        )}
+                    />
+                    <Tag
+                        size={20}
+                        className={cn(
+                            'relative z-10 transition-colors',
+                            uncategorizedOnly ? 'text-white' : 'text-zinc-400 group-hover:text-white',
+                        )}
+                    />
+                    <span className="relative z-10 transition-colors group-hover:text-white">
+                        {t('inventory.filters.uncategorized_only')}
+                    </span>
+                    {uncategorizedCount > 0 && (
+                        <span
+                            className={cn(
+                                'relative z-10 px-2 py-0.5 rounded-full text-xs font-black transition-colors',
+                                uncategorizedOnly
+                                    ? 'bg-white/20 text-white'
+                                    : 'bg-zinc-100 text-zinc-500 group-hover:bg-white/20 group-hover:text-white',
+                            )}
+                        >
+                            {uncategorizedCount}
+                        </span>
+                    )}
+                </button>
             </div>
 
             {/* Category Filter Section */}
@@ -220,12 +267,13 @@ export default function InventoryFilters({
                         </div>
 
                         {/* Clear Filters */}
-                        {(categoryFilter !== null || search || lowStockOnly) && (
+                        {(categoryFilter !== null || search || lowStockOnly || uncategorizedOnly) && (
                             <button
                                 onClick={() => {
                                     setCategoryFilter(null);
                                     setSearch('');
                                     setLowStockOnly(false);
+                                    setUncategorizedOnly(false);
                                 }}
                                 className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-all font-bold text-[10px] uppercase tracking-widest"
                             >

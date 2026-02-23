@@ -407,6 +407,7 @@
             "search_placeholder": "البحث في المخزون...",
             "low_stock_only": "المخزون المنخفض فقط",
             "export_low_stock": "تصدير المخزون المنخفض",
+            "uncategorized_only": "غير مصنف",
             "filter_by_category": "تصفية حسب الفئة",
             "all_items": "جميع العناصر",
             "clear": "مسح"

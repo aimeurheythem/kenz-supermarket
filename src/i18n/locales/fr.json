@@ -400,6 +400,7 @@
             "search_placeholder": "Rechercher dans l'inventaire...",
             "low_stock_only": "Stock Faible Uniquement",
             "export_low_stock": "Exporter Stock Faible",
+            "uncategorized_only": "Sans Catégorie",
             "filter_by_category": "Filtrer par Catégorie",
             "all_items": "Tous les Articles",
             "clear": "Effacer"
@@ -480,6 +481,7 @@
             "g": "G",
             "l": "L",
             "ml": "Ml",
+            "bottle": "Bouteille",
             "box": "Boîte",
             "pack": "Paquet"
         },

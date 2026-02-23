@@ -187,7 +187,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                                     />
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
-                                    {['piece', 'kg', 'g', 'l', 'ml', 'box', 'pack'].map((u) => (
+                                    {['piece', 'kg', 'g', 'l', 'ml', 'bottle', 'box', 'pack'].map((u) => (
                                         <DropdownMenuItem
                                             key={u}
                                             onClick={() => setForm({ ...form, unit: u })}

@@ -407,6 +407,7 @@
             "search_placeholder": "Search inventory...",
             "low_stock_only": "Low Stock Only",
             "export_low_stock": "Export Low Stock",
+            "uncategorized_only": "Uncategorized",
             "filter_by_category": "Filter by Category",
             "all_items": "All Items",
             "clear": "Clear"
@@ -487,6 +488,7 @@
             "g": "G",
             "l": "L",
             "ml": "Ml",
+            "bottle": "Bottle",
             "box": "Box",
             "pack": "Pack"
         },

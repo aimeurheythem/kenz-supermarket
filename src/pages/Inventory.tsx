@@ -40,6 +40,7 @@ export default function Inventory() {
     const [search, setSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
     const [lowStockOnly, setLowStockOnly] = useState(false);
+    const [uncategorizedOnly, setUncategorizedOnly] = useState(false);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -49,9 +50,15 @@ export default function Inventory() {
     const [showScanner, setShowScanner] = useState(false);
     const csvInputRef = useRef<HTMLInputElement>(null);
 
+    const uncategorizedCount = useMemo(() => products.filter(p => !p.category_id).length, [products]);
+    const filteredProducts = useMemo(
+        () => (uncategorizedOnly ? products.filter(p => !p.category_id) : products),
+        [products, uncategorizedOnly],
+    );
+
     const ITEMS_PER_PAGE = 16;
     const { currentPage, totalPages, startIndex, endIndex, setCurrentPage, paginate, resetPage } = usePagination({
-        totalItems: products.length,
+        totalItems: filteredProducts.length,
         pageSize: ITEMS_PER_PAGE,
     });
 
@@ -217,7 +224,7 @@ export default function Inventory() {
     // Calculations for stats
     const totalValue = products.reduce((sum, p) => sum + p.selling_price * p.stock_quantity, 0);
 
-    const paginatedProducts = paginate(products);
+    const paginatedProducts = paginate(filteredProducts);
 
     return (
         <div className="relative flex flex-col h-full gap-8 p-6 lg:p-8 animate-fadeIn mt-4 min-h-[85vh]">
@@ -342,6 +349,9 @@ export default function Inventory() {
                     lowStockOnly={lowStockOnly}
                     setLowStockOnly={setLowStockOnly}
                     lowStockCount={lowStockProducts.length}
+                    uncategorizedOnly={uncategorizedOnly}
+                    setUncategorizedOnly={setUncategorizedOnly}
+                    uncategorizedCount={uncategorizedCount}
                     categoryFilter={categoryFilter}
                     setCategoryFilter={setCategoryFilter}
                     viewMode={viewMode}
@@ -417,6 +427,7 @@ export default function Inventory() {
                         setSearch('');
                         setCategoryFilter(null);
                         setLowStockOnly(false);
+                        setUncategorizedOnly(false);
                         resetPage();
                         loadProducts();
                     }

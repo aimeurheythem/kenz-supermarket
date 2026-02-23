@@ -13,6 +13,8 @@ import {
     Scale,
     DollarSign,
     ShieldCheck,
+    UserCheck2,
+    UserLock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -73,10 +75,10 @@ export default function Sidebar() {
                 {
                     label: t('sidebar.customers'),
                     path: '/customers',
-                    icon: Users,
+                    icon: UserCheck2,
                     roles: ['admin', 'manager', 'cashier'],
                 },
-                { label: t('sidebar.users'), path: '/users', icon: Users, roles: ['admin'] },
+                { label: t('sidebar.users'), path: '/users', icon: UserLock, roles: ['admin'] },
             ],
         },
     ];

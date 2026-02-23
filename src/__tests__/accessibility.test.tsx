@@ -219,9 +219,7 @@ describe('DeleteConfirmModal accessibility', () => {
 
 describe('SearchInput accessibility', () => {
     it('has no axe violations', async () => {
-        const { container } = render(
-            <SearchInput value="" onChange={vi.fn()} placeholder="Search products…" />,
-        );
+        const { container } = render(<SearchInput value="" onChange={vi.fn()} placeholder="Search products…" />);
         const results = await axe(container);
         expect(results).toHaveNoViolations();
     });
@@ -257,9 +255,7 @@ describe('Button accessibility', () => {
     });
 
     it('has no axe violations (with icon)', async () => {
-        const { container } = render(
-            <Button icon={<span aria-hidden="true">🛒</span>}>Add to Cart</Button>,
-        );
+        const { container } = render(<Button icon={<span aria-hidden="true">🛒</span>}>Add to Cart</Button>);
         const results = await axe(container);
         expect(results).toHaveNoViolations();
     });
@@ -314,7 +310,7 @@ describe('Sidebar accessibility', () => {
 
     it('logo image has alt text', () => {
         render(<Sidebar />);
-        expect(screen.getByAltText('SuperMarket Pro')).toBeInTheDocument();
+        expect(screen.getByAltText('Kenzy Pro')).toBeInTheDocument();
     });
 });
 

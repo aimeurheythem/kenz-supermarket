@@ -61,6 +61,13 @@ export default function Users() {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const [selectedCashierPerf, setSelectedCashierPerf] = useState<{
+        total_sessions: number;
+        total_sales: number;
+        total_transactions: number;
+        average_sale: number;
+        total_hours: number;
+    } | null>(null);
 
     useEffect(() => {
         loadUsers();
@@ -173,24 +180,6 @@ export default function Users() {
         'transition-all duration-300',
     );
 
-    if (currentUser?.role !== 'admin') {
-        return (
-            <div className="flex flex-col items-center justify-center h-full text-zinc-400">
-                <Shield size={64} className="mb-4 opacity-50" />
-                <h2 className="text-xl font-bold text-black">{t('users.access_denied')}</h2>
-                <p className="text-sm">{t('users.admin_only')}</p>
-            </div>
-        );
-    }
-
-    const [selectedCashierPerf, setSelectedCashierPerf] = useState<{
-        total_sessions: number;
-        total_sales: number;
-        total_transactions: number;
-        average_sale: number;
-        total_hours: number;
-    } | null>(null);
-
     useEffect(() => {
         if (!selectedCashier) {
             setSelectedCashierPerf(null);
@@ -204,6 +193,16 @@ export default function Users() {
             cancelled = true;
         };
     }, [selectedCashier, getCashierPerformance]);
+
+    if (currentUser?.role !== 'admin') {
+        return (
+            <div className="flex flex-col items-center justify-center h-full text-zinc-400">
+                <Shield size={64} className="mb-4 opacity-50" />
+                <h2 className="text-xl font-bold text-black">{t('users.access_denied')}</h2>
+                <p className="text-sm">{t('users.admin_only')}</p>
+            </div>
+        );
+    }
 
     return (
         <div className="relative flex flex-col items-start gap-8 p-6 lg:p-8 animate-fadeIn mt-4">

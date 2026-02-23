@@ -1,7 +1,7 @@
+import { memo, useState, useRef, useEffect } from 'react';
 import { ShoppingCart, Trash2, CreditCard, Banknote, Smartphone, X, Printer, Wallet, ChevronsDown } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
-import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import CustomerSelector from '@/components/POS/CustomerSelector';
 import type { CartItem, Customer } from '@/lib/types';
@@ -23,7 +23,7 @@ interface CartPanelProps {
     getProductStyle: (id: string | number) => ProductStyle;
 }
 
-export default function CartPanel({
+function CartPanelComponent({
     cart,
     cartTotal,
     clearCart,
@@ -94,48 +94,48 @@ export default function CartPanel({
                         setCanScrollMore(el.scrollTop + el.clientHeight < el.scrollHeight - 20);
                     }}
                 >
-                {cart.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center space-y-4 opacity-10">
-                        <ShoppingCart size={80} className="text-black" strokeWidth={1} />
-                        <p className="text-[10px] font-black uppercase tracking-[0.4em]">{t('pos.cart.empty')}</p>
-                    </div>
-                ) : (
-                    <div className="space-y-6 py-4">
-                        {cart.map((item) => (
-                            <div key={item.product.id} className="flex items-center justify-between group">
-                                <div className="flex items-center gap-4 flex-1">
-                                    <div
-                                        className={cn(
-                                            'w-12 h-12 rounded-2xl flex items-center justify-center shrink-0',
-                                            getProductStyle(item.product.id).bg,
-                                        )}
-                                    >
-                                        <span className="text-[12px] font-black text-black">x{item.quantity}</span>
+                    {cart.length === 0 ? (
+                        <div className="h-full flex flex-col items-center justify-center space-y-4 opacity-10">
+                            <ShoppingCart size={80} className="text-black" strokeWidth={1} />
+                            <p className="text-[10px] font-black uppercase tracking-[0.4em]">{t('pos.cart.empty')}</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-6 py-4">
+                            {cart.map((item) => (
+                                <div key={item.product.id} className="flex items-center justify-between group">
+                                    <div className="flex items-center gap-4 flex-1">
+                                        <div
+                                            className={cn(
+                                                'w-12 h-12 rounded-2xl flex items-center justify-center shrink-0',
+                                                getProductStyle(item.product.id).bg,
+                                            )}
+                                        >
+                                            <span className="text-[12px] font-black text-black">x{item.quantity}</span>
+                                        </div>
+                                        <div className="flex flex-col min-w-0">
+                                            <span className="text-sm font-black text-black uppercase tracking-tight truncate">
+                                                {item.product.name}
+                                            </span>
+                                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
+                                                {formatCurrency(item.product.selling_price)}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div className="flex flex-col min-w-0">
-                                        <span className="text-sm font-black text-black uppercase tracking-tight truncate">
-                                            {item.product.name}
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-base font-black text-black tracking-tighter">
+                                            {formatCurrency(item.product.selling_price * item.quantity)}
                                         </span>
-                                        <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
-                                            {formatCurrency(item.product.selling_price)}
-                                        </span>
+                                        <button
+                                            onClick={() => removeFromCart(item.product.id)}
+                                            className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl bg-red-50 text-red-400 hover:bg-red-500 hover:text-white active:scale-95 transition-all duration-200"
+                                        >
+                                            <Trash2 size={18} strokeWidth={2.5} />
+                                        </button>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <span className="text-base font-black text-black tracking-tighter">
-                                        {formatCurrency(item.product.selling_price * item.quantity)}
-                                    </span>
-                                    <button
-                                        onClick={() => removeFromCart(item.product.id)}
-                                        className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl bg-red-50 text-red-400 hover:bg-red-500 hover:text-white active:scale-95 transition-all duration-200"
-                                    >
-                                        <Trash2 size={18} strokeWidth={2.5} />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Fade overlay + scroll hint */}
@@ -147,7 +147,8 @@ export default function CartPanel({
                         <div
                             className="h-24"
                             style={{
-                                background: 'linear-gradient(to top, #ffffff 0%, #ffffff 10%, rgba(255,255,255,0) 100%)',
+                                background:
+                                    'linear-gradient(to top, #ffffff 0%, #ffffff 10%, rgba(255,255,255,0) 100%)',
                             }}
                         />
                         <div className="absolute bottom-3 left-0 right-0 flex flex-col items-center gap-1">
@@ -259,3 +260,5 @@ export default function CartPanel({
         </div>
     );
 }
+
+export default memo(CartPanelComponent);

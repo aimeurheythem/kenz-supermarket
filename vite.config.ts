@@ -22,6 +22,18 @@ export default defineConfig({
     build: {
         outDir: 'dist',
         emptyOutDir: true,
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+                    'vendor-ui': ['lucide-react', 'framer-motion', 'recharts'],
+                    'vendor-db': ['sql.js', 'better-sqlite3'],
+                },
+            },
+        },
+        chunkSizeWarningLimit: 1000,
+        sourcemap: false,
+        minify: 'esbuild',
     },
     server: {
         port: 5173,

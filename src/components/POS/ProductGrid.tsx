@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +15,7 @@ interface ProductGridProps {
     searchQuery: string;
 }
 
-export default function ProductGrid({
+function ProductGridComponent({
     products,
     cart,
     handleAddProduct,
@@ -97,3 +98,5 @@ export default function ProductGrid({
         </>
     );
 }
+
+export default memo(ProductGridComponent);

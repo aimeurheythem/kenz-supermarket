@@ -49,6 +49,51 @@ contextBridge.exposeInMainWorld('electronAPI', {
     importDatabase: (data) => ipcRenderer.invoke('db:import', data),
 
     // ========================
+    // Python Barcode Scanner
+    // ========================
+
+    /**
+     * List cameras available on the machine.
+     * Returns [{id: number, label: string}]
+     */
+    scannerListCameras: () => ipcRenderer.invoke('scanner:list-cameras'),
+
+    /**
+     * Start the Python barcode decoder process.
+     * The renderer opens the camera itself and sends frames via scannerFrame.
+     */
+    scannerStart: () => ipcRenderer.invoke('scanner:start'),
+
+    /** Stop the active scanner process. */
+    scannerStop: () => ipcRenderer.invoke('scanner:stop'),
+
+    /**
+     * Send a base64-encoded JPEG frame to Python for barcode decoding.
+     * @param {string} base64Jpeg
+     */
+    scannerFrame: (base64Jpeg) => ipcRenderer.send('scanner:frame', base64Jpeg),
+
+    /**
+     * Register a listener for scanner events.
+     * cb is called with (eventName, ...args) where eventName is
+     * 'barcode', 'status', or 'error'.
+     * Returns an unsubscribe function.
+     */
+    onScannerEvent: (cb) => {
+        const onBarcode = (_e, code, fmt) => cb('barcode', code, fmt);
+        const onStatus  = (_e, status)    => cb('status',  status);
+        const onError   = (_e, msg)       => cb('error',   msg);
+        ipcRenderer.on('scanner:barcode', onBarcode);
+        ipcRenderer.on('scanner:status',  onStatus);
+        ipcRenderer.on('scanner:error',   onError);
+        return () => {
+            ipcRenderer.removeListener('scanner:barcode', onBarcode);
+            ipcRenderer.removeListener('scanner:status',  onStatus);
+            ipcRenderer.removeListener('scanner:error',   onError);
+        };
+    },
+
+    // ========================
     // Printing
     // ========================
 

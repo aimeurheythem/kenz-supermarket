@@ -71,6 +71,15 @@ declare global {
 
             // App lifecycle
             onBeforeQuit: (callback: () => void | Promise<void>) => void;
+
+            // Python barcode scanner
+            scannerListCameras: () => Promise<Array<{ id: number; label: string }>>;
+            scannerStart: () => Promise<{ started: boolean }>;
+            scannerStop: () => Promise<{ stopped: boolean }>;
+            scannerFrame: (base64Jpeg: string) => void;
+            onScannerEvent: (
+                cb: (event: 'barcode' | 'status' | 'error', ...args: string[]) => void
+            ) => () => void;
         };
     }
 

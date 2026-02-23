@@ -74,6 +74,13 @@ const mockElectronAPI: Window['electronAPI'] = {
 
     // App lifecycle
     onBeforeQuit: vi.fn(),
+
+    // Python barcode scanner
+    scannerListCameras: vi.fn().mockResolvedValue([]),
+    scannerStart: vi.fn().mockResolvedValue({ started: true }),
+    scannerStop: vi.fn().mockResolvedValue({ stopped: true }),
+    scannerFrame: vi.fn(),
+    onScannerEvent: vi.fn().mockReturnValue(() => {}),
 };
 
 Object.defineProperty(window, 'electronAPI', {

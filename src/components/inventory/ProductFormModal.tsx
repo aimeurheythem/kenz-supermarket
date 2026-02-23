@@ -77,6 +77,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
     const currentCategory = categories.find((c) => c.id === form.category_id);
 
     return (
+        <>
         <FormModal
             isOpen={isOpen}
             onClose={onClose}
@@ -294,15 +295,17 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                 </div>
             </form>
 
-            {showScanner && (
-                <BarcodeScanner
-                    onScan={(code) => {
-                        setForm({ ...form, barcode: code });
-                        setShowScanner(false);
-                    }}
-                    onClose={() => setShowScanner(false)}
-                />
-            )}
         </FormModal>
+
+        {showScanner && (
+            <BarcodeScanner
+                onScan={(code) => {
+                    setForm({ ...form, barcode: code });
+                    setShowScanner(false);
+                }}
+                onClose={() => setShowScanner(false)}
+            />
+        )}
+        </>
     );
 }

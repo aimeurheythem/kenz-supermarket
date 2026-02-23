@@ -127,13 +127,6 @@
             "none": "Aucun caissier trouvé"
         },
         "shortcuts": {
-            "no_sales": "Pas encore de ventes",
-            "units_in_stock": "{{count}} unités en stock",
-            "avg_order": "{{amount}} moy",
-            "needs_attention": "Nécessite une attention",
-            "all_stocked": "Tout est en stock"
-        },
-        "shortcuts": {
             "title": "Actions Rapides",
             "pos": "PDV",
             "inventory": "Inventaire",

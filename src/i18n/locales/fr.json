@@ -435,7 +435,8 @@
         },
         "actions": {
             "edit": "Modifier le Produit",
-            "delete": "Supprimer"
+            "delete": "Supprimer",
+            "assign_category": "Assigner Catégorie"
         },
         "delete_modal": {
             "title": "Supprimer le Produit",

@@ -133,7 +133,7 @@ export default function InventoryFilters({
                     className={cn(
                         'group relative overflow-hidden flex items-center gap-3 px-6 py-5 rounded-[2.5rem] font-bold transition-all border-2 whitespace-nowrap',
                         lowStockOnly
-                            ? 'bg-yellow-400 text-blue-600 border-yellow-400'
+                            ? 'bg-yellow-400 text-black border-yellow-400'
                             : 'bg-white text-zinc-400 border-black/30 hover:border-black/30',
                     )}
                 >
@@ -147,10 +147,10 @@ export default function InventoryFilters({
                         size={20}
                         className={cn(
                             'relative z-10 transition-colors',
-                            lowStockOnly ? 'text-blue-600' : 'text-zinc-400 group-hover:text-blue-600',
+                            lowStockOnly ? 'text-black' : 'text-zinc-400 group-hover:text-black',
                         )}
                     />
-                    <span className="relative z-10 transition-colors group-hover:text-blue-600">
+                    <span className="relative z-10 transition-colors group-hover:text-black">
                         {t('inventory.filters.low_stock_only')}
                     </span>
                     {lowStockCount > 0 && (
@@ -158,8 +158,8 @@ export default function InventoryFilters({
                             className={cn(
                                 'relative z-10 px-2 py-0.5 rounded-full text-xs font-black transition-colors',
                                 lowStockOnly
-                                    ? 'bg-blue-100 text-blue-600'
-                                    : 'bg-zinc-100 text-zinc-500 group-hover:bg-blue-100 group-hover:text-blue-600',
+                                    ? 'bg-black text-white'
+                                    : 'bg-zinc-100 text-zinc-500 group-hover:bg-black group-hover:text-white',
                             )}
                         >
                             {lowStockCount}

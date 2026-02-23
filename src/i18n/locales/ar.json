@@ -442,7 +442,8 @@
         },
         "actions": {
             "edit": "تعديل المنتج",
-            "delete": "حذف"
+            "delete": "حذف",
+            "assign_category": "تحديد الفئة"
         },
         "delete_modal": {
             "title": "حذف المنتج",

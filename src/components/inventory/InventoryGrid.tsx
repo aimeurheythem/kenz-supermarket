@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Edit2, Trash2, ShoppingBag, MoreVertical } from 'lucide-react';
+import { Edit2, Trash2, ShoppingBag, MoreVertical, Tag } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -19,6 +19,7 @@ interface InventoryGridProps {
     handleEdit: (product: Product) => void;
     handleDelete: (id: number) => void;
     categories: Category[];
+    onAssignCategory: (productId: number, categoryId: number) => void;
 }
 
 export default function InventoryGrid({
@@ -26,6 +27,8 @@ export default function InventoryGrid({
     getProductStyle: _getProductStyle,
     handleEdit,
     handleDelete,
+    categories,
+    onAssignCategory,
 }: InventoryGridProps) {
     const { t } = useTranslation();
 
@@ -62,13 +65,33 @@ export default function InventoryGrid({
                                     <h3 className="text-base font-bold text-black uppercase tracking-tight truncate pr-2 leading-tight">
                                         {product.name}
                                     </h3>
-                                    <p className="text-xs font-medium text-zinc-400 truncate">
-                                        {product.category_name
-                                            ? t(`categories.${product.category_name}`, {
-                                                  defaultValue: product.category_name,
-                                              })
-                                            : t('categories.Uncategorized')}
-                                    </p>
+                                    {product.category_id ? (
+                                        <p className="text-xs font-medium text-zinc-400 truncate">
+                                            {t(`categories.${product.category_name}`, { defaultValue: product.category_name })}
+                                        </p>
+                                    ) : (
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <button className="flex items-center gap-1 text-xs font-bold text-violet-500 hover:text-violet-700 transition-colors focus:outline-none">
+                                                    <Tag size={11} />
+                                                    <span>{t('inventory.actions.assign_category')}</span>
+                                                </button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="start" className="w-48 rounded-xl border-black/10 bg-white max-h-64 overflow-y-auto">
+                                                <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-zinc-400">{t('inventory.table.category')}</DropdownMenuLabel>
+                                                <DropdownMenuSeparator className="bg-zinc-100" />
+                                                {categories.map((cat) => (
+                                                    <DropdownMenuItem
+                                                        key={cat.id}
+                                                        onClick={() => onAssignCategory(product.id, cat.id)}
+                                                        className="gap-2 cursor-pointer focus:bg-violet-50 focus:text-violet-700"
+                                                    >
+                                                        {t(`categories.${cat.name}`, { defaultValue: cat.name })}
+                                                    </DropdownMenuItem>
+                                                ))}
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    )}
                                 </div>
                             </div>
 

@@ -1,4 +1,4 @@
-import { Edit2, Trash2, ShoppingBag, MoreVertical, Barcode } from 'lucide-react';
+import { Edit2, Trash2, ShoppingBag, MoreVertical, Barcode, Tag } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -8,16 +8,18 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn, formatDate, formatCurrency, getStockStatus } from '@/lib/utils';
-import type { Product } from '@/lib/types';
+import type { Product, Category } from '@/lib/types';
 import { useTranslation } from 'react-i18next';
 
 interface InventoryListProps {
     products: Product[];
     handleEdit: (product: Product) => void;
     handleDelete: (id: number) => void;
+    categories: Category[];
+    onAssignCategory: (productId: number, categoryId: number) => void;
 }
 
-export default function InventoryList({ products, handleEdit, handleDelete }: InventoryListProps) {
+export default function InventoryList({ products, handleEdit, handleDelete, categories, onAssignCategory }: InventoryListProps) {
     const { t, i18n } = useTranslation();
 
     return (
@@ -114,13 +116,33 @@ export default function InventoryList({ products, handleEdit, handleDelete }: In
 
                         {/* Category */}
                         <div className="text-center">
-                            <span className="px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-100 text-[10px] font-black uppercase text-zinc-500 tracking-widest">
-                                {product.category_name
-                                    ? t(`categories.${product.category_name}`, {
-                                          defaultValue: product.category_name,
-                                      })
-                                    : t('categories.Uncategorized')}
-                            </span>
+                            {product.category_id ? (
+                                <span className="px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-100 text-[10px] font-black uppercase text-zinc-500 tracking-widest">
+                                    {t(`categories.${product.category_name}`, { defaultValue: product.category_name })}
+                                </span>
+                            ) : (
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <button className="flex items-center gap-1 mx-auto px-3 py-1.5 rounded-xl border border-violet-200 bg-violet-50 text-[10px] font-black uppercase text-violet-500 tracking-widest hover:bg-violet-100 transition-colors focus:outline-none">
+                                            <Tag size={11} />
+                                            <span>{t('inventory.actions.assign_category')}</span>
+                                        </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="center" className="w-48 rounded-xl border-black/10 bg-white max-h-64 overflow-y-auto">
+                                        <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-zinc-400">{t('inventory.table.category')}</DropdownMenuLabel>
+                                        <DropdownMenuSeparator className="bg-zinc-100" />
+                                        {categories.map((cat) => (
+                                            <DropdownMenuItem
+                                                key={cat.id}
+                                                onClick={() => onAssignCategory(product.id, cat.id)}
+                                                className="gap-2 cursor-pointer focus:bg-violet-50 focus:text-violet-700"
+                                            >
+                                                {t(`categories.${cat.name}`, { defaultValue: cat.name })}
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            )}
                         </div>
 
                         {/* Stock Status Badge */}

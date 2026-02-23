@@ -442,7 +442,8 @@
         },
         "actions": {
             "edit": "Edit Product",
-            "delete": "Delete"
+            "delete": "Delete",
+            "assign_category": "Assign Category"
         },
         "delete_modal": {
             "title": "Delete Product",

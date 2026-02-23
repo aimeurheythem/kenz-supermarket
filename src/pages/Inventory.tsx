@@ -137,6 +137,11 @@ export default function Inventory() {
         setEditingProduct(null);
     };
 
+    const handleAssignCategory = async (productId: number, categoryId: number) => {
+        await updateProduct(productId, { category_id: categoryId });
+        await loadProducts();
+    };
+
     const handleExportCsv = () => {
         const headers = [
             { key: 'id', label: 'ID' },
@@ -390,6 +395,8 @@ export default function Inventory() {
                                     products={paginatedProducts}
                                     handleEdit={handleEdit}
                                     handleDelete={handleDelete}
+                                    categories={categories}
+                                    onAssignCategory={handleAssignCategory}
                                 />
                             ) : (
                                 <InventoryGrid
@@ -398,6 +405,7 @@ export default function Inventory() {
                                     handleEdit={handleEdit}
                                     handleDelete={handleDelete}
                                     categories={categories}
+                                    onAssignCategory={handleAssignCategory}
                                 />
                             )}
                         </motion.div>

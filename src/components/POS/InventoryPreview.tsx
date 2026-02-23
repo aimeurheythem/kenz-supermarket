@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, ArrowRight, Check } from 'lucide-react';
 
@@ -14,7 +14,7 @@ interface InventoryPreviewProps {
     handleAddProduct: (product: Product) => void;
 }
 
-export default function InventoryPreview({
+function InventoryPreviewComponent({
     products,
     cart,
     formatCurrency,
@@ -156,3 +156,5 @@ export default function InventoryPreview({
         </div>
     );
 }
+
+export default memo(InventoryPreviewComponent);

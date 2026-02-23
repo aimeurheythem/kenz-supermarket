@@ -182,13 +182,13 @@ export default function InventoryFilters({
                     className={cn(
                         'group relative overflow-hidden flex items-center gap-3 px-6 py-5 rounded-[2.5rem] font-bold transition-all border-2 whitespace-nowrap',
                         uncategorizedOnly
-                            ? 'bg-violet-500 text-white border-violet-500'
+                            ? 'bg-yellow-500 text-white border-yellow-500'
                             : 'bg-white text-zinc-400 border-black/30 hover:border-black/30',
                     )}
                 >
                     <div
                         className={cn(
-                            'absolute inset-0 bg-violet-500 transition-transform duration-300 ease-out origin-bottom translate-y-[102%] group-hover:translate-y-0',
+                            'absolute inset-0 bg-yellow-400 transition-transform duration-300 ease-out origin-bottom translate-y-[102%] group-hover:translate-y-0',
                             uncategorizedOnly && 'hidden',
                         )}
                     />
@@ -196,10 +196,10 @@ export default function InventoryFilters({
                         size={20}
                         className={cn(
                             'relative z-10 transition-colors',
-                            uncategorizedOnly ? 'text-white' : 'text-zinc-400 group-hover:text-white',
+                            uncategorizedOnly ? 'text-white' : 'text-zinc-400 group-hover:text-black',
                         )}
                     />
-                    <span className="relative z-10 transition-colors group-hover:text-white">
+                    <span className="relative z-10 transition-colors group-hover:text-black">
                         {t('inventory.filters.uncategorized_only')}
                     </span>
                     {uncategorizedCount > 0 && (
@@ -208,7 +208,7 @@ export default function InventoryFilters({
                                 'relative z-10 px-2 py-0.5 rounded-full text-xs font-black transition-colors',
                                 uncategorizedOnly
                                     ? 'bg-white/20 text-white'
-                                    : 'bg-zinc-100 text-zinc-500 group-hover:bg-white/20 group-hover:text-white',
+                                    : 'bg-zinc-100 text-zinc-500 group-hover:bg-black group-hover:text-white',
                             )}
                         >
                             {uncategorizedCount}

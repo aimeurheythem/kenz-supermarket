@@ -38,6 +38,7 @@ export default function POS() {
         checkout,
         stockError,
         clearStockError,
+        promotionResult,
         isLoading: isCheckingOut,
     } = useSaleStore();
     const cartTotal = useSaleStore(selectCartTotal);
@@ -353,6 +354,7 @@ export default function POS() {
                     <CartPanel
                         cart={cart}
                         cartTotal={cartTotal}
+                        promotionResult={promotionResult}
                         clearCart={clearCart}
                         removeFromCart={removeFromCart}
                         paymentMethod={paymentMethod}

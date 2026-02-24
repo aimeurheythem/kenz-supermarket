@@ -44,7 +44,9 @@ export type Permission =
     | 'use_pos'
     | 'process_refunds'
     | 'view_suppliers'
-    | 'edit_suppliers';
+    | 'edit_suppliers'
+    | 'view_promotions'
+    | 'edit_promotions';
 
 // Permission matrix
 const PERMISSIONS: Record<string, Permission[]> = {
@@ -61,6 +63,8 @@ const PERMISSIONS: Record<string, Permission[]> = {
         'process_refunds',
         'view_suppliers',
         'edit_suppliers',
+        'view_promotions',
+        'edit_promotions',
     ],
     manager: [
         'view_dashboard',
@@ -72,6 +76,8 @@ const PERMISSIONS: Record<string, Permission[]> = {
         'process_refunds',
         'view_suppliers',
         'edit_suppliers',
+        'view_promotions',
+        'edit_promotions',
     ],
     cashier: ['use_pos'],
 };

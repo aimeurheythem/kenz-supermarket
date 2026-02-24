@@ -1,5 +1,5 @@
 import { query, execute, lastInsertId, get, executeNoSave, triggerSave } from '../db';
-import type { Sale, SaleItem, CartItem } from '../../src/lib/types';
+import type { Sale, SaleItem, CartItem, PromotionApplicationResult } from '../../src/lib/types';
 import { AuditLogRepo } from './audit-log.repo';
 
 export const SaleRepo = {
@@ -69,13 +69,15 @@ export const SaleRepo = {
         },
         userId?: number,
         sessionId?: number,
+        promotionResult?: PromotionApplicationResult,
     ): Promise<Sale> {
         const subtotal = cart.reduce((sum, item) => {
             return sum + item.product.selling_price * item.quantity - item.discount;
         }, 0);
 
         const taxAmount = subtotal * (payment.tax_rate || 0);
-        const discountAmount = payment.discount || 0;
+        const promoSavings = promotionResult?.totalSavings ?? 0;
+        const discountAmount = (payment.discount || 0) + promoSavings;
         const total = subtotal + taxAmount - discountAmount;
 
         try {
@@ -129,7 +131,9 @@ export const SaleRepo = {
 
             // Create sale items and update stock for each item
             for (const item of cart) {
-                const itemTotal = item.product.selling_price * item.quantity - item.discount;
+                const appliedPromo = promotionResult?.itemDiscounts.find((d) => d.productId === item.product.id);
+                const promoItemDiscount = appliedPromo?.discountAmount ?? 0;
+                const itemTotal = item.product.selling_price * item.quantity - item.discount - promoItemDiscount;
 
                 // Validate stock inside the transaction — reject if insufficient
                 const product = await get<{ stock_quantity: number; name: string }>(
@@ -145,16 +149,18 @@ export const SaleRepo = {
                 }
 
                 await executeNoSave(
-                    `INSERT INTO sale_items (sale_id, product_id, product_name, quantity, unit_price, discount, total)
-                     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    `INSERT INTO sale_items (sale_id, product_id, product_name, quantity, unit_price, discount, total, promotion_id, promotion_name)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         saleId,
                         item.product.id,
                         item.product.name,
                         item.quantity,
                         item.product.selling_price,
-                        item.discount,
+                        item.discount + promoItemDiscount,
                         itemTotal,
+                        appliedPromo?.promotionId ?? null,
+                        appliedPromo?.promotionName ?? null,
                     ],
                 );
 

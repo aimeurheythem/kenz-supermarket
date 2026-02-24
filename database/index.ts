@@ -21,3 +21,4 @@ export { SupplierRepo } from './repositories/supplier.repo';
 export { StockRepo } from './repositories/stock.repo';
 export { UserRepo } from './repositories/user.repo';
 export { CashierSessionRepo } from './repositories/cashier-session.repo';
+export { PromotionRepo } from './repositories/promotion.repo';

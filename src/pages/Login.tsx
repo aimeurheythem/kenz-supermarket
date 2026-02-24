@@ -306,10 +306,6 @@ export default function Login() {
 
     return (
         <div className="h-screen w-screen flex overflow-hidden relative" style={{ fontFamily: 'var(--font-primary)' }}>
-            {/* Background Layer */}
-            <div className="absolute inset-0 z-0 pointer-events-none">
-                <ShaderBackground />
-            </div>
 
             {/* Window Controls */}
             {electron.isElectron && (

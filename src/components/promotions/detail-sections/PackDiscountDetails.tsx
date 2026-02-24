@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import type { PackDiscountConfig, PromotionProduct } from '@/lib/types';
 
@@ -7,6 +8,7 @@ interface PackDiscountDetailsProps {
 }
 
 export default function PackDiscountDetails({ config, products }: PackDiscountDetailsProps) {
+    const { t } = useTranslation();
     const { formatCurrency: format } = useFormatCurrency();
     const originalTotal = products.reduce((sum, p) => sum + (p.selling_price ?? 0), 0);
     const savings = Math.max(0, originalTotal - config.bundle_price);
@@ -15,12 +17,12 @@ export default function PackDiscountDetails({ config, products }: PackDiscountDe
     return (
         <div className="space-y-4">
             <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                Pack / Bundle Config
+                {t('promotions.details.pack_config')}
             </h4>
 
             {products.length > 0 && (
                 <div className="space-y-2">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">Included Products</p>
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">{t('promotions.details.label_products')}</p>
                     <div className="space-y-1.5">
                         {products.map((p) => (
                             <div
@@ -41,7 +43,7 @@ export default function PackDiscountDetails({ config, products }: PackDiscountDe
                 {originalTotal > 0 && (
                     <div className="bg-zinc-50 rounded-xl p-3">
                         <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mb-1">
-                            Original
+                            {t('promotions.details.original')}
                         </p>
                         <p className="text-sm font-black text-zinc-500 line-through">{format(originalTotal)}</p>
                     </div>
@@ -49,7 +51,7 @@ export default function PackDiscountDetails({ config, products }: PackDiscountDe
 
                 <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
                     <p className="text-[9px] font-bold uppercase tracking-widest text-yellow-600 mb-1">
-                        Bundle Price
+                        {t('promotions.details.label_bundle_price')}
                     </p>
                     <p className="text-sm font-black text-yellow-700">{format(config.bundle_price)}</p>
                 </div>
@@ -57,7 +59,7 @@ export default function PackDiscountDetails({ config, products }: PackDiscountDe
                 {originalTotal > 0 && savings > 0 && (
                     <div className="bg-green-50 border border-green-200 rounded-xl p-3">
                         <p className="text-[9px] font-bold uppercase tracking-widest text-green-600 mb-1">
-                            Savings
+                            {t('promotions.details.you_save')}
                         </p>
                         <p className="text-sm font-black text-green-700">{format(savings)}</p>
                         <p className="text-[9px] font-bold text-green-500 mt-0.5">{savingsPct}% off</p>

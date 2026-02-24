@@ -1,11 +1,14 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import { X, Calendar, Tag } from 'lucide-react';
+import { X, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useEffect, useMemo } from 'react';
+import { useProductStore } from '@/stores/useProductStore';
 import type {
     Promotion,
     PriceDiscountConfig,
     QuantityDiscountConfig,
     PackDiscountConfig,
+    PromotionProduct,
 } from '@/lib/types';
 import PriceDiscountDetails from './detail-sections/PriceDiscountDetails';
 import QuantityDiscountDetails from './detail-sections/QuantityDiscountDetails';
@@ -33,6 +36,12 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function PromotionDetailsModal({ isOpen, onClose, promotion }: PromotionDetailsModalProps) {
     const { t } = useTranslation();
+    const { products: storeProducts, loadProducts } = useProductStore();
+
+    // Ensure the product store is loaded
+    useEffect(() => {
+        if (storeProducts.length === 0) loadProducts();
+    }, []);
 
     let parsedConfig: Record<string, unknown> = {};
     try {
@@ -44,7 +53,24 @@ export default function PromotionDetailsModal({ isOpen, onClose, promotion }: Pr
         /* ignore */
     }
 
-    const products = promotion.products ?? [];
+    // Build enriched products: use DB data first, fall back to store, fall back to ID label
+    const products: PromotionProduct[] = useMemo(() => {
+        const linkedProducts = promotion.products ?? [];
+        return linkedProducts.map((pp) => {
+            // Try DB-joined data first
+            const name = pp.product_name || null;
+            const price = pp.selling_price != null ? Number(pp.selling_price) : null;
+            if (name && price !== null) return { ...pp, product_name: name, selling_price: price };
+            // Fall back to product store
+            const sp = storeProducts.find((s) => s.id === pp.product_id);
+            return {
+                ...pp,
+                product_name: name ?? sp?.name ?? `Product #${pp.product_id}`,
+                selling_price: price ?? sp?.selling_price ?? 0,
+            };
+        });
+    }, [promotion.products, storeProducts]);
+
     const effectiveStatus = promotion.effective_status ?? promotion.status;
 
     return (
@@ -119,27 +145,7 @@ export default function PromotionDetailsModal({ isOpen, onClose, promotion }: Pr
                             )}
                         </div>
 
-                        {/* Products list (if not shown inside detail section) */}
-                        {products.length > 0 && promotion.type === 'pack_discount' === false && (
-                            <div>
-                                <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-2 flex items-center gap-1">
-                                    <Tag size={10} strokeWidth={3} />
-                                    {t('promotions.details.products', 'Products')}
-                                </p>
-                                <div className="space-y-1.5">
-                                    {products.map((p) => (
-                                        <div
-                                            key={p.product_id}
-                                            className="flex justify-between items-center bg-zinc-50 rounded-xl px-3 py-2"
-                                        >
-                                            <span className="text-sm font-bold text-black">
-                                                {p.product_name ?? `#${p.product_id}`}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+
                     </div>
                 </Dialog.Content>
             </Dialog.Portal>

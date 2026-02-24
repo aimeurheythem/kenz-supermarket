@@ -39,7 +39,7 @@ export default function PackDiscountSection({ values, errors, onChange }: PackDi
 
     return (
         <div className="space-y-4">
-            <div className="h-px bg-zinc-200" />
+            <div className="h-px bg-zinc-200 my-2" />
 
             {/* Product Selection â€” multi-select */}
             <ProductSearchSelect
@@ -48,7 +48,7 @@ export default function PackDiscountSection({ values, errors, onChange }: PackDi
                 multiSelect
                 onChange={(ids) => onChange({ product_ids: ids })}
                 error={errors.product_ids}
-                placeholder={t('promotions.form.product_search_placeholder', 'Search by name or barcodeâ€¦')}
+                placeholder={t('promotions.form.product_search_placeholder', 'Search by name or barcode...')}
             />
 
             {/* Bundle Price */}
@@ -67,7 +67,7 @@ export default function PackDiscountSection({ values, errors, onChange }: PackDi
             </div>
 
             {/* Preview */}
-            {selectedProducts.length >= 2 && bundle_price && bundle_price > 0 && (
+            {selectedProducts.length >= 2 && (bundle_price ?? 0) > 0 && (
                 <div className="px-5 py-4 rounded-2xl bg-amber-50 border-2 border-amber-200 text-sm">
                     <div className="flex justify-between">
                         <span className="text-zinc-500 font-semibold">{t('promotions.form.original_total', 'Original Total')}</span>

@@ -92,22 +92,22 @@ export default function PromotionList({ promotions, isLoading, onView, onEdit, o
                     <table className="w-full">
                         <thead>
                             <tr className="border-b-2 border-zinc-100">
-                                <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="text-start px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('promotions.table.name')}
                                 </th>
-                                <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="text-start px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('promotions.table.type')}
                                 </th>
-                                <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="text-start px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('promotions.table.status')}
                                 </th>
-                                <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="text-start px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('promotions.table.start_date')}
                                 </th>
-                                <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="text-start px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('promotions.table.end_date')}
                                 </th>
-                                <th className="text-right px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                                <th className="text-end px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                                     {t('promotions.table.actions')}
                                 </th>
                             </tr>

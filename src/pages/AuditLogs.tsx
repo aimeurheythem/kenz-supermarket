@@ -88,7 +88,7 @@ export default function AuditLogs() {
                         </div>
                         <button
                             onClick={loadLogs}
-                            className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-md border border-black shadow-lg shadow-black/20 hover:bg-neutral-800 transition-all active:scale-95"
+                            className="flex items-center gap-2 px-4 py-3 bg-yellow-400 text-black rounded-3xl transition-all cursor-pointer active:scale-105"
                         >
                             <RefreshCw size={16} />
                             <span className="text-[10px] font-black uppercase tracking-widest">
@@ -180,7 +180,7 @@ export default function AuditLogs() {
                             onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
                             placeholder={t('audit_logs.search_placeholder')}
                             className={cn(
-                                'w-full pl-16 pr-16 py-4 rounded-2xl',
+                                'w-full pl-16 pr-16 py-4 rounded-3xl',
                                 'bg-white border border-zinc-200 shadow-none',
                                 'text-black placeholder:text-zinc-300 text-base font-bold',
                                 'focus:outline-none focus:ring-0 focus:!outline-none focus-visible:!outline-none focus-visible:ring-0 focus:border-zinc-400 transition-all placeholder:transition-opacity focus:placeholder:opacity-50',

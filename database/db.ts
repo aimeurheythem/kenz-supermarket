@@ -214,6 +214,16 @@ async function initDatabaseInternal(): Promise<void> {
     } catch (_) {
         /* already exists */
     }
+    try {
+        sqlJsDb.run('ALTER TABLE sale_items ADD COLUMN promotion_id INTEGER DEFAULT NULL REFERENCES promotions(id) ON DELETE SET NULL');
+    } catch (_) {
+        /* already exists */
+    }
+    try {
+        sqlJsDb.run('ALTER TABLE sale_items ADD COLUMN promotion_name TEXT DEFAULT NULL');
+    } catch (_) {
+        /* already exists */
+    }
 
     // Enable foreign keys
     try {

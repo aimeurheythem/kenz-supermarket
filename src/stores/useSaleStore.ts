@@ -1,13 +1,16 @@
 import { create } from 'zustand';
-import type { Sale, CartItem } from '@/lib/types';
+import type { Sale, CartItem, PromotionApplicationResult } from '@/lib/types';
 import { SaleRepo } from '../../database/repositories/sale.repo';
 import { ProductRepo } from '../../database/repositories/product.repo';
+import { PromotionRepo } from '../../database/repositories/promotion.repo';
+import { computeCartPromotions } from '@/services/promotionEngine';
 
 interface SaleStore {
     sales: Sale[];
     recentSales: Sale[];
     todayStats: { revenue: number; orders: number; profit: number };
     cart: CartItem[];
+    promotionResult: PromotionApplicationResult | null;
     isLoading: boolean;
     error: string | null;
 
@@ -52,11 +55,30 @@ interface SaleStore {
     clearStockError: () => void;
 }
 
-export const useSaleStore = create<SaleStore>((set, get) => ({
+export const useSaleStore = create<SaleStore>((set, get) => {
+    /** Recompute active promotions against current cart and persist the result in state. */
+    const recomputePromotions = async () => {
+        const { cart } = get();
+        if (cart.length === 0) {
+            set({ promotionResult: null });
+            return;
+        }
+        try {
+            const activePromotions = await PromotionRepo.getActiveForCheckout();
+            const result = computeCartPromotions(cart, activePromotions);
+            set({ promotionResult: result });
+        } catch {
+            // Non-critical — silently ignore if promotions unavailable
+            set({ promotionResult: null });
+        }
+    };
+
+    return {
     sales: [],
     recentSales: [],
     todayStats: { revenue: 0, orders: 0, profit: 0 },
     cart: [],
+    promotionResult: null,
     isLoading: false,
     error: null,
     stockError: null,
@@ -126,6 +148,7 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
         } else {
             set({ cart: [...cart, safeItem] });
         }
+        await recomputePromotions();
     },
 
     updateCartItem: async (productId: number, quantity: number) => {
@@ -149,22 +172,24 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
                 cart: cart.map((c) => (c.product.id === productId ? { ...c, quantity } : c)),
             });
         }
+        await recomputePromotions();
     },
 
     removeFromCart: (productId: number) => {
         set({ cart: get().cart.filter((c) => c.product.id !== productId) });
+        recomputePromotions();
     },
 
-    clearCart: () => set({ cart: [] }),
+    clearCart: () => set({ cart: [], promotionResult: null }),
 
     checkout: async (payment, userId, sessionId) => {
-        const { cart } = get();
+        const { cart, promotionResult } = get();
         if (cart.length === 0) throw new Error('Cart is empty');
 
         try {
             set({ isLoading: true, error: null });
-            const sale = await SaleRepo.createFromCart(cart, payment, userId, sessionId);
-            set({ cart: [] });
+            const sale = await SaleRepo.createFromCart(cart, payment, userId, sessionId, promotionResult ?? undefined);
+            set({ cart: [], promotionResult: null });
             await get().loadSales();
             await get().loadRecent();
             await get().loadTodayStats();
@@ -206,8 +231,15 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
     },
 
     clearStockError: () => set({ stockError: null }),
-}));
+    };
+});
 
-/** Derived selector — computes cart total from current cart state */
+/** Derived selector — computes cart total from current cart state (before promotions) */
 export const selectCartTotal = (state: SaleStore) =>
     state.cart.reduce((sum, item) => sum + item.product.selling_price * item.quantity - item.discount, 0);
+
+/** Derived selector — computes cart total after promotion savings are applied */
+export const selectCartTotalWithPromotions = (state: SaleStore) => {
+    const base = state.cart.reduce((sum, item) => sum + item.product.selling_price * item.quantity - item.discount, 0);
+    return base - (state.promotionResult?.totalSavings ?? 0);
+};

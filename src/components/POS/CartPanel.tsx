@@ -1,15 +1,16 @@
 import { memo, useState, useRef, useEffect } from 'react';
-import { ShoppingCart, Trash2, CreditCard, Banknote, Smartphone, X, Printer, Wallet, ChevronsDown } from 'lucide-react';
+import { ShoppingCart, Trash2, CreditCard, Banknote, Smartphone, X, Printer, Wallet, ChevronsDown, Tag } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import CustomerSelector from '@/components/POS/CustomerSelector';
-import type { CartItem, Customer } from '@/lib/types';
+import type { CartItem, Customer, PromotionApplicationResult } from '@/lib/types';
 import type { ProductStyle } from '@/lib/product-styles';
 
 interface CartPanelProps {
     cart: CartItem[];
     cartTotal: number;
+    promotionResult?: PromotionApplicationResult | null;
     clearCart: () => void;
     removeFromCart: (productId: number) => void;
     paymentMethod: 'cash' | 'card' | 'mobile' | 'credit';
@@ -26,6 +27,7 @@ interface CartPanelProps {
 function CartPanelComponent({
     cart,
     cartTotal,
+    promotionResult,
     clearCart,
     removeFromCart,
     paymentMethod,
@@ -41,6 +43,8 @@ function CartPanelComponent({
     const { t } = useTranslation();
     const [canScrollMore, setCanScrollMore] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const promoSavings = promotionResult?.totalSavings ?? 0;
+    const grandTotal = Math.max(0, cartTotal - promoSavings);
 
     useEffect(() => {
         const el = scrollRef.current;
@@ -101,7 +105,15 @@ function CartPanelComponent({
                         </div>
                     ) : (
                         <div className="space-y-6 py-4">
-                            {cart.map((item) => (
+                            {cart.map((item) => {
+                                const appliedPromo = promotionResult?.itemDiscounts.find(
+                                    (d) => d.productId === item.product.id,
+                                );
+                                const originalTotal = item.product.selling_price * item.quantity;
+                                const discountedTotal = appliedPromo
+                                    ? Math.max(0, originalTotal - appliedPromo.discountAmount)
+                                    : originalTotal;
+                                return (
                                 <div key={item.product.id} className="flex items-center justify-between group">
                                     <div className="flex items-center gap-4 flex-1">
                                         <div
@@ -119,12 +131,31 @@ function CartPanelComponent({
                                             <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
                                                 {formatCurrency(item.product.selling_price)}
                                             </span>
+                                            {appliedPromo && (
+                                                <span className="inline-flex items-center gap-1 mt-0.5 text-[9px] font-black tracking-wider uppercase px-1.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700 w-fit">
+                                                    <Tag size={8} strokeWidth={3} />
+                                                    {appliedPromo.promotionName}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <span className="text-base font-black text-black tracking-tighter">
-                                            {formatCurrency(item.product.selling_price * item.quantity)}
-                                        </span>
+                                        <div className="flex flex-col items-end">
+                                            {appliedPromo ? (
+                                                <>
+                                                    <span className="text-[10px] font-bold text-zinc-400 line-through">
+                                                        {formatCurrency(originalTotal)}
+                                                    </span>
+                                                    <span className="text-base font-black text-yellow-600 tracking-tighter">
+                                                        {formatCurrency(discountedTotal)}
+                                                    </span>
+                                                </>
+                                            ) : (
+                                                <span className="text-base font-black text-black tracking-tighter">
+                                                    {formatCurrency(originalTotal)}
+                                                </span>
+                                            )}
+                                        </div>
                                         <button
                                             onClick={() => removeFromCart(item.product.id)}
                                             className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl bg-red-50 text-red-400 hover:bg-red-500 hover:text-white active:scale-95 transition-all duration-200"
@@ -133,7 +164,8 @@ function CartPanelComponent({
                                         </button>
                                     </div>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>
@@ -171,12 +203,21 @@ function CartPanelComponent({
                         <span>{t('pos.cart.service_fee')}</span>
                         <span className="text-black">{formatCurrency(0)}</span>
                     </div>
+                    {promoSavings > 0 && (
+                        <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-yellow-600">
+                            <span className="flex items-center gap-1">
+                                <Tag size={10} strokeWidth={3} />
+                                {t('pos.cart.promo_savings', 'Promo Savings')}
+                            </span>
+                            <span>-{formatCurrency(promoSavings)}</span>
+                        </div>
+                    )}
                     <div className="pt-6 border-t border-zinc-200 flex items-center justify-between">
                         <span className="text-xs font-black text-black uppercase tracking-widest">
                             {t('pos.cart.grand_total')}
                         </span>
                         <span className="text-4xl font-black text-black tracking-tighter italic">
-                            {formatCurrency(cartTotal)}
+                            {formatCurrency(grandTotal)}
                         </span>
                     </div>
                 </div>

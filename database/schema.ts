@@ -159,7 +159,9 @@ CREATE TABLE IF NOT EXISTS sale_items (
   quantity INTEGER NOT NULL,
   unit_price REAL NOT NULL,
   discount REAL DEFAULT 0,
-  total REAL NOT NULL
+  total REAL NOT NULL,
+  promotion_id INTEGER DEFAULT NULL REFERENCES promotions(id) ON DELETE SET NULL,
+  promotion_name TEXT DEFAULT NULL
 );
 
 -- =============================================
@@ -268,8 +270,41 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 );
 
 -- =============================================
+-- PROMOTIONS
+-- =============================================
+CREATE TABLE IF NOT EXISTS promotions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL CHECK(type IN ('price_discount', 'quantity_discount', 'pack_discount')),
+  status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive')),
+  start_date TEXT NOT NULL,
+  end_date TEXT NOT NULL,
+  config TEXT DEFAULT '{}',
+  deleted_at TEXT DEFAULT NULL,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+-- =============================================
+-- PROMOTION PRODUCTS (junction table)
+-- =============================================
+CREATE TABLE IF NOT EXISTS promotion_products (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  promotion_id INTEGER NOT NULL REFERENCES promotions(id) ON DELETE CASCADE,
+  product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  created_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(promotion_id, product_id)
+);
+
+-- =============================================
 -- INDEXES
 -- =============================================
+CREATE INDEX IF NOT EXISTS idx_promotions_type ON promotions(type);
+CREATE INDEX IF NOT EXISTS idx_promotions_status ON promotions(status);
+CREATE INDEX IF NOT EXISTS idx_promotions_dates ON promotions(start_date, end_date);
+CREATE INDEX IF NOT EXISTS idx_promotions_deleted ON promotions(deleted_at);
+CREATE INDEX IF NOT EXISTS idx_promo_products_promotion ON promotion_products(promotion_id);
+CREATE INDEX IF NOT EXISTS idx_promo_products_product ON promotion_products(product_id);
 CREATE INDEX IF NOT EXISTS idx_products_barcode ON products(barcode);
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_name ON products(name);

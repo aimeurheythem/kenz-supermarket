@@ -20,6 +20,7 @@ import Credit from './pages/Credit';
 import BarcodeLabels from './pages/BarcodeLabels';
 import AuditLogs from './pages/AuditLogs';
 import Expenses from './pages/Expenses';
+import Promotions from './pages/Promotions';
 import Help from './pages/Help';
 import Terms from './pages/Terms';
 import Security from './pages/Security';
@@ -284,6 +285,14 @@ export default function App() {
                                                 element={
                                                     <RequirePermission permission="view_reports">
                                                         <Expenses />
+                                                    </RequirePermission>
+                                                }
+                                            />
+                                            <Route
+                                                path="/promotions"
+                                                element={
+                                                    <RequirePermission permission="view_promotions">
+                                                        <Promotions />
                                                     </RequirePermission>
                                                 }
                                             />

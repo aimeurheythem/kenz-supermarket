@@ -15,6 +15,8 @@ import {
     ShieldCheck,
     UserCheck2,
     UserLock,
+    Tag,
+    SquareCheckBig,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -50,13 +52,14 @@ export default function Sidebar() {
                 { label: t('sidebar.inventory'), path: '/inventory', icon: Package, roles: ['admin', 'manager'] },
                 { label: t('sidebar.barcodes'), path: '/barcodes', icon: ScanBarcode, roles: ['admin', 'manager'] },
                 { label: t('sidebar.stock_control'), path: '/stock', icon: ClipboardList, roles: ['admin', 'manager'] },
+                { label: t('sidebar.promotions'), path: '/promotions', icon: Tag, roles: ['admin', 'manager'] },
             ],
         },
         {
             title: t('sidebar.supply_chain') || 'Supply Chain',
             items: [
                 { label: t('sidebar.suppliers'), path: '/suppliers', icon: Truck, roles: ['admin', 'manager'] },
-                { label: t('sidebar.purchases'), path: '/purchases', icon: ScanBarcode, roles: ['admin', 'manager'] },
+                { label: t('sidebar.purchases'), path: '/purchases', icon: SquareCheckBig, roles: ['admin', 'manager'] },
                 { label: t('sidebar.credit'), path: '/credit', icon: Wallet, roles: ['admin', 'manager'] },
                 { label: t('sidebar.expenses'), path: '/expenses', icon: DollarSign, roles: ['admin', 'manager'] },
             ],

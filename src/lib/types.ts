@@ -305,6 +305,96 @@ export type QuickAccessItemInput = Pick<QuickAccessItem, 'product_id' | 'display
     Partial<Pick<QuickAccessItem, 'icon' | 'color' | 'bg_color' | 'options'>>;
 
 // =============================================
+// PROMOTIONS
+// =============================================
+export type PromotionType = 'price_discount' | 'quantity_discount' | 'pack_discount';
+export type PromotionStatus = 'active' | 'inactive';
+export type PromotionEffectiveStatus = 'active' | 'inactive' | 'expired' | 'scheduled';
+
+export interface PriceDiscountConfig {
+    discount_type: 'percentage' | 'fixed';
+    discount_value: number;
+    max_discount: number | null;
+}
+
+export interface QuantityDiscountConfig {
+    buy_quantity: number;
+    free_quantity: number;
+}
+
+export interface PackDiscountConfig {
+    bundle_price: number;
+}
+
+export type PromotionConfig = PriceDiscountConfig | QuantityDiscountConfig | PackDiscountConfig;
+
+export interface PromotionProduct {
+    id: number;
+    promotion_id: number;
+    product_id: number;
+    created_at: string;
+    // Joined fields
+    product_name?: string;
+    selling_price?: number;
+}
+
+export interface Promotion {
+    id: number;
+    name: string;
+    type: PromotionType;
+    status: PromotionStatus;
+    start_date: string;
+    end_date: string;
+    config: string; // JSON string — parsed by consumers
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+    // Joined fields
+    products?: PromotionProduct[];
+    effective_status?: PromotionEffectiveStatus;
+}
+
+export type PromotionInput = Pick<Promotion, 'name' | 'type' | 'start_date' | 'end_date'> & {
+    status?: PromotionStatus;
+    config: PromotionConfig;
+    product_ids: number[];
+};
+
+// Promotion engine result types
+export interface PromotionResult {
+    productId: number;
+    promotionId: number;
+    promotionName: string;
+    promotionType: PromotionType;
+    discountAmount: number;
+    freeQuantity?: number;
+    description: string;
+}
+
+export interface BundleResult {
+    promotionId: number;
+    promotionName: string;
+    productIds: number[];
+    bundlePrice: number;
+    originalTotal: number;
+    savings: number;
+    description: string;
+}
+
+export interface PromotionApplicationResult {
+    itemDiscounts: PromotionResult[];
+    bundleDiscounts: BundleResult[];
+    totalSavings: number;
+}
+
+// Extended CartItem with promotion info
+export type CartItemWithPromotion = CartItem & {
+    appliedPromotion?: PromotionResult | null;
+    originalTotal?: number;
+    discountedTotal?: number;
+};
+
+// =============================================
 // EXPENSES
 // =============================================
 export interface Expense {

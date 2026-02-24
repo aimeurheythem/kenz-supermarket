@@ -208,7 +208,7 @@ export const PromotionRepo = {
         return query<PromotionProduct>(
             `SELECT pp.*, p.name as product_name, p.selling_price
        FROM promotion_products pp
-       JOIN products p ON pp.product_id = p.id
+       LEFT JOIN products p ON pp.product_id = p.id
        WHERE pp.promotion_id = ?`,
             [promotionId],
         );

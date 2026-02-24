@@ -34,7 +34,7 @@ export default function QuantityDiscountSection({ values, errors, onChange }: Qu
 
     return (
         <div className="space-y-4">
-            <div className="h-px bg-zinc-200" />
+            <div className="h-px bg-zinc-200 my-2" />
 
             {/* Product Selection */}
             <ProductSearchSelect
@@ -42,7 +42,7 @@ export default function QuantityDiscountSection({ values, errors, onChange }: Qu
                 selectedIds={values.product_ids}
                 onChange={(ids) => onChange({ product_ids: ids })}
                 error={errors.product_ids}
-                placeholder={t('promotions.form.product_search_placeholder', 'Search by name or barcodeâ€¦')}
+                placeholder={t('promotions.form.product_search_placeholder', 'Search by name or barcode...')}
             />
 
             {/* Buy / Free Quantity */}

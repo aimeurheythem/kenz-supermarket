@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from 'react';
+import { ChevronDown, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { PromotionType, PromotionStatus } from '@/lib/types';
 
@@ -28,6 +30,22 @@ const LABEL_CLASS = 'block text-[11px] font-black uppercase tracking-widest text
 
 export default function GeneralInfoSection({ values, errors, onChange, isEditMode }: GeneralInfoSectionProps) {
     const { t } = useTranslation();
+    const [typeOpen, setTypeOpen] = useState(false);
+    const typeRef = useRef<HTMLDivElement>(null);
+
+    const TYPES: { value: PromotionType; label: string }[] = [
+        { value: 'price_discount', label: t('promotions.type.price_discount') },
+        { value: 'quantity_discount', label: t('promotions.type.quantity_discount') },
+        { value: 'pack_discount', label: t('promotions.type.pack_discount') },
+    ];
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (typeRef.current && !typeRef.current.contains(e.target as Node)) setTypeOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
 
     return (
         <div className="space-y-4">
@@ -45,19 +63,52 @@ export default function GeneralInfoSection({ values, errors, onChange, isEditMod
                 {errors.name && <p className="mt-1 text-xs text-rose-500 font-semibold">{errors.name}</p>}
             </div>
 
-            {/* Type */}
-            <div>
+            {/* Type — custom dropdown */}
+            <div ref={typeRef} className="relative">
                 <label className={LABEL_CLASS}>{t('promotions.form.type_label')}</label>
-                <select
-                    value={values.type}
-                    onChange={(e) => onChange({ type: e.target.value as PromotionType })}
+                <button
+                    type="button"
                     disabled={isEditMode}
-                    className={`${INPUT_CLASS} cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed`}
+                    onClick={() => !isEditMode && setTypeOpen((o) => !o)}
+                    className={`w-full h-14 ps-5 pe-4 rounded-3xl bg-zinc-100/70 border-2 font-bold text-sm text-start flex items-center transition-colors
+                        ${typeOpen ? 'border-yellow-400' : 'border-zinc-300'}
+                        ${isEditMode ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:border-zinc-400'}`}
                 >
-                    <option value="price_discount">{t('promotions.type.price_discount')}</option>
-                    <option value="quantity_discount">{t('promotions.type.quantity_discount')}</option>
-                    <option value="pack_discount">{t('promotions.type.pack_discount')}</option>
-                </select>
+                    <span className="flex-1 text-zinc-800">
+                        {TYPES.find((tp) => tp.value === values.type)?.label ?? values.type}
+                    </span>
+                    <ChevronDown
+                        size={16}
+                        strokeWidth={2.5}
+                        className={`shrink-0 text-zinc-400 transition-transform ${typeOpen ? 'rotate-180' : ''}`}
+                    />
+                </button>
+
+                {typeOpen && (
+                    <div className="absolute left-0 right-0 mt-1.5 z-50 rounded-2xl border border-zinc-200 bg-white shadow-xl overflow-hidden">
+                        <ul>
+                            {TYPES.map((tp) => {
+                                const selected = values.type === tp.value;
+                                return (
+                                    <li key={tp.value}>
+                                        <button
+                                            type="button"
+                                            onClick={() => { onChange({ type: tp.value }); setTypeOpen(false); }}
+                                            className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-zinc-50 transition-colors"
+                                        >
+                                            <span className={`shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                                                selected ? 'bg-yellow-400 border-yellow-400' : 'border-zinc-300'
+                                            }`}>
+                                                {selected && <Check size={10} strokeWidth={3.5} className="text-white" />}
+                                            </span>
+                                            <span className="text-sm font-bold text-zinc-800">{tp.label}</span>
+                                        </button>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                )}
                 {errors.type && <p className="mt-1 text-xs text-rose-500 font-semibold">{errors.type}</p>}
             </div>
 

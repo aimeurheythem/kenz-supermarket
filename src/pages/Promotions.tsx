@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Tag, CheckCircle2, XCircle } from 'lucide-react';
+import { ChevronDown, Check, Plus, Tag, CheckCircle2, XCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { usePromotionStore } from '@/stores/usePromotionStore';
+import { useProductStore } from '@/stores/useProductStore';
 import PromotionList from '@/components/promotions/PromotionList';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import type { Promotion } from '@/lib/types';
@@ -17,6 +18,7 @@ export default function Promotions() {
     usePageTitle(t('sidebar.promotions'));
 
     const { promotions, isLoading, loadPromotions, deletePromotion, getPromotionById } = usePromotionStore();
+    const { loadProducts } = useProductStore();
 
     // Modal state
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -30,8 +32,24 @@ export default function Promotions() {
     const [typeFilter, setTypeFilter] = useState<string>('all');
     const [statusFilter, setStatusFilter] = useState<string>('all');
 
+    // Filter dropdown open state
+    const [typeOpen, setTypeOpen] = useState(false);
+    const [statusOpen, setStatusOpen] = useState(false);
+    const typeRef = useRef<HTMLDivElement>(null);
+    const statusRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (typeRef.current && !typeRef.current.contains(e.target as Node)) setTypeOpen(false);
+            if (statusRef.current && !statusRef.current.contains(e.target as Node)) setStatusOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
     useEffect(() => {
         loadPromotions();
+        loadProducts();
     }, [loadPromotions]);
 
     const filteredPromotions = useMemo(() => {
@@ -177,6 +195,7 @@ export default function Promotions() {
             <div className="relative z-10 flex flex-col gap-4 flex-1">
                 {/* Search + Filters */}
                 <div className="flex flex-wrap gap-3 items-center">
+                    {/* Search */}
                     <div className="relative flex-1 min-w-[200px]">
                         <input
                             type="text"
@@ -187,28 +206,108 @@ export default function Promotions() {
                         />
                     </div>
 
-                    <select
-                        value={typeFilter}
-                        onChange={(e) => setTypeFilter(e.target.value)}
-                        className="h-12 px-5 rounded-[3rem] bg-white border-2 border-zinc-200 text-sm font-semibold text-zinc-700 focus:outline-none focus:border-yellow-400 transition-colors cursor-pointer"
-                    >
-                        <option value="all">{t('promotions.filter_type')}</option>
-                        <option value="price_discount">{t('promotions.type.price_discount')}</option>
-                        <option value="quantity_discount">{t('promotions.type.quantity_discount')}</option>
-                        <option value="pack_discount">{t('promotions.type.pack_discount')}</option>
-                    </select>
+                    {/* Type Filter */}
+                    {(() => {
+                        const TYPE_OPTIONS = [
+                            { value: 'all', label: t('promotions.filter_type') },
+                            { value: 'price_discount', label: t('promotions.type.price_discount') },
+                            { value: 'quantity_discount', label: t('promotions.type.quantity_discount') },
+                            { value: 'pack_discount', label: t('promotions.type.pack_discount') },
+                        ];
+                        const selected = TYPE_OPTIONS.find((o) => o.value === typeFilter) ?? TYPE_OPTIONS[0];
+                        const isActive = typeFilter !== 'all';
+                        return (
+                            <div ref={typeRef} className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => { setTypeOpen((o) => !o); setStatusOpen(false); }}
+                                    className={`h-12 pl-5 pr-4 rounded-[3rem] bg-white border-2 font-bold text-sm flex items-center gap-2 transition-colors cursor-pointer whitespace-nowrap ${
+                                        typeOpen ? 'border-yellow-400' : isActive ? 'border-zinc-900' : 'border-zinc-200 hover:border-zinc-300'
+                                    }`}
+                                >
+                                    <span className={isActive ? 'text-zinc-900' : 'text-zinc-500'}>{selected.label}</span>
+                                    <ChevronDown
+                                        size={14}
+                                        strokeWidth={2.5}
+                                        className={`shrink-0 text-zinc-400 transition-transform ${typeOpen ? 'rotate-180' : ''}`}
+                                    />
+                                </button>
+                                {typeOpen && (
+                                    <div className="absolute left-0 mt-1.5 z-50 rounded-2xl border border-zinc-200 bg-white shadow-xl overflow-hidden min-w-[190px]">
+                                        <ul className="py-1">
+                                            {TYPE_OPTIONS.map((opt) => {
+                                                const isOpt = typeFilter === opt.value;
+                                                return (
+                                                    <li key={opt.value}>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => { setTypeFilter(opt.value); setTypeOpen(false); }}
+                                                            className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left hover:bg-zinc-50 transition-colors"
+                                                        >
+                                                            <span className={`text-sm font-bold ${isOpt ? 'text-zinc-900' : 'text-zinc-500'}`}>{opt.label}</span>
+                                                            {isOpt && <Check size={13} strokeWidth={3} className="shrink-0 text-yellow-500" />}
+                                                        </button>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })()}
 
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="h-12 px-5 rounded-[3rem] bg-white border-2 border-zinc-200 text-sm font-semibold text-zinc-700 focus:outline-none focus:border-yellow-400 transition-colors cursor-pointer"
-                    >
-                        <option value="all">{t('promotions.filter_status')}</option>
-                        <option value="active">{t('promotions.status.active')}</option>
-                        <option value="inactive">{t('promotions.status.inactive')}</option>
-                        <option value="expired">{t('promotions.status.expired')}</option>
-                        <option value="scheduled">{t('promotions.status.scheduled')}</option>
-                    </select>
+                    {/* Status Filter */}
+                    {(() => {
+                        const STATUS_OPTIONS = [
+                            { value: 'all', label: t('promotions.filter_status') },
+                            { value: 'active', label: t('promotions.status.active') },
+                            { value: 'inactive', label: t('promotions.status.inactive') },
+                            { value: 'expired', label: t('promotions.status.expired') },
+                            { value: 'scheduled', label: t('promotions.status.scheduled') },
+                        ];
+                        const selected = STATUS_OPTIONS.find((o) => o.value === statusFilter) ?? STATUS_OPTIONS[0];
+                        const isActive = statusFilter !== 'all';
+                        return (
+                            <div ref={statusRef} className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => { setStatusOpen((o) => !o); setTypeOpen(false); }}
+                                    className={`h-12 pl-5 pr-4 rounded-[3rem] bg-white border-2 font-bold text-sm flex items-center gap-2 transition-colors cursor-pointer whitespace-nowrap ${
+                                        statusOpen ? 'border-yellow-400' : isActive ? 'border-zinc-900' : 'border-zinc-200 hover:border-zinc-300'
+                                    }`}
+                                >
+                                    <span className={isActive ? 'text-zinc-900' : 'text-zinc-500'}>{selected.label}</span>
+                                    <ChevronDown
+                                        size={14}
+                                        strokeWidth={2.5}
+                                        className={`shrink-0 text-zinc-400 transition-transform ${statusOpen ? 'rotate-180' : ''}`}
+                                    />
+                                </button>
+                                {statusOpen && (
+                                    <div className="absolute right-0 mt-1.5 z-50 rounded-2xl border border-zinc-200 bg-white shadow-xl overflow-hidden min-w-[190px]">
+                                        <ul className="py-1">
+                                            {STATUS_OPTIONS.map((opt) => {
+                                                const isOpt = statusFilter === opt.value;
+                                                return (
+                                                    <li key={opt.value}>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => { setStatusFilter(opt.value); setStatusOpen(false); }}
+                                                            className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left hover:bg-zinc-50 transition-colors"
+                                                        >
+                                                            <span className={`text-sm font-bold ${isOpt ? 'text-zinc-900' : 'text-zinc-500'}`}>{opt.label}</span>
+                                                            {isOpt && <Check size={13} strokeWidth={3} className="shrink-0 text-yellow-500" />}
+                                                        </button>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })()}
                 </div>
 
                 <PromotionList

@@ -56,11 +56,11 @@
 
 ### Implementation for User Story 1
 
-- [ ] T014 [US1] Create `src/pages/Promotions.tsx` — page shell matching Inventory.tsx layout: grid background overlay, header with subtitle ("Manage Promotions") + title ("PROMOTIONS") + "Add Promotion" CTA (yellow `bg-yellow-400` `rounded-[3rem]`), stats cards row (Total Promotions, Active Now, Expired), search bar + type filter dropdown + status filter dropdown, PromotionList table, modal state management. Use exact CSS classes from `specs/003-promotion-management/contracts/ui-components.md`
-- [ ] T015 [US1] Create `src/components/promotions/PromotionList.tsx` — table component inside `rounded-[3rem] bg-white border-2 border-black/5` container with `text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400` headers. Columns: Name, Type (color badge), Status (color badge), Start Date, End Date, Actions (View/Edit/Delete buttons). Include pagination via `usePagination` hook, empty state message, type badges (blue=price, purple=quantity, amber=bundle), status badges (green=active, gray=inactive, red=expired, blue=scheduled)
-- [ ] T016 [US1] Add `/promotions` route wrapped in `RequirePermission permission="view_promotions"` inside AppShell routes in `src/App.tsx`
-- [ ] T017 [P] [US1] Add "Promotions" navigation item with Tag icon and `view_promotions` permission to the Operations group in `src/components/layout/Sidebar.tsx`
-- [ ] T018 [P] [US1] Add promotions nav item `{ path: '/promotions', label: 'Promotions', icon: Tag, permission: 'view_promotions' }` to NAV_ITEMS array in `src/lib/navigation.ts`
+- [X] T014 [US1] Create `src/pages/Promotions.tsx` — page shell matching Inventory.tsx layout: grid background overlay, header with subtitle ("Manage Promotions") + title ("PROMOTIONS") + "Add Promotion" CTA (yellow `bg-yellow-400` `rounded-[3rem]`), stats cards row (Total Promotions, Active Now, Expired), search bar + type filter dropdown + status filter dropdown, PromotionList table, modal state management. Use exact CSS classes from `specs/003-promotion-management/contracts/ui-components.md`
+- [X] T015 [US1] Create `src/components/promotions/PromotionList.tsx` — table component inside `rounded-[3rem] bg-white border-2 border-black/5` container with `text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400` headers. Columns: Name, Type (color badge), Status (color badge), Start Date, End Date, Actions (View/Edit/Delete buttons). Include pagination via `usePagination` hook, empty state message, type badges (blue=price, purple=quantity, amber=bundle), status badges (green=active, gray=inactive, red=expired, blue=scheduled)
+- [X] T016 [US1] Add `/promotions` route wrapped in `RequirePermission permission="view_promotions"` inside AppShell routes in `src/App.tsx`
+- [X] T017 [P] [US1] Add "Promotions" navigation item with Tag icon and `view_promotions` permission to the Operations group in `src/components/layout/Sidebar.tsx`
+- [X] T018 [P] [US1] Add promotions nav item `{ path: '/promotions', label: 'Promotions', icon: Tag, permission: 'view_promotions' }` to NAV_ITEMS array in `src/lib/navigation.ts`
 
 **Checkpoint**: Promotions page accessible via sidebar, table renders with styled badges, search/filter/pagination work. User Story 1 complete.
 
@@ -74,10 +74,10 @@
 
 ### Implementation for User Story 2
 
-- [ ] T019 [P] [US2] Create `src/components/promotions/form-sections/GeneralInfoSection.tsx` — form fields: name (text input), type (select: Price Discount / Quantity Discount / Pack Discount), status toggle (active/inactive), start_date (date input), end_date (date input). Use form input classes: `h-14 px-5 rounded-3xl bg-zinc-100/70 border-2 border-zinc-300 font-bold`. Include validation error display per field
-- [ ] T020 [P] [US2] Create `src/components/promotions/form-sections/PriceDiscountSection.tsx` — fields: product searchable dropdown (from useProductStore), discount_type radio (percentage/fixed), discount_value number input, max_discount optional number input. Show computed preview: "Product X: $50 → $40 (20% off)". Validate: value > 0, percentage ≤ 100, max_discount > 0 if set
-- [ ] T021 [US2] Create `src/components/promotions/PromotionFormModal.tsx` — Radix Dialog modal with `rounded-[2rem]`, renders GeneralInfoSection always + type-specific section conditionally (PriceDiscountSection when type='price_discount'). Form state management, client-side validation (required fields, date range, type-specific rules per data-model.md validation rules), submit calls addPromotion()/updatePromotion() from usePromotionStore. Support both create and edit mode (edit pre-populates from promotion prop). Toast on success/error via sonner
-- [ ] T022 [US2] Wire "Add Promotion" CTA button in `src/pages/Promotions.tsx` to open PromotionFormModal in create mode, and wire Edit action buttons in PromotionList to open in edit mode with selected promotion
+- [X] T019 [P] [US2] Create `src/components/promotions/form-sections/GeneralInfoSection.tsx` — form fields: name (text input), type (select: Price Discount / Quantity Discount / Pack Discount), status toggle (active/inactive), start_date (date input), end_date (date input). Use form input classes: `h-14 px-5 rounded-3xl bg-zinc-100/70 border-2 border-zinc-300 font-bold`. Include validation error display per field
+- [X] T020 [P] [US2] Create `src/components/promotions/form-sections/PriceDiscountSection.tsx` — fields: product searchable dropdown (from useProductStore), discount_type radio (percentage/fixed), discount_value number input, max_discount optional number input. Show computed preview: "Product X: $50 → $40 (20% off)". Validate: value > 0, percentage ≤ 100, max_discount > 0 if set
+- [X] T021 [US2] Create `src/components/promotions/PromotionFormModal.tsx` — Radix Dialog modal with `rounded-[2rem]`, renders GeneralInfoSection always + type-specific section conditionally (PriceDiscountSection when type='price_discount'). Form state management, client-side validation (required fields, date range, type-specific rules per data-model.md validation rules), submit calls addPromotion()/updatePromotion() from usePromotionStore. Support both create and edit mode (edit pre-populates from promotion prop). Toast on success/error via sonner
+- [X] T022 [US2] Wire "Add Promotion" CTA button in `src/pages/Promotions.tsx` to open PromotionFormModal in create mode, and wire Edit action buttons in PromotionList to open in edit mode with selected promotion
 
 **Checkpoint**: Price discount promotions can be created and edited via modal. Form validates inputs, saves to DB, and list updates. User Story 2 complete.
 
@@ -107,8 +107,8 @@
 
 ### Implementation for User Story 3
 
-- [ ] T026 [P] [US3] Create `src/components/promotions/form-sections/QuantityDiscountSection.tsx` — fields: product searchable dropdown, buy_quantity number input (min 1), free_quantity number input (min 1). Show computed display: "Buy X Get Y Free — Total required: X+Y". Validate: buy_quantity ≥ 1, free_quantity ≥ 1, exactly 1 product selected
-- [ ] T027 [US3] Add QuantityDiscountSection conditional render in `src/components/promotions/PromotionFormModal.tsx` when type='quantity_discount', wire form state for quantity discount config fields
+- [X] T026 [P] [US3] Create `src/components/promotions/form-sections/QuantityDiscountSection.tsx` — fields: product searchable dropdown, buy_quantity number input (min 1), free_quantity number input (min 1). Show computed display: "Buy X Get Y Free — Total required: X+Y". Validate: buy_quantity ≥ 1, free_quantity ≥ 1, exactly 1 product selected
+- [X] T027 [US3] Add QuantityDiscountSection conditional render in `src/components/promotions/PromotionFormModal.tsx` when type='quantity_discount', wire form state for quantity discount config fields
 
 **Checkpoint**: Quantity discount promotions can be created. Checkout engine already handles this type (implemented in T011). User Story 3 complete.
 
@@ -122,8 +122,8 @@
 
 ### Implementation for User Story 4
 
-- [ ] T028 [P] [US4] Create `src/components/promotions/form-sections/PackDiscountSection.tsx` — fields: multi-product searchable selection (minimum 2 products required, from useProductStore), bundle_price number input. Show computed display: original total (sum of selected product prices), bundle price, savings amount. Validate: ≥ 2 products, bundle_price > 0, warning if bundle_price ≥ original total
-- [ ] T029 [US4] Add PackDiscountSection conditional render in `src/components/promotions/PromotionFormModal.tsx` when type='pack_discount', wire form state for pack discount config fields and multi-product selection
+- [X] T028 [P] [US4] Create `src/components/promotions/form-sections/PackDiscountSection.tsx` — fields: multi-product searchable selection (minimum 2 products required, from useProductStore), bundle_price number input. Show computed display: original total (sum of selected product prices), bundle price, savings amount. Validate: ≥ 2 products, bundle_price > 0, warning if bundle_price ≥ original total
+- [X] T029 [US4] Add PackDiscountSection conditional render in `src/components/promotions/PromotionFormModal.tsx` when type='pack_discount', wire form state for pack discount config fields and multi-product selection
 
 **Checkpoint**: Pack/bundle promotions can be created. Checkout engine already handles this type (implemented in T011). User Story 4 complete.
 
@@ -172,7 +172,7 @@
 - [X] T040 [P] Bundle edge cases verified in promotionEngine.test.ts (partial bundle, 0 qty)
 - [X] T041 Ran `npm run lint` — 0 errors, 46 pre-existing warnings only
 - [X] T042 Ran `npm test` — 238/238 tests passing, no regressions
-- [ ] T043 Run quickstart.md validation — start dev server (`npm run dev`), navigate to Promotions page, create one promotion of each type, verify checkout integration, confirm i18n works for en/fr/ar
+- [X] T043 Run quickstart.md validation — start dev server (`npm run dev`), navigate to Promotions page, create one promotion of each type, verify checkout integration, confirm i18n works for en/fr/ar
 
 ---
 

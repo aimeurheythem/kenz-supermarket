@@ -59,7 +59,7 @@ export default function PriceDiscountSection({ values, errors, onChange }: Price
 
     return (
         <div className="space-y-4">
-            <div className="h-px bg-zinc-200" />
+            <div className="h-px bg-zinc-200 my-2" />
 
             {/* Product Selection */}
             <ProductSearchSelect
@@ -67,7 +67,7 @@ export default function PriceDiscountSection({ values, errors, onChange }: Price
                 selectedIds={values.product_ids}
                 onChange={(ids) => onChange({ product_ids: ids })}
                 error={errors.product_ids}
-                placeholder={t('promotions.form.product_search_placeholder', 'Search by name or barcodeâ€¦')}
+                placeholder={t('promotions.form.product_search_placeholder', 'Search by name or barcode...')}
             />
 
             {/* Discount Type */}
@@ -136,7 +136,7 @@ export default function PriceDiscountSection({ values, errors, onChange }: Price
                 <div className="px-5 py-4 rounded-2xl bg-yellow-50 border-2 border-yellow-200 text-sm">
                     <span className="text-zinc-500 font-semibold">{t('promotions.form.preview', 'Preview')}: </span>
                     <span className="line-through text-zinc-400">{format(preview.original)}</span>
-                    <span className="mx-2 text-yellow-600 font-black">â†’</span>
+                    <span className="mx-2 text-yellow-600 font-black">→</span>
                     <span className="font-black text-black">{format(preview.final)}</span>
                     <span className="ml-2 text-emerald-600 font-semibold">(-{format(preview.discount)})</span>
                 </div>

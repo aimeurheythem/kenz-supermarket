@@ -197,17 +197,7 @@ export default function POS() {
     );
 
     return (
-        <div className="relative h-full w-full flex flex-col animate-fadeIn bg-primary overflow-hidden">
-            {/* Grid Background — solid at the top, fades to transparent mid-page */}
-            <div
-                className="absolute inset-0 pointer-events-none -z-10"
-                style={{
-                    backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px)`,
-                    backgroundSize: '40px 40px',
-                    maskImage: 'linear-gradient(to bottom, black 0%, black 20%, transparent 65%)',
-                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 20%, transparent 65%)',
-                }}
-            />
+        <div className="relative h-full w-full flex flex-col animate-fadeIn bg-gray-100 overflow-hidden">
 
             {/* Main Content Area */}
             <div className="h-0 grow flex flex-row overflow-hidden">
@@ -256,7 +246,7 @@ export default function POS() {
                             )}
                             <button
                                 onClick={() => setShowScanner(true)}
-                                className="flex items-center gap-2 px-4 py-2 border border-zinc-200 text-zinc-600 rounded-lg hover:bg-zinc-100 transition-all active:scale-95"
+                                className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 text-zinc-600 rounded-xl hover:bg-zinc-50 transition-all active:scale-95"
                             >
                                 <Barcode size={16} />
                                 <span className="text-[10px] font-black uppercase tracking-widest">
@@ -268,7 +258,7 @@ export default function POS() {
                             <div className="relative" ref={langMenuRef}>
                                 <button
                                     onClick={() => setShowLangMenu((v) => !v)}
-                                    className="flex items-center gap-2 px-4 py-2 border border-zinc-200 text-zinc-600 rounded-lg hover:bg-zinc-100 transition-all active:scale-95"
+                                    className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 text-zinc-600 rounded-xl hover:bg-zinc-50 transition-all active:scale-95"
                                 >
                                     <Globe size={16} />
                                     <span className="text-[10px] font-black uppercase tracking-widest">
@@ -302,7 +292,7 @@ export default function POS() {
                             </div>
                             <button
                                 onClick={() => setShowEndShiftConfirm(true)}
-                                className="flex items-center gap-2 px-4 py-2 border border-zinc-200 text-zinc-600 rounded-lg hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all active:scale-95"
+                                className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 text-zinc-600 rounded-xl hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all active:scale-95"
                             >
                                 <LogOut size={16} />
                                 <span className="text-[10px] font-black uppercase tracking-widest">
@@ -312,22 +302,37 @@ export default function POS() {
                         </div>
                     </div>
 
-                    {/* Active Promotions Banner */}
-                    {!searchQuery && <ActivePromotionsBanner />}
-
-                    {/* Products Scrollable Area */}
+                    {/* Products Scrollable Area — 3 sections */}
                     <div className="h-0 grow overflow-y-auto scrollable scrollbar-hide" style={{ touchAction: 'pan-y' }}>
-                        <div className="space-y-6 pb-4">
+                        <div className="space-y-8 pb-6">
+                            {/* Sections 1 + 2 wrapped with grid bg */}
                             {!searchQuery && (
-                                <InventoryPreview
-                                    products={products}
-                                    cart={cart}
-                                    formatCurrency={formatCurrency}
-                                    i18n={i18n}
-                                    handleAddProduct={handleAddProduct}
-                                />
+                                <div className="relative space-y-8">
+                                    {/* Grid background — covers promos + in-stock, fades out at bottom */}
+                                    <div
+                                        className="absolute inset-0 pointer-events-none rounded-3xl opacity-40"
+                                        style={{
+                                            backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.07) 1px, transparent 1px)`,
+                                            backgroundSize: '32px 32px',
+                                            maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+                                            WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+                                        }}
+                                    />
+                                    {/* Section 1 — Promotions */}
+                                    <ActivePromotionsBanner />
+
+                                    {/* Section 2 — In-Stock Products */}
+                                    <InventoryPreview
+                                        products={products}
+                                        cart={cart}
+                                        formatCurrency={formatCurrency}
+                                        i18n={i18n}
+                                        handleAddProduct={handleAddProduct}
+                                    />
+                                </div>
                             )}
 
+                            {/* Section 3 — Custom / Quick Access */}
                             {!searchQuery && (
                                 <QuickAccess
                                     user={user}
@@ -353,8 +358,8 @@ export default function POS() {
                     </div>
                 </div>
 
-                {/* RIGHT: Cart Sidebar — 30% full height */}
-                <div className="w-[30%] h-full shrink-0 flex flex-col border-l border-zinc-200">
+                {/* RIGHT: Ticket Cart */}
+                <div className="w-[340px] h-full shrink-0 bg-[#f2f2f0] overflow-hidden">
                     <CartPanel
                         cart={cart}
                         cartTotal={cartTotal}

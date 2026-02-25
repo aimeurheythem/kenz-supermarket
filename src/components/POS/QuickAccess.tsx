@@ -42,21 +42,28 @@ export default function QuickAccess({ user, items, products, cart, addToCart, se
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <span className="text-[12px] text-black uppercase tracking-[0.3em] font-bold">
-                    {t('pos.quick_access.title')}
-                </span>
-                {/* Quick Access Manager button — visible to all */}
-                <button
-                        onClick={() => setIsManagerOpen(true)}
-                        className="group flex items-center gap-0 hover:gap-2 p-2 bg-black hover:bg-yellow-400 cursor-pointer rounded-xl transition-all duration-300 ease-in-out text-white hover:text-black overflow-hidden"
-                    >
-                        <Plus size={20} className="shrink-0" />
-                        <span className="max-w-0 group-hover:max-w-[200px] whitespace-nowrap overflow-hidden transition-all duration-500 ease-in-out text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100">
-                            {t('pos.quick_access.add_customized')}
+                <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black">
+                        {t('pos.quick_access.title')}
+                    </span>
+                    {items.length > 0 && (
+                        <span className="px-2 py-0.5 rounded-full bg-zinc-200 text-zinc-600 text-[9px] font-black uppercase tracking-widest leading-none">
+                            {items.flatMap(i => Array.isArray(i.options) ? i.options : []).length}
                         </span>
-                    </button>
+                    )}
+                </div>
+                {/* Quick Access Manager button */}
+                <button
+                    onClick={() => setIsManagerOpen(true)}
+                    className="group flex items-center gap-0 hover:gap-2 p-2 bg-black hover:bg-zinc-800 cursor-pointer rounded-[2.5rem] transition-all duration-300 ease-in-out text-white overflow-hidden"
+                >
+                    <Plus size={16} className="shrink-0" />
+                    <span className="max-w-0 group-hover:max-w-[200px] whitespace-nowrap overflow-hidden transition-all duration-500 ease-in-out text-[9px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100">
+                        {t('pos.quick_access.add_customized')}
+                    </span>
+                </button>
             </div>
 
             {items.length > 0 ? (
@@ -220,24 +227,21 @@ export default function QuickAccess({ user, items, products, cart, addToCart, se
                 </div>
             ) : (
                 // Fallback to instructions if no items configured
-                <div className="col-span-full py-12 border-2 border-dashed border-zinc-300 rounded-[3rem] flex flex-col items-center justify-center text-center space-y-4">
-                    <div className="p-4 text-zinc-400">
-                        <Zap size={32} />
+                <div className="col-span-full py-10 border-2 border-dashed border-zinc-300 rounded-[3rem] flex flex-col items-center justify-center text-center space-y-3">
+                    <div className="p-3 rounded-2xl bg-zinc-100">
+                        <Zap size={24} className="text-zinc-400" />
                     </div>
                     <div>
-                        <h3 className="font-black text-zinc-400 uppercase tracking-tight">
+                        <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
                             {t('pos.quick_access.no_items')}
                         </h3>
-                        <p className="text-sm text-zinc-300 font-bold uppercase tracking-wider">
+                        <p className="text-[9px] text-zinc-300 font-bold uppercase tracking-wider mt-0.5">
                             {t('pos.quick_access.no_items_hint')}
                         </p>
                     </div>
-                    <Button
-                            onClick={() => setIsManagerOpen(true)}
-                            className="px-8 h-12"
-                        >
-                            {t('pos.quick_access.add_first')}
-                        </Button>
+                    <Button onClick={() => setIsManagerOpen(true)} className="px-6 h-10 text-xs">
+                        {t('pos.quick_access.add_first')}
+                    </Button>
                 </div>
             )}
         </div>

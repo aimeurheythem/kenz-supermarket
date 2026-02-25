@@ -95,6 +95,49 @@ function PromoValueLine({ promo }: { promo: Promotion }) {
     );
 }
 
+// ─── Compact value line for fixed-height cards ────────────────────────────────
+
+function PromoValueLineMini({ promo, meta }: { promo: Promotion; meta: typeof TYPE_META[keyof typeof TYPE_META] }) {
+    const { t } = useTranslation();
+    const { formatCurrency } = useFormatCurrency();
+
+    if (promo.type === 'price_discount') {
+        const c = parseConfig<PriceDiscountConfig>(promo);
+        return (
+            <div className="flex items-baseline gap-1.5">
+                <span className="text-2xl font-black text-black/90 tracking-tighter leading-none">
+                    {c.discount_type === 'percentage' ? `${c.discount_value}%` : formatCurrency(c.discount_value)}
+                </span>
+                <span className={`text-[9px] uppercase tracking-widest ${meta.valueSuffix}`}>
+                    {t('pos.promo_banner.off', 'off')}
+                </span>
+            </div>
+        );
+    }
+    if (promo.type === 'quantity_discount') {
+        const c = parseConfig<QuantityDiscountConfig>(promo);
+        return (
+            <div className="flex items-baseline gap-1.5">
+                <span className="text-2xl font-black text-black/90 tracking-tighter leading-none">
+                    {c.buy_quantity}+{c.free_quantity}
+                </span>
+                <span className={`text-[9px] uppercase tracking-widest ${meta.valueSuffix}`}>
+                    {t('pos.promo_banner.free_label', 'free')}
+                </span>
+            </div>
+        );
+    }
+    const c = parseConfig<PackDiscountConfig>(promo);
+    return (
+        <div className="flex items-baseline gap-1.5">
+            <span className="text-2xl font-black text-black/90 tracking-tighter leading-none">{formatCurrency(c.bundle_price)}</span>
+            <span className={`text-[9px] uppercase tracking-widest ${meta.valueSuffix}`}>
+                {t('pos.promo_banner.type_pack', 'bundle')}
+            </span>
+        </div>
+    );
+}
+
 // ─── Detail sheet rows ────────────────────────────────────────────────────────
 
 function DetailRow({ label, value }: { label: string; value: string }) {
@@ -379,56 +422,57 @@ function PromoCard({ promo, onClick }: { promo: Promotion; onClick: () => void }
     return (
         <motion.div
             onClick={onClick}
-            className={`flex-none w-[270px] p-6 rounded-[2.5rem] ${meta.cardBg} relative overflow-hidden group cursor-pointer select-none`}
+            className={`flex-none w-[240px] h-[160px] p-5 rounded-[2.5rem] ${meta.cardBg} relative overflow-hidden flex flex-col group cursor-pointer select-none`}
             whileHover={{ scale: 1.02 }}
             transition={{ type: 'spring', stiffness: 300, damping: 22 }}
         >
             {/* Decorative bg icon */}
             <div className="absolute top-1/2 -translate-y-1/2 ltr:-right-2 rtl:-left-2 opacity-[0.08] pointer-events-none transition-transform duration-500 group-hover:scale-110">
-                <DecorIcon size={88} className="text-black" />
+                <DecorIcon size={80} className="text-black" />
             </div>
-            <div className="absolute -bottom-8 ltr:-right-8 rtl:-left-8 w-28 h-28 bg-black/20 blur-[50px] pointer-events-none" />
 
-            {/* Top row */}
-            <div className="flex items-center justify-between mb-5 relative">
+            {/* Top row — type badge + date */}
+            <div className="flex items-center justify-between flex-shrink-0 mb-2 relative">
                 <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-xl ${meta.accentBg} flex items-center justify-center`}>
-                        <Icon size={14} strokeWidth={2.5} className="text-white" />
+                    <div className={`w-7 h-7 rounded-xl ${meta.accentBg} flex items-center justify-center`}>
+                        <Icon size={13} strokeWidth={2.5} className="text-white" />
                     </div>
-                    <span className="text-[10px] uppercase tracking-widest text-black/50">{typeLabel}</span>
+                    <span className="text-[9px] uppercase tracking-widest text-black/50">{typeLabel}</span>
                 </div>
-                <span className="text-[9px] text-black/30 uppercase tracking-wider">{promo.end_date}</span>
+                <span className="text-[8px] text-black/30 uppercase tracking-wider">{promo.end_date}</span>
             </div>
 
-            {/* Price block — old/new for pack & qty, big value for price off */}
-            {originalPrice != null && newPrice != null ? (
-                <div className="mb-5 relative">
-                    <p className="text-sm font-bold text-black/40 line-through mb-0.5">{formatCurrency(originalPrice)}</p>
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-4xl text-black/90 tracking-tighter">{formatCurrency(newPrice)}</span>
-                        <span className={`text-xs uppercase tracking-widest ${meta.valueSuffix}`}>
-                            -{formatCurrency(originalPrice - newPrice)}
-                        </span>
+            {/* Price block — flex-1, always same space */}
+            <div className="flex-1 min-h-0 flex items-center overflow-hidden relative">
+                {originalPrice != null && newPrice != null ? (
+                    <div>
+                        <p className="text-[11px] font-bold text-black/40 line-through leading-none mb-0.5">{formatCurrency(originalPrice)}</p>
+                        <div className="flex items-baseline gap-1.5">
+                            <span className="text-2xl font-black text-black/90 tracking-tighter leading-none">{formatCurrency(newPrice)}</span>
+                            <span className={`text-[9px] uppercase tracking-widest ${meta.valueSuffix}`}>
+                                -{formatCurrency(originalPrice - newPrice)}
+                            </span>
+                        </div>
                     </div>
-                </div>
-            ) : (
-                <PromoValueLine promo={promo} />
-            )}
+                ) : (
+                    <PromoValueLineMini promo={promo} meta={meta} />
+                )}
+            </div>
 
-            {/* Bottom row: name + big + button */}
-            <div className="flex items-end justify-between pt-4 border-t border-black/10 relative">
+            {/* Bottom row — name + add button */}
+            <div className="flex-shrink-0 flex items-end justify-between pt-2 border-t border-black/10 relative">
                 <div className="min-w-0 flex-1 pe-3">
-                    <p className="text-[9px] text-black/40 uppercase tracking-widest mb-0.5">
+                    <p className="text-[8px] text-black/40 uppercase tracking-widest leading-none mb-0.5">
                         {t('pos.promo_banner.title', 'Promo')}
                     </p>
-                    <p className="text-sm font-black text-black/70 truncate">{promo.name}</p>
+                    <p className="text-[11px] font-black text-black/70 truncate leading-tight">{promo.name}</p>
                 </div>
 
                 {canAdd && (
                     <motion.button
                         onClick={handleAdd}
                         whileTap={{ scale: 0.85 }}
-                        className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-colors shadow-lg ${
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors shadow-sm ${
                             added
                                 ? `${meta.accentBg} text-white`
                                 : 'bg-black text-white hover:opacity-80'
@@ -437,11 +481,11 @@ function PromoCard({ promo, onClick }: { promo: Promotion; onClick: () => void }
                         <AnimatePresence mode="wait" initial={false}>
                             {added ? (
                                 <motion.span key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
-                                    <Check size={20} strokeWidth={3} />
+                                    <Check size={16} strokeWidth={3} />
                                 </motion.span>
                             ) : (
                                 <motion.span key="plus" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
-                                    <Plus size={20} strokeWidth={3} />
+                                    <Plus size={16} strokeWidth={3} />
                                 </motion.span>
                             )}
                         </AnimatePresence>
@@ -469,15 +513,17 @@ function ActivePromotionsBannerComponent() {
 
     return (
         <>
-            <div className="mb-4">
-                <div className="flex items-center gap-2 mb-3">
-                    <Tag size={11} strokeWidth={3} className="text-zinc-400" />
-                    <span className="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-400">
-                        {t('pos.promo_banner.title', 'Active Promotions')} · {promotions.length}
+            <div className="mb-6">
+                <div className="flex items-center gap-3 mb-4">
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black">
+                        {t('pos.promo_banner.title', 'Promotions')}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-black text-white text-[9px] font-black uppercase tracking-widest leading-none">
+                        {promotions.length}
                     </span>
                 </div>
 
-                <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
+                <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
                     {promotions.map((promo) => (
                         <PromoCard key={promo.id} promo={promo} onClick={() => setSelected(promo)} />
                     ))}

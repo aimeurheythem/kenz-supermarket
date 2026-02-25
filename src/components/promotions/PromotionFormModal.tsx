@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import * as Dialog from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { usePromotionStore } from '@/stores/usePromotionStore';
+import Button from '@/components/common/Button';
 import GeneralInfoSection from './form-sections/GeneralInfoSection';
 import PriceDiscountSection from './form-sections/PriceDiscountSection';
 import QuantityDiscountSection from './form-sections/QuantityDiscountSection';
@@ -21,7 +22,7 @@ import type {
 interface PromotionFormModalProps {
     isOpen: boolean;
     onClose: () => void;
-    promotion?: Promotion;
+    promotion?: Promotion | null;
 }
 
 // ── Default Config per Type ────────────────────────────────────────────────
@@ -62,7 +63,7 @@ interface FormErrors {
     bundle_price?: string;
 }
 
-function getInitialState(promotion?: Promotion): FormState {
+function getInitialState(promotion?: Promotion | null): FormState {
     if (!promotion) {
         return {
             name: '',
@@ -89,7 +90,7 @@ function getInitialState(promotion?: Promotion): FormState {
         type: promotion.type,
         status: promotion.status,
         start_date: promotion.start_date,
-        end_date: promotion.end_date,
+        end_date: promotion.end_date || '',
         product_ids: promotion.products?.map((p) => p.product_id) ?? [],
         config,
     };
@@ -108,7 +109,6 @@ function validateForm(state: FormState): FormErrors {
     if (!state.end_date) errors.end_date = 'End date is required';
     else if (state.start_date && state.end_date <= state.start_date)
         errors.end_date = 'End date must be after start date';
-
     // Products
     if (state.type === 'pack_discount') {
         if (state.product_ids.length < 2) errors.product_ids = 'At least 2 products required for a bundle';
@@ -142,8 +142,6 @@ function validateForm(state: FormState): FormErrors {
     return errors;
 }
 
-// ── Component ──────────────────────────────────────────────────────────────
-
 export default function PromotionFormModal({ isOpen, onClose, promotion }: PromotionFormModalProps) {
     const { t } = useTranslation();
     const { addPromotion, updatePromotion } = usePromotionStore();
@@ -152,18 +150,18 @@ export default function PromotionFormModal({ isOpen, onClose, promotion }: Promo
     const [form, setForm] = useState<FormState>(() => getInitialState(promotion));
     const [errors, setErrors] = useState<FormErrors>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [step, setStep] = useState<1 | 2>(1);
 
-    // Reset form when modal opens
     useEffect(() => {
         if (isOpen) {
             setForm(getInitialState(promotion));
             setErrors({});
+            setStep(1);
         }
     }, [isOpen, promotion]);
 
     const updateForm = (partial: Partial<FormState>) => {
         setForm((prev) => ({ ...prev, ...partial }));
-        // Clear related errors
         const clearedKeys = Object.keys(partial) as (keyof FormState)[];
         if (clearedKeys.some((k) => k in errors)) {
             setErrors((prev) => {
@@ -184,8 +182,27 @@ export default function PromotionFormModal({ isOpen, onClose, promotion }: Promo
         setErrors({});
     };
 
+    const handleNext = () => {
+        const step1Errors: FormErrors = {};
+        if (!form.name.trim()) step1Errors.name = 'Name is required';
+        else if (form.name.length > 200) step1Errors.name = 'Name must be 200 characters or less';
+
+        if (!form.start_date) step1Errors.start_date = 'Start date is required';
+        if (!form.end_date) step1Errors.end_date = 'End date is required';
+        else if (form.start_date && form.end_date <= form.start_date)
+            step1Errors.end_date = 'End date must be after start date';
+
+        if (Object.keys(step1Errors).length > 0) {
+            setErrors(step1Errors);
+        } else {
+            setErrors({});
+            setStep(2);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
         const validationErrors = validateForm(form);
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
@@ -194,8 +211,8 @@ export default function PromotionFormModal({ isOpen, onClose, promotion }: Promo
 
         setIsSubmitting(true);
         try {
-            if (isEditMode) {
-                await updatePromotion(promotion!.id, {
+            if (isEditMode && promotion) {
+                await updatePromotion(promotion.id, {
                     name: form.name,
                     status: form.status,
                     start_date: form.start_date,
@@ -216,13 +233,12 @@ export default function PromotionFormModal({ isOpen, onClose, promotion }: Promo
             }
             onClose();
         } catch (err) {
-            toast.error((err as Error).message ?? t('promotions.toast.error_save', 'Failed to save promotion'));
+            toast.error((err as Error).message ?? 'Failed to save promotion');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // Props passed down to type-specific sections
     const typeProps = {
         price_discount: {
             values: { product_ids: form.product_ids, config: form.config as PriceDiscountConfig },
@@ -242,83 +258,93 @@ export default function PromotionFormModal({ isOpen, onClose, promotion }: Promo
     };
 
     return (
-        <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <Dialog.Portal>
-                <Dialog.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50" />
-                <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg bg-white rounded-[2rem] shadow-2xl focus:outline-none max-h-[90vh] overflow-y-auto">
-                    {/* Header */}
-                    <div className="flex items-center justify-between px-8 pt-8 pb-6 sticky top-0 bg-white rounded-t-[2rem] border-b border-zinc-100 z-10">
-                        <div>
-                            <Dialog.Title className="text-xl font-black uppercase tracking-tight">
-                                {isEditMode
-                                    ? t('promotions.form.edit_title', 'Edit Promotion')
-                                    : t('promotions.form.create_title', 'Add Promotion')}
-                            </Dialog.Title>
-                            {!isEditMode && (
-                                <p className="text-xs text-zinc-400 font-semibold mt-0.5">
-                                    {t('promotions.form.type_help', 'Type cannot be changed after creation')}
-                                </p>
+        <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+            <DialogContent className="max-w-2xl p-6">
+                <DialogHeader>
+                    <DialogTitle>
+                        {promotion ? t('promotions.edit_promotion') : t('promotions.add_promotion')}
+                    </DialogTitle>
+                    {!promotion && (
+                        <p className="text-xs text-[var(--color-text-muted)] font-medium mt-1">
+                            {t('promotions.form.type_help', 'Type cannot be changed after creation')}
+                        </p>
+                    )}
+                </DialogHeader>
+
+                <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+                    {step === 1 && (
+                        <div className="space-y-4">
+                            <GeneralInfoSection
+                                values={{ name: form.name, type: form.type, status: form.status, start_date: form.start_date, end_date: form.end_date }}
+                                errors={{ name: errors.name, type: errors.type, start_date: errors.start_date, end_date: errors.end_date }}
+                                onChange={(partial) => {
+                                    if ('type' in partial && partial.type) {
+                                        handleTypeChange(partial.type);
+                                    } else {
+                                        updateForm(partial as Partial<FormState>);
+                                    }
+                                }}
+                                isEditMode={isEditMode}
+                            />
+                        </div>
+                    )}
+
+                    {step === 2 && (
+                        <div className="space-y-4">
+                            {form.type === 'price_discount' && (
+                                <PriceDiscountSection {...typeProps.price_discount} />
+                            )}
+                            {form.type === 'quantity_discount' && (
+                                <QuantityDiscountSection {...typeProps.quantity_discount} />
+                            )}
+                            {form.type === 'pack_discount' && (
+                                <PackDiscountSection {...typeProps.pack_discount} />
                             )}
                         </div>
-                        <button
-                            onClick={onClose}
-                            className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 transition-colors"
-                        >
-                            <X size={16} strokeWidth={2.5} />
-                        </button>
+                    )}
+
+                    <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex justify-end gap-3">
+                        {step === 1 ? (
+                            <>
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    onClick={onClose}
+                                    disabled={isSubmitting}
+                                >
+                                    {t('common.cancel')}
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="primary"
+                                    onClick={handleNext}
+                                >
+                                    {t('common.next', 'Next')}
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    onClick={() => setStep(1)}
+                                    disabled={isSubmitting}
+                                >
+                                    {t('common.back', 'Back')}
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    variant="primary"
+                                    icon={<Save size={16} />}
+                                    disabled={isSubmitting}
+                                >
+                                    {promotion ? t('promotions.form.save_changes') : t('promotions.form.create')}
+                                </Button>
+                            </>
+                        )}
                     </div>
-
-                    {/* Body */}
-                    <form onSubmit={handleSubmit} className="px-8 py-6 space-y-0">
-                        {/* General Section */}
-                        <GeneralInfoSection
-                            values={{ name: form.name, type: form.type, status: form.status, start_date: form.start_date, end_date: form.end_date }}
-                            errors={{ name: errors.name, type: errors.type, start_date: errors.start_date, end_date: errors.end_date }}
-                            onChange={(partial) => {
-                                if ('type' in partial && partial.type) {
-                                    handleTypeChange(partial.type);
-                                } else {
-                                    updateForm(partial as Partial<FormState>);
-                                }
-                            }}
-                            isEditMode={isEditMode}
-                        />
-
-                        {/* Type-specific Section */}
-                        {form.type === 'price_discount' && (
-                            <PriceDiscountSection {...typeProps.price_discount} />
-                        )}
-                        {form.type === 'quantity_discount' && (
-                            <QuantityDiscountSection {...typeProps.quantity_discount} />
-                        )}
-                        {form.type === 'pack_discount' && (
-                            <PackDiscountSection {...typeProps.pack_discount} />
-                        )}
-
-                        {/* Footer Buttons */}
-                        <div className="flex gap-3 pt-6">
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="flex-1 h-14 rounded-[3rem] border-2 border-zinc-200 font-black uppercase tracking-widest text-xs text-zinc-600 hover:bg-zinc-50 transition-colors"
-                            >
-                                {t('promotions.form.cancel', 'Cancel')}
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="flex-1 h-14 rounded-[3rem] bg-yellow-400 hover:bg-yellow-300 text-black font-black uppercase tracking-widest text-xs transition-all disabled:opacity-50"
-                            >
-                                {isSubmitting
-                                    ? t('promotions.form.saving', 'Saving…')
-                                    : isEditMode
-                                        ? t('promotions.form.save_changes', 'Save Changes')
-                                        : t('promotions.form.create', 'Create Promotion')}
-                            </button>
-                        </div>
-                    </form>
-                </Dialog.Content>
-            </Dialog.Portal>
-        </Dialog.Root>
+                </form>
+            </DialogContent>
+        </Dialog>
     );
 }

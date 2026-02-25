@@ -22,10 +22,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useSupplierStore } from '@/stores/useSupplierStore';
 import Button from '@/components/common/Button';
-import { FormModal } from '@/components/common/FormModal';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DeleteConfirmModal } from '@/components/common/DeleteConfirmModal';
 import type { Supplier, SupplierInput } from '@/lib/types';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { FormModal } from '@/components/common/FormModal';
 
 const defaultForm: SupplierInput = {
     name: '',
@@ -138,10 +139,9 @@ export default function Suppliers() {
         setForm(defaultForm);
     };
 
-    const inputClass = cn(
-        'w-full h-14 px-5 rounded-xl bg-zinc-50 border border-zinc-200 font-bold text-black outline-none transition-all placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white',
-    );
-    const labelClass = 'text-[10px] font-black text-zinc-400 uppercase tracking-[0.15em] ml-1 mb-1.5 block';
+    const inputClass =
+        'w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-hover)] focus:ring-1 focus:ring-[var(--color-border-hover)] transition-all placeholder:text-[var(--color-text-placeholder)]';
+    const labelClass = 'block text-sm font-medium text-[var(--color-text-muted)] mb-1';
 
     return (
         <div className="relative flex flex-col items-start gap-8 p-6 lg:p-8 animate-fadeIn mt-4">
@@ -427,145 +427,107 @@ export default function Suppliers() {
             </div>
 
             {/* Supplier Form Modal */}
-            <FormModal
-                isOpen={isFormOpen}
-                onClose={handleCloseForm}
-                title={editingSupplier ? t('suppliers.form_edit_title') : t('suppliers.form_add_title')}
-                description={
-                    editingSupplier ? t('suppliers.form_edit_description') : t('suppliers.form_add_description')
-                }
-                icon={<Truck size={24} strokeWidth={1.5} />}
-            >
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <div>
-                        <label className={labelClass}>{t('suppliers.label_name')} *</label>
-                        <input
-                            type="text"
-                            value={form.name}
-                            onChange={(e) => setForm({ ...form, name: e.target.value })}
-                            placeholder={t('suppliers.placeholder_name')}
-                            className={inputClass}
-                            required
-                            autoFocus
-                        />
-                    </div>
-                    <div>
-                        <label className={labelClass}>{t('suppliers.label_contact')}</label>
-                        <div className="relative">
-                            <User
-                                size={18}
-                                className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300"
-                                strokeWidth={1.5}
+            <Dialog open={isFormOpen} onOpenChange={(open) => { if (!open) handleCloseForm(); }}>
+                <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {editingSupplier ? t('suppliers.form_edit_title') : t('suppliers.form_add_title')}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <label className={labelClass}>{t('suppliers.label_name')} *</label>
+                            <input
+                                type="text"
+                                value={form.name}
+                                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                placeholder={t('suppliers.placeholder_name')}
+                                className={inputClass}
+                                required
+                                autoFocus
                             />
+                        </div>
+                        <div>
+                            <label className={labelClass}>{t('suppliers.label_contact')}</label>
                             <input
                                 type="text"
                                 value={form.contact_person || ''}
                                 onChange={(e) => setForm({ ...form, contact_person: e.target.value })}
                                 placeholder={t('suppliers.placeholder_contact')}
-                                className={inputClass + ' pl-12'}
+                                className={inputClass}
                             />
                         </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className={labelClass}>{t('suppliers.label_phone')}</label>
-                            <div className="relative">
-                                <Phone
-                                    size={18}
-                                    className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300"
-                                    strokeWidth={1.5}
-                                />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className={labelClass}>{t('suppliers.label_phone')}</label>
                                 <input
                                     type="tel"
                                     value={form.phone || ''}
                                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
                                     placeholder={t('suppliers.placeholder_phone')}
-                                    className={inputClass + ' pl-12'}
+                                    className={inputClass}
                                 />
                             </div>
-                        </div>
-                        <div>
-                            <label className={labelClass}>{t('suppliers.label_email')}</label>
-                            <div className="relative">
-                                <Mail
-                                    size={18}
-                                    className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300"
-                                    strokeWidth={1.5}
-                                />
+                            <div>
+                                <label className={labelClass}>{t('suppliers.label_email')}</label>
                                 <input
                                     type="email"
                                     value={form.email || ''}
                                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                                     placeholder={t('suppliers.placeholder_email')}
-                                    className={inputClass + ' pl-12'}
+                                    className={inputClass}
                                 />
                             </div>
                         </div>
-                    </div>
-                    <div>
-                        <label className={labelClass}>{t('suppliers.label_address')}</label>
-                        <div className="relative">
-                            <MapPin
-                                size={18}
-                                className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300"
-                                strokeWidth={1.5}
-                            />
+                        <div>
+                            <label className={labelClass}>{t('suppliers.label_address')}</label>
                             <input
                                 type="text"
                                 value={form.address || ''}
                                 onChange={(e) => setForm({ ...form, address: e.target.value })}
                                 placeholder={t('suppliers.placeholder_address')}
-                                className={inputClass + ' pl-12'}
+                                className={inputClass}
                             />
                         </div>
-                    </div>
-                    <div className="flex items-center justify-end gap-3 pt-5 mt-2 border-t border-zinc-100">
-                        <Button
-                            variant="ghost"
-                            onClick={handleCloseForm}
-                            className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all hover:bg-zinc-100 text-zinc-400 hover:text-black"
-                        >
-                            {t('suppliers.cancel')}
-                        </Button>
-                        <Button
-                            type="submit"
-                            icon={<Save size={16} />}
-                            className="flex-[2] h-12 rounded-xl bg-yellow-400 text-black font-black uppercase tracking-widest text-[10px] transition-all hover:bg-yellow-500 flex items-center justify-center gap-2 shadow-lg shadow-yellow-400/20 border-none"
-                        >
-                            {editingSupplier ? t('suppliers.update_supplier') : t('suppliers.save_supplier')}
-                        </Button>
-                    </div>
-                </form>
-            </FormModal>
+                        <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex justify-end gap-3">
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                onClick={handleCloseForm}
+                            >
+                                {t('suppliers.cancel')}
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                icon={<Save size={16} />}
+                            >
+                                {editingSupplier ? t('suppliers.update_supplier') : t('suppliers.save_supplier')}
+                            </Button>
+                        </div>
+                    </form>
+                </DialogContent>
+            </Dialog>
 
             {/* Payment Modal */}
-            <FormModal
-                isOpen={isPaymentOpen}
-                onClose={() => setIsPaymentOpen(false)}
-                title={t('suppliers.payment_title')}
-                description={t('suppliers.payment_description')}
-                icon={<CreditCard size={24} strokeWidth={1.5} />}
-                maxWidth="max-w-md"
-            >
-                <form onSubmit={handlePaymentSubmit} className="space-y-5">
-                    <div className="p-4 bg-zinc-50 rounded-xl border border-zinc-200 space-y-1">
-                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                            {t('suppliers.current_balance')}
-                        </span>
-                        <div className="text-xl font-black text-black">
-                            {selectedSupplierForPayment
-                                ? formatCurrency(selectedSupplierForPayment.balance)
-                                : formatCurrency(0)}
+            <Dialog open={isPaymentOpen} onOpenChange={(open) => { if (!open) setIsPaymentOpen(false); }}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>{t('suppliers.payment_title')}</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handlePaymentSubmit} className="space-y-4">
+                        <div className="p-4 bg-[var(--color-bg-secondary)] rounded-xl border border-[var(--color-border)] space-y-1">
+                            <span className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">
+                                {t('suppliers.current_balance')}
+                            </span>
+                            <div className="text-xl font-black text-[var(--color-text-primary)]">
+                                {selectedSupplierForPayment
+                                    ? formatCurrency(selectedSupplierForPayment.balance)
+                                    : formatCurrency(0)}
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <label className={labelClass}>{t('suppliers.payment_label')}</label>
-                        <div className="relative">
-                            <Banknote
-                                size={18}
-                                className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300"
-                                strokeWidth={1.5}
-                            />
+                        <div>
+                            <label className={labelClass}>{t('suppliers.payment_label')}</label>
                             <input
                                 type="number"
                                 step="0.01"
@@ -573,30 +535,30 @@ export default function Suppliers() {
                                 value={paymentAmount}
                                 onChange={(e) => setPaymentAmount(e.target.value)}
                                 placeholder="0.00"
-                                className={inputClass + ' pl-12'}
+                                className={inputClass}
                                 required
                                 autoFocus
                             />
                         </div>
-                    </div>
-                    <div className="flex items-center justify-end gap-3 pt-5 border-t border-zinc-100">
-                        <Button
-                            variant="ghost"
-                            onClick={() => setIsPaymentOpen(false)}
-                            className="flex-1 h-12 rounded-xl text-zinc-400 font-bold uppercase text-[10px] tracking-widest"
-                        >
-                            {t('suppliers.cancel')}
-                        </Button>
-                        <Button
-                            type="submit"
-                            icon={<CreditCard size={15} />}
-                            className="flex-[2] h-12 rounded-xl bg-yellow-400 text-black font-bold uppercase text-[10px] tracking-widest shadow-lg shadow-yellow-400/20 border-none"
-                        >
-                            {t('suppliers.confirm_payment')}
-                        </Button>
-                    </div>
-                </form>
-            </FormModal>
+                        <div className="pt-4 mt-6 border-t border-[var(--color-border)] flex justify-end gap-3">
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                onClick={() => setIsPaymentOpen(false)}
+                            >
+                                {t('suppliers.cancel')}
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                icon={<CreditCard size={15} />}
+                            >
+                                {t('suppliers.confirm_payment')}
+                            </Button>
+                        </div>
+                    </form>
+                </DialogContent>
+            </Dialog>
 
             {/* Global Delete Confirmation Modal */}
             <DeleteConfirmModal

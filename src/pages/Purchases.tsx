@@ -132,13 +132,13 @@ export default function Purchases() {
                                 {t('purchases.title')}
                             </h2>
                         </div>
-                        <Button
-                            className="btn-page-action"
+                        <button
                             onClick={() => setIsNewOrderOpen(true)}
-                            icon={<Plus size={16} />}
+                            className="flex items-center gap-2 px-5 py-3 bg-yellow-400 hover:bg-yellow-300 text-black rounded-[3rem] font-black uppercase tracking-widest text-xs transition-all"
                         >
-                            {t('purchases.new_order')}
-                        </Button>
+                            <Plus size={18} strokeWidth={3} />
+                            <span>{t('purchases.new_order')}</span>
+                        </button>
                     </div>
                 </div>
 

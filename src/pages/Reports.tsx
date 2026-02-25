@@ -181,18 +181,18 @@ export default function Reports() {
                                         {p === '7days'
                                             ? t('reports.period_7days')
                                             : p === '30days'
-                                              ? t('reports.period_30days')
-                                              : t('reports.period_year')}
+                                                ? t('reports.period_30days')
+                                                : t('reports.period_year')}
                                     </button>
                                 ))}
                             </div>
 
                             <button
                                 onClick={activeTab === 'cashiers' ? handleExportCashierReport : handleExport}
-                                className="flex items-center gap-2 px-4 py-2.5 bg-black text-white rounded-xl border border-black shadow-lg shadow-black/20 hover:bg-neutral-800 transition-all active:scale-95"
+                                className="flex items-center gap-2 px-5 py-3 bg-yellow-400 hover:bg-yellow-300 text-black rounded-[3rem] font-black uppercase tracking-widest text-xs transition-all"
                             >
-                                <Download size={16} />
-                                <span className="text-xs font-bold uppercase tracking-wider">
+                                <Download size={18} strokeWidth={3} />
+                                <span>
                                     {t('reports.export')}
                                 </span>
                             </button>
@@ -597,10 +597,10 @@ export default function Reports() {
                                                             i === 0
                                                                 ? 'bg-yellow-400 text-black'
                                                                 : i === 1
-                                                                  ? 'bg-zinc-300 text-black'
-                                                                  : i === 2
-                                                                    ? 'bg-orange-300 text-black'
-                                                                    : 'bg-zinc-200 text-zinc-600',
+                                                                    ? 'bg-zinc-300 text-black'
+                                                                    : i === 2
+                                                                        ? 'bg-orange-300 text-black'
+                                                                        : 'bg-zinc-200 text-zinc-600',
                                                         )}
                                                     >
                                                         {i + 1}
@@ -655,15 +655,15 @@ export default function Reports() {
                                                             session.cash_difference === 0
                                                                 ? 'text-emerald-500'
                                                                 : session.cash_difference && session.cash_difference > 0
-                                                                  ? 'text-emerald-500'
-                                                                  : 'text-red-500',
+                                                                    ? 'text-emerald-500'
+                                                                    : 'text-red-500',
                                                         )}
                                                     >
                                                         {session.status === 'active'
                                                             ? t('reports.session_active')
                                                             : session.cash_difference !== null
-                                                              ? `${t('reports.session_diff')} ${formatCurrency(session.cash_difference)}`
-                                                              : t('reports.session_closed')}
+                                                                ? `${t('reports.session_diff')} ${formatCurrency(session.cash_difference)}`
+                                                                : t('reports.session_closed')}
                                                     </p>
                                                 </div>
                                             </div>

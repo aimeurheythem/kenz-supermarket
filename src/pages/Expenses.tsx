@@ -96,12 +96,10 @@ export default function Expenses() {
                         </div>
                         <button
                             onClick={() => setIsModalOpen(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-md border border-black shadow-lg shadow-black/20 hover:bg-neutral-800 transition-all active:scale-95"
+                            className="flex items-center gap-2 px-5 py-3 bg-yellow-400 hover:bg-yellow-300 text-black rounded-[3rem] font-black uppercase tracking-widest text-xs transition-all"
                         >
-                            <Plus size={16} />
-                            <span className="text-[10px] font-black uppercase tracking-widest">
-                                {t('expenses.add_expense')}
-                            </span>
+                            <Plus size={18} strokeWidth={3} />
+                            <span>{t('expenses.add_expense')}</span>
                         </button>
                     </div>
                 </div>

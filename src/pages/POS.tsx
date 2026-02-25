@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import QuickAccess from '@/components/POS/QuickAccess';
 import InventoryPreview from '@/components/POS/InventoryPreview';
+import ActivePromotionsBanner from '@/components/POS/ActivePromotionsBanner';
 import CheckoutSimulation from '@/components/POS/CheckoutSimulation';
 import ReceiptPreview from '@/components/POS/ReceiptPreview';
 import CartPanel from '@/components/POS/CartPanel';
@@ -310,6 +311,9 @@ export default function POS() {
                             </button>
                         </div>
                     </div>
+
+                    {/* Active Promotions Banner */}
+                    {!searchQuery && <ActivePromotionsBanner />}
 
                     {/* Products Scrollable Area */}
                     <div className="h-0 grow overflow-y-auto scrollable scrollbar-hide" style={{ touchAction: 'pan-y' }}>

@@ -1,14 +1,6 @@
 import React from 'react';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import Button from '@/components/common/Button';
-import { AlertTriangle } from 'lucide-react';
+import * as Dialog from '@radix-ui/react-dialog';
+import { X, AlertTriangle } from 'lucide-react';
 
 interface ConfirmDialogProps {
     isOpen: boolean;
@@ -33,54 +25,49 @@ export function ConfirmDialog({
     variant = 'warning',
     loading = false,
 }: ConfirmDialogProps) {
-    const iconColor =
-        variant === 'danger' ? 'text-red-500' : variant === 'warning' ? 'text-amber-500' : 'text-zinc-500';
-    const btnClass =
-        variant === 'danger'
-            ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20 border-none'
-            : variant === 'warning'
-              ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20 border-none'
-              : 'bg-zinc-900 hover:bg-zinc-800 text-white border-none';
+    const titleColor = variant === 'danger' ? 'text-rose-600' : variant === 'warning' ? 'text-amber-500' : 'text-zinc-800';
+    const btnClass = variant === 'danger'
+        ? 'bg-rose-500 hover:bg-rose-600'
+        : variant === 'warning'
+            ? 'bg-amber-500 hover:bg-amber-600'
+            : 'bg-zinc-900 hover:bg-zinc-800';
 
     return (
-        <Dialog
-            open={isOpen}
-            onOpenChange={(open) => {
-                if (!open) onClose();
-            }}
-        >
-            <DialogContent className="max-w-[400px]">
-                <DialogHeader className="pt-4 px-4">
-                    <div className="flex items-center gap-3">
-                        <AlertTriangle className={`${iconColor} shrink-0`} size={24} strokeWidth={2} />
-                        <DialogTitle className="text-xl font-black text-black uppercase tracking-tight">
+        <Dialog.Root open={isOpen} onOpenChange={(open) => { if (!open && !loading) onClose(); }}>
+            <Dialog.Portal>
+                <Dialog.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50" />
+                <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-white rounded-[2rem] p-8 shadow-2xl focus:outline-none">
+                    <div className="flex items-center justify-between mb-6">
+                        <Dialog.Title className={`text-xl font-black uppercase tracking-tight ${titleColor}`}>
                             {title}
-                        </DialogTitle>
+                        </Dialog.Title>
+                        <button onClick={onClose} disabled={loading} className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 transition-colors disabled:opacity-50">
+                            <X size={16} strokeWidth={2.5} />
+                        </button>
                     </div>
-                    <DialogDescription className="text-zinc-500 font-medium leading-relaxed mt-2">
+
+                    <p className="text-sm text-zinc-600 mb-6 flex flex-col gap-2">
                         {description}
-                    </DialogDescription>
-                </DialogHeader>
-                <DialogFooter className="flex flex-col sm:flex-row gap-3 mt-6 sm:justify-center w-full px-4 pb-4">
-                    <Button
-                        variant="ghost"
-                        onClick={onClose}
-                        disabled={loading}
-                        className="flex-1 rounded-2xl h-12 text-zinc-400 hover:text-black hover:bg-zinc-50 transition-all font-bold uppercase text-xs tracking-widest"
-                    >
-                        {cancelLabel}
-                    </Button>
-                    <Button
-                        onClick={() => {
-                            onConfirm();
-                        }}
-                        disabled={loading}
-                        className={`flex-1 rounded-2xl h-12 transition-all font-bold uppercase text-xs tracking-widest ${btnClass}`}
-                    >
-                        {loading ? 'Processing...' : confirmLabel}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                    </p>
+
+                    <div className="flex gap-3">
+                        <button
+                            onClick={onClose}
+                            disabled={loading}
+                            className="flex-1 h-12 rounded-[3rem] border-2 border-zinc-200 font-black uppercase tracking-widest text-xs text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-50"
+                        >
+                            {cancelLabel}
+                        </button>
+                        <button
+                            onClick={() => onConfirm()}
+                            disabled={loading}
+                            className={`flex-1 h-12 flex items-center justify-center gap-2 rounded-[3rem] text-white font-black uppercase tracking-widest text-xs transition-colors disabled:opacity-50 ${btnClass}`}
+                        >
+                            {loading ? '...' : confirmLabel}
+                        </button>
+                    </div>
+                </Dialog.Content>
+            </Dialog.Portal>
+        </Dialog.Root>
     );
 }

@@ -4,6 +4,7 @@ import { Save, ScanBarcode } from 'lucide-react';
 import Button from '@/components/common/Button';
 import BarcodeScanner from '@/components/common/BarcodeScanner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Product, ProductInput, Category } from '@/lib/types';
 
 interface ProductFormModalProps {
@@ -120,34 +121,46 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                                 <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">
                                     {t('inventory.form.labels.category')}
                                 </label>
-                                <select
-                                    value={form.category_id || ''}
-                                    onChange={(e) => setForm({ ...form, category_id: e.target.value ? Number(e.target.value) : undefined })}
-                                    className={inputClass}
+                                <Select
+                                    value={form.category_id ? String(form.category_id) : '__none__'}
+                                    onValueChange={(v) =>
+                                        setForm({ ...form, category_id: v === '__none__' ? undefined : Number(v) })
+                                    }
                                 >
-                                    <option value="">{t('inventory.form.placeholders.none')}</option>
-                                    {categories.map((cat) => (
-                                        <option key={cat.id} value={cat.id}>
-                                            {t(`categories.${cat.name}`, { defaultValue: cat.name })}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-hover)] focus:ring-1 focus:ring-[var(--color-border-hover)] transition-all h-auto font-normal">
+                                        <SelectValue placeholder={t('inventory.form.placeholders.none')} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="__none__">
+                                            {t('inventory.form.placeholders.none')}
+                                        </SelectItem>
+                                        {categories.map((cat) => (
+                                            <SelectItem key={cat.id} value={String(cat.id)}>
+                                                {t(`categories.${cat.name}`, { defaultValue: cat.name })}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">
                                     {t('inventory.form.labels.unit')}
                                 </label>
-                                <select
+                                <Select
                                     value={form.unit || 'piece'}
-                                    onChange={(e) => setForm({ ...form, unit: e.target.value })}
-                                    className={inputClass}
+                                    onValueChange={(v) => setForm({ ...form, unit: v })}
                                 >
-                                    {['piece', 'kg', 'g', 'l', 'ml', 'bottle', 'box', 'pack'].map((u) => (
-                                        <option key={u} value={u}>
-                                            {t(`inventory.units.${u}`)}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-hover)] focus:ring-1 focus:ring-[var(--color-border-hover)] transition-all h-auto font-normal">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {['piece', 'kg', 'g', 'l', 'ml', 'bottle', 'box', 'pack'].map((u) => (
+                                            <SelectItem key={u} value={u}>
+                                                {t(`inventory.units.${u}`)}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
 

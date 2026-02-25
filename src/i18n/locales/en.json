@@ -380,6 +380,17 @@
         "scan": "Scan",
         "end_shift": "End Shift",
         "scan_product": "Scan Product",
+        "promo_banner": {
+            "title": "Active Promotions",
+            "type_price": "Price Off",
+            "type_quantity": "Buy & Get",
+            "type_pack": "Bundle",
+            "off": "off",
+            "buy_get": "Buy {{buy}}, get {{free}} free",
+            "bundle_at": "Bundle at",
+            "free_label": "free",
+            "products": "product(s)"
+        },
         "print": {
             "yes": "Receipt",
             "no": "No Receipt"

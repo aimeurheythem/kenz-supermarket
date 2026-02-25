@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useEffect } from 'react';
-import { ShoppingCart, Trash2, CreditCard, Banknote, Smartphone, X, Printer, Wallet, ChevronsDown, Tag } from 'lucide-react';
+import { ShoppingCart, Trash2, CreditCard, Banknote, Smartphone, X, Printer, Wallet, ChevronsDown, Tag, Package } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -104,7 +104,7 @@ function CartPanelComponent({
                             <p className="text-[10px] font-black uppercase tracking-[0.4em]">{t('pos.cart.empty')}</p>
                         </div>
                     ) : (
-                        <div className="space-y-6 py-4">
+                        <div className="space-y-3 py-4">
                             {cart.map((item) => {
                                 const appliedPromo = promotionResult?.itemDiscounts.find(
                                     (d) => d.productId === item.product.id,
@@ -113,16 +113,40 @@ function CartPanelComponent({
                                 const discountedTotal = appliedPromo
                                     ? Math.max(0, originalTotal - appliedPromo.discountAmount)
                                     : originalTotal;
+
+                                // Accent color per promo type
+                                const accentBar = appliedPromo
+                                    ? appliedPromo.promotionType === 'quantity_discount'
+                                        ? 'border-l-4 border-purple-400 bg-purple-50/60 pl-3'
+                                        : 'border-l-4 border-yellow-400 bg-yellow-50/60 pl-3'
+                                    : 'pl-0';
+                                const badgeBg = appliedPromo
+                                    ? appliedPromo.promotionType === 'quantity_discount'
+                                        ? 'bg-purple-100 text-purple-700'
+                                        : 'bg-yellow-100 text-yellow-700'
+                                    : '';
+                                const priceColor = appliedPromo
+                                    ? appliedPromo.promotionType === 'quantity_discount'
+                                        ? 'text-purple-600'
+                                        : 'text-yellow-600'
+                                    : 'text-black';
+
                                 return (
-                                <div key={item.product.id} className="flex items-center justify-between group">
-                                    <div className="flex items-center gap-4 flex-1">
+                                <div
+                                    key={item.product.id}
+                                    className={cn(
+                                        'flex items-center justify-between rounded-2xl pr-2 py-2 transition-colors',
+                                        accentBar,
+                                    )}
+                                >
+                                    <div className="flex items-center gap-3 flex-1 min-w-0">
                                         <div
                                             className={cn(
-                                                'w-12 h-12 rounded-2xl flex items-center justify-center shrink-0',
+                                                'w-11 h-11 rounded-xl flex items-center justify-center shrink-0',
                                                 getProductStyle(item.product.id).bg,
                                             )}
                                         >
-                                            <span className="text-[12px] font-black text-black">x{item.quantity}</span>
+                                            <span className="text-[11px] font-black text-black">x{item.quantity}</span>
                                         </div>
                                         <div className="flex flex-col min-w-0">
                                             <span className="text-sm font-black text-black uppercase tracking-tight truncate">
@@ -132,21 +156,25 @@ function CartPanelComponent({
                                                 {formatCurrency(item.product.selling_price)}
                                             </span>
                                             {appliedPromo && (
-                                                <span className="inline-flex items-center gap-1 mt-0.5 text-[9px] font-black tracking-wider uppercase px-1.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700 w-fit">
+                                                <span className={cn(
+                                                    'inline-flex items-center gap-1 mt-1 text-[9px] font-black tracking-wider uppercase px-2 py-0.5 rounded-full w-fit',
+                                                    badgeBg,
+                                                )}>
                                                     <Tag size={8} strokeWidth={3} />
                                                     {appliedPromo.promotionName}
+                                                    <span className="opacity-70">· -{formatCurrency(appliedPromo.discountAmount)}</span>
                                                 </span>
                                             )}
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-2 shrink-0">
                                         <div className="flex flex-col items-end">
                                             {appliedPromo ? (
                                                 <>
                                                     <span className="text-[10px] font-bold text-zinc-400 line-through">
                                                         {formatCurrency(originalTotal)}
                                                     </span>
-                                                    <span className="text-base font-black text-yellow-600 tracking-tighter">
+                                                    <span className={cn('text-base font-black tracking-tighter', priceColor)}>
                                                         {formatCurrency(discountedTotal)}
                                                     </span>
                                                 </>
@@ -158,14 +186,48 @@ function CartPanelComponent({
                                         </div>
                                         <button
                                             onClick={() => removeFromCart(item.product.id)}
-                                            className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl bg-red-50 text-red-400 hover:bg-red-500 hover:text-white active:scale-95 transition-all duration-200"
+                                            className="w-9 h-9 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-xl bg-red-50 text-red-400 hover:bg-red-500 hover:text-white active:scale-95 transition-all duration-200"
                                         >
-                                            <Trash2 size={18} strokeWidth={2.5} />
+                                            <Trash2 size={15} strokeWidth={2.5} />
                                         </button>
                                     </div>
                                 </div>
                                 );
                             })}
+
+                            {/* Bundle discount cards */}
+                            {(promotionResult?.bundleDiscounts ?? []).length > 0 && (
+                                <div className="mt-2 space-y-2">
+                                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-orange-500 flex items-center gap-1.5 px-1">
+                                        <Package size={10} strokeWidth={3} />
+                                        {t('pos.cart.bundle_deals', 'Bundle Deals')}
+                                    </p>
+                                    {promotionResult!.bundleDiscounts.map((bundle) => {
+                                        const bundleProducts = cart
+                                            .filter((c) => bundle.productIds.includes(c.product.id))
+                                            .map((c) => c.product.name);
+                                        return (
+                                            <div
+                                                key={bundle.promotionId}
+                                                className="rounded-2xl bg-orange-50 border-l-4 border-orange-400 px-3 py-2.5"
+                                            >
+                                                <div className="flex items-center justify-between mb-1.5">
+                                                    <span className="text-xs font-black text-orange-700 flex items-center gap-1.5">
+                                                        <Package size={11} strokeWidth={2.5} />
+                                                        {bundle.promotionName}
+                                                    </span>
+                                                    <span className="text-[10px] font-black text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">
+                                                        -{formatCurrency(bundle.savings)}
+                                                    </span>
+                                                </div>
+                                                <p className="text-[10px] font-bold text-orange-500/80 truncate">
+                                                    {bundleProducts.join(' · ')}
+                                                </p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -204,12 +266,12 @@ function CartPanelComponent({
                         <span className="text-black">{formatCurrency(0)}</span>
                     </div>
                     {promoSavings > 0 && (
-                        <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-yellow-600">
-                            <span className="flex items-center gap-1">
-                                <Tag size={10} strokeWidth={3} />
+                        <div className="flex items-center justify-between font-black uppercase tracking-widest bg-yellow-50 border border-yellow-200 rounded-2xl px-4 py-3">
+                            <span className="flex items-center gap-2 text-[11px] text-yellow-700">
+                                <Tag size={12} strokeWidth={3} />
                                 {t('pos.cart.promo_savings', 'Promo Savings')}
                             </span>
-                            <span>-{formatCurrency(promoSavings)}</span>
+                            <span className="text-sm text-yellow-700">-{formatCurrency(promoSavings)}</span>
                         </div>
                     )}
                     <div className="pt-6 border-t border-zinc-200 flex items-center justify-between">

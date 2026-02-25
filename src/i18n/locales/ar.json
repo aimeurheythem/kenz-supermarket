@@ -373,6 +373,17 @@
         "scan": "مسح ضوئي",
         "end_shift": "إنهاء الوردية",
         "scan_product": "مسح المنتج",
+        "promo_banner": {
+            "title": "العروض النشطة",
+            "type_price": "خصم سعر",
+            "type_quantity": "اشترِ واحصل",
+            "type_pack": "حزمة",
+            "off": "خصم",
+            "buy_get": "اشترِ {{buy}}، احصل على {{free}} مجاناً",
+            "bundle_at": "حزمة بـ",
+            "free_label": "مجاناً",
+            "products": "منتج/منتجات"
+        },
         "print": {
             "yes": "إيصال",
             "no": "بدون إيصال"

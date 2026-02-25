@@ -373,6 +373,17 @@
         "scan": "Scanner",
         "end_shift": "Fin de service",
         "scan_product": "Scanner un produit",
+        "promo_banner": {
+            "title": "Promotions actives",
+            "type_price": "Prix réduit",
+            "type_quantity": "Achetez & obtenez",
+            "type_pack": "Pack",
+            "off": "de réduction",
+            "buy_get": "Achetez {{buy}}, obtenez {{free}} gratuit(s)",
+            "bundle_at": "Pack à",
+            "free_label": "gratuit(s)",
+            "products": "produit(s)"
+        },
         "print": {
             "yes": "Reçu",
             "no": "Sans reçu"

@@ -53,7 +53,7 @@ function InventoryPreviewComponent({
                 </span>
             </div>
 
-            <div className="grid grid-cols-5 gap-2.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2.5">
                 {products.filter(p => p.stock_quantity > 0).slice(0, 15).map((product) => {
                     const isOutOfStock = product.stock_quantity <= 0;
                     const inCart = cart.find((c) => c.product.id === product.id);

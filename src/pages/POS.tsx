@@ -16,11 +16,12 @@ import InventoryPreview from '@/components/POS/InventoryPreview';
 import ActivePromotionsBanner from '@/components/POS/ActivePromotionsBanner';
 import CheckoutSimulation from '@/components/POS/CheckoutSimulation';
 import ReceiptPreview from '@/components/POS/ReceiptPreview';
-import CartPanel from '@/components/POS/CartPanel';
+
 import ProductGrid from '@/components/POS/ProductGrid';
 import EmptyCartDialog from '@/components/POS/EmptyCartDialog';
 import StockErrorDialog from '@/components/POS/StockErrorDialog';
 import QuickAccessManager from '@/components/POS/QuickAccessManager';
+import CartPanel from '@/components/POS/CartPanel';
 import LogoutConfirmModal from '@/components/layout/LogoutConfirmModal';
 import { toast } from 'sonner';
 import { getProductStyle } from '@/lib/product-styles';
@@ -41,6 +42,7 @@ export default function POS() {
         clearStockError,
         promotionResult,
         isLoading: isCheckingOut,
+        updateCartItem,
     } = useSaleStore();
     const cartTotal = useSaleStore(selectCartTotal);
     const { user, currentSession, getCurrentSessionId, closeCashierSession, logout } = useAuthStore();
@@ -358,25 +360,24 @@ export default function POS() {
                     </div>
                 </div>
 
-                {/* RIGHT: Ticket Cart */}
-                <div className="w-[340px] h-full shrink-0 bg-[#f2f2f0] overflow-hidden">
-                    <CartPanel
-                        cart={cart}
-                        cartTotal={cartTotal}
-                        promotionResult={promotionResult}
-                        clearCart={clearCart}
-                        removeFromCart={removeFromCart}
-                        paymentMethod={paymentMethod}
-                        setPaymentMethod={setPaymentMethod}
-                        selectedCustomer={selectedCustomer}
-                        setSelectedCustomer={setSelectedCustomer}
-                        printReceipt={printReceipt}
-                        setPrintReceipt={setPrintReceipt}
-                        handleBeforeCheckout={handleBeforeCheckout}
-                        isCheckingOut={isCheckingOut}
-                        getProductStyle={getProductStyle}
-                    />
-                </div>
+                {/* RIGHT: Cart Panel */}
+                <CartPanel
+                    cart={cart}
+                    cartTotal={cartTotal}
+                    promotionResult={promotionResult}
+                    addToCart={addToCart}
+                    updateCartItem={updateCartItem}
+                    removeFromCart={removeFromCart}
+                    clearCart={clearCart}
+                    selectedCustomer={selectedCustomer}
+                    setSelectedCustomer={setSelectedCustomer}
+                    paymentMethod={paymentMethod}
+                    setPaymentMethod={setPaymentMethod}
+                    handleBeforeCheckout={handleBeforeCheckout}
+                    isCheckingOut={isCheckingOut}
+                    stockError={stockError}
+                    clearStockError={clearStockError}
+                />
             </div>
 
             {/* Modals */}

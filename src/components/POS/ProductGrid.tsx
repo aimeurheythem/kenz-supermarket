@@ -39,7 +39,7 @@ function ProductGridComponent({
                 </span>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6 pb-8 sm:pb-12">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 pb-8 sm:pb-12">
                 {products.map((product) => {
                     const inCart = cart.find((c) => c.product.id === product.id);
                     const isOutOfStock = product.stock_quantity <= 0;

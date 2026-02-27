@@ -171,8 +171,7 @@ export default function CartPanel({
                 {/* Title row */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-black/20" />
-                        <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-[0.3em]">
+                        <span className="text-[12px] text-black font-bold uppercase tracking-[0.3em]">
                             {t('pos.cart.title')}
                         </span>
                         {cart.length > 0 && (
@@ -202,7 +201,7 @@ export default function CartPanel({
             </div>
 
             {/* Dashed separator */}
-            <div className="border-t border-dashed border-zinc-200" />
+            <div className="border-t border-dashed border-zinc-300" />
 
             {/* ═══ BODY ═══ */}
             <div className="h-0 grow flex flex-col overflow-hidden">
@@ -267,7 +266,7 @@ export default function CartPanel({
             </div>
 
             {/* ═══ FOOTER ═══ */}
-            <div className="px-4 pb-4 pt-3 space-y-3 border-t border-dashed border-zinc-200">
+            <div className="px-4 pb-4 pt-3 space-y-3 border-t border-dashed border-zinc-300">
                 {/* Grand total */}
                 <div className="flex items-center justify-between">
                     <span className="text-sm font-bold text-zinc-400 uppercase tracking-wider">

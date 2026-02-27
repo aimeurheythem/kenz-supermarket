@@ -25,7 +25,9 @@
           "scrollbar-width: thin",
           "scrollbar-color",
           "-webkit-app-region",
-          "scrollbar-width: none"
+          "scrollbar-width: none",
+          "-webkit-overflow-scrolling",
+          "text-wrap"
         ]
       }
     ]

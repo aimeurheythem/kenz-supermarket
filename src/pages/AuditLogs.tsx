@@ -369,28 +369,168 @@ export default function AuditLogs() {
                                                                 </div>
                                                             </div>
 
-                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                                <div>
-                                                                    <h4 className="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-3">
-                                                                        {t('audit_logs.label_old_value')}
-                                                                    </h4>
-                                                                    <pre className="text-xs font-mono bg-rose-50 p-4 rounded-xl overflow-x-auto text-rose-900 min-h-[100px] border border-rose-100">
-                                                                        {log.old_value
-                                                                            ? JSON.stringify(log.old_value, null, 2)
-                                                                            : 'null'}
-                                                                    </pre>
-                                                                </div>
-                                                                <div>
-                                                                    <h4 className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-3">
-                                                                        {t('audit_logs.label_new_value')}
-                                                                    </h4>
-                                                                    <pre className="text-xs font-mono bg-emerald-50 p-4 rounded-xl overflow-x-auto text-emerald-900 min-h-[100px] border border-emerald-100">
-                                                                        {log.new_value
-                                                                            ? JSON.stringify(log.new_value, null, 2)
-                                                                            : 'null'}
-                                                                    </pre>
-                                                                </div>
-                                                            </div>
+                                                            {(() => {
+                                                                const parseValue = (v: any) => {
+                                                                    if (v == null) return null;
+                                                                    if (typeof v === 'string') {
+                                                                        try { return JSON.parse(v); } catch { return v; }
+                                                                    }
+                                                                    return v;
+                                                                };
+                                                                const oldObj = parseValue(log.old_value);
+                                                                const newObj = parseValue(log.new_value);
+                                                                const isObject = (v: any) => v !== null && typeof v === 'object' && !Array.isArray(v);
+
+                                                                // Only show simple scalar values the user can actually read
+                                                                const isSimpleValue = (v: any) =>
+                                                                    v === null || v === undefined || typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean';
+
+                                                                const formatCell = (v: any) => {
+                                                                    if (v === undefined || v === null) return <span className="text-zinc-300 italic">—</span>;
+                                                                    if (typeof v === 'boolean') return v ? t('common.yes', 'Yes') : t('common.no', 'No');
+                                                                    return String(v);
+                                                                };
+
+                                                                // Skip any field that's internal / not meaningful to the user
+                                                                const shouldSkipField = (key: string, oldVal: any, newVal: any) => {
+                                                                    // Any field ending with _id or _ids
+                                                                    if (/_ids?$/.test(key)) return true;
+                                                                    // Explicit system fields
+                                                                    if (['id', 'created_at', 'updated_at', 'deleted_at', 'status', 'effective_status', 'type', 'config', 'products', 'items', 'image', 'image_url', 'password', 'password_hash', 'token'].includes(key)) return true;
+                                                                    // Skip if both values are arrays or nested objects (not human-readable)
+                                                                    if (!isSimpleValue(oldVal) && !isSimpleValue(newVal)) return true;
+                                                                    // Skip if one side is array/object (complex data)
+                                                                    if (Array.isArray(oldVal) || Array.isArray(newVal)) return true;
+                                                                    if (isObject(oldVal) || isObject(newVal)) return true;
+                                                                    return false;
+                                                                };
+
+                                                                // Human-readable labels
+                                                                const fieldLabels: Record<string, string> = {
+                                                                    name: t('audit_logs.field_name', 'Name'),
+                                                                    full_name: t('audit_logs.field_full_name', 'Full Name'),
+                                                                    username: t('audit_logs.field_username', 'Username'),
+                                                                    email: t('audit_logs.field_email', 'Email'),
+                                                                    phone: t('audit_logs.field_phone', 'Phone'),
+                                                                    role: t('audit_logs.field_role', 'Role'),
+                                                                    barcode: t('audit_logs.field_barcode', 'Barcode'),
+                                                                    description: t('audit_logs.field_description', 'Description'),
+                                                                    buy_price: t('audit_logs.field_buy_price', 'Buy Price'),
+                                                                    sell_price: t('audit_logs.field_sell_price', 'Sell Price'),
+                                                                    price: t('audit_logs.field_price', 'Price'),
+                                                                    quantity: t('audit_logs.field_quantity', 'Quantity'),
+                                                                    stock: t('audit_logs.field_stock', 'Stock'),
+                                                                    stock_quantity: t('audit_logs.field_stock', 'Stock'),
+                                                                    min_stock: t('audit_logs.field_min_stock', 'Min Stock'),
+                                                                    max_stock: t('audit_logs.field_max_stock', 'Max Stock'),
+                                                                    unit: t('audit_logs.field_unit', 'Unit'),
+                                                                    category_name: t('audit_logs.field_category', 'Category'),
+                                                                    supplier_name: t('audit_logs.field_supplier', 'Supplier'),
+                                                                    address: t('audit_logs.field_address', 'Address'),
+                                                                    notes: t('audit_logs.field_notes', 'Notes'),
+                                                                    discount: t('audit_logs.field_discount', 'Discount'),
+                                                                    discount_type: t('audit_logs.field_discount_type', 'Discount Type'),
+                                                                    discount_value: t('audit_logs.field_discount_value', 'Discount Value'),
+                                                                    tax: t('audit_logs.field_tax', 'Tax'),
+                                                                    total: t('audit_logs.field_total', 'Total'),
+                                                                    is_active: t('audit_logs.field_active', 'Active'),
+                                                                    expiry_date: t('audit_logs.field_expiry', 'Expiry Date'),
+                                                                    start_date: t('audit_logs.field_start_date', 'Start Date'),
+                                                                    end_date: t('audit_logs.field_end_date', 'End Date'),
+                                                                    value: t('audit_logs.field_value', 'Value'),
+                                                                    setting_key: t('audit_logs.field_setting', 'Setting'),
+                                                                    setting_value: t('audit_logs.field_value', 'Value'),
+                                                                    min_quantity: t('audit_logs.field_min_qty', 'Min Quantity'),
+                                                                    max_quantity: t('audit_logs.field_max_qty', 'Max Quantity'),
+                                                                    bundle_price: t('audit_logs.field_bundle_price', 'Bundle Price'),
+                                                                    pack_size: t('audit_logs.field_pack_size', 'Pack Size'),
+                                                                    contact_person: t('audit_logs.field_contact', 'Contact Person'),
+                                                                    company_name: t('audit_logs.field_company', 'Company'),
+                                                                    city: t('audit_logs.field_city', 'City'),
+                                                                };
+
+                                                                const getLabel = (key: string) =>
+                                                                    fieldLabels[key] || key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+                                                                if (isObject(oldObj) || isObject(newObj)) {
+                                                                    const allKeys = Array.from(new Set([
+                                                                        ...Object.keys(oldObj || {}),
+                                                                        ...Object.keys(newObj || {}),
+                                                                    ]));
+
+                                                                    const changedKeys = allKeys.filter((key) => {
+                                                                        const oldVal = oldObj?.[key];
+                                                                        const newVal = newObj?.[key];
+                                                                        if (shouldSkipField(key, oldVal, newVal)) return false;
+                                                                        return JSON.stringify(oldVal) !== JSON.stringify(newVal);
+                                                                    });
+
+                                                                    if (changedKeys.length === 0) {
+                                                                        return (
+                                                                            <div className="p-6 text-center text-sm text-zinc-400 font-medium">
+                                                                                {t('audit_logs.no_changes', 'No changes detected')}
+                                                                            </div>
+                                                                        );
+                                                                    }
+
+                                                                    return (
+                                                                        <div className="rounded-xl border border-zinc-200 overflow-hidden">
+                                                                            <table className="w-full text-sm">
+                                                                                <thead>
+                                                                                    <tr className="bg-zinc-50 border-b border-zinc-200">
+                                                                                        <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                                                                                            {t('audit_logs.col_field', 'Field')}
+                                                                                        </th>
+                                                                                        <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-rose-400">
+                                                                                            {t('audit_logs.label_old_value')}
+                                                                                        </th>
+                                                                                        <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-emerald-500">
+                                                                                            {t('audit_logs.label_new_value')}
+                                                                                        </th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody className="divide-y divide-zinc-100">
+                                                                                    {changedKeys.map((key) => (
+                                                                                        <tr key={key}>
+                                                                                            <td className="px-4 py-2.5 font-bold text-zinc-700 text-xs">
+                                                                                                {getLabel(key)}
+                                                                                            </td>
+                                                                                            <td className="px-4 py-2.5 text-xs break-all text-rose-600 bg-rose-50/50">
+                                                                                                {formatCell(oldObj?.[key])}
+                                                                                            </td>
+                                                                                            <td className="px-4 py-2.5 text-xs break-all text-emerald-600 bg-emerald-50/50">
+                                                                                                {formatCell(newObj?.[key])}
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    ))}
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    );
+                                                                }
+
+                                                                // Fallback for non-object values
+                                                                return (
+                                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                        <div className="p-4 bg-rose-50 rounded-xl border border-rose-100">
+                                                                            <h4 className="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-2">
+                                                                                {t('audit_logs.label_old_value')}
+                                                                            </h4>
+                                                                            <p className="text-sm text-rose-900 break-all">
+                                                                                {formatCell(oldObj)}
+                                                                            </p>
+                                                                        </div>
+                                                                        <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                                                                            <h4 className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-2">
+                                                                                {t('audit_logs.label_new_value')}
+                                                                            </h4>
+                                                                            <p className="text-sm text-emerald-900 break-all">
+                                                                                {formatCell(newObj)}
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })()}
                                                         </div>
                                                     </DialogContent>
                                                 </Dialog>

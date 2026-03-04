@@ -408,8 +408,8 @@ export default function POSLayout() {
         onDrawer: handleOpenDrawer,
         onPriceCheck: () => searchInputRef.current?.focus(),
         onReturn: handleReturn,
-        onReport: () => navigate('/reports'),
-        onSettings: () => navigate('/settings'),
+        onReport: () => navigate('/pos/reports'),
+        onSettings: () => navigate('/pos/settings'),
         onEndShift: () => setShowEndShiftConfirm(true),
         onGiftCard: () => toast.info(t('pos.gift_card_not_available', 'Gift card feature is not available yet')),
     });
@@ -587,8 +587,8 @@ export default function POSLayout() {
                         onOpenDrawer={handleOpenDrawer}
                         onPriceCheck={() => searchInputRef.current?.focus()}
                         onReturn={handleReturn}
-                        onDailyReport={() => navigate('/reports')}
-                        onSettings={() => navigate('/settings')}
+                        onDailyReport={() => navigate('/pos/reports')}
+                        onSettings={() => navigate('/pos/settings')}
                         onEndShift={() => setShowEndShiftConfirm(true)}
                         onGiftCard={() => toast.info(t('pos.gift_card_not_available', 'Gift card feature is not available yet'))}
                     />

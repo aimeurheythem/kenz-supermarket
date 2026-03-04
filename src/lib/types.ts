@@ -21,6 +21,7 @@ export type CategoryInput = Pick<Category, 'name'> & Partial<Pick<Category, 'des
 // PRODUCTS
 // =============================================
 export interface Product {
+    buying_price: null;
     id: number;
     barcode: string | null;
     name: string;
@@ -157,10 +158,17 @@ export interface Sale {
     tax_amount: number;
     discount_amount: number;
     total: number;
-    payment_method: 'cash' | 'card' | 'mobile' | 'credit';
+    payment_method: 'cash' | 'card' | 'mobile' | 'credit' | 'split';
     customer_name: string;
-    status: 'completed' | 'refunded' | 'voided';
+    status: 'completed' | 'refunded' | 'voided' | 'returned';
     created_at: string;
+    // POS rebuild fields
+    ticket_number: number | null;
+    original_sale_id: number | null;
+    return_type: 'full' | 'partial' | null;
+    cart_discount_type: 'percentage' | 'fixed' | null;
+    cart_discount_value: number;
+    cart_discount_amount: number;
     // Joined
     user_name?: string;
     session_status?: string;
@@ -175,12 +183,19 @@ export interface SaleItem {
     unit_price: number;
     discount: number;
     total: number;
+    // POS rebuild fields
+    manual_discount_type: 'percentage' | 'fixed' | null;
+    manual_discount_value: number;
+    manual_discount_amount: number;
+    promotion_id?: number | null;
+    promotion_name?: string | null;
 }
 
 export type CartItem = {
     product: Product;
     quantity: number;
     discount: number;
+    manualDiscount?: ManualDiscount;
 };
 
 // =============================================
@@ -410,3 +425,82 @@ export interface Expense {
 
 export type ExpenseInput = Pick<Expense, 'description' | 'amount' | 'category'> &
     Partial<Pick<Expense, 'date' | 'payment_method' | 'user_id'>>;
+
+// =============================================
+// POS REBUILD — NEW TYPES (005-pos-rebuild)
+// =============================================
+
+/** A single payment entry in a (potentially split) payment */
+export interface PaymentEntry {
+    id: number;
+    sale_id: number;
+    method: 'cash' | 'card' | 'mobile' | 'credit';
+    amount: number;
+    change_amount: number;
+    created_at: string;
+}
+
+/** Payload for adding a payment during split payment flow */
+export interface PaymentEntryInput {
+    method: 'cash' | 'card' | 'mobile' | 'credit';
+    amount: number;
+}
+
+/** A manually applied discount (line-level or cart-level) */
+export interface ManualDiscount {
+    type: 'percentage' | 'fixed';
+    value: number;           // 10 for 10%, or 5.00 for $5
+    computedAmount: number;  // resolved dollar amount
+    reason?: string;
+    authorizedBy?: number;   // manager user_id if above threshold
+}
+
+/** A parked/held transaction (session-scoped, in-memory) */
+export interface HeldTransaction {
+    id: string;              // crypto.randomUUID()
+    ticketNumber: number;
+    cart: CartItem[];
+    customer: Customer | null;
+    promotionResult: PromotionApplicationResult | null;
+    cartDiscount: ManualDiscount | null;
+    heldAt: string;          // ISO timestamp
+    cashierId: number;
+    note?: string;
+}
+
+/** Item selection for a return/refund */
+export interface ReturnItem {
+    saleItemId: number;
+    productId: number;
+    productName: string;
+    originalQuantity: number;
+    returnQuantity: number;
+    unitPrice: number;
+    lineDiscount: number;    // prorated discount per unit
+    refundAmount: number;    // computed refund for this return line
+}
+
+/** Full return/refund request */
+export interface ReturnRequest {
+    originalSaleId: number;
+    items: ReturnItem[];
+    totalRefund: number;
+    reason?: string;
+    authorizedBy: number;    // manager user_id (required for all returns)
+}
+
+/** Manager authorization result */
+export interface AuthorizationResult {
+    authorized: boolean;
+    managerId: number | null;
+    managerName: string | null;
+}
+
+/** Authorization action types */
+export type AuthorizableAction = 'void_sale' | 'return' | 'large_discount' | 'price_override';
+
+/** Numeric keypad state */
+export interface KeypadState {
+    value: string;           // accumulated digit string
+    mode: 'product_code' | 'quantity' | 'price';
+}

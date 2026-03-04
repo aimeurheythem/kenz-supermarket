@@ -1,5 +1,5 @@
 import { query, execute, lastInsertId, get, executeNoSave, triggerSave } from '../db';
-import type { Sale, SaleItem, CartItem, PromotionApplicationResult } from '../../src/lib/types';
+import type { Sale, SaleItem, CartItem, PromotionApplicationResult, PaymentEntry, PaymentEntryInput, ManualDiscount } from '../../src/lib/types';
 import { AuditLogRepo } from './audit-log.repo';
 
 export const SaleRepo = {
@@ -484,5 +484,315 @@ export const SaleRepo = {
              LIMIT ?`,
             params,
         );
+    },
+
+    // =============================================
+    // TICKET NUMBERS (005-pos-rebuild)
+    // =============================================
+
+    /**
+     * Peek at the next ticket number for today (without incrementing).
+     */
+    async getNextTicketNumber(): Promise<number> {
+        const row = await get<{ last_number: number }>(
+            "SELECT last_number FROM ticket_counter WHERE date = date('now')",
+        );
+        return (row?.last_number ?? 0) + 1;
+    },
+
+    /**
+     * Atomically increment and return the next ticket number (inside an existing transaction).
+     * Must be called within BEGIN TRANSACTION ... COMMIT.
+     */
+    async _incrementTicketNumber(): Promise<number> {
+        await executeNoSave(
+            "INSERT INTO ticket_counter (date, last_number) VALUES (date('now'), 0) ON CONFLICT(date) DO NOTHING",
+        );
+        await executeNoSave(
+            "UPDATE ticket_counter SET last_number = last_number + 1 WHERE date = date('now')",
+        );
+        const row = await get<{ last_number: number }>(
+            "SELECT last_number FROM ticket_counter WHERE date = date('now')",
+        );
+        return row?.last_number ?? 1;
+    },
+
+    // =============================================
+    // SPLIT PAYMENT (005-pos-rebuild)
+    // =============================================
+
+    /**
+     * Create a sale from cart with split payment (multiple payment entries).
+     */
+    async createFromCartWithSplitPayment(
+        cart: CartItem[],
+        payments: PaymentEntryInput[],
+        customer: { name: string; id?: number },
+        userId?: number,
+        sessionId?: number,
+        promotionResult?: PromotionApplicationResult,
+        cartDiscount?: ManualDiscount,
+    ): Promise<Sale> {
+        const subtotal = cart.reduce((sum, item) => {
+            const lineManual = item.manualDiscount?.computedAmount ?? 0;
+            return sum + item.product.selling_price * item.quantity - item.discount - lineManual;
+        }, 0);
+
+        const promoSavings = promotionResult?.totalSavings ?? 0;
+        const cartDiscountAmount = cartDiscount?.computedAmount ?? 0;
+        const discountAmount = promoSavings + cartDiscountAmount +
+            cart.reduce((sum, item) => sum + (item.manualDiscount?.computedAmount ?? 0), 0);
+        const total = Math.max(0, subtotal - promoSavings - cartDiscountAmount);
+
+        try {
+            await executeNoSave('BEGIN TRANSACTION;');
+
+            const ticketNumber = await this._incrementTicketNumber();
+
+            await executeNoSave(
+                `INSERT INTO sales (user_id, session_id, customer_id, subtotal, tax_amount, discount_amount, total, payment_method, customer_name, ticket_number, cart_discount_type, cart_discount_value, cart_discount_amount)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, 'split', ?, ?, ?, ?, ?)`,
+                [
+                    userId || null,
+                    sessionId || null,
+                    customer.id || null,
+                    subtotal,
+                    0,
+                    discountAmount,
+                    total,
+                    customer.name || 'Walk-in Customer',
+                    ticketNumber,
+                    cartDiscount?.type ?? null,
+                    cartDiscount?.value ?? 0,
+                    cartDiscountAmount,
+                ],
+            );
+
+            const saleId = await lastInsertId();
+
+            // Insert payment entries
+            for (const entry of payments) {
+                await executeNoSave(
+                    `INSERT INTO payment_entries (sale_id, method, amount, change_amount) VALUES (?, ?, ?, ?)`,
+                    [saleId, entry.method, entry.amount, 0],
+                );
+            }
+
+            // Create sale items and update stock
+            for (const item of cart) {
+                const appliedPromo = promotionResult?.itemDiscounts.find((d) => d.productId === item.product.id);
+                const promoItemDiscount = appliedPromo?.discountAmount ?? 0;
+                const manualLineDiscount = item.manualDiscount?.computedAmount ?? 0;
+                const itemTotal = item.product.selling_price * item.quantity - item.discount - promoItemDiscount - manualLineDiscount;
+
+                const product = await get<{ stock_quantity: number; name: string }>(
+                    'SELECT stock_quantity, name FROM products WHERE id = ?',
+                    [item.product.id],
+                );
+                const previousStock = product?.stock_quantity ?? 0;
+
+                if (previousStock < item.quantity) {
+                    throw new Error(
+                        `Insufficient stock for "${product?.name || item.product.name}": requested ${item.quantity}, available ${previousStock}`,
+                    );
+                }
+
+                await executeNoSave(
+                    `INSERT INTO sale_items (sale_id, product_id, product_name, quantity, unit_price, discount, total, manual_discount_type, manual_discount_value, manual_discount_amount, promotion_id, promotion_name)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        saleId,
+                        item.product.id,
+                        item.product.name,
+                        item.quantity,
+                        item.product.selling_price,
+                        item.discount + promoItemDiscount,
+                        itemTotal,
+                        item.manualDiscount?.type ?? null,
+                        item.manualDiscount?.value ?? 0,
+                        manualLineDiscount,
+                        appliedPromo?.promotionId ?? null,
+                        appliedPromo?.promotionName ?? null,
+                    ],
+                );
+
+                await executeNoSave(
+                    "UPDATE products SET stock_quantity = MAX(0, stock_quantity - ?), updated_at = datetime('now') WHERE id = ?",
+                    [item.quantity, item.product.id],
+                );
+                const newStock = Math.max(0, previousStock - item.quantity);
+                await executeNoSave(
+                    `INSERT INTO stock_movements (product_id, type, quantity, previous_stock, new_stock, reason, reference_id, reference_type)
+                     VALUES (?, 'out', ?, ?, ?, 'Sale', ?, 'sale')`,
+                    [item.product.id, item.quantity, previousStock, newStock, saleId],
+                );
+            }
+
+            await executeNoSave('COMMIT;');
+            triggerSave();
+
+            const sale = await this.getById(saleId);
+            if (!sale) throw new Error(`Failed to retrieve created sale with ID ${saleId}`);
+
+            AuditLogRepo.log(
+                'CREATE',
+                'SALE',
+                saleId,
+                `Split-payment Sale #${saleId} — ${cart.length} items, total ${total}, ${payments.length} payment entries`,
+                null,
+                { total, items: cart.length, payment_method: 'split', payments },
+                userId || null,
+            );
+
+            return sale;
+        } catch (error) {
+            await executeNoSave('ROLLBACK;');
+            console.error('Split payment transaction failed:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Get all payment entries for a sale.
+     */
+    async getPaymentEntries(saleId: number): Promise<PaymentEntry[]> {
+        return query<PaymentEntry>('SELECT * FROM payment_entries WHERE sale_id = ? ORDER BY created_at', [saleId]);
+    },
+
+    // =============================================
+    // RETURNS / REFUNDS (005-pos-rebuild)
+    // =============================================
+
+    /**
+     * Get total quantities already returned for each product in a sale.
+     */
+    async getReturnedQuantities(saleId: number): Promise<Map<number, number>> {
+        const rows = await query<{ product_id: number; total_returned: number }>(
+            `SELECT si.product_id, SUM(si.quantity) as total_returned
+             FROM sale_items si
+             JOIN sales s ON si.sale_id = s.id
+             WHERE s.original_sale_id = ? AND s.status = 'returned'
+             GROUP BY si.product_id`,
+            [saleId],
+        );
+        const map = new Map<number, number>();
+        for (const row of rows) {
+            map.set(row.product_id, row.total_returned);
+        }
+        return map;
+    },
+
+    /**
+     * Create a partial return: negative sale linked to original via original_sale_id.
+     * Restocks returned items and creates stock movements.
+     */
+    async createPartialReturn(request: {
+        originalSaleId: number;
+        items: Array<{
+            saleItemId: number;
+            productId: number;
+            productName: string;
+            returnQuantity: number;
+            unitPrice: number;
+            refundAmount: number;
+        }>;
+        totalRefund: number;
+        reason?: string;
+        authorizedBy: number;
+    }): Promise<Sale> {
+        const originalSale = await this.getById(request.originalSaleId);
+        if (!originalSale) throw new Error(`Original sale ${request.originalSaleId} not found`);
+
+        const returnType = request.items.length === (await this.getItems(request.originalSaleId)).length ? 'full' : 'partial';
+
+        try {
+            await executeNoSave('BEGIN TRANSACTION;');
+
+            const ticketNumber = await this._incrementTicketNumber();
+
+            // Create return sale (negative total)
+            await executeNoSave(
+                `INSERT INTO sales (user_id, session_id, customer_id, subtotal, tax_amount, discount_amount, total, payment_method, customer_name, status, ticket_number, original_sale_id, return_type)
+                 VALUES (?, ?, ?, ?, 0, 0, ?, ?, ?, 'returned', ?, ?, ?)`,
+                [
+                    request.authorizedBy,
+                    originalSale.session_id,
+                    originalSale.customer_id,
+                    -request.totalRefund,
+                    -request.totalRefund,
+                    originalSale.payment_method,
+                    originalSale.customer_name,
+                    ticketNumber,
+                    request.originalSaleId,
+                    returnType,
+                ],
+            );
+
+            const returnSaleId = await lastInsertId();
+
+            // Create return sale items (positive quantities for tracking, negative totals)
+            for (const item of request.items) {
+                await executeNoSave(
+                    `INSERT INTO sale_items (sale_id, product_id, product_name, quantity, unit_price, discount, total)
+                     VALUES (?, ?, ?, ?, ?, 0, ?)`,
+                    [
+                        returnSaleId,
+                        item.productId,
+                        item.productName,
+                        item.returnQuantity,
+                        item.unitPrice,
+                        -item.refundAmount,
+                    ],
+                );
+
+                // Restore stock
+                const product = await get<{ stock_quantity: number }>(
+                    'SELECT stock_quantity FROM products WHERE id = ?',
+                    [item.productId],
+                );
+                const previousStock = product?.stock_quantity ?? 0;
+
+                await executeNoSave(
+                    "UPDATE products SET stock_quantity = stock_quantity + ?, updated_at = datetime('now') WHERE id = ?",
+                    [item.returnQuantity, item.productId],
+                );
+
+                await executeNoSave(
+                    `INSERT INTO stock_movements (product_id, type, quantity, previous_stock, new_stock, reason, reference_id, reference_type)
+                     VALUES (?, 'return', ?, ?, ?, ?, ?, 'sale')`,
+                    [item.productId, item.returnQuantity, previousStock, previousStock + item.returnQuantity, request.reason || 'Return', returnSaleId],
+                );
+            }
+
+            // If full return, mark original as returned
+            if (returnType === 'full') {
+                await executeNoSave(
+                    "UPDATE sales SET status = 'returned' WHERE id = ?",
+                    [request.originalSaleId],
+                );
+            }
+
+            await executeNoSave('COMMIT;');
+            triggerSave();
+
+            const returnSale = await this.getById(returnSaleId);
+            if (!returnSale) throw new Error(`Failed to retrieve return sale with ID ${returnSaleId}`);
+
+            AuditLogRepo.log(
+                'RETURN',
+                'SALE',
+                returnSaleId,
+                `${returnType} return for Sale #${request.originalSaleId} — ${request.items.length} items, refund ${request.totalRefund}`,
+                { original_sale_id: request.originalSaleId },
+                { return_type: returnType, refund: request.totalRefund, authorized_by: request.authorizedBy },
+                request.authorizedBy,
+            );
+
+            return returnSale;
+        } catch (error) {
+            await executeNoSave('ROLLBACK;');
+            console.error('Return transaction failed:', error);
+            throw error;
+        }
     },
 };

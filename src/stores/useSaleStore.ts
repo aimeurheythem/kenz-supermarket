@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Sale, CartItem, PromotionApplicationResult } from '@/lib/types';
+import type { Sale, CartItem, PromotionApplicationResult, ManualDiscount, PaymentEntryInput, ReturnRequest } from '@/lib/types';
 import { SaleRepo } from '../../database/repositories/sale.repo';
 import { ProductRepo } from '../../database/repositories/product.repo';
 import { PromotionRepo } from '../../database/repositories/promotion.repo';
@@ -10,6 +10,7 @@ interface SaleStore {
     recentSales: Sale[];
     todayStats: { revenue: number; orders: number; profit: number };
     cart: CartItem[];
+    cartDiscount: ManualDiscount | null;
     promotionResult: PromotionApplicationResult | null;
     isLoading: boolean;
     error: string | null;
@@ -53,6 +54,23 @@ interface SaleStore {
     // Stock error handling
     stockError: { productName: string; available: number } | null;
     clearStockError: () => void;
+
+    // Manual discounts
+    setItemManualDiscount: (productId: number, discount: ManualDiscount) => void;
+    clearItemManualDiscount: (productId: number) => void;
+    setCartDiscount: (discount: ManualDiscount) => void;
+    clearCartDiscount: () => void;
+
+    // Split payment checkout
+    checkoutWithSplitPayment: (
+        entries: PaymentEntryInput[],
+        customer: { name: string; id?: number },
+        userId?: number,
+        sessionId?: number,
+    ) => Promise<Sale>;
+
+    // Returns
+    processReturn: (request: ReturnRequest) => Promise<Sale>;
 }
 
 export const useSaleStore = create<SaleStore>((set, get) => {
@@ -78,6 +96,7 @@ export const useSaleStore = create<SaleStore>((set, get) => {
     recentSales: [],
     todayStats: { revenue: 0, orders: 0, profit: 0 },
     cart: [],
+    cartDiscount: null,
     promotionResult: null,
     isLoading: false,
     error: null,
@@ -231,6 +250,74 @@ export const useSaleStore = create<SaleStore>((set, get) => {
     },
 
     clearStockError: () => set({ stockError: null }),
+
+    // Manual discounts
+    setItemManualDiscount: (productId, discount) => {
+        const { cart } = get();
+        set({
+            cart: cart.map((c) =>
+                c.product.id === productId ? { ...c, manualDiscount: discount } : c,
+            ),
+        });
+    },
+
+    clearItemManualDiscount: (productId) => {
+        const { cart } = get();
+        set({
+            cart: cart.map((c) =>
+                c.product.id === productId ? { ...c, manualDiscount: undefined } : c,
+            ),
+        });
+    },
+
+    setCartDiscount: (discount) => set({ cartDiscount: discount }),
+    clearCartDiscount: () => set({ cartDiscount: null }),
+
+    // Split payment checkout
+    checkoutWithSplitPayment: async (entries, customer, userId, sessionId) => {
+        const { cart, promotionResult, cartDiscount } = get();
+        if (cart.length === 0) throw new Error('Cart is empty');
+
+        try {
+            set({ isLoading: true, error: null });
+            const sale = await SaleRepo.createFromCartWithSplitPayment(
+                cart,
+                entries,
+                customer,
+                userId,
+                sessionId,
+                promotionResult ?? undefined,
+                cartDiscount ?? undefined,
+            );
+            set({ cart: [], cartDiscount: null, promotionResult: null });
+            await get().loadSales();
+            await get().loadRecent();
+            await get().loadTodayStats();
+            return sale;
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+
+    // Returns
+    processReturn: async (request) => {
+        try {
+            set({ isLoading: true, error: null });
+            const returnSale = await SaleRepo.createPartialReturn(request);
+            await get().loadSales();
+            await get().loadRecent();
+            await get().loadTodayStats();
+            return returnSale;
+        } catch (e) {
+            set({ error: (e as Error).message });
+            throw e;
+        } finally {
+            set({ isLoading: false });
+        }
+    },
     };
 });
 
@@ -242,4 +329,35 @@ export const selectCartTotal = (state: SaleStore) =>
 export const selectCartTotalWithPromotions = (state: SaleStore) => {
     const base = state.cart.reduce((sum, item) => sum + item.product.selling_price * item.quantity - item.discount, 0);
     return base - (state.promotionResult?.totalSavings ?? 0);
+};
+
+/** Derived selector — computes manual discount amount from cart items + cart-level discount */
+export const selectManualDiscountTotal = (state: SaleStore) => {
+    // Sum item-level manual discounts
+    const itemDiscounts = state.cart.reduce((sum, item) => {
+        if (!item.manualDiscount) return sum;
+        const lineTotal = item.product.selling_price * item.quantity;
+        return sum + (item.manualDiscount.type === 'percentage'
+            ? lineTotal * (item.manualDiscount.value / 100)
+            : item.manualDiscount.value);
+    }, 0);
+
+    // Cart-level discount
+    const subtotal = state.cart.reduce((sum, item) => sum + item.product.selling_price * item.quantity - item.discount, 0);
+    const cartDisc = state.cartDiscount
+        ? state.cartDiscount.type === 'percentage'
+            ? subtotal * (state.cartDiscount.value / 100)
+            : state.cartDiscount.value
+        : 0;
+
+    return itemDiscounts + cartDisc;
+};
+
+/** Derived selector — grand total after all discounts (promo + manual) + VAT */
+export const selectGrandTotal = (vatRate: number) => (state: SaleStore) => {
+    const subtotal = selectCartTotal(state);
+    const promoSavings = state.promotionResult?.totalSavings ?? 0;
+    const manualDiscount = selectManualDiscountTotal(state);
+    const afterDiscounts = subtotal - promoSavings - manualDiscount;
+    return afterDiscounts + afterDiscounts * vatRate;
 };

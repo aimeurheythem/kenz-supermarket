@@ -1,13 +1,14 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Printer, X, CheckCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Portal from '@/components/common/Portal';
 import Button from '@/components/common/Button';
 import { formatCurrency, formatDate, cn } from '@/lib/utils';
-import type { Sale, SaleItem } from '@/lib/types';
+import type { Sale, SaleItem, PaymentEntry } from '@/lib/types';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useSettingsStore, selectSetting } from '@/stores/useSettingsStore';
+import { SaleRepo } from '../../../database/repositories/sale.repo';
 
 interface ReceiptPreviewProps {
     sale: Sale;
@@ -36,12 +37,14 @@ function ReceiptContent({
     storeInfo,
     cashierName,
     forPrint,
+    paymentEntries,
 }: {
     sale: Sale;
     items: SaleItem[];
     storeInfo: StoreInfo;
     cashierName: string;
     forPrint: boolean;
+    paymentEntries?: PaymentEntry[];
 }) {
     const { t } = useTranslation();
 
@@ -92,6 +95,11 @@ function ReceiptContent({
                         <div className="flex flex-col">
                             <span>{formatDate(sale.created_at)}</span>
                             <span>ID: {sale.id}</span>
+                            {sale.ticket_number != null && (
+                                <span className="font-bold">
+                                    {t('pos.receipt.ticket', 'Ticket')}: #{String(sale.ticket_number).padStart(3, '0')}
+                                </span>
+                            )}
                         </div>
                         <div className="flex flex-col items-end">
                             <span>
@@ -106,6 +114,12 @@ function ReceiptContent({
                             <span>{formatDate(sale.created_at)}</span>
                             <span>#{sale.id.toString().padStart(6, '0')}</span>
                         </div>
+                        {sale.ticket_number != null && (
+                            <div className="flex justify-between text-zinc-600 text-xs font-semibold">
+                                <span>{t('pos.receipt.ticket', 'Ticket')}:</span>
+                                <span>#{String(sale.ticket_number).padStart(3, '0')}</span>
+                            </div>
+                        )}
                         <div className="flex justify-between text-zinc-500 text-xs">
                             <span>{t('pos.receipt.cashier', 'Cashier')}:</span>
                             <span>{cashierName}</span>
@@ -189,6 +203,38 @@ function ReceiptContent({
                 )}
             </div>
 
+            {/* ── Split Payment Breakdown ── */}
+            {sale.payment_method === 'split' && paymentEntries && paymentEntries.length > 0 && (
+                <div
+                    className={cn(
+                        forPrint
+                            ? 'mb-4 text-[10px] border-b border-black pb-2 border-dashed'
+                            : 'border-t border-dashed border-zinc-200 py-2 space-y-1',
+                    )}
+                >
+                    <p
+                        className={cn(
+                            'font-bold uppercase',
+                            forPrint ? 'text-[10px] mb-1' : 'text-xs text-zinc-500 tracking-wider mb-1',
+                        )}
+                    >
+                        {t('pos.receipt.payment_breakdown', 'Payment Breakdown')}
+                    </p>
+                    {paymentEntries.map((entry, idx) => (
+                        <div
+                            key={idx}
+                            className={cn(
+                                'flex justify-between',
+                                forPrint ? 'text-[10px]' : 'text-sm text-zinc-600',
+                            )}
+                        >
+                            <span className="capitalize">{entry.method}</span>
+                            <span className={cn(!forPrint && 'font-medium')}>{formatCurrency(entry.amount)}</span>
+                        </div>
+                    ))}
+                </div>
+            )}
+
             {/* ── Footer (print only) ── */}
             {forPrint && (
                 <div className="text-center text-[10px] pt-4 border-t border-black border-dashed">
@@ -218,6 +264,7 @@ export default function ReceiptPreview({ sale, items, onClose, onPrint }: Receip
     const { t } = useTranslation();
     const { user } = useAuthStore();
     const [isPrinting, setIsPrinting] = useState(false);
+    const [paymentEntries, setPaymentEntries] = useState<PaymentEntry[]>([]);
 
     const storeName = useSettingsStore(selectSetting('store.name', 'Kenzy Pro'));
     const storeAddress = useSettingsStore(selectSetting('store.address', 'Store Address'));
@@ -238,6 +285,13 @@ export default function ReceiptPreview({ sale, items, onClose, onPrint }: Receip
     };
 
     const cashierName = user?.full_name || 'Staff';
+
+    // Fetch payment entries for split-payment sales
+    useEffect(() => {
+        if (sale.payment_method === 'split' && sale.id) {
+            SaleRepo.getPaymentEntries(sale.id).then(setPaymentEntries).catch(() => setPaymentEntries([]));
+        }
+    }, [sale.id, sale.payment_method]);
 
     const handlePrint = useCallback(async () => {
         setIsPrinting(true);
@@ -316,6 +370,7 @@ export default function ReceiptPreview({ sale, items, onClose, onPrint }: Receip
                             storeInfo={storeInfo}
                             cashierName={cashierName}
                             forPrint={false}
+                            paymentEntries={paymentEntries}
                         />
                     </div>
 
@@ -342,6 +397,7 @@ export default function ReceiptPreview({ sale, items, onClose, onPrint }: Receip
                         storeInfo={storeInfo}
                         cashierName={cashierName}
                         forPrint={true}
+                        paymentEntries={paymentEntries}
                     />
                 </div>
             </div>

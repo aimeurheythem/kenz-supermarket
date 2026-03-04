@@ -1,0 +1,718 @@
+// POSLayout.tsx — Multi-zone POS layout orchestrator (3-column CSS Grid)
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Search, X, Barcode } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
+import { toast } from 'sonner';
+
+import POSHeader from './POSHeader';
+import CartTicket from './CartTicket';
+import TotalsBar from './TotalsBar';
+import ClientInfoPanel from './ClientInfoPanel';
+import ProductDetailCard from './ProductDetailCard';
+import NumericKeypad from './NumericKeypad';
+import ActionGrid from './ActionGrid';
+import ManagerPinDialog from './ManagerPinDialog';
+import DiscountDialog from './DiscountDialog';
+import StockErrorDialog from './StockErrorDialog';
+import HoldRecallDialog from './HoldRecallDialog';
+import ReturnDialog from './ReturnDialog';
+import SplitPaymentPanel from './SplitPaymentPanel';
+import ReceiptPreview from './ReceiptPreview';
+import BarcodeScanner from '@/components/common/BarcodeScanner';
+import { SaleRepo } from '../../../database/repositories/sale.repo';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { useSettingsStore, selectSetting } from '@/stores/useSettingsStore';
+import { useProductStore } from '@/stores/useProductStore';
+import { useSaleStore, selectCartTotal, selectCartTotalWithPromotions, selectManualDiscountTotal } from '@/stores/useSaleStore';
+import { usePOSStore } from '@/stores/usePOSStore';
+import { useAuthorizationStore } from '@/stores/useAuthorizationStore';
+import { useBarcodeScanner } from '@/hooks/useBarcodeScanner';
+import { useFormatCurrency } from '@/hooks/useFormatCurrency';
+import { useTicketNumber } from '@/hooks/useTicketNumber';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useManagerAuth } from '@/hooks/useManagerAuth';
+import type { Product, Customer, ManualDiscount, Sale, SaleItem } from '@/lib/types';
+
+export default function POSLayout() {
+    const { t } = useTranslation();
+    const navigate = useNavigate();
+    const { formatCurrency } = useFormatCurrency();
+    const { ticketNumber, refresh: refreshTicketNumber } = useTicketNumber();
+
+    // Stores
+    const storeName = useSettingsStore(selectSetting('store.name', 'Super Market'));
+    const vatRate = parseFloat(useSettingsStore(selectSetting('tax.rate', '0')) || '0') / 100;
+    const user = useAuthStore((s) => s.user);
+    const currentSession = useAuthStore((s) => s.currentSession);
+    const { products, loadProducts, getByBarcode } = useProductStore();
+    const {
+        cart,
+        addToCart,
+        updateCartItem,
+        removeFromCart,
+        clearCart,
+        promotionResult,
+        isLoading: isCheckingOut,
+        stockError,
+        clearStockError,
+    } = useSaleStore();
+    const cartTotal = useSaleStore(selectCartTotal);
+    const cartTotalWithPromos = useSaleStore(selectCartTotalWithPromotions);
+    const manualDiscountTotal = useSaleStore(selectManualDiscountTotal);
+    const { setItemManualDiscount, clearItemManualDiscount, setCartDiscount, clearCartDiscount, checkout } = useSaleStore();
+    const { setSelectedProduct, holdTransaction, getHoldCount } = usePOSStore();
+    const selectedProduct = usePOSStore((s) => s.selectedProduct);
+    const heldTransactions = usePOSStore((s) => s.heldTransactions);
+    const keypadValue = usePOSStore((s) => s.keypadValue);
+    const { appendKeypad, clearKeypad, backspaceKeypad } = usePOSStore();
+    const { requestAuth } = useManagerAuth();
+    const { processReturn: processReturnAction } = useSaleStore();
+
+    // Authorization store (for ManagerPinDialog)
+    const authStore = useAuthorizationStore();
+
+    // Local state
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+    const [showScanner, setShowScanner] = useState(false);
+    const [showCustomerSearch, setShowCustomerSearch] = useState(false);
+    const [showDiscountDialog, setShowDiscountDialog] = useState(false);
+    const [discountScope, setDiscountScope] = useState<'line' | 'cart'>('cart');
+    const [discountProductId, setDiscountProductId] = useState<number | null>(null);
+    const [showEndShiftConfirm, setShowEndShiftConfirm] = useState(false);
+    const [showReturnDialog, setShowReturnDialog] = useState(false);
+    const [showHoldRecallDialog, setShowHoldRecallDialog] = useState(false);
+    const [returnManagerId, setReturnManagerId] = useState<number | null>(null);
+    const [showSplitPayment, setShowSplitPayment] = useState(false);
+    const [lastSale, setLastSale] = useState<Sale | null>(null);
+    const [lastSaleItems, setLastSaleItems] = useState<SaleItem[]>([]);
+    const [showReceiptPreview, setShowReceiptPreview] = useState(false);
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
+    // O(1) barcode→product lookup map
+    const barcodeMap = useMemo(() => {
+        const map = new Map<string, Product>();
+        for (const p of products) {
+            if (p.barcode) map.set(p.barcode, p);
+        }
+        return map;
+    }, [products]);
+
+    // Hardware barcode scanner
+    useBarcodeScanner(
+        useCallback(
+            async (barcode: string) => {
+                const product = barcodeMap.get(barcode);
+                if (product) {
+                    await addToCart({ product, quantity: 1, discount: 0 });
+                    setSelectedProduct(product);
+                    toast.success(product.name, { description: t('pos.scan.added', 'Added to cart'), duration: 1500 });
+                } else {
+                    toast.warning(t('pos.scan.not_found', 'Product not found: ') + barcode);
+                }
+            },
+            [barcodeMap, addToCart, setSelectedProduct, t],
+        ),
+        !showScanner,
+    );
+
+    useEffect(() => {
+        loadProducts();
+    }, [loadProducts]);
+
+    // Search filtering
+    const filteredProducts = useMemo(
+        () =>
+            products
+                .filter(
+                    (p) =>
+                        searchQuery.length > 0 &&
+                        (p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            (p.barcode && p.barcode.includes(searchQuery))),
+                )
+                .slice(0, 12),
+        [products, searchQuery],
+    );
+
+    const handleAddProduct = useCallback(
+        async (product: Product) => {
+            if (product.stock_quantity <= 0) return;
+            await addToCart({ product, quantity: 1, discount: 0 });
+            setSelectedProduct(product);
+            setSearchQuery('');
+        },
+        [addToCart, setSelectedProduct],
+    );
+
+    // === Action handlers for ActionGrid ===
+    const holdCount = getHoldCount(user?.id ?? 0);
+    const closeCashierSession = useAuthStore((s) => s.closeCashierSession);
+    const authLogout = useAuthStore((s) => s.logout);
+
+    const handleHold = useCallback(() => {
+        if (cart.length === 0) {
+            toast.warning(t('pos.empty_cart_warning', 'Cart is empty'));
+            return;
+        }
+        const success = holdTransaction(
+            cart,
+            selectedCustomer,
+            promotionResult,
+            null, // cartDiscount
+            usePOSStore.getState().nextTicketNumber,
+            user?.id ?? 0,
+        );
+        if (success) {
+            clearCart();
+            setSelectedCustomer(null);
+            toast.success(t('pos.sale_held', 'Sale held'));
+        } else {
+            toast.error(t('pos.max_holds', 'Maximum 5 holds reached'));
+        }
+    }, [cart, selectedCustomer, promotionResult, user, holdTransaction, clearCart, t]);
+
+    const handleRecall = useCallback(() => {
+        setShowHoldRecallDialog(true);
+    }, []);
+
+    const handleRecallTransaction = useCallback((id: string) => {
+        if (cart.length > 0) {
+            const confirmed = window.confirm(t('pos.recall_replace_warning', 'Current cart is not empty. Replace with held transaction?'));
+            if (!confirmed) return;
+        }
+        const held = usePOSStore.getState().recallTransaction(id);
+        if (held) {
+            clearCart();
+            // Restore items from held transaction
+            held.cart.forEach((item) => {
+                addToCart({ product: item.product, quantity: item.quantity, discount: item.discount ?? 0 });
+            });
+            setSelectedCustomer(held.customer);
+            if (held.cartDiscount) {
+                setCartDiscount(held.cartDiscount);
+            }
+            setShowHoldRecallDialog(false);
+            toast.success(t('pos.sale_recalled', 'Sale recalled'));
+        }
+    }, [cart, clearCart, addToCart, setSelectedCustomer, setCartDiscount, t]);
+
+    const handleDeleteHeld = useCallback((id: string) => {
+        usePOSStore.getState().removeHeld(id);
+        toast.info(t('pos.hold_deleted', 'Held transaction deleted'));
+    }, [t]);
+
+    const handleVoid = useCallback(async () => {
+        if (cart.length === 0) return;
+        const result = await requestAuth('void_sale');
+        if (result.authorized) {
+            clearCart();
+            setSelectedCustomer(null);
+            toast.success(t('pos.sale_voided', 'Sale voided'), {
+                description: t('pos.authorized_by', 'Authorized by {{name}}', { name: result.managerName }),
+            });
+        }
+    }, [cart, requestAuth, clearCart, t]);
+
+    const handleDiscount = useCallback(() => {
+        setDiscountScope('cart');
+        setDiscountProductId(null);
+        setShowDiscountDialog(true);
+    }, []);
+
+    const handleLineDiscount = useCallback((productId: number) => {
+        setDiscountScope('line');
+        setDiscountProductId(productId);
+        setShowDiscountDialog(true);
+    }, []);
+
+    const handleApplyDiscount = useCallback((discount: ManualDiscount) => {
+        if (discountScope === 'line' && discountProductId != null) {
+            setItemManualDiscount(discountProductId, discount);
+        } else {
+            setCartDiscount(discount);
+        }
+    }, [discountScope, discountProductId, setItemManualDiscount, setCartDiscount]);
+
+    const handleClearDiscount = useCallback(() => {
+        if (discountScope === 'line' && discountProductId != null) {
+            clearItemManualDiscount(discountProductId);
+        } else {
+            clearCartDiscount();
+        }
+    }, [discountScope, discountProductId, clearItemManualDiscount, clearCartDiscount]);
+
+    const handleReturn = useCallback(async () => {
+        const result = await requestAuth('return');
+        if (result.authorized) {
+            setReturnManagerId(result.managerId);
+            setShowReturnDialog(true);
+        }
+    }, [requestAuth]);
+
+    const handleReturnConfirm = useCallback(async (request: import('@/lib/types').ReturnRequest) => {
+        try {
+            await processReturnAction(request);
+            setShowReturnDialog(false);
+            setReturnManagerId(null);
+            loadProducts();
+            toast.success(t('pos.return.success', 'Return processed successfully'));
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Unknown error';
+            toast.error(t('pos.return.error', 'Return failed: ') + message);
+        }
+    }, [processReturnAction, loadProducts, t]);
+
+    const handleEndShift = useCallback(async () => {
+        await closeCashierSession(0, 'Shift ended by cashier');
+        await authLogout();
+        navigate('/login');
+    }, [closeCashierSession, authLogout, navigate]);
+
+    const handleOpenDrawer = useCallback(() => {
+        // Electron cash drawer command via silent print (common POS approach)
+        if (window.electronAPI?.printReceipt) {
+            window.electronAPI.printReceipt({ silent: true }).then((result) => {
+                if (result.success) {
+                    toast.success(t('pos.drawer_opened', 'Cash drawer opened'));
+                } else {
+                    toast.error(t('pos.drawer_error', 'Could not open cash drawer'));
+                }
+            });
+        } else {
+            toast.info(t('pos.drawer_not_available', 'Cash drawer is only available in desktop mode'));
+        }
+    }, [t]);
+
+    const handleReprintReceipt = useCallback(async () => {
+        if (!lastSale) {
+            // Try fetching last sale from DB
+            try {
+                const recent = await SaleRepo.getRecentSales(1);
+                if (recent.length > 0) {
+                    const sale = recent[0];
+                    const items = await SaleRepo.getItems(sale.id);
+                    setLastSale(sale);
+                    setLastSaleItems(items);
+                    setShowReceiptPreview(true);
+                } else {
+                    toast.warning(t('pos.no_recent_sale', 'No recent sale to reprint'));
+                }
+            } catch {
+                toast.error(t('pos.reprint_error', 'Could not load last receipt'));
+            }
+        } else {
+            setShowReceiptPreview(true);
+        }
+    }, [lastSale, t]);
+
+    const handleCheckout = useCallback(async () => {
+        if (cart.length === 0) {
+            toast.warning(t('pos.empty_cart_warning', 'Add items to the cart first'));
+            return;
+        }
+        try {
+            const sessionId = useAuthStore.getState().getCurrentSessionId();
+            const sale = await checkout(
+                {
+                    method: 'cash',
+                    customer_name: selectedCustomer?.full_name ?? 'Walk-in Customer',
+                    customer_id: selectedCustomer?.id,
+                },
+                user?.id,
+                sessionId || undefined,
+            );
+            setSelectedCustomer(null);
+            loadProducts();
+            refreshTicketNumber();
+            // Track last sale for reprint
+            if (sale) {
+                setLastSale(sale);
+                SaleRepo.getItems(sale.id).then(setLastSaleItems).catch(() => {});
+            }
+            toast.success(t('pos.sale_complete', 'Sale complete!'));
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Unknown error';
+            toast.error(t('pos.checkout_error', 'Checkout error: ') + message);
+        }
+    }, [cart, checkout, selectedCustomer, user, loadProducts, refreshTicketNumber, t]);
+
+    const handleSplitPaymentFinalize = useCallback(async (entries: import('@/lib/types').PaymentEntryInput[]) => {
+        try {
+            const sessionId = useAuthStore.getState().getCurrentSessionId();
+            await useSaleStore.getState().checkoutWithSplitPayment(
+                entries,
+                {
+                    name: selectedCustomer?.full_name ?? 'Walk-in Customer',
+                    id: selectedCustomer?.id,
+                },
+                user?.id,
+                sessionId || undefined,
+            );
+            setSelectedCustomer(null);
+            setShowSplitPayment(false);
+            loadProducts();
+            refreshTicketNumber();
+            // Track last sale for reprint
+            try {
+                const recent = await SaleRepo.getRecentSales(1);
+                if (recent.length > 0) {
+                    setLastSale(recent[0]);
+                    SaleRepo.getItems(recent[0].id).then(setLastSaleItems).catch(() => {});
+                }
+            } catch { /* ignore */ }
+            toast.success(t('pos.sale_complete', 'Sale complete!'));
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Unknown error';
+            toast.error(t('pos.checkout_error', 'Checkout error: ') + message);
+        }
+    }, [selectedCustomer, user, loadProducts, refreshTicketNumber, t]);
+
+    const handleScan = useCallback(
+        async (code: string) => {
+            const product = barcodeMap.get(code) ?? (await getByBarcode(code));
+            if (product) {
+                await addToCart({ product, quantity: 1, discount: 0 });
+                setSelectedProduct(product);
+                setShowScanner(false);
+                toast.success(product.name, { description: t('pos.scan.added', 'Added to cart'), duration: 1500 });
+            } else {
+                toast.warning(t('pos.scan.not_found', 'Product not found with barcode: ') + code);
+            }
+        },
+        [barcodeMap, getByBarcode, addToCart, setSelectedProduct, t],
+    );
+
+    const handleKeypadConfirm = useCallback(async () => {
+        const code = usePOSStore.getState().keypadValue.trim();
+        if (!code) return;
+        const product = barcodeMap.get(code) ?? (await getByBarcode(code));
+        if (product) {
+            await addToCart({ product, quantity: 1, discount: 0 });
+            setSelectedProduct(product);
+            clearKeypad();
+            toast.success(product.name, { description: t('pos.added_via_keypad', 'Added via keypad'), duration: 1500 });
+        } else {
+            toast.warning(t('pos.keypad_not_found', 'No product found for code: ') + code);
+        }
+    }, [barcodeMap, getByBarcode, addToCart, setSelectedProduct, clearKeypad, t]);
+
+    // Keyboard shortcuts
+    useKeyboardShortcuts({
+        onHold: handleHold,
+        onRecall: handleRecall,
+        onVoid: handleVoid,
+        onDiscount: handleDiscount,
+        onReprint: handleReprintReceipt,
+        onDrawer: handleOpenDrawer,
+        onPriceCheck: () => searchInputRef.current?.focus(),
+        onReturn: handleReturn,
+        onReport: () => navigate('/pos/reports'),
+        onSettings: () => navigate('/pos/settings'),
+        onEndShift: () => setShowEndShiftConfirm(true),
+        onGiftCard: () => toast.info(t('pos.gift_card_not_available', 'Gift card feature is not available yet')),
+    });
+
+    // Discount dialog context
+    const discountItem = discountProductId != null ? cart.find((c) => c.product.id === discountProductId) : null;
+    const discountMaxAmount = discountScope === 'line' && discountItem
+        ? discountItem.product.selling_price * discountItem.quantity
+        : cartTotal;
+    const discountCurrent = discountScope === 'line' && discountItem
+        ? discountItem.manualDiscount ?? null
+        : useSaleStore.getState().cartDiscount;
+
+    return (
+        <div className="flex flex-col h-full w-full bg-zinc-100 overflow-hidden">
+            {/* Header */}
+            <POSHeader
+                storeName={storeName}
+                cashierName={user?.full_name ?? t('pos.unknown_cashier', 'Cashier')}
+                sessionActive={!!currentSession?.session}
+                shiftStartTime={currentSession?.session?.login_time}
+            />
+
+            {/* Main 3-column grid — stacks on small screens */}
+            <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[240px_1fr_220px] lg:grid-cols-[260px_1fr_240px] xl:grid-cols-[300px_1fr_280px] gap-0">
+                {/* LEFT PANEL — hidden on small, visible md+ */}
+                <aside className="hidden md:flex flex-col border-r border-zinc-200 bg-white overflow-y-auto" aria-label="Customer and product info">
+                    {/* Client Info */}
+                    <ClientInfoPanel
+                        customer={selectedCustomer}
+                        onSearch={() => setShowCustomerSearch(true)}
+                        onClear={() => setSelectedCustomer(null)}
+                        onEdit={() => {/* TODO: open edit modal */}}
+                        onAddNew={() => setShowCustomerSearch(true)}
+                    />
+
+                    {/* Product Detail */}
+                    <ProductDetailCard
+                        product={selectedProduct}
+                        formatCurrency={formatCurrency}
+                    />
+
+                    {/* NumericKeypad */}
+                    <div className="mt-auto">
+                        <NumericKeypad
+                            value={keypadValue}
+                            onDigit={appendKeypad}
+                            onBackspace={backspaceKeypad}
+                            onClear={clearKeypad}
+                            onConfirm={handleKeypadConfirm}
+                        />
+                    </div>
+                </aside>
+
+                {/* CENTER PANEL */}
+                <main className="flex flex-col min-h-0 overflow-hidden" role="main" aria-label="Cart and products">
+                    {/* Search bar */}
+                    <div className="p-3 border-b border-zinc-200 bg-white">
+                        <div className="relative">
+                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                            <input
+                                ref={searchInputRef}
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder={t('pos.search_placeholder', 'Search products or scan barcode...')}
+                                aria-label={t('pos.search_placeholder', 'Search products or scan barcode...')}
+                                className="w-full pl-9 pr-20 py-2.5 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-900 placeholder:text-zinc-400 text-sm font-medium focus:outline-none focus:border-zinc-400 focus:bg-white transition-colors"
+                            />
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                                {searchQuery && (
+                                    <motion.button
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        onClick={() => setSearchQuery('')}
+                                        className="p-1 rounded-full bg-zinc-200 text-zinc-500 hover:bg-zinc-300 transition-all"
+                                    >
+                                        <X size={12} strokeWidth={3} />
+                                    </motion.button>
+                                )}
+                                <button
+                                    onClick={() => setShowScanner(true)}
+                                    className="p-1.5 rounded-lg text-zinc-500 hover:bg-zinc-200 transition-all"
+                                    title={t('pos.scan', 'Scan Barcode')}
+                                >
+                                    <Barcode size={16} />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Search results dropdown */}
+                        {filteredProducts.length > 0 && (
+                            <div className="mt-2 max-h-64 overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-lg">
+                                {filteredProducts.map((product) => (
+                                    <button
+                                        key={product.id}
+                                        onClick={() => handleAddProduct(product)}
+                                        className="w-full flex items-center justify-between px-3 py-2 hover:bg-zinc-50 transition-colors border-b border-zinc-50 last:border-b-0"
+                                    >
+                                        <div className="text-left">
+                                            <div className="text-sm font-semibold text-zinc-800">{product.name}</div>
+                                            <div className="text-xs text-zinc-400">
+                                                {product.barcode && <span>{product.barcode} · </span>}
+                                                <span>{t('pos.stock', 'Stock')}: {product.stock_quantity}</span>
+                                            </div>
+                                        </div>
+                                        <span className="text-sm font-bold text-zinc-700">
+                                            {formatCurrency(product.selling_price)}
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Cart area — CartTicket */}
+                    <div className="flex-1 min-h-0 overflow-hidden">
+                        <CartTicket
+                            cart={cart}
+                            ticketNumber={ticketNumber}
+                            promotionResult={promotionResult}
+                            onQuantityChange={(productId, qty) => updateCartItem(productId, qty)}
+                            onRemove={(productId) => removeFromCart(productId)}
+                            onDiscountClick={handleLineDiscount}
+                            formatCurrency={formatCurrency}
+                        />
+                    </div>
+
+                    {/* Totals bar — sticky bottom */}
+                    <TotalsBar
+                        subtotal={cartTotal}
+                        vatRate={vatRate}
+                        vatAmount={cartTotal * vatRate}
+                        promoSavings={promotionResult?.totalSavings ?? 0}
+                        manualDiscount={manualDiscountTotal}
+                        grandTotal={cartTotalWithPromos + cartTotal * vatRate - manualDiscountTotal}
+                        formatCurrency={formatCurrency}
+                    />
+
+                    {/* Mobile checkout — visible only on small screens */}
+                    <div className="md:hidden p-3 bg-white border-t border-zinc-200 flex gap-2">
+                        <button
+                            onClick={() => {
+                                if (cart.length === 0) {
+                                    toast.warning(t('pos.empty_cart_warning', 'Add items to the cart first'));
+                                    return;
+                                }
+                                setShowSplitPayment(true);
+                            }}
+                            disabled={cart.length === 0 || isCheckingOut}
+                            className="flex-1 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-zinc-300 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-all active:scale-[0.98]"
+                        >
+                            {t('pos.split_payment', 'Split Payment')}
+                        </button>
+                        <button
+                            onClick={handleCheckout}
+                            disabled={cart.length === 0 || isCheckingOut}
+                            className="flex-[2] py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-300 disabled:cursor-not-allowed text-white text-base font-black rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-emerald-600/20"
+                        >
+                            {isCheckingOut ? t('pos.processing', 'Processing...') : t('pos.checkout', 'CHECKOUT')}
+                        </button>
+                    </div>
+                </main>
+
+                {/* RIGHT PANEL — hidden on small, visible md+ */}
+                <aside className="hidden md:flex flex-col border-l border-zinc-200 bg-zinc-50 overflow-y-auto" aria-label="Actions and checkout">
+                    <ActionGrid
+                        holdCount={holdCount}
+                        maxHolds={5}
+                        onHold={handleHold}
+                        onRecall={handleRecall}
+                        onVoid={handleVoid}
+                        onDiscount={handleDiscount}
+                        onReprintReceipt={handleReprintReceipt}
+                        onOpenDrawer={handleOpenDrawer}
+                        onPriceCheck={() => searchInputRef.current?.focus()}
+                        onReturn={handleReturn}
+                        onDailyReport={() => navigate('/pos/reports')}
+                        onSettings={() => navigate('/pos/settings')}
+                        onEndShift={() => setShowEndShiftConfirm(true)}
+                        onGiftCard={() => toast.info(t('pos.gift_card_not_available', 'Gift card feature is not available yet'))}
+                    />
+
+                    {/* Checkout buttons */}
+                    <div className="mt-auto p-3 space-y-2">
+                        <button
+                            onClick={() => {
+                                if (cart.length === 0) {
+                                    toast.warning(t('pos.empty_cart_warning', 'Add items to the cart first'));
+                                    return;
+                                }
+                                setShowSplitPayment(true);
+                            }}
+                            disabled={cart.length === 0 || isCheckingOut}
+                            className="w-full py-2.5 bg-blue-500 hover:bg-blue-600 disabled:bg-zinc-300 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-all active:scale-[0.98]"
+                        >
+                            {t('pos.split_payment', 'Split Payment')}
+                        </button>
+                        <button
+                            onClick={handleCheckout}
+                            disabled={cart.length === 0 || isCheckingOut}
+                            className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-300 disabled:cursor-not-allowed text-white text-lg font-black rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-emerald-600/20"
+                        >
+                            {isCheckingOut ? t('pos.processing', 'Processing...') : t('pos.checkout', 'CHECKOUT')}
+                        </button>
+                    </div>
+                </aside>
+            </div>
+
+            {/* === Global Modals === */}
+            <ManagerPinDialog
+                isOpen={authStore.isOpen}
+                action={authStore.action}
+                onSubmit={authStore.submitPin}
+                onCancel={authStore.cancel}
+                isVerifying={authStore.isVerifying}
+                error={authStore.error ?? undefined}
+            />
+
+            <DiscountDialog
+                isOpen={showDiscountDialog}
+                onClose={() => setShowDiscountDialog(false)}
+                scope={discountScope}
+                currentDiscount={discountCurrent}
+                maxAmount={discountMaxAmount}
+                onApply={handleApplyDiscount}
+                onClear={handleClearDiscount}
+            />
+
+            <HoldRecallDialog
+                isOpen={showHoldRecallDialog}
+                onClose={() => setShowHoldRecallDialog(false)}
+                heldTransactions={heldTransactions}
+                onRecall={handleRecallTransaction}
+                onDelete={handleDeleteHeld}
+                formatCurrency={formatCurrency}
+            />
+
+            <ReturnDialog
+                isOpen={showReturnDialog}
+                onClose={() => { setShowReturnDialog(false); setReturnManagerId(null); }}
+                onConfirm={handleReturnConfirm}
+                managerId={returnManagerId}
+            />
+
+            <StockErrorDialog error={stockError} onClose={clearStockError} />
+
+            <SplitPaymentPanel
+                isOpen={showSplitPayment}
+                onClose={() => setShowSplitPayment(false)}
+                grandTotal={cartTotalWithPromos + cartTotal * vatRate - manualDiscountTotal}
+                onFinalize={handleSplitPaymentFinalize}
+                formatCurrency={formatCurrency}
+            />
+
+            {showScanner && (
+                <BarcodeScanner
+                    onScan={handleScan}
+                    onClose={() => setShowScanner(false)}
+                />
+            )}
+
+            {/* End Shift Confirmation Dialog */}
+            {showEndShiftConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" role="dialog" aria-modal="true" aria-label={t('pos.end_shift', 'End Shift')}>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4 space-y-4"
+                    >
+                        <h2 className="text-lg font-bold text-zinc-900">{t('pos.end_shift_title', 'End Shift?')}</h2>
+                        <p className="text-sm text-zinc-500">
+                            {t('pos.end_shift_message', 'This will close your current cashier session and log you out. Are you sure?')}
+                        </p>
+                        <div className="flex gap-3 pt-2">
+                            <button
+                                onClick={() => setShowEndShiftConfirm(false)}
+                                className="flex-1 py-2.5 rounded-xl border border-zinc-200 text-zinc-700 font-medium text-sm hover:bg-zinc-50 transition-colors"
+                            >
+                                {t('common.cancel', 'Cancel')}
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    setShowEndShiftConfirm(false);
+                                    await handleEndShift();
+                                }}
+                                className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-sm transition-colors"
+                            >
+                                {t('pos.end_shift_confirm', 'End Shift')}
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+
+            {/* Reprint Receipt Preview */}
+            {showReceiptPreview && lastSale && (
+                <ReceiptPreview
+                    sale={lastSale}
+                    items={lastSaleItems}
+                    onClose={() => setShowReceiptPreview(false)}
+                />
+            )}
+        </div>
+    );
+}

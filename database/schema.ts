@@ -145,6 +145,12 @@ CREATE TABLE IF NOT EXISTS sales (
   payment_method TEXT DEFAULT 'cash',
   customer_name TEXT DEFAULT 'Walk-in Customer', -- Fallback or denormalized name
   status TEXT DEFAULT 'completed',
+  ticket_number INTEGER DEFAULT NULL,
+  original_sale_id INTEGER DEFAULT NULL REFERENCES sales(id),
+  return_type TEXT DEFAULT NULL,
+  cart_discount_type TEXT DEFAULT NULL,
+  cart_discount_value REAL DEFAULT 0,
+  cart_discount_amount REAL DEFAULT 0,
   created_at TEXT DEFAULT (datetime('now'))
 );
 
@@ -160,6 +166,9 @@ CREATE TABLE IF NOT EXISTS sale_items (
   unit_price REAL NOT NULL,
   discount REAL DEFAULT 0,
   total REAL NOT NULL,
+  manual_discount_type TEXT DEFAULT NULL,
+  manual_discount_value REAL DEFAULT 0,
+  manual_discount_amount REAL DEFAULT 0,
   promotion_id INTEGER DEFAULT NULL REFERENCES promotions(id) ON DELETE SET NULL,
   promotion_name TEXT DEFAULT NULL
 );
@@ -305,6 +314,28 @@ CREATE INDEX IF NOT EXISTS idx_promotions_dates ON promotions(start_date, end_da
 CREATE INDEX IF NOT EXISTS idx_promotions_deleted ON promotions(deleted_at);
 CREATE INDEX IF NOT EXISTS idx_promo_products_promotion ON promotion_products(promotion_id);
 CREATE INDEX IF NOT EXISTS idx_promo_products_product ON promotion_products(product_id);
+
+-- =============================================
+-- PAYMENT ENTRIES (Split payment support)
+-- =============================================
+CREATE TABLE IF NOT EXISTS payment_entries (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  sale_id INTEGER NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
+  method TEXT NOT NULL CHECK(method IN ('cash','card','mobile','credit')),
+  amount REAL NOT NULL CHECK(amount > 0),
+  change_amount REAL DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_payment_entries_sale_id ON payment_entries(sale_id);
+
+-- =============================================
+-- TICKET COUNTER (Daily-reset sequential numbers)
+-- =============================================
+CREATE TABLE IF NOT EXISTS ticket_counter (
+  date TEXT PRIMARY KEY,
+  last_number INTEGER NOT NULL DEFAULT 0
+);
 CREATE INDEX IF NOT EXISTS idx_products_barcode ON products(barcode);
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_name ON products(name);

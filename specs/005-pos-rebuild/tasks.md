@@ -19,10 +19,10 @@
 
 **Purpose**: New types, database schema, and store scaffolds that all user stories depend on
 
-- [ ] T001 [P] Add new TypeScript types (PaymentEntry, PaymentEntryInput, ManualDiscount, HeldTransaction, ReturnItem, ReturnRequest, AuthorizationResult, AuthorizableAction, KeypadState) to src/lib/types.ts
-- [ ] T002 [P] Update database schema: create payment_entries table, ticket_counter table, add new columns (ticket_number, original_sale_id, return_type, cart_discount_type/value/amount) to sales table, add new columns (manual_discount_type/value/amount) to sale_items table in database/schema.ts
-- [ ] T003 [P] Create usePOSStore with typed state (heldTransactions, selectedProduct, keypadValue, keypadMode, returnMode, nextTicketNumber) and stub actions in src/stores/usePOSStore.ts
-- [ ] T004 [P] Create useAuthorizationStore with isOpen/action/resolve state and requestAuth/submitPin/cancel actions returning Promise<AuthorizationResult> in src/stores/useAuthorizationStore.ts
+- [X] T001 [P] Add new TypeScript types (PaymentEntry, PaymentEntryInput, ManualDiscount, HeldTransaction, ReturnItem, ReturnRequest, AuthorizationResult, AuthorizableAction, KeypadState) to src/lib/types.ts
+- [X] T002 [P] Update database schema: create payment_entries table, ticket_counter table, add new columns (ticket_number, original_sale_id, return_type, cart_discount_type/value/amount) to sales table, add new columns (manual_discount_type/value/amount) to sale_items table in database/schema.ts
+- [X] T003 [P] Create usePOSStore with typed state (heldTransactions, selectedProduct, keypadValue, keypadMode, returnMode, nextTicketNumber) and stub actions in src/stores/usePOSStore.ts
+- [X] T004 [P] Create useAuthorizationStore with isOpen/action/resolve state and requestAuth/submitPin/cancel actions returning Promise<AuthorizationResult> in src/stores/useAuthorizationStore.ts
 
 **Checkpoint**: All new types compiled, schema migrations applied on next app start, empty stores importable
 
@@ -34,9 +34,9 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 [P] Add verifyManagerPin(pin: string) method that checks all active admin/manager users against bcrypt-hashed pin_code in database/repositories/user.repo.ts
-- [ ] T006 [P] Add ticket number methods (getNextTicketNumber peek, atomic incrementAndGet inside checkout transaction) and split payment storage (createFromCartWithSplitPayment with PaymentEntryInput[], getPaymentEntries) to database/repositories/sale.repo.ts
-- [ ] T007 Add partial return methods (createPartialReturn with ReturnRequest, getReturnedQuantities returning Map<productId, returnedQty>) to database/repositories/sale.repo.ts
+- [X] T005 [P] Add verifyManagerPin(pin: string) method that checks all active admin/manager users against bcrypt-hashed pin_code in database/repositories/user.repo.ts
+- [X] T006 [P] Add ticket number methods (getNextTicketNumber peek, atomic incrementAndGet inside checkout transaction) and split payment storage (createFromCartWithSplitPayment with PaymentEntryInput[], getPaymentEntries) to database/repositories/sale.repo.ts
+- [X] T007 Add partial return methods (createPartialReturn with ReturnRequest, getReturnedQuantities returning Map<productId, returnedQty>) to database/repositories/sale.repo.ts
 
 **Checkpoint**: Foundation ready — repo methods callable, store actions functional, user story implementation can begin
 
@@ -50,10 +50,10 @@
 
 ### Implementation for User Story 1
 
-- [ ] T008 [P] [US1] Create useLiveClock hook returning formatted date and time string, updating every second via setInterval in src/hooks/useLiveClock.ts
-- [ ] T009 [US1] Create POSHeader component displaying store name (placeholder), cashier name from useAuthStore, and live clock from useLiveClock in src/components/POS/POSHeader.tsx
-- [ ] T010 [US1] Create POSLayout component with CSS Grid layout (grid-cols-[260px_1fr_240px] xl:grid-cols-[300px_1fr_280px]), rendering POSHeader at top and empty placeholder panels for left/center/right zones in src/components/POS/POSLayout.tsx
-- [ ] T011 [US1] Refactor src/pages/POS.tsx to render POSLayout as the main content, moving existing state management (barcode scanner, search, customer selection) into POSLayout or preserving via props
+- [X] T008 [P] [US1] Create useLiveClock hook returning formatted date and time string, updating every second via setInterval in src/hooks/useLiveClock.ts
+- [X] T009 [US1] Create POSHeader component displaying store name (placeholder), cashier name from useAuthStore, and live clock from useLiveClock in src/components/POS/POSHeader.tsx
+- [X] T010 [US1] Create POSLayout component with CSS Grid layout (grid-cols-[260px_1fr_240px] xl:grid-cols-[300px_1fr_280px]), rendering POSHeader at top and empty placeholder panels for left/center/right zones in src/components/POS/POSLayout.tsx
+- [X] T011 [US1] Refactor src/pages/POS.tsx to render POSLayout as the main content, moving existing state management (barcode scanner, search, customer selection) into POSLayout or preserving via props
 
 **Checkpoint**: POS page shows the new 3-column grid layout with header — the shell is ready for content
 
@@ -67,7 +67,7 @@
 
 ### Implementation for User Story 2
 
-- [ ] T012 [US2] Integrate existing search bar (with real-time product dropdown within 300ms) and barcode scanner hook into POSLayout center panel top, wiring product selection to usePOSStore.setSelectedProduct in src/components/POS/POSLayout.tsx
+- [X] T012 [US2] Integrate existing search bar (with real-time product dropdown within 300ms) and barcode scanner hook into POSLayout center panel top, wiring product selection to usePOSStore.setSelectedProduct in src/components/POS/POSLayout.tsx
 
 **Checkpoint**: Products can be added via search and scan in the new layout; keypad entry added in US11
 
@@ -81,9 +81,9 @@
 
 ### Implementation for User Story 3
 
-- [ ] T013 [P] [US3] Create CartTicketRow component with line number, product name, unit price, quantity controls (+/- stepper and direct input), manual discount display, remove button with exit animation, and onDiscountClick callback in src/components/POS/CartTicketRow.tsx
-- [ ] T014 [US3] Create CartTicket component with ticket-styled header (column labels), scrollable AnimatePresence list of CartTicketRow, sticky header row, and ticket number placeholder in src/components/POS/CartTicket.tsx
-- [ ] T015 [US3] Integrate CartTicket into POSLayout center panel, replacing existing CartPanel usage, wiring cart state from useSaleStore and promotion results in src/components/POS/POSLayout.tsx
+- [X] T013 [P] [US3] Create CartTicketRow component with line number, product name, unit price, quantity controls (+/- stepper and direct input), manual discount display, remove button with exit animation, and onDiscountClick callback in src/components/POS/CartTicketRow.tsx
+- [X] T014 [US3] Create CartTicket component with ticket-styled header (column labels), scrollable AnimatePresence list of CartTicketRow, sticky header row, and ticket number placeholder in src/components/POS/CartTicket.tsx
+- [X] T015 [US3] Integrate CartTicket into POSLayout center panel, replacing existing CartPanel usage, wiring cart state from useSaleStore and promotion results in src/components/POS/POSLayout.tsx
 
 **Checkpoint**: Cart displays as a professional ticket with editable lines and smooth remove animations
 
@@ -97,8 +97,8 @@
 
 ### Implementation for User Story 4
 
-- [ ] T016 [US4] Create TotalsBar component displaying Subtotal, VAT (with configurable % from settings), Discount (accent color, combining promo + manual), and Grand Total (text-5xl xl:text-6xl font-black tabular-nums) with formatCurrency in src/components/POS/TotalsBar.tsx
-- [ ] T017 [US4] Add manual discount actions (setItemManualDiscount, clearItemManualDiscount, setCartDiscount, clearCartDiscount) and selectGrandTotal selector to useSaleStore, then integrate TotalsBar into POSLayout center panel bottom (sticky) in src/stores/useSaleStore.ts and src/components/POS/POSLayout.tsx
+- [X] T016 [US4] Create TotalsBar component displaying Subtotal, VAT (with configurable % from settings), Discount (accent color, combining promo + manual), and Grand Total (text-5xl xl:text-6xl font-black tabular-nums) with formatCurrency in src/components/POS/TotalsBar.tsx
+- [X] T017 [US4] Add manual discount actions (setItemManualDiscount, clearItemManualDiscount, setCartDiscount, clearCartDiscount) and selectGrandTotal selector to useSaleStore, then integrate TotalsBar into POSLayout center panel bottom (sticky) in src/stores/useSaleStore.ts and src/components/POS/POSLayout.tsx
 
 **Checkpoint**: Totals bar is always visible, grand total is the largest element on screen, all discount types combine correctly
 
@@ -112,8 +112,8 @@
 
 ### Implementation for User Story 5
 
-- [ ] T018 [P] [US5] Create ClientInfoPanel component showing customer fields (name, client number, address, phone, email) or "Walk-in Customer" placeholder, with Search/Clear/Edit/Add New action buttons in src/components/POS/ClientInfoPanel.tsx
-- [ ] T019 [US5] Integrate ClientInfoPanel into POSLayout left panel top, wiring customer state from existing CustomerSelector logic in src/components/POS/POSLayout.tsx
+- [X] T018 [P] [US5] Create ClientInfoPanel component showing customer fields (name, client number, address, phone, email) or "Walk-in Customer" placeholder, with Search/Clear/Edit/Add New action buttons in src/components/POS/ClientInfoPanel.tsx
+- [X] T019 [US5] Integrate ClientInfoPanel into POSLayout left panel top, wiring customer state from existing CustomerSelector logic in src/components/POS/POSLayout.tsx
 
 **Checkpoint**: Customer info panel works in left panel with search, select, and clear
 
@@ -127,8 +127,8 @@
 
 ### Implementation for User Story 6
 
-- [ ] T020 [P] [US6] Create ProductDetailCard component with product image (or placeholder), name, variant info, reference, barcode, selling price, stock quantity (warning color if below reorder_level) in src/components/POS/ProductDetailCard.tsx
-- [ ] T021 [US6] Integrate ProductDetailCard into POSLayout left panel below ClientInfoPanel, reading selectedProduct from usePOSStore in src/components/POS/POSLayout.tsx
+- [X] T020 [P] [US6] Create ProductDetailCard component with product image (or placeholder), name, variant info, reference, barcode, selling price, stock quantity (warning color if below reorder_level) in src/components/POS/ProductDetailCard.tsx
+- [X] T021 [US6] Integrate ProductDetailCard into POSLayout left panel below ClientInfoPanel, reading selectedProduct from usePOSStore in src/components/POS/POSLayout.tsx
 
 **Checkpoint**: Product detail card updates on every scan/search selection; low-stock items show visual warning
 
@@ -142,13 +142,13 @@
 
 ### Implementation for User Story 7
 
-- [ ] T022 [P] [US7] Create ActionButton component with icon (lucide-react), label, optional F-key badge, variant styling (default/danger/success/warning), disabled state, and optional badge (e.g., "3/5") in src/components/POS/ActionButton.tsx
-- [ ] T023 [US7] Create ActionGrid component rendering 4×3 grid of ActionButton instances for all 12 actions per FR-034, with hold count badge, wired to callback props in src/components/POS/ActionGrid.tsx
-- [ ] T024 [P] [US7] Create useManagerAuth hook wrapping useAuthorizationStore.requestAuth for component-level authorization calls in src/hooks/useManagerAuth.ts
-- [ ] T025 [US7] Create ManagerPinDialog component (Radix Dialog) with 4–6 digit PIN input, loading spinner during verification, error message display, cancel button, calling useAuthorizationStore.submitPin in src/components/POS/ManagerPinDialog.tsx
-- [ ] T026 [US7] Create DiscountDialog component (Radix Dialog) with line/cart scope toggle, percentage/fixed mode switch, amount input with validation (max = item total or subtotal), apply and clear buttons, manager PIN trigger if above threshold in src/components/POS/DiscountDialog.tsx
-- [ ] T027 [P] [US7] Create useKeyboardShortcuts hook with capture-phase keydown listener for F1–F12 (preventDefault to block browser defaults), mapping to action callbacks via POS_SHORTCUTS config in src/hooks/useKeyboardShortcuts.ts
-- [ ] T028 [US7] Integrate ActionGrid into POSLayout right panel, wire useKeyboardShortcuts, render ManagerPinDialog and DiscountDialog as global modals in src/components/POS/POSLayout.tsx
+- [X] T022 [P] [US7] Create ActionButton component with icon (lucide-react), label, optional F-key badge, variant styling (default/danger/success/warning), disabled state, and optional badge (e.g., "3/5") in src/components/POS/ActionButton.tsx
+- [X] T023 [US7] Create ActionGrid component rendering 4×3 grid of ActionButton instances for all 12 actions per FR-034, with hold count badge, wired to callback props in src/components/POS/ActionGrid.tsx
+- [X] T024 [P] [US7] Create useManagerAuth hook wrapping useAuthorizationStore.requestAuth for component-level authorization calls in src/hooks/useManagerAuth.ts
+- [X] T025 [US7] Create ManagerPinDialog component (Radix Dialog) with 4–6 digit PIN input, loading spinner during verification, error message display, cancel button, calling useAuthorizationStore.submitPin in src/components/POS/ManagerPinDialog.tsx
+- [X] T026 [US7] Create DiscountDialog component (Radix Dialog) with line/cart scope toggle, percentage/fixed mode switch, amount input with validation (max = item total or subtotal), apply and clear buttons, manager PIN trigger if above threshold in src/components/POS/DiscountDialog.tsx
+- [X] T027 [P] [US7] Create useKeyboardShortcuts hook with capture-phase keydown listener for F1–F12 (preventDefault to block browser defaults), mapping to action callbacks via POS_SHORTCUTS config in src/hooks/useKeyboardShortcuts.ts
+- [X] T028 [US7] Integrate ActionGrid into POSLayout right panel, wire useKeyboardShortcuts, render ManagerPinDialog and DiscountDialog as global modals in src/components/POS/POSLayout.tsx
 
 **Checkpoint**: All 12 action buttons visible and functional; F1–F12 keyboard shortcuts fire correct actions; manager PIN prompts for void/discount above threshold
 
@@ -162,9 +162,9 @@
 
 ### Implementation for User Story 8
 
-- [ ] T029 [US8] Implement holdTransaction (snapshot cart + customer + promos + discount into HeldTransaction[], enforce max 5 per cashierId) and recallTransaction (remove from list, return data, warn if current cart non-empty) in src/stores/usePOSStore.ts
-- [ ] T030 [US8] Create HoldRecallDialog component (Radix Dialog) listing held transactions (item count, total, timestamp, customer name) with recall button per row and replace-cart confirmation prompt in src/components/POS/HoldRecallDialog.tsx
-- [ ] T031 [US8] Wire Hold (F1) and Recall (F2) action buttons to HoldRecallDialog and usePOSStore actions, update ActionButton badge to show "{count}/5" in src/components/POS/POSLayout.tsx
+- [X] T029 [US8] Implement holdTransaction (snapshot cart + customer + promos + discount into HeldTransaction[], enforce max 5 per cashierId) and recallTransaction (remove from list, return data, warn if current cart non-empty) in src/stores/usePOSStore.ts
+- [X] T030 [US8] Create HoldRecallDialog component (Radix Dialog) listing held transactions (item count, total, timestamp, customer name) with recall button per row and replace-cart confirmation prompt in src/components/POS/HoldRecallDialog.tsx
+- [X] T031 [US8] Wire Hold (F1) and Recall (F2) action buttons to HoldRecallDialog and usePOSStore actions, update ActionButton badge to show "{count}/5" in src/components/POS/POSLayout.tsx
 
 **Checkpoint**: Hold/recall fully functional with max-5 enforcement and visual indicator; held sales survive navigation within session
 
@@ -178,8 +178,8 @@
 
 ### Implementation for User Story 9
 
-- [ ] T032 [US9] Create ReturnDialog component (Radix Dialog) with sale lookup (by receipt number/ticket, date, customer name), original sale display with item checkboxes and return-quantity spinners (max = original qty − already returned), prorated refund preview, confirm button in src/components/POS/ReturnDialog.tsx
-- [ ] T033 [US9] Add checkoutReturn flow: wire Return (F8) button → ReturnDialog → ManagerPinDialog authorization → useSaleStore.processReturn (calling SaleRepo.createPartialReturn) → success toast + return receipt in src/stores/useSaleStore.ts and src/components/POS/POSLayout.tsx
+- [X] T032 [US9] Create ReturnDialog component (Radix Dialog) with sale lookup (by receipt number/ticket, date, customer name), original sale display with item checkboxes and return-quantity spinners (max = original qty − already returned), prorated refund preview, confirm button in src/components/POS/ReturnDialog.tsx
+- [X] T033 [US9] Add checkoutReturn flow: wire Return (F8) button → ReturnDialog → ManagerPinDialog authorization → useSaleStore.processReturn (calling SaleRepo.createPartialReturn) → success toast + return receipt in src/stores/useSaleStore.ts and src/components/POS/POSLayout.tsx
 
 **Checkpoint**: Full and partial returns work end-to-end with manager authorization, stock restoration, and audit logging
 
@@ -193,9 +193,9 @@
 
 ### Implementation for User Story 10
 
-- [ ] T034 [P] [US10] Create useTicketNumber hook that peeks the next ticket number from SaleRepo.getNextTicketNumber and formats as zero-padded 3-digit string in src/hooks/useTicketNumber.ts
-- [ ] T035 [US10] Display ticket number ("Ticket n° 042") in CartTicket header area, refreshing on each checkout completion in src/components/POS/CartTicket.tsx
-- [ ] T036 [US10] Add ticket number and formatted sale date to ReceiptPreview as a unique sale reference in src/components/POS/ReceiptPreview.tsx
+- [X] T034 [P] [US10] Create useTicketNumber hook that peeks the next ticket number from SaleRepo.getNextTicketNumber and formats as zero-padded 3-digit string in src/hooks/useTicketNumber.ts
+- [X] T035 [US10] Display ticket number ("Ticket n° 042") in CartTicket header area, refreshing on each checkout completion in src/components/POS/CartTicket.tsx
+- [X] T036 [US10] Add ticket number and formatted sale date to ReceiptPreview as a unique sale reference in src/components/POS/ReceiptPreview.tsx
 
 **Checkpoint**: Every sale gets a sequential ticket number; receipt shows ticket + date reference
 
@@ -209,8 +209,8 @@
 
 ### Implementation for User Story 11
 
-- [ ] T037 [US11] Create NumericKeypad component with 0–9 digit buttons in calculator grid layout, backspace (←), clear (C), and confirm (↵) buttons, digit display field showing accumulated value from usePOSStore.keypadValue in src/components/POS/NumericKeypad.tsx
-- [ ] T038 [US11] Integrate NumericKeypad into POSLayout left panel below ProductDetailCard, wire confirm action to product code lookup (search by barcode/reference → addToCart or show error toast) in src/components/POS/POSLayout.tsx
+- [X] T037 [US11] Create NumericKeypad component with 0–9 digit buttons in calculator grid layout, backspace (←), clear (C), and confirm (↵) buttons, digit display field showing accumulated value from usePOSStore.keypadValue in src/components/POS/NumericKeypad.tsx
+- [X] T038 [US11] Integrate NumericKeypad into POSLayout left panel below ProductDetailCard, wire confirm action to product code lookup (search by barcode/reference → addToCart or show error toast) in src/components/POS/POSLayout.tsx
 
 **Checkpoint**: Numeric keypad fully functional for product code entry on touchscreen
 
@@ -224,8 +224,8 @@
 
 ### Implementation for User Story 12
 
-- [ ] T039 [US12] Load store name/logo from app_settings table via settings.repo and display in POSHeader, replacing placeholder in src/components/POS/POSHeader.tsx
-- [ ] T040 [US12] Add cashier session metadata (shift start time from cashier_sessions) to POSHeader display in src/components/POS/POSHeader.tsx
+- [X] T039 [US12] Load store name/logo from app_settings table via settings.repo and display in POSHeader, replacing placeholder in src/components/POS/POSHeader.tsx
+- [X] T040 [US12] Add cashier session metadata (shift start time from cashier_sessions) to POSHeader display in src/components/POS/POSHeader.tsx
 
 **Checkpoint**: Header shows real store branding, live clock, and session context
 
@@ -235,13 +235,13 @@
 
 **Purpose**: Split payment feature, i18n, responsive testing, accessibility, and final validation
 
-- [ ] T041 [P] Create SplitPaymentPanel component with sequential multi-tender entry (method selector + amount input), running remaining-balance display, entry remove buttons, and finalize button (blocked until remaining ≤ 0) in src/components/POS/SplitPaymentPanel.tsx
-- [ ] T042 Integrate SplitPaymentPanel into checkout flow: show when payment method = 'split', wire to useSaleStore.checkoutWithSplitPayment in src/components/POS/POSLayout.tsx
-- [ ] T043 Update ReceiptPreview to display split payment method breakdown (each method + amount) when sale.payment_method = 'split' in src/components/POS/ReceiptPreview.tsx
-- [ ] T044 [P] Add i18n translation keys for all new POS components (button labels, dialog titles, error messages, totals labels) in src/i18n/locales/en.json, src/i18n/locales/ar.json, and src/i18n/locales/fr.json
-- [ ] T045 Test and adjust responsive layout for 1024×768, 1366×768, and 1920×1080 breakpoints — ensure cart and totals are always visible, zones stack on smaller screens in src/components/POS/POSLayout.tsx
-- [ ] T046 Accessibility pass: add ARIA labels to all action buttons, manage focus for modal dialogs (ManagerPinDialog, HoldRecallDialog, ReturnDialog, DiscountDialog), ensure keyboard navigation across all new POS components
-- [ ] T047 Run quickstart.md validation scenarios end-to-end (5-item sale < 45s, hold/recall, return, split payment, all 3 product entry methods)
+- [X] T041 [P] Create SplitPaymentPanel component with sequential multi-tender entry (method selector + amount input), running remaining-balance display, entry remove buttons, and finalize button (blocked until remaining ≤ 0) in src/components/POS/SplitPaymentPanel.tsx
+- [X] T042 Integrate SplitPaymentPanel into checkout flow: show when payment method = 'split', wire to useSaleStore.checkoutWithSplitPayment in src/components/POS/POSLayout.tsx
+- [X] T043 Update ReceiptPreview to display split payment method breakdown (each method + amount) when sale.payment_method = 'split' in src/components/POS/ReceiptPreview.tsx
+- [X] T044 [P] Add i18n translation keys for all new POS components (button labels, dialog titles, error messages, totals labels) in src/i18n/locales/en.json, src/i18n/locales/ar.json, and src/i18n/locales/fr.json
+- [X] T045 Test and adjust responsive layout for 1024×768, 1366×768, and 1920×1080 breakpoints — ensure cart and totals are always visible, zones stack on smaller screens in src/components/POS/POSLayout.tsx
+- [X] T046 Accessibility pass: add ARIA labels to all action buttons, manage focus for modal dialogs (ManagerPinDialog, HoldRecallDialog, ReturnDialog, DiscountDialog), ensure keyboard navigation across all new POS components
+- [X] T047 Run quickstart.md validation scenarios end-to-end (5-item sale < 45s, hold/recall, return, split payment, all 3 product entry methods)
 
 ---
 

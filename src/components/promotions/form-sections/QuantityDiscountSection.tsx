@@ -19,8 +19,8 @@ interface QuantityDiscountSectionProps {
     onChange: (partial: Partial<QuantityDiscountValues>) => void;
 }
 
-const INPUT_CLASS = 'w-full h-14 px-5 rounded-3xl bg-zinc-100/70 border-2 border-zinc-300 font-bold text-sm placeholder:text-zinc-400 focus:outline-none focus:border-yellow-400 transition-colors';
-const LABEL_CLASS = 'block text-[11px] font-black uppercase tracking-widest text-zinc-500 mb-1';
+const INPUT_CLASS = 'w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-hover)] focus:ring-1 focus:ring-[var(--color-border-hover)] transition-all placeholder:text-[var(--color-text-placeholder)]';
+const LABEL_CLASS = 'block text-sm font-medium text-[var(--color-text-muted)] mb-1';
 
 export default function QuantityDiscountSection({ values, errors, onChange }: QuantityDiscountSectionProps) {
     const { t } = useTranslation();
@@ -77,7 +77,7 @@ export default function QuantityDiscountSection({ values, errors, onChange }: Qu
 
             {/* Preview */}
             {buy_quantity >= 1 && free_quantity >= 1 && (
-                <div className="px-5 py-4 rounded-2xl bg-purple-50 border-2 border-purple-200 text-sm">
+                <div className="px-4 py-3 rounded-lg bg-purple-50 border border-purple-200 text-sm">
                     <span className="font-black text-purple-700">
                         Buy {buy_quantity} Get {free_quantity} Free
                     </span>

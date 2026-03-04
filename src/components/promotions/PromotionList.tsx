@@ -1,6 +1,14 @@
 import { useTranslation } from 'react-i18next';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Trash2, MoreVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import Pagination from '@/components/common/Pagination';
 import { usePagination } from '@/hooks/usePagination';
 import { cn } from '@/lib/utils';
@@ -139,28 +147,39 @@ export default function PromotionList({ promotions, isLoading, onView, onEdit, o
                                             {promotion.end_date}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button
-                                                    onClick={() => onView(promotion)}
-                                                    title={t('promotions.table.view', 'View')}
-                                                    className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-colors"
-                                                >
-                                                    <Eye size={14} strokeWidth={2.5} />
-                                                </button>
-                                                <button
-                                                    onClick={() => onEdit(promotion)}
-                                                    title={t('promotions.table.edit', 'Edit')}
-                                                    className="p-2 rounded-xl bg-zinc-100 hover:bg-yellow-100 text-zinc-600 hover:text-yellow-700 transition-colors"
-                                                >
-                                                    <Pencil size={14} strokeWidth={2.5} />
-                                                </button>
-                                                <button
-                                                    onClick={() => onDelete(promotion)}
-                                                    title={t('promotions.table.delete', 'Delete')}
-                                                    className="p-2 rounded-xl bg-zinc-100 hover:bg-rose-100 text-zinc-600 hover:text-rose-600 transition-colors"
-                                                >
-                                                    <Trash2 size={14} strokeWidth={2.5} />
-                                                </button>
+                                            <div className="flex justify-end">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <button className="p-2 rounded-xl hover:bg-black/5 text-zinc-400 hover:text-black transition-colors focus:outline-none">
+                                                            <MoreVertical size={18} />
+                                                        </button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-40 rounded-xl border-black/10 bg-white">
+                                                        <DropdownMenuLabel>{t('promotions.table.actions')}</DropdownMenuLabel>
+                                                        <DropdownMenuSeparator className="bg-zinc-100" />
+                                                        <DropdownMenuItem
+                                                            onClick={() => onView(promotion)}
+                                                            className="gap-2 cursor-pointer focus:bg-zinc-50"
+                                                        >
+                                                            <Eye size={14} />
+                                                            <span>{t('promotions.table.view', 'View')}</span>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={() => onEdit(promotion)}
+                                                            className="gap-2 cursor-pointer focus:bg-zinc-50"
+                                                        >
+                                                            <Pencil size={14} />
+                                                            <span>{t('promotions.table.edit', 'Edit')}</span>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={() => onDelete(promotion)}
+                                                            className="gap-2 text-red-600 focus:text-red-700 focus:bg-red-50 cursor-pointer"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                            <span>{t('promotions.table.delete', 'Delete')}</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                             </div>
                                         </td>
                                     </motion.tr>

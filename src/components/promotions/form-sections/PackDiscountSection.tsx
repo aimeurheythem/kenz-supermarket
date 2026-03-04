@@ -21,8 +21,8 @@ interface PackDiscountSectionProps {
     onChange: (partial: Partial<PackDiscountValues>) => void;
 }
 
-const INPUT_CLASS = 'w-full h-14 px-5 rounded-3xl bg-zinc-100/70 border-2 border-zinc-300 font-bold text-sm placeholder:text-zinc-400 focus:outline-none focus:border-yellow-400 transition-colors';
-const LABEL_CLASS = 'block text-[11px] font-black uppercase tracking-widest text-zinc-500 mb-1';
+const INPUT_CLASS = 'w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-hover)] focus:ring-1 focus:ring-[var(--color-border-hover)] transition-all placeholder:text-[var(--color-text-placeholder)]';
+const LABEL_CLASS = 'block text-sm font-medium text-[var(--color-text-muted)] mb-1';
 
 export default function PackDiscountSection({ values, errors, onChange }: PackDiscountSectionProps) {
     const { t } = useTranslation();

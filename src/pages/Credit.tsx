@@ -13,6 +13,7 @@ import {
     Users,
     TrendingUp,
     X,
+    MoreVertical,
 } from 'lucide-react';
 import { cn, formatCurrency, validatePaymentAmount } from '@/lib/utils';
 import { useCustomerStore } from '@/stores/useCustomerStore';
@@ -20,6 +21,14 @@ import { toast } from 'sonner';
 import { exportToCsv } from '@/lib/csv';
 import type { Customer } from '@/lib/types';
 import Button from '@/components/common/Button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import Portal from '@/components/common/Portal';
 import { usePageTitle } from '@/hooks/usePageTitle';
 
@@ -379,15 +388,29 @@ export default function Credit() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 rtl:text-left ltr:text-right">
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedDebtor(debtor);
-                                                    setShowPaymentModal(true);
-                                                }}
-                                                className="px-4 py-2 bg-black text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-neutral-800 transition-all"
-                                            >
-                                                {t('credit.settle_debt')}
-                                            </button>
+                                            <div className="flex justify-end">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <button className="p-2 rounded-xl hover:bg-black/5 text-zinc-400 hover:text-black transition-colors focus:outline-none">
+                                                            <MoreVertical size={18} />
+                                                        </button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-44 rounded-xl border-black/10 bg-white">
+                                                        <DropdownMenuLabel>{t('credit.col_actions')}</DropdownMenuLabel>
+                                                        <DropdownMenuSeparator className="bg-zinc-100" />
+                                                        <DropdownMenuItem
+                                                            onClick={() => {
+                                                                setSelectedDebtor(debtor);
+                                                                setShowPaymentModal(true);
+                                                            }}
+                                                            className="gap-2 cursor-pointer focus:bg-zinc-50"
+                                                        >
+                                                            <Banknote size={14} />
+                                                            <span>{t('credit.settle_debt')}</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))

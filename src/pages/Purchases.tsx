@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, CheckCircle, Eye, XCircle } from 'lucide-react';
+import { Plus, CheckCircle, Eye, XCircle, MoreVertical } from 'lucide-react';
 import { cn, formatCurrency, formatDate } from '@/lib/utils';
 import { usePurchaseStore } from '@/stores/usePurchaseStore';
 import { useSupplierStore } from '@/stores/useSupplierStore';
@@ -11,6 +11,14 @@ import { usePagination } from '@/hooks/usePagination';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import SearchInput from '@/components/common/SearchInput';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import type { Product } from '@/lib/types';
 import { usePageTitle } from '@/hooks/usePageTitle';
 
@@ -218,23 +226,34 @@ export default function Purchases() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="flex items-center justify-center gap-2">
-                                                <button
-                                                    onClick={() => setViewedOrder(order.id)}
-                                                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 hover:bg-black hover:text-white transition-all"
-                                                    title={t('purchases.view_details')}
-                                                >
-                                                    <Eye size={16} />
-                                                </button>
-                                                {order.status === 'ordered' || order.status === 'pending' ? (
-                                                    <button
-                                                        onClick={() => receiveOrder(order.id)}
-                                                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all"
-                                                        title={t('purchases.receive_items')}
-                                                    >
-                                                        <CheckCircle size={16} />
-                                                    </button>
-                                                ) : null}
+                                            <div className="flex justify-end">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <button className="p-2 rounded-xl hover:bg-black/5 text-zinc-400 hover:text-black transition-colors focus:outline-none">
+                                                            <MoreVertical size={18} />
+                                                        </button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-44 rounded-xl border-black/10 bg-white">
+                                                        <DropdownMenuLabel>{t('purchases.col_actions')}</DropdownMenuLabel>
+                                                        <DropdownMenuSeparator className="bg-zinc-100" />
+                                                        <DropdownMenuItem
+                                                            onClick={() => setViewedOrder(order.id)}
+                                                            className="gap-2 cursor-pointer focus:bg-zinc-50"
+                                                        >
+                                                            <Eye size={14} />
+                                                            <span>{t('purchases.view_details')}</span>
+                                                        </DropdownMenuItem>
+                                                        {(order.status === 'ordered' || order.status === 'pending') && (
+                                                            <DropdownMenuItem
+                                                                onClick={() => receiveOrder(order.id)}
+                                                                className="gap-2 text-emerald-600 focus:text-emerald-700 focus:bg-emerald-50 cursor-pointer"
+                                                            >
+                                                                <CheckCircle size={14} />
+                                                                <span>{t('purchases.receive_items')}</span>
+                                                            </DropdownMenuItem>
+                                                        )}
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                             </div>
                                         </td>
                                     </tr>

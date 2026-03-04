@@ -15,6 +15,7 @@ import {
     BarChart3,
     Search,
     X,
+    MoreVertical,
 } from 'lucide-react';
 import { cn, formatDate, formatCurrency, validatePassword, validatePin } from '@/lib/utils';
 import { useUserStore } from '@/stores/useUserStore';
@@ -25,6 +26,14 @@ import { usePagination } from '@/hooks/usePagination';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { User, UserInput } from '@/lib/types';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -441,30 +450,43 @@ export default function Users() {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 rtl:text-left ltr:text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            {user.role === 'cashier' && (
-                                                <button
-                                                    onClick={() => handleViewPerformance(user)}
-                                                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 hover:bg-orange-100 hover:text-orange-600 transition-all"
-                                                    title={t('users.view_performance')}
-                                                >
-                                                    <BarChart3 size={14} />
-                                                </button>
-                                            )}
-                                            <button
-                                                onClick={() => handleEdit(user)}
-                                                className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 hover:bg-blue-100 hover:text-blue-600 transition-all"
-                                            >
-                                                <Edit2 size={14} />
-                                            </button>
-                                            {user.id !== currentUser?.id && (
-                                                <button
-                                                    onClick={() => handleDelete(user.id)}
-                                                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 hover:bg-rose-100 hover:text-rose-600 transition-all"
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
-                                            )}
+                                        <div className="flex justify-end">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <button className="p-2 rounded-xl hover:bg-black/5 text-zinc-400 hover:text-black transition-colors focus:outline-none">
+                                                        <MoreVertical size={18} />
+                                                    </button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-44 rounded-xl border-black/10 bg-white">
+                                                    <DropdownMenuLabel>{t('users.col_actions')}</DropdownMenuLabel>
+                                                    <DropdownMenuSeparator className="bg-zinc-100" />
+                                                    {user.role === 'cashier' && (
+                                                        <DropdownMenuItem
+                                                            onClick={() => handleViewPerformance(user)}
+                                                            className="gap-2 cursor-pointer focus:bg-zinc-50"
+                                                        >
+                                                            <BarChart3 size={14} />
+                                                            <span>{t('users.view_performance')}</span>
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                    <DropdownMenuItem
+                                                        onClick={() => handleEdit(user)}
+                                                        className="gap-2 cursor-pointer focus:bg-zinc-50"
+                                                    >
+                                                        <Edit2 size={14} />
+                                                        <span>{t('common.edit', 'Edit')}</span>
+                                                    </DropdownMenuItem>
+                                                    {user.id !== currentUser?.id && (
+                                                        <DropdownMenuItem
+                                                            onClick={() => handleDelete(user.id)}
+                                                            className="gap-2 text-red-600 focus:text-red-700 focus:bg-red-50 cursor-pointer"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                            <span>{t('common.delete', 'Delete')}</span>
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </div>
                                     </td>
                                 </tr>

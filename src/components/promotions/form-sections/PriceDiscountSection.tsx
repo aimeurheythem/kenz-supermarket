@@ -23,8 +23,8 @@ interface PriceDiscountSectionProps {
     onChange: (partial: Partial<PriceDiscountValues>) => void;
 }
 
-const INPUT_CLASS = 'w-full h-14 px-5 rounded-3xl bg-zinc-100/70 border-2 border-zinc-300 font-bold text-sm placeholder:text-zinc-400 focus:outline-none focus:border-yellow-400 transition-colors';
-const LABEL_CLASS = 'block text-[11px] font-black uppercase tracking-widest text-zinc-500 mb-1';
+const INPUT_CLASS = 'w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-hover)] focus:ring-1 focus:ring-[var(--color-border-hover)] transition-all placeholder:text-[var(--color-text-placeholder)]';
+const LABEL_CLASS = 'block text-sm font-medium text-[var(--color-text-muted)] mb-1';
 
 export default function PriceDiscountSection({ values, errors, onChange }: PriceDiscountSectionProps) {
     const { t } = useTranslation();
@@ -79,10 +79,10 @@ export default function PriceDiscountSection({ values, errors, onChange }: Price
                             key={dt}
                             type="button"
                             onClick={() => updateConfig({ discount_type: dt })}
-                            className={`flex-1 h-12 rounded-3xl border-2 font-black uppercase tracking-widest text-xs transition-all ${
+                            className={`flex-1 py-2 rounded-lg border font-medium text-sm transition-all ${
                                 values.config.discount_type === dt
                                     ? 'bg-blue-500 border-blue-500 text-white'
-                                    : 'bg-zinc-100/70 border-zinc-300 text-zinc-500 hover:border-zinc-400'
+                                    : 'bg-[var(--color-bg-input)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-border-hover)]'
                             }`}
                         >
                             {t(`promotions.form.discount_type_${dt}`)}
@@ -133,7 +133,7 @@ export default function PriceDiscountSection({ values, errors, onChange }: Price
 
             {/* Live Preview */}
             {preview && (
-                <div className="px-5 py-4 rounded-2xl bg-yellow-50 border-2 border-yellow-200 text-sm">
+                <div className="px-4 py-3 rounded-lg bg-yellow-50 border border-yellow-200 text-sm">
                     <span className="text-zinc-500 font-semibold">{t('promotions.form.preview', 'Preview')}: </span>
                     <span className="line-through text-zinc-400">{format(preview.original)}</span>
                     <span className="mx-2 text-yellow-600 font-black">→</span>

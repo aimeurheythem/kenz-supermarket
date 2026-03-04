@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableSkeletonRows } from '@/components/common/TableSkeleton';
-import { Plus, Search, Filter, Download, DollarSign, TrendingUp, PieChart, Wallet, X } from 'lucide-react';
+import { Plus, Search, Filter, Download, DollarSign, TrendingUp, PieChart, Wallet, X, MoreVertical, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '@/components/common/Button';
 import { DeleteConfirmModal } from '@/components/common/DeleteConfirmModal';
@@ -12,6 +12,14 @@ import { useExpenseStore } from '@/stores/useExpenseStore';
 import { exportToCsv } from '@/lib/csv';
 import { toast } from 'sonner';
 import ExpenseModal from '@/components/expenses/ExpenseModal';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { usePageTitle } from '@/hooks/usePageTitle';
 
 export default function Expenses() {
@@ -360,12 +368,26 @@ export default function Expenses() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 rtl:text-left ltr:text-right">
-                                            <button
-                                                onClick={() => setDeleteTarget(expense.id)}
-                                                className="text-zinc-400 hover:text-rose-500 font-bold text-[10px] uppercase tracking-wider transition-colors"
-                                            >
-                                                {t('expenses.delete_expense')}
-                                            </button>
+                                            <div className="flex justify-end">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <button className="p-2 rounded-xl hover:bg-black/5 text-zinc-400 hover:text-black transition-colors focus:outline-none">
+                                                            <MoreVertical size={18} />
+                                                        </button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-40 rounded-xl border-black/10 bg-white">
+                                                        <DropdownMenuLabel>{t('expenses.col_actions')}</DropdownMenuLabel>
+                                                        <DropdownMenuSeparator className="bg-zinc-100" />
+                                                        <DropdownMenuItem
+                                                            onClick={() => setDeleteTarget(expense.id)}
+                                                            className="gap-2 text-red-600 focus:text-red-700 focus:bg-red-50 cursor-pointer"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                            <span>{t('expenses.delete_expense')}</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))

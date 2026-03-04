@@ -1,13 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCustomerStore } from '@/stores/useCustomerStore';
 import { useTranslation } from 'react-i18next';
-import { Search, Plus, Trash2, Edit, Phone, Mail, MapPin, Award, Users, UserCheck, Wallet, X } from 'lucide-react';
+import { Search, Plus, Trash2, Edit, Phone, Mail, MapPin, Award, Users, UserCheck, Wallet, X, MoreVertical } from 'lucide-react';
 import { DeleteConfirmModal } from '@/components/common/DeleteConfirmModal';
 import CustomerModal from '@/components/customers/CustomerModal';
 import Pagination from '@/components/common/Pagination';
 import { usePagination } from '@/hooks/usePagination';
 import { cn, formatCurrency } from '@/lib/utils';
 import type { Customer } from '@/lib/types';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { TableSkeletonRows } from '@/components/common/TableSkeleton';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -303,22 +311,35 @@ export default function Customers() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 rtl:text-left ltr:text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedCustomer(customer);
-                                                        setIsModalOpen(true);
-                                                    }}
-                                                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 hover:bg-black hover:text-white transition-all"
-                                                >
-                                                    <Edit size={14} />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(customer.id)}
-                                                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 hover:bg-rose-500 hover:text-white transition-all"
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
+                                            <div className="flex justify-end">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <button className="p-2 rounded-xl hover:bg-black/5 text-zinc-400 hover:text-black transition-colors focus:outline-none">
+                                                            <MoreVertical size={18} />
+                                                        </button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-40 rounded-xl border-black/10 bg-white">
+                                                        <DropdownMenuLabel>{t('customers.col_actions')}</DropdownMenuLabel>
+                                                        <DropdownMenuSeparator className="bg-zinc-100" />
+                                                        <DropdownMenuItem
+                                                            onClick={() => {
+                                                                setSelectedCustomer(customer);
+                                                                setIsModalOpen(true);
+                                                            }}
+                                                            className="gap-2 cursor-pointer focus:bg-zinc-50"
+                                                        >
+                                                            <Edit size={14} />
+                                                            <span>{t('common.edit', 'Edit')}</span>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={() => handleDelete(customer.id)}
+                                                            className="gap-2 text-red-600 focus:text-red-700 focus:bg-red-50 cursor-pointer"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                            <span>{t('common.delete', 'Delete')}</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                             </div>
                                         </td>
                                     </tr>

@@ -259,7 +259,7 @@ export default function PromotionFormModal({ isOpen, onClose, promotion }: Promo
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-            <DialogContent className="max-w-2xl p-6">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
                 <DialogHeader>
                     <DialogTitle>
                         {promotion ? t('promotions.edit_promotion') : t('promotions.add_promotion')}
@@ -271,7 +271,7 @@ export default function PromotionFormModal({ isOpen, onClose, promotion }: Promo
                     )}
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     {step === 1 && (
                         <div className="space-y-4">
                             <GeneralInfoSection

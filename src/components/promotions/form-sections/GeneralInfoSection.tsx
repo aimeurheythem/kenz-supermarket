@@ -25,8 +25,8 @@ interface GeneralInfoSectionProps {
     isEditMode: boolean;
 }
 
-const INPUT_CLASS = 'w-full h-14 px-5 rounded-3xl bg-zinc-100/70 border-2 border-zinc-300 font-bold text-sm placeholder:text-zinc-400 focus:outline-none focus:border-yellow-400 transition-colors';
-const LABEL_CLASS = 'block text-[11px] font-black uppercase tracking-widest text-zinc-500 mb-1';
+const INPUT_CLASS = 'w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-hover)] focus:ring-1 focus:ring-[var(--color-border-hover)] transition-all placeholder:text-[var(--color-text-placeholder)]';
+const LABEL_CLASS = 'block text-sm font-medium text-[var(--color-text-muted)] mb-1';
 
 export default function GeneralInfoSection({ values, errors, onChange, isEditMode }: GeneralInfoSectionProps) {
     const { t } = useTranslation();
@@ -70,9 +70,9 @@ export default function GeneralInfoSection({ values, errors, onChange, isEditMod
                     type="button"
                     disabled={isEditMode}
                     onClick={() => !isEditMode && setTypeOpen((o) => !o)}
-                    className={`w-full h-14 ps-5 pe-4 rounded-3xl bg-zinc-100/70 border-2 font-bold text-sm text-start flex items-center transition-colors
-                        ${typeOpen ? 'border-yellow-400' : 'border-zinc-300'}
-                        ${isEditMode ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:border-zinc-400'}`}
+                    className={`w-full px-3 py-2 rounded-lg bg-[var(--color-bg-input)] border text-sm text-start flex items-center transition-all
+                        ${typeOpen ? 'border-[var(--color-border-hover)] ring-1 ring-[var(--color-border-hover)]' : 'border-[var(--color-border)]'}
+                        ${isEditMode ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:border-[var(--color-border-hover)]'}`}
                 >
                     <span className="flex-1 text-zinc-800">
                         {TYPES.find((tp) => tp.value === values.type)?.label ?? values.type}
@@ -85,7 +85,7 @@ export default function GeneralInfoSection({ values, errors, onChange, isEditMod
                 </button>
 
                 {typeOpen && (
-                    <div className="absolute left-0 right-0 mt-1.5 z-50 rounded-2xl border border-zinc-200 bg-white shadow-xl overflow-hidden">
+                    <div className="absolute left-0 right-0 mt-1 z-50 rounded-lg border border-[var(--color-border)] bg-white shadow-lg overflow-hidden">
                         <ul>
                             {TYPES.map((tp) => {
                                 const selected = values.type === tp.value;
@@ -96,10 +96,10 @@ export default function GeneralInfoSection({ values, errors, onChange, isEditMod
                                             onClick={() => { onChange({ type: tp.value }); setTypeOpen(false); }}
                                             className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-zinc-50 transition-colors"
                                         >
-                                            <span className={`shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                                                selected ? 'bg-yellow-400 border-yellow-400' : 'border-zinc-300'
+                                            <span className={`shrink-0 w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
+                                                selected ? 'bg-[var(--color-border-hover)] border-[var(--color-border-hover)]' : 'border-[var(--color-border)]'
                                             }`}>
-                                                {selected && <Check size={10} strokeWidth={3.5} className="text-white" />}
+                                                {selected && <Check size={9} strokeWidth={3} className="text-white" />}
                                             </span>
                                             <span className="text-sm font-bold text-zinc-800">{tp.label}</span>
                                         </button>
@@ -121,12 +121,12 @@ export default function GeneralInfoSection({ values, errors, onChange, isEditMod
                             key={s}
                             type="button"
                             onClick={() => onChange({ status: s })}
-                            className={`flex-1 h-14 rounded-3xl border-2 font-black uppercase tracking-widest text-xs transition-all ${
+                            className={`flex-1 py-2 rounded-lg border font-medium text-sm transition-all ${
                                 values.status === s
                                     ? s === 'active'
-                                        ? 'bg-emerald-400 border-emerald-400 text-white'
+                                        ? 'bg-emerald-500 border-emerald-500 text-white'
                                         : 'bg-zinc-700 border-zinc-700 text-white'
-                                    : 'bg-zinc-100/70 border-zinc-300 text-zinc-500 hover:border-zinc-400'
+                                    : 'bg-[var(--color-bg-input)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-border-hover)]'
                             }`}
                         >
                             {t(`promotions.status.${s}`)}

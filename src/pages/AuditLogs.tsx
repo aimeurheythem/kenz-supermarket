@@ -1,17 +1,223 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+﻿import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AuditLog } from '@/stores/useAuditLogStore';
 import { useAuditLogStore } from '@/stores/useAuditLogStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { TableSkeletonCells } from '@/components/common/TableSkeleton';
 import Pagination from '@/components/common/Pagination';
 import { usePagination } from '@/hooks/usePagination';
-import { Search, Eye, X, Activity, User, Clock, FileText, RefreshCw } from 'lucide-react';
+import { Search, Eye, X, Activity, User, Clock, FileText, RefreshCw, MoreVertical } from 'lucide-react';
 import { format } from 'date-fns';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+
+// ── Audit Log Detail (used inside the controlled Dialog) ─────────────────
+
+function AuditLogDetail({ log }: { log: AuditLog }) {
+    const { t } = useTranslation();
+
+    const parseValue = (v: any) => {
+        if (v == null) return null;
+        if (typeof v === 'string') {
+            try { return JSON.parse(v); } catch { return v; }
+        }
+        return v;
+    };
+
+    const oldObj = parseValue(log.old_value);
+    const newObj = parseValue(log.new_value);
+    const isObject = (v: any) => v !== null && typeof v === 'object' && !Array.isArray(v);
+    const isSimpleValue = (v: any) =>
+        v === null || v === undefined || typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean';
+
+    const formatCell = (v: any) => {
+        if (v === undefined || v === null) return <span className="text-zinc-300 italic">—</span>;
+        if (typeof v === 'boolean') return v ? t('common.yes', 'Yes') : t('common.no', 'No');
+        return String(v);
+    };
+
+    const shouldSkipField = (key: string, oldVal: any, newVal: any) => {
+        if (/_ids?$/.test(key)) return true;
+        if (['id', 'created_at', 'updated_at', 'deleted_at', 'status', 'effective_status', 'type', 'config', 'products', 'items', 'image', 'image_url', 'password', 'password_hash', 'token'].includes(key)) return true;
+        if (!isSimpleValue(oldVal) && !isSimpleValue(newVal)) return true;
+        if (Array.isArray(oldVal) || Array.isArray(newVal)) return true;
+        if (isObject(oldVal) || isObject(newVal)) return true;
+        return false;
+    };
+
+    const fieldLabels: Record<string, string> = {
+        name: t('audit_logs.field_name', 'Name'),
+        full_name: t('audit_logs.field_full_name', 'Full Name'),
+        username: t('audit_logs.field_username', 'Username'),
+        email: t('audit_logs.field_email', 'Email'),
+        phone: t('audit_logs.field_phone', 'Phone'),
+        role: t('audit_logs.field_role', 'Role'),
+        barcode: t('audit_logs.field_barcode', 'Barcode'),
+        description: t('audit_logs.field_description', 'Description'),
+        buy_price: t('audit_logs.field_buy_price', 'Buy Price'),
+        sell_price: t('audit_logs.field_sell_price', 'Sell Price'),
+        price: t('audit_logs.field_price', 'Price'),
+        quantity: t('audit_logs.field_quantity', 'Quantity'),
+        stock: t('audit_logs.field_stock', 'Stock'),
+        stock_quantity: t('audit_logs.field_stock', 'Stock'),
+        min_stock: t('audit_logs.field_min_stock', 'Min Stock'),
+        max_stock: t('audit_logs.field_max_stock', 'Max Stock'),
+        unit: t('audit_logs.field_unit', 'Unit'),
+        category_name: t('audit_logs.field_category', 'Category'),
+        supplier_name: t('audit_logs.field_supplier', 'Supplier'),
+        address: t('audit_logs.field_address', 'Address'),
+        notes: t('audit_logs.field_notes', 'Notes'),
+        discount: t('audit_logs.field_discount', 'Discount'),
+        discount_type: t('audit_logs.field_discount_type', 'Discount Type'),
+        discount_value: t('audit_logs.field_discount_value', 'Discount Value'),
+        tax: t('audit_logs.field_tax', 'Tax'),
+        total: t('audit_logs.field_total', 'Total'),
+        is_active: t('audit_logs.field_active', 'Active'),
+        expiry_date: t('audit_logs.field_expiry', 'Expiry Date'),
+        start_date: t('audit_logs.field_start_date', 'Start Date'),
+        end_date: t('audit_logs.field_end_date', 'End Date'),
+        value: t('audit_logs.field_value', 'Value'),
+        setting_key: t('audit_logs.field_setting', 'Setting'),
+        setting_value: t('audit_logs.field_value', 'Value'),
+        min_quantity: t('audit_logs.field_min_qty', 'Min Quantity'),
+        max_quantity: t('audit_logs.field_max_qty', 'Max Quantity'),
+        bundle_price: t('audit_logs.field_bundle_price', 'Bundle Price'),
+        pack_size: t('audit_logs.field_pack_size', 'Pack Size'),
+        contact_person: t('audit_logs.field_contact', 'Contact Person'),
+        company_name: t('audit_logs.field_company', 'Company'),
+        city: t('audit_logs.field_city', 'City'),
+    };
+
+    const getLabel = (key: string) =>
+        fieldLabels[key] || key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+    const renderChanges = () => {
+        if (isObject(oldObj) || isObject(newObj)) {
+            const allKeys = Array.from(new Set([
+                ...Object.keys(oldObj || {}),
+                ...Object.keys(newObj || {}),
+            ]));
+
+            const changedKeys = allKeys.filter((key) => {
+                const oldVal = oldObj?.[key];
+                const newVal = newObj?.[key];
+                if (shouldSkipField(key, oldVal, newVal)) return false;
+                return JSON.stringify(oldVal) !== JSON.stringify(newVal);
+            });
+
+            if (changedKeys.length === 0) {
+                return (
+                    <div className="p-6 text-center text-sm text-zinc-400 font-medium">
+                        {t('audit_logs.no_changes', 'No changes detected')}
+                    </div>
+                );
+            }
+
+            return (
+                <div className="rounded-xl border border-zinc-200 overflow-hidden">
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="bg-zinc-50 border-b border-zinc-200">
+                                <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                                    {t('audit_logs.col_field', 'Field')}
+                                </th>
+                                <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-rose-400">
+                                    {t('audit_logs.label_old_value')}
+                                </th>
+                                <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-emerald-500">
+                                    {t('audit_logs.label_new_value')}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-100">
+                            {changedKeys.map((key) => (
+                                <tr key={key}>
+                                    <td className="px-4 py-2.5 font-bold text-zinc-700 text-xs">
+                                        {getLabel(key)}
+                                    </td>
+                                    <td className="px-4 py-2.5 text-xs break-all text-rose-600 bg-rose-50/50">
+                                        {formatCell(oldObj?.[key])}
+                                    </td>
+                                    <td className="px-4 py-2.5 text-xs break-all text-emerald-600 bg-emerald-50/50">
+                                        {formatCell(newObj?.[key])}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 bg-rose-50 rounded-xl border border-rose-100">
+                    <h4 className="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-2">
+                        {t('audit_logs.label_old_value')}
+                    </h4>
+                    <p className="text-sm text-rose-900 break-all">{formatCell(oldObj)}</p>
+                </div>
+                <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                    <h4 className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-2">
+                        {t('audit_logs.label_new_value')}
+                    </h4>
+                    <p className="text-sm text-emerald-900 break-all">{formatCell(newObj)}</p>
+                </div>
+            </div>
+        );
+    };
+
+    return (
+        <div className="space-y-6 pt-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="p-4 bg-zinc-50 rounded-xl">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                        {t('audit_logs.label_timestamp')}
+                    </label>
+                    <p className="font-bold text-black mt-1">
+                        {format(new Date(log.created_at), 'PPP pp')}
+                    </p>
+                </div>
+                <div className="p-4 bg-zinc-50 rounded-xl">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                        {t('audit_logs.label_user')}
+                    </label>
+                    <p className="font-bold text-black mt-1">
+                        {log.user_name || t('audit_logs.system_user')}{' '}
+                        <span className="text-zinc-400 font-normal">(ID: {log.user_id})</span>
+                    </p>
+                </div>
+                <div className="p-4 bg-zinc-50 rounded-xl col-span-2">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                        {t('audit_logs.label_action')}
+                    </label>
+                    <p className="font-bold text-black mt-1">
+                        {log.action} on {log.entity} #{log.entity_id}
+                    </p>
+                </div>
+                <div className="col-span-2 p-4 bg-zinc-50 rounded-xl">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                        {t('audit_logs.label_description')}
+                    </label>
+                    <p className="text-zinc-700 mt-1">{log.details}</p>
+                </div>
+            </div>
+            {renderChanges()}
+        </div>
+    );
+}
+
+// ── Main Component ────────────────────────────────────────────────────────
 
 export default function AuditLogs() {
     const { t } = useTranslation();
@@ -23,6 +229,7 @@ export default function AuditLogs() {
         search: '',
     });
     const [_selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
+    const [isDetailOpen, setIsDetailOpen] = useState(false);
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     const loadLogs = useCallback(async () => {
@@ -316,224 +523,28 @@ export default function AuditLogs() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="flex items-center justify-end rtl:justify-start">
-                                                <Dialog>
-                                                    <DialogTrigger asChild>
-                                                        <button
-                                                            onClick={() => setSelectedLog(log)}
-                                                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 hover:bg-black hover:text-white transition-all"
-                                                        >
-                                                            <Eye size={16} />
+                                            <div className="flex justify-end rtl:justify-start">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <button className="p-2 rounded-xl hover:bg-black/5 text-zinc-400 hover:text-black transition-colors focus:outline-none">
+                                                            <MoreVertical size={18} />
                                                         </button>
-                                                    </DialogTrigger>
-                                                    <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto rounded-[2rem]">
-                                                        <DialogHeader>
-                                                            <DialogTitle className="text-xl font-bold text-black tracking-tight">
-                                                                {t('audit_logs.log_details')}
-                                                            </DialogTitle>
-                                                        </DialogHeader>
-                                                        <div className="space-y-6 pt-4">
-                                                            <div className="grid grid-cols-2 gap-4 text-sm">
-                                                                <div className="p-4 bg-zinc-50 rounded-xl">
-                                                                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                                                                        {t('audit_logs.label_timestamp')}
-                                                                    </label>
-                                                                    <p className="font-bold text-black mt-1">
-                                                                        {format(new Date(log.created_at), 'PPP pp')}
-                                                                    </p>
-                                                                </div>
-                                                                <div className="p-4 bg-zinc-50 rounded-xl">
-                                                                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                                                                        {t('audit_logs.label_user')}
-                                                                    </label>
-                                                                    <p className="font-bold text-black mt-1">
-                                                                        {log.user_name || t('audit_logs.system_user')}{' '}
-                                                                        <span className="text-zinc-400 font-normal">
-                                                                            (ID: {log.user_id})
-                                                                        </span>
-                                                                    </p>
-                                                                </div>
-                                                                <div className="p-4 bg-zinc-50 rounded-xl col-span-2">
-                                                                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                                                                        {t('audit_logs.label_action')}
-                                                                    </label>
-                                                                    <p className="font-bold text-black mt-1">
-                                                                        {log.action} on {log.entity} #{log.entity_id}
-                                                                    </p>
-                                                                </div>
-                                                                <div className="col-span-2 p-4 bg-zinc-50 rounded-xl">
-                                                                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                                                                        {t('audit_logs.label_description')}
-                                                                    </label>
-                                                                    <p className="text-zinc-700 mt-1">{log.details}</p>
-                                                                </div>
-                                                            </div>
-
-                                                            {(() => {
-                                                                const parseValue = (v: any) => {
-                                                                    if (v == null) return null;
-                                                                    if (typeof v === 'string') {
-                                                                        try { return JSON.parse(v); } catch { return v; }
-                                                                    }
-                                                                    return v;
-                                                                };
-                                                                const oldObj = parseValue(log.old_value);
-                                                                const newObj = parseValue(log.new_value);
-                                                                const isObject = (v: any) => v !== null && typeof v === 'object' && !Array.isArray(v);
-
-                                                                // Only show simple scalar values the user can actually read
-                                                                const isSimpleValue = (v: any) =>
-                                                                    v === null || v === undefined || typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean';
-
-                                                                const formatCell = (v: any) => {
-                                                                    if (v === undefined || v === null) return <span className="text-zinc-300 italic">—</span>;
-                                                                    if (typeof v === 'boolean') return v ? t('common.yes', 'Yes') : t('common.no', 'No');
-                                                                    return String(v);
-                                                                };
-
-                                                                // Skip any field that's internal / not meaningful to the user
-                                                                const shouldSkipField = (key: string, oldVal: any, newVal: any) => {
-                                                                    // Any field ending with _id or _ids
-                                                                    if (/_ids?$/.test(key)) return true;
-                                                                    // Explicit system fields
-                                                                    if (['id', 'created_at', 'updated_at', 'deleted_at', 'status', 'effective_status', 'type', 'config', 'products', 'items', 'image', 'image_url', 'password', 'password_hash', 'token'].includes(key)) return true;
-                                                                    // Skip if both values are arrays or nested objects (not human-readable)
-                                                                    if (!isSimpleValue(oldVal) && !isSimpleValue(newVal)) return true;
-                                                                    // Skip if one side is array/object (complex data)
-                                                                    if (Array.isArray(oldVal) || Array.isArray(newVal)) return true;
-                                                                    if (isObject(oldVal) || isObject(newVal)) return true;
-                                                                    return false;
-                                                                };
-
-                                                                // Human-readable labels
-                                                                const fieldLabels: Record<string, string> = {
-                                                                    name: t('audit_logs.field_name', 'Name'),
-                                                                    full_name: t('audit_logs.field_full_name', 'Full Name'),
-                                                                    username: t('audit_logs.field_username', 'Username'),
-                                                                    email: t('audit_logs.field_email', 'Email'),
-                                                                    phone: t('audit_logs.field_phone', 'Phone'),
-                                                                    role: t('audit_logs.field_role', 'Role'),
-                                                                    barcode: t('audit_logs.field_barcode', 'Barcode'),
-                                                                    description: t('audit_logs.field_description', 'Description'),
-                                                                    buy_price: t('audit_logs.field_buy_price', 'Buy Price'),
-                                                                    sell_price: t('audit_logs.field_sell_price', 'Sell Price'),
-                                                                    price: t('audit_logs.field_price', 'Price'),
-                                                                    quantity: t('audit_logs.field_quantity', 'Quantity'),
-                                                                    stock: t('audit_logs.field_stock', 'Stock'),
-                                                                    stock_quantity: t('audit_logs.field_stock', 'Stock'),
-                                                                    min_stock: t('audit_logs.field_min_stock', 'Min Stock'),
-                                                                    max_stock: t('audit_logs.field_max_stock', 'Max Stock'),
-                                                                    unit: t('audit_logs.field_unit', 'Unit'),
-                                                                    category_name: t('audit_logs.field_category', 'Category'),
-                                                                    supplier_name: t('audit_logs.field_supplier', 'Supplier'),
-                                                                    address: t('audit_logs.field_address', 'Address'),
-                                                                    notes: t('audit_logs.field_notes', 'Notes'),
-                                                                    discount: t('audit_logs.field_discount', 'Discount'),
-                                                                    discount_type: t('audit_logs.field_discount_type', 'Discount Type'),
-                                                                    discount_value: t('audit_logs.field_discount_value', 'Discount Value'),
-                                                                    tax: t('audit_logs.field_tax', 'Tax'),
-                                                                    total: t('audit_logs.field_total', 'Total'),
-                                                                    is_active: t('audit_logs.field_active', 'Active'),
-                                                                    expiry_date: t('audit_logs.field_expiry', 'Expiry Date'),
-                                                                    start_date: t('audit_logs.field_start_date', 'Start Date'),
-                                                                    end_date: t('audit_logs.field_end_date', 'End Date'),
-                                                                    value: t('audit_logs.field_value', 'Value'),
-                                                                    setting_key: t('audit_logs.field_setting', 'Setting'),
-                                                                    setting_value: t('audit_logs.field_value', 'Value'),
-                                                                    min_quantity: t('audit_logs.field_min_qty', 'Min Quantity'),
-                                                                    max_quantity: t('audit_logs.field_max_qty', 'Max Quantity'),
-                                                                    bundle_price: t('audit_logs.field_bundle_price', 'Bundle Price'),
-                                                                    pack_size: t('audit_logs.field_pack_size', 'Pack Size'),
-                                                                    contact_person: t('audit_logs.field_contact', 'Contact Person'),
-                                                                    company_name: t('audit_logs.field_company', 'Company'),
-                                                                    city: t('audit_logs.field_city', 'City'),
-                                                                };
-
-                                                                const getLabel = (key: string) =>
-                                                                    fieldLabels[key] || key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-
-                                                                if (isObject(oldObj) || isObject(newObj)) {
-                                                                    const allKeys = Array.from(new Set([
-                                                                        ...Object.keys(oldObj || {}),
-                                                                        ...Object.keys(newObj || {}),
-                                                                    ]));
-
-                                                                    const changedKeys = allKeys.filter((key) => {
-                                                                        const oldVal = oldObj?.[key];
-                                                                        const newVal = newObj?.[key];
-                                                                        if (shouldSkipField(key, oldVal, newVal)) return false;
-                                                                        return JSON.stringify(oldVal) !== JSON.stringify(newVal);
-                                                                    });
-
-                                                                    if (changedKeys.length === 0) {
-                                                                        return (
-                                                                            <div className="p-6 text-center text-sm text-zinc-400 font-medium">
-                                                                                {t('audit_logs.no_changes', 'No changes detected')}
-                                                                            </div>
-                                                                        );
-                                                                    }
-
-                                                                    return (
-                                                                        <div className="rounded-xl border border-zinc-200 overflow-hidden">
-                                                                            <table className="w-full text-sm">
-                                                                                <thead>
-                                                                                    <tr className="bg-zinc-50 border-b border-zinc-200">
-                                                                                        <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                                                                                            {t('audit_logs.col_field', 'Field')}
-                                                                                        </th>
-                                                                                        <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-rose-400">
-                                                                                            {t('audit_logs.label_old_value')}
-                                                                                        </th>
-                                                                                        <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-emerald-500">
-                                                                                            {t('audit_logs.label_new_value')}
-                                                                                        </th>
-                                                                                    </tr>
-                                                                                </thead>
-                                                                                <tbody className="divide-y divide-zinc-100">
-                                                                                    {changedKeys.map((key) => (
-                                                                                        <tr key={key}>
-                                                                                            <td className="px-4 py-2.5 font-bold text-zinc-700 text-xs">
-                                                                                                {getLabel(key)}
-                                                                                            </td>
-                                                                                            <td className="px-4 py-2.5 text-xs break-all text-rose-600 bg-rose-50/50">
-                                                                                                {formatCell(oldObj?.[key])}
-                                                                                            </td>
-                                                                                            <td className="px-4 py-2.5 text-xs break-all text-emerald-600 bg-emerald-50/50">
-                                                                                                {formatCell(newObj?.[key])}
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                    ))}
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </div>
-                                                                    );
-                                                                }
-
-                                                                // Fallback for non-object values
-                                                                return (
-                                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                                        <div className="p-4 bg-rose-50 rounded-xl border border-rose-100">
-                                                                            <h4 className="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-2">
-                                                                                {t('audit_logs.label_old_value')}
-                                                                            </h4>
-                                                                            <p className="text-sm text-rose-900 break-all">
-                                                                                {formatCell(oldObj)}
-                                                                            </p>
-                                                                        </div>
-                                                                        <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
-                                                                            <h4 className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-2">
-                                                                                {t('audit_logs.label_new_value')}
-                                                                            </h4>
-                                                                            <p className="text-sm text-emerald-900 break-all">
-                                                                                {formatCell(newObj)}
-                                                                            </p>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })()}
-                                                        </div>
-                                                    </DialogContent>
-                                                </Dialog>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-40 rounded-xl border-black/10 bg-white">
+                                                        <DropdownMenuLabel>{t('common.actions', 'Actions')}</DropdownMenuLabel>
+                                                        <DropdownMenuSeparator className="bg-zinc-100" />
+                                                        <DropdownMenuItem
+                                                            onClick={() => {
+                                                                setSelectedLog(log);
+                                                                setIsDetailOpen(true);
+                                                            }}
+                                                            className="gap-2 cursor-pointer focus:bg-zinc-50"
+                                                        >
+                                                            <Eye size={14} />
+                                                            <span>{t('audit_logs.log_details', 'View Details')}</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                             </div>
                                         </td>
                                     </tr>
@@ -556,6 +567,21 @@ export default function AuditLogs() {
                     </div>
                 </div>
             </div>
+
+            {/* Detail Dialog */}
+            {_selectedLog && (
+                <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
+                    <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto rounded-[2rem]">
+                        <DialogHeader>
+                            <DialogTitle className="text-xl font-bold text-black tracking-tight">
+                                {t('audit_logs.log_details')}
+                            </DialogTitle>
+                        </DialogHeader>
+                        <AuditLogDetail log={_selectedLog} />
+                    </DialogContent>
+                </Dialog>
+            )}
         </div>
     );
 }
+

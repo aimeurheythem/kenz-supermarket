@@ -20,6 +20,7 @@ import HoldRecallDialog from './HoldRecallDialog';
 import ReturnDialog from './ReturnDialog';
 import SplitPaymentPanel from './SplitPaymentPanel';
 import ReceiptPreview from './ReceiptPreview';
+import CustomerSearchDialog from './CustomerSearchDialog';
 import BarcodeScanner from '@/components/common/BarcodeScanner';
 import { SaleRepo } from '../../../database/repositories/sale.repo';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -769,6 +770,13 @@ export default function POSLayout() {
                     onClose={() => setShowReceiptPreview(false)}
                 />
             )}
+
+            {/* Customer Search Dialog */}
+            <CustomerSearchDialog
+                isOpen={showCustomerSearch}
+                onClose={() => setShowCustomerSearch(false)}
+                onSelect={(customer) => setSelectedCustomer(customer)}
+            />
         </div>
     );
 }

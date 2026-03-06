@@ -1,5 +1,5 @@
 // NumericKeypad.tsx — On-screen numeric keypad for touchscreen product code entry
-import { Delete, CornerDownLeft, X } from 'lucide-react';
+import { Delete, Check, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 
@@ -34,31 +34,31 @@ export default function NumericKeypad({
     };
 
     return (
-        <div className="p-3">
-            <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
+        <div className="p-5">
+            <div className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-4">
                 {t('pos.keypad', 'Keypad')}
             </div>
 
             {/* Display */}
-            <div className="relative mb-2">
-                <div className="w-full h-9 px-3 flex items-center justify-between rounded-lg bg-zinc-100 border border-zinc-200">
-                    <span className={`text-sm font-mono font-bold tabular-nums ${value ? 'text-zinc-900' : 'text-zinc-300'}`}>
+            <div className="relative mb-4">
+                <div className="w-full h-14 px-4 flex items-center justify-between rounded-2xl bg-zinc-50 border border-zinc-100">
+                    <span className={`text-lg font-mono font-semibold tabular-nums ${value ? 'text-zinc-800' : 'text-zinc-300'}`}>
                         {value || t('pos.keypad_placeholder', 'Product code...')}
                     </span>
                     {value && (
                         <button
                             onClick={onBackspace}
-                            className="p-0.5 rounded text-zinc-400 hover:text-zinc-600 transition-colors"
+                            className="p-2 rounded-xl text-zinc-300 hover:text-zinc-600 hover:bg-zinc-100 transition-all"
                             aria-label={t('pos.backspace', 'Backspace')}
                         >
-                            <Delete size={14} />
+                            <Delete size={20} strokeWidth={1.5} />
                         </button>
                     )}
                 </div>
             </div>
 
             {/* Keypad grid */}
-            <div className="grid grid-cols-3 gap-1" role="group" aria-label={t('pos.keypad', 'Keypad')}>
+            <div className="grid grid-cols-3 gap-2.5" role="group" aria-label={t('pos.keypad', 'Keypad')}>
                 {KEYS.flat().map((key) => {
                     const isConfirm = key === '↵';
                     const isClear = key === 'C';
@@ -69,21 +69,21 @@ export default function NumericKeypad({
                             whileTap={{ scale: 0.92 }}
                             onClick={() => handleKey(key)}
                             className={`
-                                h-10 rounded-lg text-sm font-bold transition-all
+                                h-14 rounded-2xl text-lg font-bold transition-all shadow-sm
                                 ${isConfirm
-                                    ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                                    ? 'bg-zinc-900 text-white hover:bg-zinc-800 shadow-zinc-900/20'
                                     : isClear
-                                        ? 'bg-red-100 text-red-500 hover:bg-red-200'
-                                        : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
+                                        ? 'bg-red-50 text-red-500 hover:bg-red-100 shadow-red-100/50'
+                                        : 'bg-white text-zinc-800 hover:bg-zinc-100 border border-zinc-200 shadow-zinc-100/50'
                                 }
                                 active:scale-95 flex items-center justify-center
                             `}
                             aria-label={isConfirm ? t('pos.confirm', 'Confirm') : isClear ? t('pos.clear', 'Clear') : key}
                         >
                             {isConfirm ? (
-                                <CornerDownLeft size={16} />
+                                <Check size={22} strokeWidth={2} />
                             ) : isClear ? (
-                                <X size={16} />
+                                <X size={22} strokeWidth={2} />
                             ) : (
                                 key
                             )}

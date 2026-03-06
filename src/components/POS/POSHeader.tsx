@@ -1,4 +1,4 @@
-import { Clock, Store } from 'lucide-react';
+import { Clock, ShoppingBag } from 'lucide-react';
 import { useLiveClock } from '@/hooks/useLiveClock';
 import { useTranslation } from 'react-i18next';
 
@@ -18,28 +18,28 @@ export default function POSHeader({ storeName, cashierName, sessionActive, shift
         : null;
 
     return (
-        <header className="flex items-center justify-between px-4 py-2 bg-zinc-900 text-white shrink-0">
+        <header className="flex items-center justify-between px-5 py-2.5 bg-white border-b border-zinc-100 shrink-0">
             {/* Left: Store branding */}
             <div className="flex items-center gap-3">
-                <div className="p-1.5 bg-yellow-400 rounded-lg">
-                    <Store size={18} className="text-zinc-900" />
+                <div className="p-2 bg-zinc-900 rounded-xl">
+                    <ShoppingBag size={16} strokeWidth={1.5} className="text-white" />
                 </div>
                 <div className="leading-tight">
-                    <h1 className="text-sm font-black tracking-tight uppercase">{storeName || t('pos.store_name', 'Super Market')}</h1>
-                    <span className="text-[10px] text-zinc-400 font-bold tracking-[0.15em] uppercase">{t('pos.system', 'POS SYSTEM')}</span>
+                    <h1 className="text-sm font-bold tracking-tight text-zinc-900">{storeName || t('pos.store_name', 'Super Market')}</h1>
+                    <span className="text-[10px] text-zinc-400 font-medium tracking-widest uppercase">{t('pos.system', 'POS SYSTEM')}</span>
                 </div>
             </div>
 
             {/* Center: Cashier info + shift */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
                 {sessionActive && (
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                            <span className="text-xs font-bold text-zinc-300">{cashierName}</span>
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 ring-4 ring-emerald-50" />
+                            <span className="text-xs font-semibold text-zinc-600">{cashierName}</span>
                         </div>
                         {shiftStart && (
-                            <span className="text-[10px] text-zinc-500 font-medium">
+                            <span className="text-[10px] text-zinc-400 font-medium">
                                 {t('pos.shift_since', 'Shift since {{time}}', { time: shiftStart })}
                             </span>
                         )}
@@ -48,11 +48,11 @@ export default function POSHeader({ storeName, cashierName, sessionActive, shift
             </div>
 
             {/* Right: Live clock */}
-            <div className="flex items-center gap-2 text-zinc-300">
-                <Clock size={14} className="text-zinc-500" />
+            <div className="flex items-center gap-2.5 text-zinc-500">
+                <Clock size={14} strokeWidth={1.5} className="text-zinc-300" />
                 <div className="text-right leading-tight">
-                    <div className="text-xs font-bold tabular-nums">{time}</div>
-                    <div className="text-[10px] text-zinc-500 font-medium">{date}</div>
+                    <div className="text-xs font-semibold text-zinc-700 tabular-nums">{time}</div>
+                    <div className="text-[10px] text-zinc-400 font-medium">{date}</div>
                 </div>
             </div>
         </header>

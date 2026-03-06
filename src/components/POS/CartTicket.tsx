@@ -1,7 +1,7 @@
 // CartTicket.tsx — Professional receipt/ticket-styled cart display
 import { AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Receipt } from 'lucide-react';
+import { FileText, ShoppingCart } from 'lucide-react';
 import CartTicketRow from './CartTicketRow';
 import type { CartItem, PromotionApplicationResult } from '@/lib/types';
 
@@ -35,10 +35,10 @@ export default function CartTicket({
 
     if (cart.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-full text-zinc-400">
-                <div className="text-5xl mb-3">🛒</div>
-                <div className="text-sm font-medium">{t('pos.empty_cart', 'Cart is empty')}</div>
-                <div className="text-xs mt-1">{t('pos.scan_to_add', 'Scan or search to add products')}</div>
+            <div className="flex flex-col items-center justify-center h-full text-zinc-300">
+                <ShoppingCart size={40} strokeWidth={1} className="mb-4 text-zinc-200" />
+                <div className="text-sm font-medium text-zinc-400">{t('pos.empty_cart', 'Cart is empty')}</div>
+                <div className="text-xs mt-1.5 text-zinc-300">{t('pos.scan_to_add', 'Scan or search to add products')}</div>
             </div>
         );
     }
@@ -46,25 +46,24 @@ export default function CartTicket({
     return (
         <div className="flex flex-col h-full">
             {/* Ticket header */}
-            <div className="flex items-center justify-between px-3 py-2 border-b border-dashed border-zinc-300">
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-100">
                 <div className="flex items-center gap-2">
-                    <Receipt size={14} className="text-zinc-400" />
-                    <span className="text-xs font-bold text-zinc-500">
-                        {t('pos.ticket', 'Ticket')} n° {formattedTicket}
+                    <FileText size={14} strokeWidth={1.5} className="text-zinc-300" />
+                    <span className="text-xs font-semibold text-zinc-400">
+                        {t('pos.ticket', 'Ticket')} #{formattedTicket}
                     </span>
                 </div>
-                <span className="text-xs font-medium text-zinc-400">
+                <span className="text-[10px] font-medium text-zinc-300 bg-zinc-50 px-2 py-0.5 rounded-full">
                     {cart.length} {cart.length === 1 ? t('pos.item', 'item') : t('pos.items', 'items')}
                 </span>
             </div>
 
             {/* Column labels */}
-            <div className="flex items-center gap-1 px-2 py-1.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider border-b border-zinc-200 bg-zinc-50/50 shrink-0">
-                <span className="w-6">#</span>
-                <span className="flex-1">{t('pos.item', 'Item')}</span>
-                <span className="w-20 text-center">{t('pos.qty', 'Qty')}</span>
-                <span className="w-20 text-right">{t('pos.total', 'Total')}</span>
-                <span className="w-14" />
+            <div className="flex items-center px-5 py-3 text-xs font-bold text-zinc-400 uppercase tracking-wider border-b border-zinc-100 bg-zinc-50/50 shrink-0">
+                <span className="flex-1">{t('pos.article', 'Article')}</span>
+                <span className="w-14 text-center mr-10">{t('pos.qty', 'QTE')}</span>
+                <span className="w-18 text-right pr-2">{t('pos.total', 'Total')}</span>
+                <span className="w-72 text-center">{t('pos.actions', 'Actions')}</span>
             </div>
 
             {/* Scrollable cart rows */}

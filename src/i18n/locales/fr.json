@@ -379,6 +379,9 @@
         "scroll_more": "Défiler pour voir plus",
         "scan": "Scanner",
         "end_shift": "Fin de service",
+        "end_shift_title": "Fin de service ?",
+        "end_shift_message": "Cela fermera votre session de caisse et vous déconnectera. Êtes-vous sûr ?",
+        "end_shift_confirm": "Fin de service",
         "scan_product": "Scanner un produit",
         "promo_banner": {
             "title": "Promotions actives",

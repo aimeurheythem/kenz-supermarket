@@ -34,15 +34,15 @@ export default function NumericKeypad({
     };
 
     return (
-        <div className="p-5">
-            <div className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-4">
+        <div className="p-3 lg:p-5">
+            <div className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-3 lg:mb-4">
                 {t('pos.keypad', 'Keypad')}
             </div>
 
             {/* Display */}
-            <div className="relative mb-4">
-                <div className="w-full h-14 px-4 flex items-center justify-between rounded-2xl bg-zinc-50 border border-zinc-100">
-                    <span className={`text-lg font-mono font-semibold tabular-nums ${value ? 'text-zinc-800' : 'text-zinc-300'}`}>
+            <div className="relative mb-3 lg:mb-4">
+                <div className="w-full h-11 lg:h-14 px-3 lg:px-4 flex items-center justify-between rounded-2xl bg-zinc-50 border border-zinc-100">
+                    <span className={`text-base lg:text-lg font-mono font-semibold tabular-nums ${value ? 'text-zinc-800' : 'text-zinc-300'}`}>
                         {value || t('pos.keypad_placeholder', 'Product code...')}
                     </span>
                     {value && (
@@ -58,7 +58,7 @@ export default function NumericKeypad({
             </div>
 
             {/* Keypad grid */}
-            <div className="grid grid-cols-3 gap-2.5" role="group" aria-label={t('pos.keypad', 'Keypad')}>
+            <div className="grid grid-cols-3 gap-1.5 lg:gap-2.5" role="group" aria-label={t('pos.keypad', 'Keypad')}>
                 {KEYS.flat().map((key) => {
                     const isConfirm = key === '↵';
                     const isClear = key === 'C';
@@ -69,7 +69,7 @@ export default function NumericKeypad({
                             whileTap={{ scale: 0.92 }}
                             onClick={() => handleKey(key)}
                             className={`
-                                h-14 rounded-2xl text-lg font-bold transition-all shadow-sm
+                                h-11 lg:h-14 rounded-xl lg:rounded-2xl text-base lg:text-lg font-bold transition-all shadow-sm
                                 ${isConfirm
                                     ? 'bg-zinc-900 text-white hover:bg-zinc-800 shadow-zinc-900/20'
                                     : isClear

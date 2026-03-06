@@ -59,11 +59,11 @@ export default function CartTicket({
             </div>
 
             {/* Column labels */}
-            <div className="flex items-center px-5 py-3 text-xs font-bold text-zinc-400 uppercase tracking-wider border-b border-zinc-100 bg-zinc-50/50 shrink-0">
-                <span className="flex-1">{t('pos.article', 'Article')}</span>
-                <span className="w-14 text-center mr-10">{t('pos.qty', 'QTE')}</span>
-                <span className="w-18 text-right pr-2">{t('pos.total', 'Total')}</span>
-                <span className="w-72 text-center">{t('pos.actions', 'Actions')}</span>
+            <div className="flex items-center px-3 md:px-5 py-3 text-xs font-bold text-zinc-400 uppercase tracking-wider border-b border-zinc-100 bg-zinc-50/50 shrink-0">
+                <span className="flex-1 min-w-0">{t('pos.article', 'Article')}</span>
+                <span className="w-12 md:w-14 text-center shrink-0">{t('pos.qty', 'QTE')}</span>
+                <span className="w-16 md:w-20 text-right pr-2 shrink-0">{t('pos.total', 'Total')}</span>
+                <span className="hidden sm:block w-32 md:w-44 lg:w-52 xl:w-72 text-center shrink-0">{t('pos.actions', 'Actions')}</span>
             </div>
 
             {/* Scrollable cart rows */}

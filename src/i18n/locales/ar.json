@@ -379,6 +379,9 @@
         "scroll_more": "مرر لرؤية المزيد",
         "scan": "مسح ضوئي",
         "end_shift": "إنهاء الوردية",
+        "end_shift_title": "إنهاء الوردية؟",
+        "end_shift_message": "سيتم إغلاق جلسة الكاشير الحالية وتسجيل خروجك. هل أنت متأكد؟",
+        "end_shift_confirm": "إنهاء الوردية",
         "scan_product": "مسح المنتج",
         "promo_banner": {
             "title": "العروض النشطة",

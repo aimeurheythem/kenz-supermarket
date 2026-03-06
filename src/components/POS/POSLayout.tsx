@@ -21,6 +21,7 @@ import ReturnDialog from './ReturnDialog';
 import SplitPaymentPanel from './SplitPaymentPanel';
 import ReceiptPreview from './ReceiptPreview';
 import CustomerSearchDialog from './CustomerSearchDialog';
+import CustomerModal from '@/components/customers/CustomerModal';
 import BarcodeScanner from '@/components/common/BarcodeScanner';
 import { SaleRepo } from '../../../database/repositories/sale.repo';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -29,6 +30,7 @@ import { useProductStore } from '@/stores/useProductStore';
 import { useSaleStore, selectCartTotal, selectCartTotalWithPromotions, selectManualDiscountTotal } from '@/stores/useSaleStore';
 import { usePOSStore } from '@/stores/usePOSStore';
 import { useAuthorizationStore } from '@/stores/useAuthorizationStore';
+import { useCustomerStore } from '@/stores/useCustomerStore';
 import { useBarcodeScanner } from '@/hooks/useBarcodeScanner';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import { useTicketNumber } from '@/hooks/useTicketNumber';
@@ -79,6 +81,7 @@ export default function POSLayout() {
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [showScanner, setShowScanner] = useState(false);
     const [showCustomerSearch, setShowCustomerSearch] = useState(false);
+    const [showAddCustomer, setShowAddCustomer] = useState(false);
     const [showDiscountDialog, setShowDiscountDialog] = useState(false);
     const [discountScope, setDiscountScope] = useState<'line' | 'cart'>('cart');
     const [discountProductId, setDiscountProductId] = useState<number | null>(null);
@@ -187,19 +190,21 @@ export default function POSLayout() {
         }
         const held = usePOSStore.getState().recallTransaction(id);
         if (held) {
-            clearCart();
-            // Restore items from held transaction
-            held.cart.forEach((item) => {
-                addToCart({ product: item.product, quantity: item.quantity, discount: item.discount ?? 0 });
+            // Directly set the cart state with the held items to avoid async race conditions
+            useSaleStore.setState({
+                cart: held.cart.map((item) => ({
+                    product: item.product,
+                    quantity: item.quantity,
+                    discount: item.discount ?? 0,
+                })),
+                promotionResult: held.promotionResult ?? null,
+                cartDiscount: held.cartDiscount ?? null,
             });
             setSelectedCustomer(held.customer);
-            if (held.cartDiscount) {
-                setCartDiscount(held.cartDiscount);
-            }
             setShowHoldRecallDialog(false);
             toast.success(t('pos.sale_recalled', 'Sale recalled'));
         }
-    }, [cart, clearCart, addToCart, setSelectedCustomer, setCartDiscount, t]);
+    }, [cart, setSelectedCustomer, t]);
 
     const handleDeleteHeld = useCallback((id: string) => {
         usePOSStore.getState().removeHeld(id);
@@ -436,10 +441,10 @@ export default function POSLayout() {
                 shiftStartTime={currentSession?.session?.login_time}
             />
 
-            {/* Main 3-column grid — stacks on small screens */}
-            <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[2fr_3fr_minmax(240px,1fr)] gap-0">
+            {/* Main 3-column grid — stacks on small screens, adapts at every breakpoint */}
+            <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[1fr_2fr] lg:grid-cols-[2fr_3fr_minmax(200px,1fr)] xl:grid-cols-[2fr_3fr_minmax(260px,1fr)] gap-0">
                 {/* LEFT PANEL — Product catalog (40%) */}
-                <aside className="hidden md:flex flex-col border-r border-zinc-100 bg-white overflow-hidden" aria-label="Product catalog">
+                <aside className="hidden lg:flex flex-col border-r border-zinc-100 bg-white overflow-hidden" aria-label="Product catalog">
                     {/* Search bar */}
                     <div className="p-3 border-b border-zinc-100 shrink-0">
                         <div className="relative">
@@ -476,9 +481,9 @@ export default function POSLayout() {
                     </div>
 
                     {/* Product grid — scrollable */}
-                    <div className="flex-1 min-h-0 overflow-y-auto p-3">
+                    <div className="flex-1 min-h-0 overflow-y-auto p-2 lg:p-3">
                         {filteredProducts.length > 0 ? (
-                            <div className="grid grid-cols-2 xl:grid-cols-3 gap-2.5">
+                            <div className="grid grid-cols-2 2xl:grid-cols-3 gap-2">
                                 {filteredProducts.map((product) => {
                                     const inCart = cart.find((c) => c.product.id === product.id);
                                     const isOutOfStock = product.stock_quantity <= 0;
@@ -489,7 +494,7 @@ export default function POSLayout() {
                                             key={product.id}
                                             onClick={() => handleAddProduct(product)}
                                             disabled={isOutOfStock}
-                                            className={`group relative flex flex-col items-start p-4 rounded-2xl border shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-300 active:scale-[0.97] active:shadow-none disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0 text-left overflow-hidden ${isInCart ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-100 hover:border-zinc-200'}`}
+                                            className={`group relative flex flex-col items-start p-3 xl:p-4 rounded-2xl border shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-300 active:scale-[0.97] active:shadow-none disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0 text-left overflow-hidden ${isInCart ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-100 hover:border-zinc-200'}`}
                                         >
                                             {/* Subtle gradient accent on hover */}
                                             {!isInCart && <div className="absolute inset-0 bg-gradient-to-br from-amber-50/0 via-transparent to-amber-50/0 group-hover:from-amber-50/60 group-hover:to-yellow-50/40 transition-all duration-500 rounded-2xl pointer-events-none" />}
@@ -557,18 +562,18 @@ export default function POSLayout() {
                 {/* CENTER PANEL — Cart + Totals */}
                 <main className="flex flex-col min-h-0 overflow-hidden bg-white" role="main" aria-label="Cart and totals">
                     {/* Client Info — above cart */}
-                    <div className="hidden md:block shrink-0 border-b border-zinc-100">
+                    <div className="hidden md:block shrink-0 border-b border-zinc-100 overflow-hidden">
                         <ClientInfoPanel
                             customer={selectedCustomer}
                             onSearch={() => setShowCustomerSearch(true)}
                             onClear={() => setSelectedCustomer(null)}
                             onEdit={() => {/* TODO: open edit modal */}}
-                            onAddNew={() => setShowCustomerSearch(true)}
+                            onAddNew={() => setShowAddCustomer(true)}
                         />
                     </div>
 
-                    {/* Mobile search bar — visible only on small screens */}
-                    <div className="md:hidden p-3 border-b border-zinc-100">
+                    {/* Mobile/tablet search bar — visible when left panel is hidden */}
+                    <div className="lg:hidden p-3 border-b border-zinc-100">
                         <div className="relative">
                             <Search size={15} strokeWidth={1.5} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-300" />
                             <input
@@ -605,8 +610,8 @@ export default function POSLayout() {
                         formatCurrency={formatCurrency}
                     />
 
-                    {/* Mobile checkout — visible only on small screens */}
-                    <div className="md:hidden p-3 bg-white border-t border-zinc-100 flex gap-2">
+                    {/* Mobile/tablet checkout — visible when right panel is hidden */}
+                    <div className="lg:hidden p-3 bg-white border-t border-zinc-100 flex gap-2">
                         <button
                             onClick={() => {
                                 if (cart.length === 0) {
@@ -631,7 +636,7 @@ export default function POSLayout() {
                 </main>
 
                 {/* RIGHT PANEL — Actions, Checkout */}
-                <aside className="hidden md:flex flex-col border-l border-zinc-100 bg-white overflow-y-auto" aria-label="Actions and checkout">
+                <aside className="hidden lg:flex flex-col border-l border-zinc-100 bg-white overflow-y-auto" aria-label="Actions and checkout">
                     {/* Action Grid */}
                     <ActionGrid
                         holdCount={holdCount}
@@ -661,7 +666,7 @@ export default function POSLayout() {
                                 setShowSplitPayment(true);
                             }}
                             disabled={isCheckingOut}
-                            className="w-full py-10 bg-zinc-900 hover:bg-zinc-800 text-white text-xl font-black uppercase tracking-wider transition-all active:scale-[0.98]"
+                            className="w-full py-6 xl:py-10 bg-zinc-900 hover:bg-zinc-800 text-white text-base xl:text-xl font-black uppercase tracking-wider transition-all active:scale-[0.98]"
                         >
                             {t('pos.split_payment', 'Split Payment')}
                         </button>
@@ -669,7 +674,7 @@ export default function POSLayout() {
                     <button
                         onClick={handleCheckout}
                         disabled={isCheckingOut}
-                        className="w-full py-10 bg-emerald-500 hover:bg-emerald-600 text-white text-xl font-black uppercase tracking-wider transition-all active:scale-[0.98]"
+                        className="w-full py-6 xl:py-10 bg-emerald-500 hover:bg-emerald-600 text-white text-base xl:text-xl font-black uppercase tracking-wider transition-all active:scale-[0.98]"
                     >
                         {isCheckingOut ? t('pos.processing', 'Processing...') : t('pos.checkout', 'CHECKOUT')}
                     </button>
@@ -786,6 +791,15 @@ export default function POSLayout() {
                 isOpen={showCustomerSearch}
                 onClose={() => setShowCustomerSearch(false)}
                 onSelect={(customer) => setSelectedCustomer(customer)}
+            />
+
+            {/* Add New Customer Modal */}
+            <CustomerModal
+                isOpen={showAddCustomer}
+                onClose={() => {
+                    setShowAddCustomer(false);
+                    useCustomerStore.getState().loadCustomers();
+                }}
             />
         </div>
     );

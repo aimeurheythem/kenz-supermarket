@@ -50,17 +50,18 @@ export default function ActionButton({
             onClick={onClick}
             disabled={disabled}
             aria-label={shortcutKey ? `${label} (${shortcutKey})` : label}
-            className={`relative flex items-center justify-center gap-3 w-full py-5 border-b border-white/10 text-xl font-black uppercase tracking-wider transition-all duration-150 active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed ${style.bg}`}
+            className={`relative flex items-center justify-center gap-2 lg:gap-3 w-full py-3 lg:py-4 xl:py-5 border-b border-white/10 text-sm lg:text-base xl:text-xl font-black uppercase tracking-wider transition-all duration-150 active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed ${style.bg}`}
         >
             {badge != null && (
-                <span className="absolute top-2 left-3 text-[10px] font-semibold text-white/70 bg-white/20 rounded-full px-2 py-0.5 leading-none">
+                <span className="absolute top-1.5 left-2 lg:left-3 text-[9px] lg:text-[10px] font-semibold text-white/70 bg-white/20 rounded-full px-1.5 lg:px-2 py-0.5 leading-none">
                     {badge}
                 </span>
             )}
-            <Icon size={22} strokeWidth={1.5} className={style.icon} />
+            <Icon size={18} strokeWidth={1.5} className={`lg:hidden ${style.icon}`} />
+            <Icon size={22} strokeWidth={1.5} className={`hidden lg:block ${style.icon}`} />
             <span className={style.text}>{label}</span>
             {shortcutKey && (
-                <span className="absolute right-3 text-[10px] font-medium text-white/40 leading-none">
+                <span className="absolute right-2 lg:right-3 text-[9px] lg:text-[10px] font-medium text-white/40 leading-none">
                     {shortcutKey}
                 </span>
             )}

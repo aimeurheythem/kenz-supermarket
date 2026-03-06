@@ -18,20 +18,21 @@ export default function POSHeader({ storeName, cashierName, sessionActive, shift
         : null;
 
     return (
-        <header className="flex items-center justify-between px-5 py-2.5 bg-white border-b border-zinc-100 shrink-0">
+        <header className="flex items-center justify-between px-3 md:px-5 py-2 md:py-2.5 bg-white border-b border-zinc-100 shrink-0">
             {/* Left: Store branding */}
-            <div className="flex items-center gap-3">
-                <div className="p-2 bg-zinc-900 rounded-xl">
-                    <ShoppingBag size={16} strokeWidth={1.5} className="text-white" />
+            <div className="flex items-center gap-2 md:gap-3">
+                <div className="p-1.5 md:p-2 bg-zinc-900 rounded-lg md:rounded-xl">
+                    <ShoppingBag size={14} strokeWidth={1.5} className="text-white md:hidden" />
+                    <ShoppingBag size={16} strokeWidth={1.5} className="text-white hidden md:block" />
                 </div>
                 <div className="leading-tight">
-                    <h1 className="text-sm font-bold tracking-tight text-zinc-900">{storeName || t('pos.store_name', 'Super Market')}</h1>
-                    <span className="text-[10px] text-zinc-400 font-medium tracking-widest uppercase">{t('pos.system', 'POS SYSTEM')}</span>
+                    <h1 className="text-xs md:text-sm font-bold tracking-tight text-zinc-900">{storeName || t('pos.store_name', 'Super Market')}</h1>
+                    <span className="text-[9px] md:text-[10px] text-zinc-400 font-medium tracking-widest uppercase">{t('pos.system', 'POS SYSTEM')}</span>
                 </div>
             </div>
 
             {/* Center: Cashier info + shift */}
-            <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-2 md:gap-4">
                 {sessionActive && (
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2.5">

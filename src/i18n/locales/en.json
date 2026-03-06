@@ -386,6 +386,9 @@
         "scroll_more": "Scroll to see more",
         "scan": "Scan",
         "end_shift": "End Shift",
+        "end_shift_title": "End Shift?",
+        "end_shift_message": "This will close your current cashier session and log you out. Are you sure?",
+        "end_shift_confirm": "End Shift",
         "scan_product": "Scan Product",
         "promo_banner": {
             "title": "Active Promotions",

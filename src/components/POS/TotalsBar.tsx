@@ -25,7 +25,7 @@ export default function TotalsBar({
     const vatPercent = Math.round(vatRate * 100);
 
     return (
-        <div className="border-t border-zinc-100 bg-white px-6 py-5 shrink-0">
+        <div className="border-t border-zinc-100 bg-white px-4 md:px-6 py-4 md:py-5 shrink-0">
             <div className="space-y-2">
                 {/* Subtotal */}
                 <div className="flex justify-between text-sm">
@@ -68,11 +68,11 @@ export default function TotalsBar({
                 )}
 
                 {/* Grand Total — the hero element */}
-                <div className="flex justify-between items-end pt-5 mt-2 border-t border-zinc-200">
-                    <span className="text-base font-semibold text-zinc-400 uppercase tracking-widest">
+                <div className="flex justify-between items-end pt-4 md:pt-5 mt-2 border-t border-zinc-200">
+                    <span className="text-sm md:text-base font-semibold text-zinc-400 uppercase tracking-widest">
                         {t('pos.grand_total', 'TOTAL')}
                     </span>
-                    <span className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-zinc-900 tabular-nums tracking-tighter leading-none">
+                    <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-bold text-zinc-900 tabular-nums tracking-tighter leading-none">
                         {formatCurrency(grandTotal)}
                     </span>
                 </div>

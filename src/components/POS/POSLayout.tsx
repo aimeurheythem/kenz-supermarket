@@ -1,7 +1,7 @@
 // POSLayout.tsx — Multi-zone POS layout orchestrator (3-column CSS Grid)
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, X, Barcode } from 'lucide-react';
+import { Search, X, ScanBarcode } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -123,16 +123,18 @@ export default function POSLayout() {
     }, [loadProducts]);
 
     // Search filtering
+    // Search filtering — show 12 products when empty, filter when typing
     const filteredProducts = useMemo(
-        () =>
-            products
+        () => {
+            if (searchQuery.length === 0) return products.filter((p) => p.is_active && p.stock_quantity > 0).slice(0, 12);
+            return products
                 .filter(
                     (p) =>
-                        searchQuery.length > 0 &&
-                        (p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            (p.barcode && p.barcode.includes(searchQuery))),
+                        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        (p.barcode && p.barcode.includes(searchQuery)),
                 )
-                .slice(0, 12),
+                .slice(0, 12);
+        },
         [products, searchQuery],
     );
 
@@ -424,7 +426,7 @@ export default function POSLayout() {
         : useSaleStore.getState().cartDiscount;
 
     return (
-        <div className="flex flex-col h-full w-full bg-zinc-100 overflow-hidden">
+        <div className="flex flex-col h-full w-full bg-zinc-50 overflow-hidden">
             {/* Header */}
             <POSHeader
                 storeName={storeName}
@@ -434,26 +436,113 @@ export default function POSLayout() {
             />
 
             {/* Main 3-column grid — stacks on small screens */}
-            <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[240px_1fr_220px] lg:grid-cols-[260px_1fr_240px] xl:grid-cols-[300px_1fr_280px] gap-0">
-                {/* LEFT PANEL — hidden on small, visible md+ */}
-                <aside className="hidden md:flex flex-col border-r border-zinc-200 bg-white overflow-y-auto" aria-label="Customer and product info">
-                    {/* Client Info */}
-                    <ClientInfoPanel
-                        customer={selectedCustomer}
-                        onSearch={() => setShowCustomerSearch(true)}
-                        onClear={() => setSelectedCustomer(null)}
-                        onEdit={() => {/* TODO: open edit modal */}}
-                        onAddNew={() => setShowCustomerSearch(true)}
-                    />
+            <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[2fr_3fr_minmax(240px,1fr)] gap-0">
+                {/* LEFT PANEL — Product catalog (40%) */}
+                <aside className="hidden md:flex flex-col border-r border-zinc-100 bg-white overflow-hidden" aria-label="Product catalog">
+                    {/* Search bar */}
+                    <div className="p-3 border-b border-zinc-100 shrink-0">
+                        <div className="relative">
+                            <Search size={15} strokeWidth={1.5} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-300" />
+                            <input
+                                ref={searchInputRef}
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder={t('pos.search_placeholder', 'Search products or scan barcode...')}
+                                aria-label={t('pos.search_placeholder', 'Search products or scan barcode...')}
+                                className="w-full pl-10 pr-12 py-2.5 rounded-2xl bg-zinc-50 border border-zinc-100 text-zinc-700 placeholder:text-zinc-300 text-sm font-medium focus:outline-none focus:border-zinc-200 focus:bg-white transition-colors"
+                            />
+                            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                                {searchQuery && (
+                                    <motion.button
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        onClick={() => setSearchQuery('')}
+                                        className="p-1 rounded-full bg-zinc-100 text-zinc-400 hover:bg-zinc-200 hover:text-zinc-500 transition-all"
+                                    >
+                                        <X size={12} strokeWidth={2} />
+                                    </motion.button>
+                                )}
+                                <button
+                                    onClick={() => setShowScanner(true)}
+                                    className="p-1.5 rounded-xl text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 transition-all"
+                                    title={t('pos.scan', 'Scan Barcode')}
+                                >
+                                    <ScanBarcode size={16} strokeWidth={1.5} />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
-                    {/* Product Detail */}
-                    <ProductDetailCard
-                        product={selectedProduct}
-                        formatCurrency={formatCurrency}
-                    />
+                    {/* Product grid — scrollable */}
+                    <div className="flex-1 min-h-0 overflow-y-auto p-3">
+                        {filteredProducts.length > 0 ? (
+                            <div className="grid grid-cols-2 xl:grid-cols-3 gap-2.5">
+                                {filteredProducts.map((product) => {
+                                    const inCart = cart.find((c) => c.product.id === product.id);
+                                    const isOutOfStock = product.stock_quantity <= 0;
+                                    const isLowStock = product.stock_quantity > 0 && product.stock_quantity <= 5;
+                                    const isInCart = !!inCart;
+                                    return (
+                                        <button
+                                            key={product.id}
+                                            onClick={() => handleAddProduct(product)}
+                                            disabled={isOutOfStock}
+                                            className={`group relative flex flex-col items-start p-4 rounded-2xl border shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-300 active:scale-[0.97] active:shadow-none disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0 text-left overflow-hidden ${isInCart ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-100 hover:border-zinc-200'}`}
+                                        >
+                                            {/* Subtle gradient accent on hover */}
+                                            {!isInCart && <div className="absolute inset-0 bg-gradient-to-br from-amber-50/0 via-transparent to-amber-50/0 group-hover:from-amber-50/60 group-hover:to-yellow-50/40 transition-all duration-500 rounded-2xl pointer-events-none" />}
+
+                                            {/* Cart badge */}
+                                            {inCart && (
+                                                <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold z-10 shadow-sm bg-white text-zinc-900">
+                                                    {inCart.quantity}
+                                                </div>
+                                            )}
+
+                                            {/* Product name */}
+                                            <div className={`relative text-[13px] font-semibold leading-snug line-clamp-2 mb-2 transition-colors ${isInCart ? 'text-white' : 'text-zinc-800 group-hover:text-zinc-900'}`}>
+                                                {product.name}
+                                            </div>
+
+                                            {/* Barcode */}
+                                            <div className={`relative text-[10px] tabular-nums mb-2 font-mono ${isInCart ? 'text-zinc-400' : 'text-zinc-300'}`}>
+                                                {product.barcode || '\u00A0'}
+                                            </div>
+
+                                            {/* Price + Stock */}
+                                            <div className={`relative mt-auto flex items-end justify-between w-full pt-2 border-t ${isInCart ? 'border-zinc-700' : 'border-zinc-100'}`}>
+                                                <span className={`text-base font-bold tabular-nums tracking-tight ${isInCart ? 'text-white' : 'text-zinc-900'}`}>
+                                                    {formatCurrency(product.selling_price)}
+                                                </span>
+                                                <span className={`text-[10px] font-semibold tabular-nums ${isInCart ? 'text-zinc-400' : isLowStock ? 'text-amber-500' : 'text-zinc-400'}`}>
+                                                    {product.stock_quantity}
+                                                </span>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center h-full text-zinc-300">
+                                <Search size={28} strokeWidth={1} className="mb-3 text-zinc-200" />
+                                <div className="text-xs font-medium text-zinc-400">{t('pos.no_products_found', 'No products found')}</div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Selected product detail — collapsible footer */}
+                    {selectedProduct && (
+                        <div className="shrink-0 border-t border-zinc-100">
+                            <ProductDetailCard
+                                product={selectedProduct}
+                                formatCurrency={formatCurrency}
+                            />
+                        </div>
+                    )}
 
                     {/* NumericKeypad */}
-                    <div className="mt-auto">
+                    <div className="shrink-0 border-t border-zinc-100 mt-auto">
                         <NumericKeypad
                             value={keypadValue}
                             onDigit={appendKeypad}
@@ -464,65 +553,31 @@ export default function POSLayout() {
                     </div>
                 </aside>
 
-                {/* CENTER PANEL */}
-                <main className="flex flex-col min-h-0 overflow-hidden" role="main" aria-label="Cart and products">
-                    {/* Search bar */}
-                    <div className="p-3 border-b border-zinc-200 bg-white">
+                {/* CENTER PANEL — Cart + Totals */}
+                <main className="flex flex-col min-h-0 overflow-hidden bg-white" role="main" aria-label="Cart and totals">
+                    {/* Client Info — above cart */}
+                    <div className="hidden md:block shrink-0 border-b border-zinc-100">
+                        <ClientInfoPanel
+                            customer={selectedCustomer}
+                            onSearch={() => setShowCustomerSearch(true)}
+                            onClear={() => setSelectedCustomer(null)}
+                            onEdit={() => {/* TODO: open edit modal */}}
+                            onAddNew={() => setShowCustomerSearch(true)}
+                        />
+                    </div>
+
+                    {/* Mobile search bar — visible only on small screens */}
+                    <div className="md:hidden p-3 border-b border-zinc-100">
                         <div className="relative">
-                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                            <Search size={15} strokeWidth={1.5} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-300" />
                             <input
-                                ref={searchInputRef}
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder={t('pos.search_placeholder', 'Search products or scan barcode...')}
-                                aria-label={t('pos.search_placeholder', 'Search products or scan barcode...')}
-                                className="w-full pl-9 pr-20 py-2.5 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-900 placeholder:text-zinc-400 text-sm font-medium focus:outline-none focus:border-zinc-400 focus:bg-white transition-colors"
+                                className="w-full pl-10 pr-12 py-2.5 rounded-2xl bg-zinc-50 border border-zinc-100 text-zinc-700 placeholder:text-zinc-300 text-sm font-medium focus:outline-none focus:border-zinc-200 focus:bg-white transition-colors"
                             />
-                            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                                {searchQuery && (
-                                    <motion.button
-                                        initial={{ opacity: 0, scale: 0.8 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        onClick={() => setSearchQuery('')}
-                                        className="p-1 rounded-full bg-zinc-200 text-zinc-500 hover:bg-zinc-300 transition-all"
-                                    >
-                                        <X size={12} strokeWidth={3} />
-                                    </motion.button>
-                                )}
-                                <button
-                                    onClick={() => setShowScanner(true)}
-                                    className="p-1.5 rounded-lg text-zinc-500 hover:bg-zinc-200 transition-all"
-                                    title={t('pos.scan', 'Scan Barcode')}
-                                >
-                                    <Barcode size={16} />
-                                </button>
-                            </div>
                         </div>
-
-                        {/* Search results dropdown */}
-                        {filteredProducts.length > 0 && (
-                            <div className="mt-2 max-h-64 overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-lg">
-                                {filteredProducts.map((product) => (
-                                    <button
-                                        key={product.id}
-                                        onClick={() => handleAddProduct(product)}
-                                        className="w-full flex items-center justify-between px-3 py-2 hover:bg-zinc-50 transition-colors border-b border-zinc-50 last:border-b-0"
-                                    >
-                                        <div className="text-left">
-                                            <div className="text-sm font-semibold text-zinc-800">{product.name}</div>
-                                            <div className="text-xs text-zinc-400">
-                                                {product.barcode && <span>{product.barcode} · </span>}
-                                                <span>{t('pos.stock', 'Stock')}: {product.stock_quantity}</span>
-                                            </div>
-                                        </div>
-                                        <span className="text-sm font-bold text-zinc-700">
-                                            {formatCurrency(product.selling_price)}
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
-                        )}
                     </div>
 
                     {/* Cart area — CartTicket */}
@@ -550,7 +605,7 @@ export default function POSLayout() {
                     />
 
                     {/* Mobile checkout — visible only on small screens */}
-                    <div className="md:hidden p-3 bg-white border-t border-zinc-200 flex gap-2">
+                    <div className="md:hidden p-3 bg-white border-t border-zinc-100 flex gap-2">
                         <button
                             onClick={() => {
                                 if (cart.length === 0) {
@@ -560,22 +615,23 @@ export default function POSLayout() {
                                 setShowSplitPayment(true);
                             }}
                             disabled={cart.length === 0 || isCheckingOut}
-                            className="flex-1 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-zinc-300 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-all active:scale-[0.98]"
+                            className="flex-1 py-3 bg-zinc-100 hover:bg-zinc-200 disabled:bg-zinc-50 disabled:cursor-not-allowed text-zinc-600 text-sm font-medium rounded-2xl transition-all active:scale-[0.98]"
                         >
                             {t('pos.split_payment', 'Split Payment')}
                         </button>
                         <button
                             onClick={handleCheckout}
                             disabled={cart.length === 0 || isCheckingOut}
-                            className="flex-[2] py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-300 disabled:cursor-not-allowed text-white text-base font-black rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-emerald-600/20"
+                            className="flex-[2] py-3 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-200 disabled:cursor-not-allowed text-white text-base font-semibold rounded-2xl transition-all active:scale-[0.98]"
                         >
                             {isCheckingOut ? t('pos.processing', 'Processing...') : t('pos.checkout', 'CHECKOUT')}
                         </button>
                     </div>
                 </main>
 
-                {/* RIGHT PANEL — hidden on small, visible md+ */}
-                <aside className="hidden md:flex flex-col border-l border-zinc-200 bg-zinc-50 overflow-y-auto" aria-label="Actions and checkout">
+                {/* RIGHT PANEL — Actions, Checkout */}
+                <aside className="hidden md:flex flex-col border-l border-zinc-100 bg-white overflow-y-auto" aria-label="Actions and checkout">
+                    {/* Action Grid */}
                     <ActionGrid
                         holdCount={holdCount}
                         maxHolds={5}
@@ -604,14 +660,14 @@ export default function POSLayout() {
                                 setShowSplitPayment(true);
                             }}
                             disabled={cart.length === 0 || isCheckingOut}
-                            className="w-full py-2.5 bg-blue-500 hover:bg-blue-600 disabled:bg-zinc-300 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-all active:scale-[0.98]"
+                            className="w-full py-2.5 bg-zinc-50 hover:bg-zinc-100 border border-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed text-zinc-500 text-sm font-medium rounded-2xl transition-all active:scale-[0.98]"
                         >
                             {t('pos.split_payment', 'Split Payment')}
                         </button>
                         <button
                             onClick={handleCheckout}
                             disabled={cart.length === 0 || isCheckingOut}
-                            className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-300 disabled:cursor-not-allowed text-white text-lg font-black rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-emerald-600/20"
+                            className="w-full py-4 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-100 disabled:text-zinc-300 disabled:cursor-not-allowed text-white text-base font-semibold rounded-2xl transition-all active:scale-[0.98]"
                         >
                             {isCheckingOut ? t('pos.processing', 'Processing...') : t('pos.checkout', 'CHECKOUT')}
                         </button>
@@ -674,20 +730,20 @@ export default function POSLayout() {
 
             {/* End Shift Confirmation Dialog */}
             {showEndShiftConfirm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" role="dialog" aria-modal="true" aria-label={t('pos.end_shift', 'End Shift')}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={t('pos.end_shift', 'End Shift')}>
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4 space-y-4"
+                        className="bg-white rounded-3xl shadow-xl shadow-zinc-200/50 p-7 w-full max-w-sm mx-4 space-y-5"
                     >
-                        <h2 className="text-lg font-bold text-zinc-900">{t('pos.end_shift_title', 'End Shift?')}</h2>
-                        <p className="text-sm text-zinc-500">
+                        <h2 className="text-lg font-semibold text-zinc-800">{t('pos.end_shift_title', 'End Shift?')}</h2>
+                        <p className="text-sm text-zinc-400 leading-relaxed">
                             {t('pos.end_shift_message', 'This will close your current cashier session and log you out. Are you sure?')}
                         </p>
-                        <div className="flex gap-3 pt-2">
+                        <div className="flex gap-3 pt-1">
                             <button
                                 onClick={() => setShowEndShiftConfirm(false)}
-                                className="flex-1 py-2.5 rounded-xl border border-zinc-200 text-zinc-700 font-medium text-sm hover:bg-zinc-50 transition-colors"
+                                className="flex-1 py-2.5 rounded-2xl border border-zinc-100 text-zinc-500 font-medium text-sm hover:bg-zinc-50 transition-colors"
                             >
                                 {t('common.cancel', 'Cancel')}
                             </button>
@@ -696,7 +752,7 @@ export default function POSLayout() {
                                     setShowEndShiftConfirm(false);
                                     await handleEndShift();
                                 }}
-                                className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-sm transition-colors"
+                                className="flex-1 py-2.5 rounded-2xl bg-red-50 hover:bg-red-100 text-red-500 font-semibold text-sm transition-colors"
                             >
                                 {t('pos.end_shift_confirm', 'End Shift')}
                             </button>

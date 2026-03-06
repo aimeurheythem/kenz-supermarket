@@ -1,6 +1,6 @@
 // CartTicketRow.tsx — Individual line item row for the cart ticket
 import { useState, useRef, useEffect } from 'react';
-import { X, Minus, Plus, Tag } from 'lucide-react';
+import { Trash2, Minus, Plus, Percent } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import type { CartItem, PromotionResult } from '@/lib/types';
@@ -78,44 +78,30 @@ export default function CartTicketRow({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, x: -50, height: 0, marginBottom: 0, overflow: 'hidden' }}
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-            className="group"
         >
-            <div className="flex items-start gap-1 px-2 py-2 rounded-lg hover:bg-zinc-50 transition-colors">
-                {/* Line number */}
-                <span className="w-6 text-xs font-bold text-zinc-300 pt-0.5 shrink-0">
-                    {String(index).padStart(2, '0')}
-                </span>
-
-                {/* Product info */}
+            <div className="flex items-center px-5 py-4 border-b border-zinc-100 hover:bg-zinc-50/60 transition-colors">
+                {/* Article — name + unit price + promo */}
                 <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-zinc-800 truncate">{item.product.name}</div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-zinc-400 tabular-nums">
-                            {formatCurrency(unitPrice)}
+                    <div className="text-base font-bold text-zinc-900 truncate">{item.product.name}</div>
+                    <div className="flex items-center gap-2 mt-1">
+                        <span className="text-sm text-zinc-400 tabular-nums">
+                            {formatCurrency(unitPrice)} x {item.quantity}
                         </span>
                         {totalDiscount > 0 && (
-                            <span className="text-xs text-emerald-600 font-medium tabular-nums">
+                            <span className="text-sm text-emerald-500 font-semibold tabular-nums">
                                 -{formatCurrency(totalDiscount)}
                             </span>
                         )}
                         {promotion && (
-                            <span className="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold">
+                            <span className="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-medium">
                                 {promotion.promotionName}
                             </span>
                         )}
                     </div>
                 </div>
 
-                {/* Quantity controls */}
-                <div className="w-20 flex items-center justify-center gap-0.5 shrink-0">
-                    <button
-                        onClick={onDecrement}
-                        disabled={item.quantity <= 1}
-                        aria-label={t('common.decrease', 'Decrease')}
-                        className="w-6 h-6 rounded bg-zinc-100 text-zinc-600 flex items-center justify-center hover:bg-zinc-200 active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                    >
-                        <Minus size={12} />
-                    </button>
+                {/* QTE — editable quantity */}
+                <div className="w-14 flex items-center justify-center shrink-0 mr-10">
                     {isEditing ? (
                         <input
                             ref={inputRef}
@@ -125,56 +111,66 @@ export default function CartTicketRow({
                             onChange={(e) => setEditValue(e.target.value)}
                             onBlur={handleEditConfirm}
                             onKeyDown={handleEditKeyDown}
-                            className="w-8 h-6 text-sm font-bold text-center text-zinc-800 border border-blue-400 rounded bg-blue-50 outline-none tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            className="w-14 h-10 text-lg font-extrabold text-center text-zinc-800 border-2 border-zinc-300 rounded-xl bg-white outline-none tabular-nums focus:border-zinc-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                         />
                     ) : (
                         <button
                             onClick={handleEditStart}
-                            className="w-8 h-6 text-sm font-bold text-zinc-800 tabular-nums text-center hover:bg-blue-50 hover:text-blue-600 rounded transition-colors cursor-text"
+                            className="w-14 h-10 text-lg font-extrabold text-zinc-900 tabular-nums text-center bg-zinc-100 hover:bg-zinc-200 rounded-xl transition-colors cursor-text"
                             title={t('pos.click_to_edit', 'Click to edit quantity')}
                         >
                             {item.quantity}
                         </button>
                     )}
-                    <button
-                        onClick={onIncrement}
-                        disabled={isAtMaxStock}
-                        aria-label={t('common.increase', 'Increase')}
-                        className="w-6 h-6 rounded bg-zinc-100 text-zinc-600 flex items-center justify-center hover:bg-zinc-200 active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                    >
-                        <Plus size={12} />
-                    </button>
                 </div>
 
-                {/* Line total */}
-                <div className="w-20 text-right shrink-0 pt-0.5">
-                    <div className="text-sm font-bold text-zinc-800 tabular-nums">
+                {/* Total */}
+                <div className="w-18 text-right pr-2 shrink-0">
+                    <div className="text-lg font-extrabold text-zinc-900 tabular-nums">
                         {formatCurrency(finalTotal)}
                     </div>
                     {totalDiscount > 0 && (
-                        <div className="text-[10px] text-zinc-400 line-through tabular-nums">
+                        <div className="text-xs text-zinc-300 line-through tabular-nums">
                             {formatCurrency(lineTotal)}
                         </div>
                     )}
                 </div>
 
-                {/* Actions */}
-                <div className="w-14 flex items-center justify-end gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                {/* Actions — 4 big visible buttons */}
+                <div className="w-72 flex items-center justify-end gap-3.5 shrink-0 pl-4">
+                    <button
+                        onClick={onIncrement}
+                        disabled={isAtMaxStock}
+                        aria-label={t('common.increase', 'Increase')}
+                        className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-100 active:scale-90 disabled:opacity-25 disabled:cursor-not-allowed transition-all"
+                        title="+"
+                    >
+                        <Plus size={20} strokeWidth={2.5} />
+                    </button>
+                    <button
+                        onClick={onDecrement}
+                        disabled={item.quantity <= 1}
+                        aria-label={t('common.decrease', 'Decrease')}
+                        className="w-10 h-10 rounded-xl bg-zinc-100 text-zinc-600 flex items-center justify-center hover:bg-zinc-200 active:scale-90 disabled:opacity-25 disabled:cursor-not-allowed transition-all"
+                        title="-"
+                    >
+                        <Minus size={20} strokeWidth={2.5} />
+                    </button>
                     <button
                         onClick={onDiscountClick}
-                        className="w-6 h-6 rounded flex items-center justify-center text-zinc-400 hover:text-amber-500 hover:bg-amber-50 transition-all"
-                        title={t('pos.discount', 'Discount')}
-                        aria-label={t('pos.discount', 'Discount')}
+                        aria-label={t('pos.discount', 'Remise')}
+                        className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-100 active:scale-90 transition-all"
+                        title={t('pos.discount', 'Remise')}
                     >
-                        <Tag size={12} />
+                        <Percent size={18} strokeWidth={2} />
                     </button>
                     <button
                         onClick={onRemove}
-                        className="w-6 h-6 rounded flex items-center justify-center text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all"
-                        title={t('pos.remove', 'Remove')}
-                        aria-label={t('pos.remove', 'Remove')}
+                        aria-label={t('pos.remove', 'Delete')}
+                        className="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 active:scale-90 transition-all"
+                        title={t('pos.remove', 'Delete')}
                     >
-                        <X size={14} />
+                        <Trash2 size={18} strokeWidth={2} />
                     </button>
                 </div>
             </div>

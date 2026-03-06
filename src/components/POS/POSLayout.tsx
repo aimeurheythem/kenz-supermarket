@@ -651,7 +651,7 @@ export default function POSLayout() {
                     />
 
                     {/* Checkout buttons */}
-                    <div className="mt-auto p-3 space-y-2">
+                    <div className="mt-auto">
                         <button
                             onClick={() => {
                                 if (cart.length === 0) {
@@ -660,19 +660,19 @@ export default function POSLayout() {
                                 }
                                 setShowSplitPayment(true);
                             }}
-                            disabled={cart.length === 0 || isCheckingOut}
-                            className="w-full py-2.5 bg-zinc-50 hover:bg-zinc-100 border border-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed text-zinc-500 text-sm font-medium rounded-2xl transition-all active:scale-[0.98]"
+                            disabled={isCheckingOut}
+                            className="w-full py-10 bg-zinc-900 hover:bg-zinc-800 text-white text-xl font-black uppercase tracking-wider transition-all active:scale-[0.98]"
                         >
                             {t('pos.split_payment', 'Split Payment')}
                         </button>
-                        <button
-                            onClick={handleCheckout}
-                            disabled={cart.length === 0 || isCheckingOut}
-                            className="w-full py-4 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-100 disabled:text-zinc-300 disabled:cursor-not-allowed text-white text-base font-semibold rounded-2xl transition-all active:scale-[0.98]"
-                        >
-                            {isCheckingOut ? t('pos.processing', 'Processing...') : t('pos.checkout', 'CHECKOUT')}
-                        </button>
                     </div>
+                    <button
+                        onClick={handleCheckout}
+                        disabled={isCheckingOut}
+                        className="w-full py-10 bg-emerald-500 hover:bg-emerald-600 text-white text-xl font-black uppercase tracking-wider transition-all active:scale-[0.98]"
+                    >
+                        {isCheckingOut ? t('pos.processing', 'Processing...') : t('pos.checkout', 'CHECKOUT')}
+                    </button>
                 </aside>
             </div>
 

@@ -503,6 +503,14 @@
             "placeholder": "Search customer...",
             "no_results": "No customers found"
         },
+        "customer_search_dialog": {
+            "title": "Search Customer",
+            "placeholder": "Search by name, phone, or email...",
+            "no_results": "No customers found",
+            "try_different": "Try a different search or add a new customer",
+            "type_to_search": "Type to search customers",
+            "add_new": "Add New Customer"
+        },
         "return": {
             "title": "Process Return",
             "lookup_desc": "Enter the sale ID or ticket number to look up",

@@ -496,6 +496,14 @@
             "placeholder": "Rechercher un client...",
             "no_results": "Aucun client trouvé"
         },
+        "customer_search_dialog": {
+            "title": "Rechercher un client",
+            "placeholder": "Rechercher par nom, téléphone ou email...",
+            "no_results": "Aucun client trouvé",
+            "try_different": "Essayez une autre recherche ou ajoutez un nouveau client",
+            "type_to_search": "Tapez pour rechercher des clients",
+            "add_new": "Ajouter un nouveau client"
+        },
         "return": {
             "title": "Traiter un retour",
             "lookup_desc": "Saisir l'ID de vente ou le numéro de ticket",

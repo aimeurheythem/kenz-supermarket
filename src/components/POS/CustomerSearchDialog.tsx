@@ -79,7 +79,7 @@ export default function CustomerSearchDialog({ isOpen, onClose, onSelect }: Cust
     return (
         <>
             {/* Backdrop */}
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+            <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 backdrop-blur-sm">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -90,7 +90,7 @@ export default function CustomerSearchDialog({ isOpen, onClose, onSelect }: Cust
                     {/* Header */}
                     <div className="flex items-center justify-between px-6 pt-6 pb-4">
                         <h2 className="text-lg font-bold text-zinc-800">
-                            {t('pos.customer_search', 'Search Customer')}
+                            {t('pos.customer_search_dialog.title', 'Search Customer')}
                         </h2>
                         <button
                             onClick={onClose}
@@ -109,7 +109,7 @@ export default function CustomerSearchDialog({ isOpen, onClose, onSelect }: Cust
                                 type="text"
                                 value={query}
                                 onChange={(e) => handleSearch(e.target.value)}
-                                placeholder={t('pos.search_customer_placeholder', 'Search by name, phone, or email...')}
+                                placeholder={t('pos.customer_search_dialog.placeholder', 'Search by name, phone, or email...')}
                                 className="w-full pl-11 pr-4 py-3 rounded-2xl bg-zinc-50 border border-zinc-100 text-zinc-700 placeholder:text-zinc-300 text-sm font-medium focus:outline-none focus:border-zinc-200 focus:bg-white transition-colors"
                             />
                         </div>
@@ -158,17 +158,17 @@ export default function CustomerSearchDialog({ isOpen, onClose, onSelect }: Cust
                             <div className="flex flex-col items-center justify-center py-12 text-zinc-300">
                                 <CircleUser size={32} strokeWidth={1} className="mb-3 text-zinc-200" />
                                 <div className="text-sm font-medium text-zinc-400">
-                                    {t('pos.no_customers_found', 'No customers found')}
+                                    {t('pos.customer_search_dialog.no_results', 'No customers found')}
                                 </div>
                                 <div className="text-xs text-zinc-300 mt-1">
-                                    {t('pos.try_different_search', 'Try a different search or add a new customer')}
+                                    {t('pos.customer_search_dialog.try_different', 'Try a different search or add a new customer')}
                                 </div>
                             </div>
                         ) : (
                             <div className="flex flex-col items-center justify-center py-12 text-zinc-300">
                                 <Search size={28} strokeWidth={1} className="mb-3 text-zinc-200" />
                                 <div className="text-xs font-medium text-zinc-400">
-                                    {t('pos.type_to_search', 'Type to search customers')}
+                                    {t('pos.customer_search_dialog.type_to_search', 'Type to search customers')}
                                 </div>
                             </div>
                         )}
@@ -181,7 +181,7 @@ export default function CustomerSearchDialog({ isOpen, onClose, onSelect }: Cust
                             className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-semibold transition-all active:scale-[0.98]"
                         >
                             <UserPlus size={16} strokeWidth={1.5} />
-                            {t('pos.add_new_customer', 'Add New Customer')}
+                            {t('pos.customer_search_dialog.add_new', 'Add New Customer')}
                         </button>
                     </div>
                 </motion.div>

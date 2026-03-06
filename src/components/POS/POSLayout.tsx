@@ -731,20 +731,30 @@ export default function POSLayout() {
 
             {/* End Shift Confirmation Dialog */}
             {showEndShiftConfirm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={t('pos.end_shift', 'End Shift')}>
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-white rounded-3xl shadow-xl shadow-zinc-200/50 p-7 w-full max-w-sm mx-4 space-y-5"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                        onClick={() => setShowEndShiftConfirm(false)}
+                    />
+                    <motion.div
+                        initial={{ scale: 0.95, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="relative bg-white border border-gray-100 rounded-2xl p-6 w-full max-w-sm shadow-2xl"
                     >
-                        <h2 className="text-lg font-semibold text-zinc-800">{t('pos.end_shift_title', 'End Shift?')}</h2>
-                        <p className="text-sm text-zinc-400 leading-relaxed">
-                            {t('pos.end_shift_message', 'This will close your current cashier session and log you out. Are you sure?')}
-                        </p>
-                        <div className="flex gap-3 pt-1">
+                        <div className="text-center mb-6">
+                            <h3 className="text-lg font-bold text-black mb-1">
+                                {t('pos.end_shift_title', 'End Shift?')}
+                            </h3>
+                            <p className="text-black/40 text-sm">
+                                {t('pos.end_shift_message', 'This will close your current cashier session and log you out. Are you sure?')}
+                            </p>
+                        </div>
+                        <div className="flex gap-2">
                             <button
                                 onClick={() => setShowEndShiftConfirm(false)}
-                                className="flex-1 py-2.5 rounded-2xl border border-zinc-100 text-zinc-500 font-medium text-sm hover:bg-zinc-50 transition-colors"
+                                className="flex-1 py-2.5 bg-gray-50 text-black font-bold rounded-xl transition-all hover:bg-gray-100"
                             >
                                 {t('common.cancel', 'Cancel')}
                             </button>
@@ -753,7 +763,7 @@ export default function POSLayout() {
                                     setShowEndShiftConfirm(false);
                                     await handleEndShift();
                                 }}
-                                className="flex-1 py-2.5 rounded-2xl bg-red-50 hover:bg-red-100 text-red-500 font-semibold text-sm transition-colors"
+                                className="flex-1 py-2.5 bg-red-500 text-white font-bold rounded-xl transition-all hover:bg-red-600"
                             >
                                 {t('pos.end_shift_confirm', 'End Shift')}
                             </button>

@@ -62,12 +62,12 @@ export default function ActionGrid({
         { icon: RefreshCcw, label: t('pos.action.return', 'Return'), key: 'F8', onClick: onReturn, variant: 'warning' as const },
         { icon: TrendingUp, label: t('pos.action.report', 'Report'), key: 'F9', onClick: onDailyReport, variant: 'default' as const },
         { icon: SlidersHorizontal, label: t('pos.action.settings', 'Settings'), key: 'F10', onClick: onSettings, variant: 'default' as const },
-        { icon: Power, label: t('pos.action.end_shift', 'End Shift'), key: 'F11', onClick: onEndShift, variant: 'danger' as const },
-        { icon: Gift, label: t('pos.action.gift', 'Gift Card'), key: 'F12', onClick: onGiftCard, variant: 'default' as const },
+        { icon: Gift, label: t('pos.action.gift', 'Gift Card'), key: 'F11', onClick: onGiftCard, variant: 'default' as const },
+        { icon: Power, label: t('pos.action.end_shift', 'End Shift'), key: 'F12', onClick: onEndShift, variant: 'danger' as const },
     ];
 
     return (
-        <div className="grid grid-cols-2 gap-2 p-3">
+        <div className="grid grid-cols-1">
             {actions.map((action) => (
                 <ActionButton
                     key={action.key}

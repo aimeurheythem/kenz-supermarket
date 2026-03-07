@@ -63,7 +63,6 @@ export default function ActionGrid({
         { icon: TrendingUp, label: t('pos.action.report', 'Report'), key: 'F9', onClick: onDailyReport, variant: 'default' as const },
         { icon: SlidersHorizontal, label: t('pos.action.settings', 'Settings'), key: 'F10', onClick: onSettings, variant: 'default' as const },
         { icon: Gift, label: t('pos.action.gift', 'Gift Card'), key: 'F11', onClick: onGiftCard, variant: 'default' as const },
-        { icon: Power, label: t('pos.action.end_shift', 'End Shift'), key: 'F12', onClick: onEndShift, variant: 'danger' as const },
     ];
 
     return (

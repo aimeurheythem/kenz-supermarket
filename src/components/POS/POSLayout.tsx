@@ -444,6 +444,7 @@ export default function POSLayout() {
                 cashierName={user?.full_name ?? t('pos.unknown_cashier', 'Cashier')}
                 sessionActive={!!currentSession?.session}
                 shiftStartTime={currentSession?.session?.login_time}
+                onEndShift={() => setShowEndShiftConfirm(true)}
             />
 
             {/* Main 3-column grid — stacks on small screens, adapts at every breakpoint */}

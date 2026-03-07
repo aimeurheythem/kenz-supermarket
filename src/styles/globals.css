@@ -297,7 +297,7 @@ body,
     height: 100%;
     width: 100%;
     overflow: hidden;
-    border-radius: 12px 12px 0 0;
+    border-radius: 0;
 }
 
 /* Global Draggable Region */

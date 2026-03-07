@@ -36,9 +36,9 @@ export default function CartTicket({
     if (cart.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-full text-zinc-300">
-                <ShoppingCart size={40} strokeWidth={1} className="mb-4 text-zinc-200" />
+                <ShoppingCart size={32} strokeWidth={1} className="mb-3 text-zinc-200" />
                 <div className="text-sm font-medium text-zinc-400">{t('pos.empty_cart', 'Cart is empty')}</div>
-                <div className="text-xs mt-1.5 text-zinc-300">{t('pos.scan_to_add', 'Scan or search to add products')}</div>
+                <div className="text-xs mt-1 text-zinc-300">{t('pos.scan_to_add', 'Scan or search to add products')}</div>
             </div>
         );
     }
@@ -46,24 +46,16 @@ export default function CartTicket({
     return (
         <div className="flex flex-col h-full">
             {/* Ticket header */}
-            <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-100">
+            <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-200/60 bg-zinc-50 shrink-0">
                 <div className="flex items-center gap-2">
-                    <FileText size={14} strokeWidth={1.5} className="text-zinc-300" />
-                    <span className="text-xs font-semibold text-zinc-400">
-                        {t('pos.ticket', 'Ticket')} #{formattedTicket}
+                    <FileText size={13} strokeWidth={1.5} className="text-zinc-400" />
+                    <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+                        #{formattedTicket}
                     </span>
                 </div>
-                <span className="text-[10px] font-medium text-zinc-300 bg-zinc-50 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-semibold text-zinc-400 tabular-nums">
                     {cart.length} {cart.length === 1 ? t('pos.item', 'item') : t('pos.items', 'items')}
                 </span>
-            </div>
-
-            {/* Column labels */}
-            <div className="flex items-center px-3 md:px-5 py-3 text-xs font-bold text-zinc-400 uppercase tracking-wider border-b border-zinc-100 bg-zinc-50/50 shrink-0">
-                <span className="flex-1 min-w-0">{t('pos.article', 'Article')}</span>
-                <span className="w-12 md:w-14 text-center shrink-0">{t('pos.qty', 'QTE')}</span>
-                <span className="w-16 md:w-20 text-right pr-2 shrink-0">{t('pos.total', 'Total')}</span>
-                <span className="hidden sm:block w-32 md:w-44 lg:w-52 xl:w-72 text-center shrink-0">{t('pos.actions', 'Actions')}</span>
             </div>
 
             {/* Scrollable cart rows */}

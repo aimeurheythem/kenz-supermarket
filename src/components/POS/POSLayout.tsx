@@ -334,10 +334,13 @@ export default function POSLayout() {
             setSelectedCustomer(null);
             loadProducts();
             refreshTicketNumber();
-            // Track last sale for reprint
+            // Track last sale for reprint & show receipt
             if (sale) {
                 setLastSale(sale);
-                SaleRepo.getItems(sale.id).then(setLastSaleItems).catch(() => {});
+                SaleRepo.getItems(sale.id).then((items) => {
+                    setLastSaleItems(items);
+                    setShowReceiptPreview(true);
+                }).catch(() => {});
             }
             toast.success(t('pos.sale_complete', 'Sale complete!'));
         } catch (err: unknown) {
@@ -362,12 +365,14 @@ export default function POSLayout() {
             setShowSplitPayment(false);
             loadProducts();
             refreshTicketNumber();
-            // Track last sale for reprint
+            // Track last sale for reprint & show receipt
             try {
                 const recent = await SaleRepo.getRecentSales(1);
                 if (recent.length > 0) {
                     setLastSale(recent[0]);
-                    SaleRepo.getItems(recent[0].id).then(setLastSaleItems).catch(() => {});
+                    const items = await SaleRepo.getItems(recent[0].id);
+                    setLastSaleItems(items);
+                    setShowReceiptPreview(true);
                 }
             } catch { /* ignore */ }
             toast.success(t('pos.sale_complete', 'Sale complete!'));
@@ -444,11 +449,11 @@ export default function POSLayout() {
             {/* Main 3-column grid — stacks on small screens, adapts at every breakpoint */}
             <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[1fr_2fr] lg:grid-cols-[2fr_3fr_minmax(200px,1fr)] xl:grid-cols-[2fr_3fr_minmax(260px,1fr)] gap-0">
                 {/* LEFT PANEL — Product catalog (40%) */}
-                <aside className="hidden lg:flex flex-col border-r border-zinc-100 bg-white overflow-hidden" aria-label="Product catalog">
+                <aside className="hidden lg:flex flex-col border-r border-zinc-100 bg-zinc-950 overflow-hidden" aria-label="Product catalog">
                     {/* Search bar */}
-                    <div className="p-3 border-b border-zinc-100 shrink-0">
+                    <div className="shrink-0 bg-white border-b border-zinc-100">
                         <div className="relative">
-                            <Search size={15} strokeWidth={1.5} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-300" />
+                            <Search size={15} strokeWidth={1.5} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-300" />
                             <input
                                 ref={searchInputRef}
                                 type="text"
@@ -456,9 +461,9 @@ export default function POSLayout() {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder={t('pos.search_placeholder', 'Search products or scan barcode...')}
                                 aria-label={t('pos.search_placeholder', 'Search products or scan barcode...')}
-                                className="w-full pl-10 pr-12 py-2.5 rounded-2xl bg-zinc-50 border border-zinc-100 text-zinc-700 placeholder:text-zinc-300 text-sm font-medium focus:outline-none focus:border-zinc-200 focus:bg-white transition-colors"
+                                className="w-full pl-11 pr-14 py-3.5 bg-white text-zinc-700 placeholder:text-zinc-300 text-sm font-medium focus:outline-none transition-colors"
                             />
-                            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
                                 {searchQuery && (
                                     <motion.button
                                         initial={{ opacity: 0, scale: 0.8 }}
@@ -471,7 +476,7 @@ export default function POSLayout() {
                                 )}
                                 <button
                                     onClick={() => setShowScanner(true)}
-                                    className="p-1.5 rounded-xl text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 transition-all"
+                                    className="p-1.5 text-zinc-300 hover:text-zinc-500 transition-all"
                                     title={t('pos.scan', 'Scan Barcode')}
                                 >
                                     <ScanBarcode size={16} strokeWidth={1.5} />
@@ -481,9 +486,9 @@ export default function POSLayout() {
                     </div>
 
                     {/* Product grid — scrollable */}
-                    <div className="flex-1 min-h-0 overflow-y-auto p-2 lg:p-3">
+                    <div className="flex-1 min-h-0 overflow-y-auto bg-white [&::-webkit-scrollbar-thumb]:!bg-zinc-200 [&::-webkit-scrollbar-thumb:hover]:!bg-zinc-300 [&::-webkit-scrollbar-track]:!bg-white" style={{ scrollbarColor: '#e4e4e7 white' }}>
                         {filteredProducts.length > 0 ? (
-                            <div className="grid grid-cols-2 2xl:grid-cols-3 gap-2">
+                            <div className="grid grid-cols-2 2xl:grid-cols-3 gap-px bg-zinc-100 min-h-full">
                                 {filteredProducts.map((product) => {
                                     const inCart = cart.find((c) => c.product.id === product.id);
                                     const isOutOfStock = product.stock_quantity <= 0;
@@ -494,36 +499,30 @@ export default function POSLayout() {
                                             key={product.id}
                                             onClick={() => handleAddProduct(product)}
                                             disabled={isOutOfStock}
-                                            className={`group relative flex flex-col items-start p-3 xl:p-4 rounded-2xl border shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-300 active:scale-[0.97] active:shadow-none disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0 text-left overflow-hidden ${isInCart ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-100 hover:border-zinc-200'}`}
+                                            className={`relative flex flex-col justify-between p-3 xl:p-4 min-h-[88px] xl:min-h-[96px] text-left transition-colors duration-100 active:brightness-95 disabled:opacity-25 disabled:cursor-not-allowed ${isInCart ? 'bg-zinc-900' : 'bg-white hover:bg-zinc-50'}`}
                                         >
-                                            {/* Subtle gradient accent on hover */}
-                                            {!isInCart && <div className="absolute inset-0 bg-gradient-to-br from-amber-50/0 via-transparent to-amber-50/0 group-hover:from-amber-50/60 group-hover:to-yellow-50/40 transition-all duration-500 rounded-2xl pointer-events-none" />}
-
-                                            {/* Cart badge */}
-                                            {inCart && (
-                                                <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold z-10 shadow-sm bg-white text-zinc-900">
+                                            {/* Quantity badge */}
+                                            {isInCart && (
+                                                <span className="absolute top-2 right-2.5 bg-emerald-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
                                                     {inCart.quantity}
-                                                </div>
+                                                </span>
                                             )}
 
                                             {/* Product name */}
-                                            <div className={`relative text-[13px] font-semibold leading-snug line-clamp-2 mb-2 transition-colors ${isInCart ? 'text-white' : 'text-zinc-800 group-hover:text-zinc-900'}`}>
+                                            <span className={`text-[13px] font-semibold leading-snug line-clamp-2 pr-6 ${isInCart ? 'text-white' : 'text-zinc-800'}`}>
                                                 {product.name}
-                                            </div>
+                                            </span>
 
-                                            {/* Barcode */}
-                                            <div className={`relative text-[10px] tabular-nums mb-2 font-mono ${isInCart ? 'text-zinc-400' : 'text-zinc-300'}`}>
-                                                {product.barcode || '\u00A0'}
-                                            </div>
-
-                                            {/* Price + Stock */}
-                                            <div className={`relative mt-auto flex items-end justify-between w-full pt-2 border-t ${isInCart ? 'border-zinc-700' : 'border-zinc-100'}`}>
-                                                <span className={`text-base font-bold tabular-nums tracking-tight ${isInCart ? 'text-white' : 'text-zinc-900'}`}>
+                                            {/* Price + stock */}
+                                            <div className="flex items-end justify-between mt-auto pt-1.5">
+                                                <span className={`text-[15px] xl:text-base font-bold tabular-nums tracking-tight ${isInCart ? 'text-emerald-400' : 'text-zinc-900'}`}>
                                                     {formatCurrency(product.selling_price)}
                                                 </span>
-                                                <span className={`text-[10px] font-semibold tabular-nums ${isInCart ? 'text-zinc-400' : isLowStock ? 'text-amber-500' : 'text-zinc-400'}`}>
-                                                    {product.stock_quantity}
-                                                </span>
+                                                {!isInCart && (
+                                                    <span className={`text-[10px] font-medium tabular-nums ${isOutOfStock ? 'text-red-400' : isLowStock ? 'text-amber-500' : 'text-zinc-300'}`}>
+                                                        {product.stock_quantity}
+                                                    </span>
+                                                )}
                                             </div>
                                         </button>
                                     );
@@ -539,7 +538,7 @@ export default function POSLayout() {
 
                     {/* Selected product detail — collapsible footer */}
                     {selectedProduct && (
-                        <div className="shrink-0 border-t border-zinc-100">
+                        <div className="shrink-0">
                             <ProductDetailCard
                                 product={selectedProduct}
                                 formatCurrency={formatCurrency}
@@ -548,7 +547,7 @@ export default function POSLayout() {
                     )}
 
                     {/* NumericKeypad */}
-                    <div className="shrink-0 border-t border-zinc-100 mt-auto">
+                    <div className="shrink-0">
                         <NumericKeypad
                             value={keypadValue}
                             onDigit={appendKeypad}
@@ -636,7 +635,7 @@ export default function POSLayout() {
                 </main>
 
                 {/* RIGHT PANEL — Actions, Checkout */}
-                <aside className="hidden lg:flex flex-col border-l border-zinc-100 bg-white overflow-y-auto" aria-label="Actions and checkout">
+                <aside className="hidden lg:flex flex-col bg-zinc-950 overflow-hidden" aria-label="Actions and checkout">
                     {/* Action Grid */}
                     <ActionGrid
                         holdCount={holdCount}
@@ -655,29 +654,31 @@ export default function POSLayout() {
                         onGiftCard={() => toast.info(t('pos.gift_card_not_available', 'Gift card feature is not available yet'))}
                     />
 
-                    {/* Checkout buttons */}
                     <div className="mt-auto">
-                        <button
-                            onClick={() => {
-                                if (cart.length === 0) {
-                                    toast.warning(t('pos.empty_cart_warning', 'Add items to the cart first'));
-                                    return;
-                                }
-                                setShowSplitPayment(true);
-                            }}
-                            disabled={isCheckingOut}
-                            className="w-full py-6 xl:py-10 bg-zinc-900 hover:bg-zinc-800 text-white text-base xl:text-xl font-black uppercase tracking-wider transition-all active:scale-[0.98]"
-                        >
-                            {t('pos.split_payment', 'Split Payment')}
-                        </button>
-                    </div>
+                    {/* Split Payment */}
+                    <button
+                        onClick={() => {
+                            if (cart.length === 0) {
+                                toast.warning(t('pos.empty_cart_warning', 'Add items to the cart first'));
+                                return;
+                            }
+                            setShowSplitPayment(true);
+                        }}
+                        disabled={isCheckingOut}
+                        className="w-full py-10 xl:py-16 border-b border-white/[0.06] bg-zinc-900 hover:bg-zinc-800 text-white text-sm lg:text-base xl:text-lg font-black uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                        {t('pos.split_payment', 'Split Payment')}
+                    </button>
+
+                    {/* Checkout */}
                     <button
                         onClick={handleCheckout}
                         disabled={isCheckingOut}
-                        className="w-full py-6 xl:py-10 bg-emerald-500 hover:bg-emerald-600 text-white text-base xl:text-xl font-black uppercase tracking-wider transition-all active:scale-[0.98]"
+                        className="w-full py-10 xl:py-16 bg-emerald-600 hover:bg-emerald-500 text-white text-sm lg:text-base xl:text-lg font-black uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                         {isCheckingOut ? t('pos.processing', 'Processing...') : t('pos.checkout', 'CHECKOUT')}
                     </button>
+                    </div>
                 </aside>
             </div>
 

@@ -1,7 +1,6 @@
 // NumericKeypad.tsx — On-screen numeric keypad for touchscreen product code entry
 import { Delete, Check, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
 
 interface NumericKeypadProps {
     value: string;
@@ -10,13 +9,6 @@ interface NumericKeypadProps {
     onClear: () => void;
     onConfirm: () => void;
 }
-
-const KEYS = [
-    ['7', '8', '9'],
-    ['4', '5', '6'],
-    ['1', '2', '3'],
-    ['C', '0', '↵'],
-] as const;
 
 export default function NumericKeypad({
     value,
@@ -27,69 +19,51 @@ export default function NumericKeypad({
 }: NumericKeypadProps) {
     const { t } = useTranslation();
 
-    const handleKey = (key: string) => {
-        if (key === 'C') onClear();
-        else if (key === '↵') onConfirm();
-        else onDigit(key);
-    };
-
     return (
-        <div className="p-3 lg:p-5">
-            <div className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-3 lg:mb-4">
-                {t('pos.keypad', 'Keypad')}
+        <div className="bg-zinc-50">
+            {/* Display row */}
+            <div className="flex items-center h-11 lg:h-12 border-b border-zinc-200">
+                <span className={`flex-1 px-4 text-sm lg:text-base font-mono font-semibold tabular-nums truncate ${value ? 'text-zinc-900' : 'text-zinc-400'}`}>
+                    {value || t('pos.keypad_placeholder', 'Code...')}
+                </span>
+                {value && (
+                    <button
+                        onClick={onBackspace}
+                        className="h-full px-4 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors border-l border-zinc-200"
+                        aria-label={t('pos.backspace', 'Backspace')}
+                    >
+                        <Delete size={16} strokeWidth={1.5} />
+                    </button>
+                )}
             </div>
 
-            {/* Display */}
-            <div className="relative mb-3 lg:mb-4">
-                <div className="w-full h-11 lg:h-14 px-3 lg:px-4 flex items-center justify-between rounded-2xl bg-zinc-50 border border-zinc-100">
-                    <span className={`text-base lg:text-lg font-mono font-semibold tabular-nums ${value ? 'text-zinc-800' : 'text-zinc-300'}`}>
-                        {value || t('pos.keypad_placeholder', 'Product code...')}
-                    </span>
-                    {value && (
-                        <button
-                            onClick={onBackspace}
-                            className="p-2 rounded-xl text-zinc-300 hover:text-zinc-600 hover:bg-zinc-100 transition-all"
-                            aria-label={t('pos.backspace', 'Backspace')}
-                        >
-                            <Delete size={20} strokeWidth={1.5} />
-                        </button>
-                    )}
-                </div>
-            </div>
+            {/* Keys — flat full-width rows */}
+            <div className="grid grid-cols-4 grid-rows-4" role="group" aria-label={t('pos.keypad', 'Keypad')}>
+                {/* Row 1: 7 8 9 C */}
+                {['7', '8', '9'].map((k) => (
+                    <button key={k} onClick={() => onDigit(k)} className="h-11 lg:h-12 text-sm lg:text-base font-bold text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 border-b border-r border-zinc-200 transition-colors active:bg-zinc-200">{k}</button>
+                ))}
+                <button onClick={onClear} className="h-11 lg:h-12 text-sm lg:text-base font-bold text-red-500 hover:text-red-600 hover:bg-red-50 border-b border-zinc-200 transition-colors active:bg-red-100" aria-label={t('pos.clear', 'Clear')}>
+                    <X size={16} strokeWidth={2} className="mx-auto" />
+                </button>
 
-            {/* Keypad grid */}
-            <div className="grid grid-cols-3 gap-1.5 lg:gap-2.5" role="group" aria-label={t('pos.keypad', 'Keypad')}>
-                {KEYS.flat().map((key) => {
-                    const isConfirm = key === '↵';
-                    const isClear = key === 'C';
+                {/* Row 2: 4 5 6 (confirm spans 3 rows) */}
+                {['4', '5', '6'].map((k) => (
+                    <button key={k} onClick={() => onDigit(k)} className="h-11 lg:h-12 text-sm lg:text-base font-bold text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 border-b border-r border-zinc-200 transition-colors active:bg-zinc-200">{k}</button>
+                ))}
+                <button onClick={onConfirm} className="row-span-3 text-sm lg:text-base font-bold bg-emerald-500 hover:bg-emerald-600 text-white transition-colors active:bg-emerald-700" aria-label={t('pos.confirm', 'Confirm')}>
+                    <Check size={20} strokeWidth={2} className="mx-auto" />
+                </button>
 
-                    return (
-                        <motion.button
-                            key={key}
-                            whileTap={{ scale: 0.92 }}
-                            onClick={() => handleKey(key)}
-                            className={`
-                                h-11 lg:h-14 rounded-xl lg:rounded-2xl text-base lg:text-lg font-bold transition-all shadow-sm
-                                ${isConfirm
-                                    ? 'bg-zinc-900 text-white hover:bg-zinc-800 shadow-zinc-900/20'
-                                    : isClear
-                                        ? 'bg-red-50 text-red-500 hover:bg-red-100 shadow-red-100/50'
-                                        : 'bg-white text-zinc-800 hover:bg-zinc-100 border border-zinc-200 shadow-zinc-100/50'
-                                }
-                                active:scale-95 flex items-center justify-center
-                            `}
-                            aria-label={isConfirm ? t('pos.confirm', 'Confirm') : isClear ? t('pos.clear', 'Clear') : key}
-                        >
-                            {isConfirm ? (
-                                <Check size={22} strokeWidth={2} />
-                            ) : isClear ? (
-                                <X size={22} strokeWidth={2} />
-                            ) : (
-                                key
-                            )}
-                        </motion.button>
-                    );
-                })}
+                {/* Row 3: 1 2 3 */}
+                {['1', '2', '3'].map((k) => (
+                    <button key={k} onClick={() => onDigit(k)} className="h-11 lg:h-12 text-sm lg:text-base font-bold text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 border-b border-r border-zinc-200 transition-colors active:bg-zinc-200">{k}</button>
+                ))}
+
+                {/* Row 4: 00 0 . */}
+                <button onClick={() => onDigit('00')} className="h-11 lg:h-12 text-sm lg:text-base font-bold text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 border-r border-zinc-200 transition-colors active:bg-zinc-200">00</button>
+                <button onClick={() => onDigit('0')} className="h-11 lg:h-12 text-sm lg:text-base font-bold text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 border-r border-zinc-200 transition-colors active:bg-zinc-200">0</button>
+                <button onClick={() => onDigit('.')} className="h-11 lg:h-12 text-sm lg:text-base font-bold text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 border-r border-zinc-200 transition-colors active:bg-zinc-200">.</button>
             </div>
         </div>
     );

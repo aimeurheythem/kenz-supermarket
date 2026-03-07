@@ -25,57 +25,51 @@ export default function TotalsBar({
     const vatPercent = Math.round(vatRate * 100);
 
     return (
-        <div className="border-t border-zinc-100 bg-white px-4 md:px-6 py-4 md:py-5 shrink-0">
-            <div className="space-y-2">
-                {/* Subtotal */}
-                <div className="flex justify-between text-sm">
+        <div className="bg-zinc-50 px-5 py-5 md:py-6 shrink-0">
+            {/* Breakdown row */}
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-sm tabular-nums mb-4">
+                <div className="flex items-center gap-2">
                     <span className="text-zinc-400 font-medium">{t('pos.subtotal', 'Subtotal')}</span>
-                    <span className="font-medium text-zinc-600 tabular-nums">{formatCurrency(subtotal)}</span>
+                    <span className="font-bold text-zinc-700">{formatCurrency(subtotal)}</span>
                 </div>
 
-                {/* VAT */}
                 {vatAmount > 0 && (
-                    <div className="flex justify-between text-sm">
-                        <span className="text-zinc-400 font-medium">
-                            {t('pos.vat', 'VAT')} ({vatPercent}%)
-                        </span>
-                        <span className="font-medium text-zinc-600 tabular-nums">{formatCurrency(vatAmount)}</span>
+                    <div className="flex items-center gap-2">
+                        <span className="text-zinc-400 font-medium">{t('pos.vat', 'VAT')} {vatPercent}%</span>
+                        <span className="font-bold text-zinc-700">{formatCurrency(vatAmount)}</span>
                     </div>
                 )}
 
-                {/* Promo savings */}
                 {promoSavings > 0 && (
-                    <div className="flex justify-between text-sm">
-                        <span className="text-emerald-500 font-medium">{t('pos.promo_savings', 'Promo Savings')}</span>
-                        <span className="font-medium text-emerald-500 tabular-nums">-{formatCurrency(promoSavings)}</span>
+                    <div className="flex items-center gap-2">
+                        <span className="text-emerald-500 font-medium">{t('pos.promo_savings', 'Promo')}</span>
+                        <span className="font-bold text-emerald-500">−{formatCurrency(promoSavings)}</span>
                     </div>
                 )}
 
-                {/* Manual discount */}
                 {manualDiscount > 0 && (
-                    <div className="flex justify-between text-sm">
+                    <div className="flex items-center gap-2">
                         <span className="text-amber-500 font-medium">{t('pos.manual_discount', 'Discount')}</span>
-                        <span className="font-medium text-amber-500 tabular-nums">-{formatCurrency(manualDiscount)}</span>
+                        <span className="font-bold text-amber-500">−{formatCurrency(manualDiscount)}</span>
                     </div>
                 )}
 
-                {/* Total discount summary */}
                 {totalDiscount > 0 && (
-                    <div className="flex justify-between text-xs pt-2 border-t border-dashed border-zinc-100">
-                        <span className="text-zinc-300">{t('pos.total_savings', 'Total Savings')}</span>
-                        <span className="font-semibold text-emerald-500 tabular-nums">-{formatCurrency(totalDiscount)}</span>
+                    <div className="flex items-center gap-2 ml-auto">
+                        <span className="text-zinc-300">{t('pos.total_savings', 'Saved')}</span>
+                        <span className="font-extrabold text-emerald-500">−{formatCurrency(totalDiscount)}</span>
                     </div>
                 )}
+            </div>
 
-                {/* Grand Total — the hero element */}
-                <div className="flex justify-between items-end pt-4 md:pt-5 mt-2 border-t border-zinc-200">
-                    <span className="text-sm md:text-base font-semibold text-zinc-400 uppercase tracking-widest">
-                        {t('pos.grand_total', 'TOTAL')}
-                    </span>
-                    <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-bold text-zinc-900 tabular-nums tracking-tighter leading-none">
-                        {formatCurrency(grandTotal)}
-                    </span>
-                </div>
+            {/* Grand Total */}
+            <div className="flex items-end justify-between">
+                <span className="text-sm md:text-base font-bold text-zinc-400 uppercase tracking-widest">
+                    {t('pos.grand_total', 'TOTAL')}
+                </span>
+                <span className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black text-zinc-900 tabular-nums tracking-tighter leading-none">
+                    {formatCurrency(grandTotal)}
+                </span>
             </div>
         </div>
     );

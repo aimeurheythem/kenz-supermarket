@@ -6,5 +6,6 @@ interface PortalProps {
 }
 
 export default function Portal({ children }: PortalProps) {
-    return createPortal(children, document.body);
+    const portalRoot = document.getElementById('portal-root') || document.body;
+    return createPortal(children, portalRoot);
 }

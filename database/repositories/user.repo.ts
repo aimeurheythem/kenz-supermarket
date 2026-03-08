@@ -221,4 +221,24 @@ export const UserRepo = {
     async delete(id: number): Promise<void> {
         await execute('UPDATE users SET is_active = 0 WHERE id = ?', [id]);
     },
+
+    /**
+     * Verify a manager/admin PIN for mid-flow authorization.
+     * Iterates all active admin/manager users and returns the first match.
+     */
+    async verifyManagerPin(pin: string): Promise<User | null> {
+        const managers = await query<User & { pin_code: string | null }>(
+            `SELECT ${USER_ALL_COLUMNS} FROM users WHERE role IN ('admin', 'manager') AND is_active = 1 AND pin_code IS NOT NULL AND pin_code != ''`,
+        );
+
+        for (const manager of managers) {
+            if (!manager.pin_code) continue;
+            const isValid = await verifyPin(pin, manager.pin_code);
+            if (isValid) {
+                return stripSensitiveFields(manager);
+            }
+        }
+
+        return null;
+    },
 };

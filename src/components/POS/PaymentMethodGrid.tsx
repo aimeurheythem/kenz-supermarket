@@ -27,13 +27,13 @@ export default function PaymentMethodGrid({ selected, onSelect }: PaymentMethodG
                         type="button"
                         onClick={() => onSelect(value)}
                         className={cn(
-                            'flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all active:scale-[0.97]',
+                            'flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl text-xs font-semibold uppercase tracking-wider transition-all duration-150 active:scale-[0.97]',
                             isSelected
-                                ? 'bg-yellow-400 text-black shadow-sm'
-                                : 'bg-white border border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:text-zinc-700',
+                                ? 'bg-zinc-900 text-white shadow-sm'
+                                : 'bg-zinc-50 border border-zinc-100 text-zinc-400 hover:border-zinc-200 hover:text-zinc-600',
                         )}
                     >
-                        <Icon size={16} strokeWidth={2.5} />
+                        <Icon size={15} strokeWidth={1.5} />
                         <span>{t(labelKey)}</span>
                     </button>
                 );

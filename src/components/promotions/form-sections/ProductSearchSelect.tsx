@@ -23,7 +23,7 @@ interface ProductSearchSelectProps {
 
 // ── Shared style tokens ────────────────────────────────────────────────────
 
-const LABEL_CLASS = 'block text-[11px] font-black uppercase tracking-widest text-zinc-500 mb-1';
+const LABEL_CLASS = 'block text-sm font-medium text-[var(--color-text-muted)] mb-1';
 
 // ── Component ──────────────────────────────────────────────────────────────
 
@@ -138,13 +138,13 @@ export default function ProductSearchSelect({
             {/* Input wrapper */}
             <div className="relative">
                 {/* Search icon */}
-                <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center">
-                    <Search size={15} className="text-zinc-400" strokeWidth={2.5} />
+                <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+                    <Search size={15} className="text-[var(--color-text-placeholder)]" strokeWidth={2.5} />
                 </div>
 
                 {/* Single-select: show selected product inside the input box */}
                 {!multiSelect && selectedIds.length > 0 ? (
-                    <div className="w-full h-14 pl-11 pr-10 rounded-3xl bg-zinc-100/70 border-2 border-yellow-400 text-sm font-bold flex items-center gap-2">
+                    <div className="w-full pl-9 pr-10 py-2 rounded-lg bg-[var(--color-bg-input)] border border-[var(--color-border-hover)] text-sm flex items-center gap-2">
                         <span className="flex-1 truncate text-zinc-800">
                             {selectedProducts[0]?.name ?? '—'}
                         </span>
@@ -170,14 +170,14 @@ export default function ProductSearchSelect({
                         onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
                         onFocus={() => setOpen(true)}
                         placeholder={placeholder}
-                        className="w-full h-14 pl-11 pr-5 rounded-3xl bg-zinc-100/70 border-2 border-zinc-300 font-bold text-sm placeholder:text-zinc-400 focus:outline-none focus:border-yellow-400 transition-colors"
+                        className="w-full pl-9 pr-3 py-2 rounded-lg bg-[var(--color-bg-input)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-placeholder)] focus:outline-none focus:border-[var(--color-border-hover)] focus:ring-1 focus:ring-[var(--color-border-hover)] transition-all"
                     />
                 )}
             </div>
 
             {/* Dropdown */}
             {showDropdown && (
-                <div className="absolute left-0 right-0 mt-1.5 z-50 rounded-2xl border border-zinc-200 bg-white shadow-xl overflow-hidden">
+                <div className="absolute left-0 right-0 mt-1 z-50 rounded-lg border border-[var(--color-border)] bg-white shadow-lg overflow-hidden">
                     {filteredProducts.length === 0 ? (
                         <div className="px-4 py-3 text-xs font-semibold text-zinc-400 text-center">
                             No products found
@@ -194,12 +194,12 @@ export default function ProductSearchSelect({
                                             className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-zinc-50 transition-colors group"
                                         >
                                             {/* Check indicator */}
-                                            <span className={`shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                                            <span className={`shrink-0 w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
                                                 isSelected
-                                                    ? 'bg-yellow-400 border-yellow-400'
-                                                    : 'border-zinc-300 group-hover:border-zinc-400'
+                                                    ? 'bg-[var(--color-border-hover)] border-[var(--color-border-hover)]'
+                                                    : 'border-[var(--color-border)] group-hover:border-[var(--color-border-hover)]'
                                             }`}>
-                                                {isSelected && <Check size={10} strokeWidth={3.5} className="text-white" />}
+                                                {isSelected && <Check size={9} strokeWidth={3} className="text-white" />}
                                             </span>
 
                                             {/* Name */}

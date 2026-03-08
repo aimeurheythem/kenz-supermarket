@@ -24,6 +24,8 @@ import Promotions from './pages/Promotions';
 import Help from './pages/Help';
 import Terms from './pages/Terms';
 import Security from './pages/Security';
+import CashierSettings from './pages/CashierSettings';
+import CashierReports from './pages/CashierReports';
 
 import { useAuthStore } from './stores/useAuthStore';
 import { useSettingsStore } from './stores/useSettingsStore';
@@ -170,6 +172,28 @@ export default function App() {
                                     <div className="h-screen w-screen overflow-hidden bg-primary">
                                         <POS />
                                     </div>
+                                </RequirePermission>
+                            </RequireAuth>
+                        }
+                    />
+
+                    {/* POS sub-pages — No Sidebar */}
+                    <Route
+                        path="/pos/settings"
+                        element={
+                            <RequireAuth>
+                                <RequirePermission permission="use_pos">
+                                    <CashierSettings />
+                                </RequirePermission>
+                            </RequireAuth>
+                        }
+                    />
+                    <Route
+                        path="/pos/reports"
+                        element={
+                            <RequireAuth>
+                                <RequirePermission permission="use_pos">
+                                    <CashierReports />
                                 </RequirePermission>
                             </RequireAuth>
                         }

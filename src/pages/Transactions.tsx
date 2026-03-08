@@ -5,10 +5,18 @@ import { Sale } from '@/lib/types';
 import SaleDetailModal from '@/components/reports/SaleDetailModal';
 import Pagination from '@/components/common/Pagination';
 import { usePagination } from '@/hooks/usePagination';
-import { Filter, Search, ArrowUpRight, ArrowDownLeft, Clock, X } from 'lucide-react';
+import { Filter, Search, ArrowUpRight, ArrowDownLeft, Clock, X, MoreVertical } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { TableSkeletonRows } from '@/components/common/TableSkeleton';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -320,16 +328,31 @@ export default function Transactions() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="flex items-center justify-end rtl:justify-start">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setSelectedSale(sale);
-                                                    }}
-                                                    className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-500 hover:bg-black hover:text-white transition-all"
-                                                >
-                                                    <ArrowUpRight size={16} />
-                                                </button>
+                                            <div className="flex justify-end rtl:justify-start">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <button
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className="p-2 rounded-xl hover:bg-black/5 text-zinc-400 hover:text-black transition-colors focus:outline-none"
+                                                        >
+                                                            <MoreVertical size={18} />
+                                                        </button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-40 rounded-xl border-black/10 bg-white">
+                                                        <DropdownMenuLabel>{t('common.actions', 'Actions')}</DropdownMenuLabel>
+                                                        <DropdownMenuSeparator className="bg-zinc-100" />
+                                                        <DropdownMenuItem
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedSale(sale);
+                                                            }}
+                                                            className="gap-2 cursor-pointer focus:bg-zinc-50"
+                                                        >
+                                                            <ArrowUpRight size={14} />
+                                                            <span>{t('purchases.view_details', 'View Details')}</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                             </div>
                                         </td>
                                     </tr>

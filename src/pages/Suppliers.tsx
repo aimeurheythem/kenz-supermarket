@@ -8,7 +8,7 @@ import {
     Phone,
     Mail,
     MapPin,
-    MoreHorizontal,
+    MoreVertical,
     User,
     Save,
     CreditCard,
@@ -24,6 +24,14 @@ import { useSupplierStore } from '@/stores/useSupplierStore';
 import Button from '@/components/common/Button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DeleteConfirmModal } from '@/components/common/DeleteConfirmModal';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import type { Supplier, SupplierInput } from '@/lib/types';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { FormModal } from '@/components/common/FormModal';
@@ -51,7 +59,6 @@ export default function Suppliers() {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
     const [form, setForm] = useState<SupplierInput>(defaultForm);
-    const [activeMenu, setActiveMenu] = useState<number | null>(null);
     const [isPaymentOpen, setIsPaymentOpen] = useState(false);
     const [paymentAmount, setPaymentAmount] = useState('');
     const [selectedSupplierForPayment, setSelectedSupplierForPayment] = useState<Supplier | null>(null);
@@ -84,7 +91,6 @@ export default function Suppliers() {
             address: supplier.address,
         });
         setIsFormOpen(true);
-        setActiveMenu(null);
     };
 
     const handleDelete = (id: number) => {
@@ -93,7 +99,6 @@ export default function Suppliers() {
             setSupplierToDelete(supplier);
             setIsDeleteModalOpen(true);
         }
-        setActiveMenu(null);
     };
 
     const confirmDelete = () => {
@@ -121,7 +126,6 @@ export default function Suppliers() {
         setSelectedSupplierForPayment(supplier);
         setPaymentAmount('');
         setIsPaymentOpen(true);
-        setActiveMenu(null);
     };
 
     const handlePaymentSubmit = (e: React.FormEvent) => {
@@ -342,44 +346,38 @@ export default function Suppliers() {
                                     </div>
 
                                     <div className="relative">
-                                        <button
-                                            onClick={() =>
-                                                setActiveMenu(activeMenu === supplier.id ? null : supplier.id)
-                                            }
-                                            className="p-1.5 rounded-lg text-zinc-400 hover:text-black hover:bg-zinc-100 transition-colors opacity-0 group-hover:opacity-100"
-                                        >
-                                            <MoreHorizontal size={16} />
-                                        </button>
-
-                                        <AnimatePresence>
-                                            {activeMenu === supplier.id && (
-                                                <motion.div
-                                                    initial={{ opacity: 0, scale: 0.95, y: -5 }}
-                                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                    exit={{ opacity: 0, scale: 0.95, y: -5 }}
-                                                    className="absolute right-0 top-full mt-1 z-20 w-36 rounded-xl bg-white border border-zinc-200 shadow-xl py-1"
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <button className="p-1.5 rounded-lg text-zinc-400 hover:text-black hover:bg-zinc-100 transition-colors opacity-0 group-hover:opacity-100 focus:outline-none">
+                                                    <MoreVertical size={16} />
+                                                </button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-40 rounded-xl border-black/10 bg-white">
+                                                <DropdownMenuLabel>{t('common.actions', 'Actions')}</DropdownMenuLabel>
+                                                <DropdownMenuSeparator className="bg-zinc-100" />
+                                                <DropdownMenuItem
+                                                    onClick={() => handleOpenPayment(supplier)}
+                                                    className="gap-2 cursor-pointer focus:bg-zinc-50"
                                                 >
-                                                    <button
-                                                        onClick={() => handleOpenPayment(supplier)}
-                                                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-black transition-colors"
-                                                    >
-                                                        <CreditCard size={13} /> {t('suppliers.menu_pay')}
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleEdit(supplier)}
-                                                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-black transition-colors"
-                                                    >
-                                                        <Edit2 size={13} /> {t('suppliers.menu_edit')}
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(supplier.id)}
-                                                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-rose-500 hover:bg-rose-50 transition-colors"
-                                                    >
-                                                        <Trash2 size={13} /> {t('suppliers.menu_delete')}
-                                                    </button>
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
+                                                    <CreditCard size={14} />
+                                                    <span>{t('suppliers.menu_pay')}</span>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() => handleEdit(supplier)}
+                                                    className="gap-2 cursor-pointer focus:bg-zinc-50"
+                                                >
+                                                    <Edit2 size={14} />
+                                                    <span>{t('suppliers.menu_edit')}</span>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() => handleDelete(supplier.id)}
+                                                    className="gap-2 text-red-600 focus:text-red-700 focus:bg-red-50 cursor-pointer"
+                                                >
+                                                    <Trash2 size={14} />
+                                                    <span>{t('suppliers.menu_delete')}</span>
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </div>
                                 </div>
 
@@ -421,9 +419,6 @@ export default function Suppliers() {
                         ))}
                     </div>
                 )}
-
-                {/* Close dropdown when clicking outside */}
-                {activeMenu !== null && <div className="fixed inset-0 z-10" onClick={() => setActiveMenu(null)} />}
             </div>
 
             {/* Supplier Form Modal */}

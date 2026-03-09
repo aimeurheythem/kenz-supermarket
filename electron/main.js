@@ -147,7 +147,7 @@ function scannerScript() {
 /** Kill any running scanner process cleanly. */
 function killScanner() {
     if (scannerProc) {
-        try { scannerProc.kill('SIGTERM'); } catch (_) {}
+        try { scannerProc.kill('SIGTERM'); } catch (_) { }
         scannerProc = null;
     }
     scannerSender = null;
@@ -176,7 +176,7 @@ ipcMain.handle('scanner:list-cameras', () => {
             resolve([]);
         });
         // Safety timeout — don't hang the UI
-        setTimeout(() => { try { proc.kill(); } catch (_) {} resolve([]); }, 8000);
+        setTimeout(() => { try { proc.kill(); } catch (_) { } resolve([]); }, 8000);
     });
 });
 
@@ -201,7 +201,7 @@ ipcMain.handle('scanner:start', (event) => {
     );
 
     let stdoutReady = false; // track if Python sent at least one message
-    let stderrBuf   = '';
+    let stderrBuf = '';
 
     // Parse JSON lines from Python stdout
     let buffer = '';
@@ -216,9 +216,9 @@ ipcMain.handle('scanner:start', (event) => {
                 const msg = JSON.parse(trimmed);
                 if (!scannerSender || scannerSender.isDestroyed()) continue;
                 stdoutReady = true;
-                if (msg.status  ) scannerSender.send('scanner:status',  msg.status);
-                if (msg.barcode ) scannerSender.send('scanner:barcode', msg.barcode, msg.format || '');
-                if (msg.error   ) scannerSender.send('scanner:error',   msg.error);
+                if (msg.status) scannerSender.send('scanner:status', msg.status);
+                if (msg.barcode) scannerSender.send('scanner:barcode', msg.barcode, msg.format || '');
+                if (msg.error) scannerSender.send('scanner:error', msg.error);
             } catch (_) { /* bad line — ignore */ }
         }
     });
@@ -245,8 +245,8 @@ ipcMain.handle('scanner:start', (event) => {
             const hint = stderrBuf.includes('pyzbar')
                 ? 'pyzbar not installed. Run: pip install pyzbar'
                 : stderrBuf.includes('cv2') || stderrBuf.includes('opencv')
-                ? 'OpenCV error. Run: pip install opencv-python'
-                : `Camera process exited (code ${code}). Check that the camera is connected.`;
+                    ? 'OpenCV error. Run: pip install opencv-python'
+                    : `Camera process exited (code ${code}). Check that the camera is connected.`;
             scannerSender.send('scanner:error', hint);
         }
         scannerProc = null;
@@ -307,7 +307,7 @@ function createWindow() {
     });
 
     if (isDev) {
-        mainWindow.loadURL('http://localhost:5173');
+        mainWindow.loadURL('http://localhost:5174');
         mainWindow.webContents.openDevTools({ mode: 'detach' });
     } else {
         mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));

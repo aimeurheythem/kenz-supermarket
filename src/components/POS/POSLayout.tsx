@@ -13,6 +13,7 @@ import ClientInfoPanel from './ClientInfoPanel';
 import ProductDetailCard from './ProductDetailCard';
 import NumericKeypad from './NumericKeypad';
 import ActionGrid from './ActionGrid';
+import PaymentMethodsGrid from './PaymentMethodsGrid';
 import ManagerPinDialog from './ManagerPinDialog';
 import DiscountDialog from './DiscountDialog';
 import StockErrorDialog from './StockErrorDialog';
@@ -313,6 +314,75 @@ export default function POSLayout() {
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Unknown error';
             toast.error(t('pos.checkout_error', 'Checkout error: ') + message);
+        }
+    }, [cart, checkout, selectedCustomer, user, loadProducts, refreshTicketNumber, t]);
+
+    const handleCheckoutWithMethod = useCallback(async (method: 'card' | 'mobile') => {
+        if (cart.length === 0) {
+            toast.warning(t('pos.empty_cart_warning', 'Add items to the cart first'));
+            return;
+        }
+        try {
+            const sessionId = useAuthStore.getState().getCurrentSessionId();
+            const sale = await checkout(
+                {
+                    method: method,
+                    customer_name: selectedCustomer?.full_name ?? 'Walk-in Customer',
+                    customer_id: selectedCustomer?.id,
+                },
+                user?.id,
+                sessionId || undefined,
+            );
+            setSelectedCustomer(null);
+            clearTab(activeTabId);
+            loadProducts();
+            refreshTicketNumber();
+            if (sale) {
+                setLastSale(sale);
+                SaleRepo.getItems(sale.id).then((items) => {
+                    setLastSaleItems(items);
+                    setShowReceiptPreview(true);
+                }).catch(() => { });
+            }
+            toast.success(t('pos.sale_with_method', 'Sale completed via {{method}}!', { method }));
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Unknown error';
+            toast.error(t('pos.checkout_error', 'Checkout error: ') + message);
+        }
+    }, [cart, checkout, selectedCustomer, user, loadProducts, refreshTicketNumber, t]);
+
+    const handlePayDebt = useCallback(async () => {
+        if (cart.length === 0) return;
+        if (!selectedCustomer) {
+            toast.warning(t('pos.debt_requires_customer', 'A customer must be selected to record debt.'));
+            return;
+        }
+        try {
+            const sessionId = useAuthStore.getState().getCurrentSessionId();
+            const sale = await checkout(
+                {
+                    method: 'credit',
+                    customer_name: selectedCustomer.full_name,
+                    customer_id: selectedCustomer.id,
+                },
+                user?.id,
+                sessionId || undefined,
+            );
+            setSelectedCustomer(null);
+            clearTab(activeTabId);
+            loadProducts();
+            refreshTicketNumber();
+            if (sale) {
+                setLastSale(sale);
+                SaleRepo.getItems(sale.id).then((items) => {
+                    setLastSaleItems(items);
+                    setShowReceiptPreview(true);
+                }).catch(() => { });
+            }
+            toast.success(t('pos.debt_recorded', 'Sale recorded as debt for {{name}}', { name: selectedCustomer.full_name }));
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Unknown error';
+            toast.error(t('pos.debt_error', 'Credit/Debt error: ') + message);
         }
     }, [cart, checkout, selectedCustomer, user, loadProducts, refreshTicketNumber, t]);
 
@@ -651,7 +721,7 @@ export default function POSLayout() {
 
                 {/* RIGHT PANEL — Actions, Checkout */}
                 <aside className="hidden lg:flex flex-col bg-zinc-950 overflow-hidden" aria-label="Actions and checkout">
-                    {/* Action Grid */}
+                    {/* Operation Actions */}
                     <ActionGrid
                         onVoid={handleVoid}
                         onDiscount={handleDiscount}
@@ -661,27 +731,28 @@ export default function POSLayout() {
                         onEndShift={() => setShowEndShiftConfirm(true)}
                     />
 
-                    <div className="mt-auto">
-                        {/* Split Payment */}
-                        <button
-                            onClick={() => {
+                    {/* Payment Actions */}
+                    <div className="flex-1 mt-auto border-t border-zinc-900 bg-zinc-950 flex flex-col">
+                        <PaymentMethodsGrid
+                            onPayCash={handleCheckout}
+                            onPayCard={() => handleCheckoutWithMethod('card')}
+                            onPayMobile={() => handleCheckoutWithMethod('mobile')}
+                            onPayDebt={handlePayDebt}
+                            onSplitPayment={() => {
                                 if (cart.length === 0) {
                                     toast.warning(t('pos.empty_cart_warning', 'Add items to the cart first'));
                                     return;
                                 }
                                 setShowSplitPayment(true);
                             }}
-                            disabled={isCheckingOut}
-                            className="w-full py-10 xl:py-16 border-b border-white/[0.06] bg-zinc-900 hover:bg-zinc-800 text-white text-sm lg:text-base xl:text-lg font-black uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
-                        >
-                            {t('pos.split_payment', 'Split Payment')}
-                        </button>
+                            isProcessing={isCheckingOut}
+                        />
 
-                        {/* Checkout */}
+                        {/* Huge primary checkout button — Minimal style */}
                         <button
                             onClick={handleCheckout}
-                            disabled={isCheckingOut}
-                            className="w-full py-10 xl:py-16 bg-emerald-600 hover:bg-emerald-500 text-white text-sm lg:text-base xl:text-lg font-black uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
+                            disabled={isCheckingOut || cart.length === 0}
+                            className="w-full py-16 xl:py-24 bg-emerald-600 hover:bg-emerald-500 text-white text-xl lg:text-2xl xl:text-4xl font-black uppercase tracking-[0.2em] transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed border-t border-white/10"
                         >
                             {isCheckingOut ? t('pos.processing', 'Processing...') : t('pos.checkout', 'CHECKOUT')}
                         </button>

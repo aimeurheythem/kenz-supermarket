@@ -44,7 +44,7 @@ export default function ActionGrid({
     ];
 
     return (
-        <div className="grid grid-cols-2 auto-rows-fr gap-2 p-2 2xl:gap-3 2xl:p-3 flex-1">
+        <div className="grid grid-cols-2 auto-rows-fr gap-2 p-2 2xl:gap-3 2xl:p-3 flex-1 h-full min-h-fit">
             {actions.map((action) => (
                 <div key={action.key} className={`${action.fullWidth ? 'col-span-2' : ''} flex`}>
                     <ActionButton

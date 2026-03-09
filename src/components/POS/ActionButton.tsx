@@ -50,7 +50,7 @@ export default function ActionButton({
             onClick={onClick}
             disabled={disabled}
             aria-label={shortcutKey ? `${label} (${shortcutKey})` : label}
-            className={`relative flex items-center justify-center gap-2 lg:gap-3 w-full flex-1 min-h-0 border-b border-white/[0.06] text-sm lg:text-base xl:text-lg font-black uppercase tracking-wider transition-all duration-150 active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed ${style.bg}`}
+            className={`relative flex items-center justify-center gap-2 lg:gap-3 w-full flex-1 min-h-[60px] lg:min-h-[80px] xl:min-h-[100px] border-b border-white/[0.06] text-sm lg:text-base xl:text-lg font-black uppercase tracking-wider transition-all duration-150 active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed ${style.bg}`}
         >
             {badge != null && (
                 <span className="absolute top-1.5 left-2 lg:left-3 text-[9px] lg:text-[10px] font-semibold text-white/70 bg-white/20 rounded-full px-1.5 lg:px-2 py-0.5 leading-none">

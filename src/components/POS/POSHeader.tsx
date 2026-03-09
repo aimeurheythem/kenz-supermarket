@@ -1,4 +1,4 @@
-import { Clock, LogOut, Menu, ScanSearch, TrendingUp, SlidersHorizontal, Gift } from 'lucide-react';
+import { Clock, LogOut, Grid3X3, ScanSearch, TrendingUp, SlidersHorizontal, Gift } from 'lucide-react';
 import { useLiveClock } from '@/hooks/useLiveClock';
 import { useTranslation } from 'react-i18next';
 import {
@@ -6,7 +6,6 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-    DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 
 interface POSHeaderProps {
@@ -77,32 +76,67 @@ export default function POSHeader({
                     </div>
                 </div>
 
-                {/* Dropdown Menu for secondary actions */}
+                {/* Dropdown Menu for secondary actions - Google Apps Style */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <button className="flex items-center justify-center px-4 hover:bg-zinc-50 border-l border-zinc-100 transition-colors">
-                            <Menu size={18} strokeWidth={1.5} className="text-zinc-500" />
+                        <button className="flex items-center justify-center px-8 h-full hover:bg-zinc-50 border-x border-zinc-100 transition-all group">
+                            <Grid3X3 size={24} strokeWidth={1.5} className="text-zinc-400 group-hover:text-zinc-900 transition-colors" />
                         </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56">
-                        <DropdownMenuItem onClick={onPriceCheck}>
-                            <ScanSearch className="mr-2 h-4 w-4" />
-                            <span>{t('pos.action.price_check', 'Price Check')}</span>
-                            <span className="ml-auto text-[10px] text-zinc-400 font-mono">F11</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={onReport}>
-                            <TrendingUp className="mr-2 h-4 w-4" />
-                            <span>{t('pos.action.report', 'Daily Report')}</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={onSettings}>
-                            <SlidersHorizontal className="mr-2 h-4 w-4" />
-                            <span>{t('pos.action.settings', 'Settings')}</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={onGiftCard}>
-                            <Gift className="mr-2 h-4 w-4" />
-                            <span>{t('pos.action.gift', 'Gift Card')}</span>
-                        </DropdownMenuItem>
+                    <DropdownMenuContent align="end" className="w-[250px] p-4 bg-white border-zinc-200 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] rounded-md">
+                        <div className="px-1 mb-4 flex justify-between items-center text-zinc-400">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.2em]">{t('pos.header.quick_actions', 'Quick Actions')}</span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <DropdownMenuItem
+                                onClick={onPriceCheck}
+                                className="flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-sky-50 hover:bg-sky-100 transition-all border-0 focus:bg-sky-100 cursor-pointer group/item aspect-square outline-none"
+                            >
+                                <div className="text-sky-600 transition-all group-hover/item:scale-110">
+                                    <ScanSearch size={32} strokeWidth={1.5} />
+                                </div>
+                                <span className="text-xs font-bold text-sky-900/80">
+                                    {t('pos.action.price_check', 'Price Check')}
+                                </span>
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem
+                                onClick={onReport}
+                                className="flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition-all border-0 focus:bg-emerald-100 cursor-pointer group/item aspect-square outline-none"
+                            >
+                                <div className="text-emerald-600 transition-all group-hover/item:scale-110">
+                                    <TrendingUp size={32} strokeWidth={1.5} />
+                                </div>
+                                <span className="text-xs font-bold text-emerald-900/80">
+                                    {t('pos.action.report', 'Reports')}
+                                </span>
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem
+                                onClick={onSettings}
+                                className="flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-indigo-50 hover:bg-indigo-100 transition-all border-0 focus:bg-indigo-100 cursor-pointer group/item aspect-square outline-none"
+                            >
+                                <div className="text-indigo-600 transition-all group-hover/item:scale-110">
+                                    <SlidersHorizontal size={32} strokeWidth={1.5} />
+                                </div>
+                                <span className="text-xs font-bold text-indigo-900/80">
+                                    {t('pos.action.settings', 'Settings')}
+                                </span>
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem
+                                onClick={onGiftCard}
+                                className="flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-rose-50 hover:bg-rose-100 transition-all border-0 focus:bg-rose-100 cursor-pointer group/item aspect-square outline-none"
+                            >
+                                <div className="text-rose-600 transition-all group-hover/item:scale-110">
+                                    <Gift size={32} strokeWidth={1.5} />
+                                </div>
+                                <span className="text-xs font-bold text-rose-900/80">
+                                    {t('pos.action.gift', 'Gift Cards')}
+                                </span>
+                            </DropdownMenuItem>
+                        </div>
                     </DropdownMenuContent>
                 </DropdownMenu>
 

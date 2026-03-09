@@ -37,23 +37,24 @@ export default function ActionGrid({
 
     const actions = [
         { icon: Ban, label: t('pos.action.void', 'Void'), key: 'F7', onClick: onVoid, variant: 'danger' as const },
+        { icon: RefreshCcw, label: t('pos.action.return', 'Return'), key: 'F12', onClick: onReturn, variant: 'warning' as const },
         { icon: Percent, label: t('pos.action.discount', 'Discount'), key: 'F8', onClick: onDiscount, variant: 'warning' as const },
         { icon: Printer, label: t('pos.action.reprint', 'Reprint'), key: 'F9', onClick: onReprintReceipt, variant: 'default' as const },
-        { icon: Archive, label: t('pos.action.drawer', 'Drawer'), key: 'F10', onClick: onOpenDrawer, variant: 'default' as const },
-        { icon: RefreshCcw, label: t('pos.action.return', 'Return'), key: 'F12', onClick: onReturn, variant: 'warning' as const },
+        { icon: Archive, label: t('pos.action.drawer', 'Drawer'), key: 'F10', onClick: onOpenDrawer, variant: 'default' as const, fullWidth: true },
     ];
 
     return (
-        <div className="flex flex-col flex-1 min-h-0">
+        <div className="grid grid-cols-2 auto-rows-fr gap-2 p-2 2xl:gap-3 2xl:p-3 flex-1">
             {actions.map((action) => (
-                <ActionButton
-                    key={action.key}
-                    icon={action.icon}
-                    label={action.label}
-                    shortcutKey={action.key}
-                    onClick={action.onClick}
-                    variant={action.variant}
-                />
+                <div key={action.key} className={`${action.fullWidth ? 'col-span-2' : ''} flex`}>
+                    <ActionButton
+                        icon={action.icon}
+                        label={action.label}
+                        shortcutKey={action.key}
+                        onClick={action.onClick}
+                        variant={action.variant}
+                    />
+                </div>
             ))}
         </div>
     );

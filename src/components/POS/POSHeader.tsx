@@ -1,6 +1,13 @@
-import { Clock, LogOut } from 'lucide-react';
+import { Clock, LogOut, Menu, ScanSearch, TrendingUp, SlidersHorizontal, Gift } from 'lucide-react';
 import { useLiveClock } from '@/hooks/useLiveClock';
 import { useTranslation } from 'react-i18next';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+    DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 
 interface POSHeaderProps {
     storeName: string;
@@ -8,9 +15,23 @@ interface POSHeaderProps {
     sessionActive: boolean;
     shiftStartTime?: string; // ISO timestamp of shift start
     onEndShift?: () => void;
+    onPriceCheck?: () => void;
+    onReport?: () => void;
+    onSettings?: () => void;
+    onGiftCard?: () => void;
 }
 
-export default function POSHeader({ storeName, cashierName, sessionActive, shiftStartTime, onEndShift }: POSHeaderProps) {
+export default function POSHeader({
+    storeName,
+    cashierName,
+    sessionActive,
+    shiftStartTime,
+    onEndShift,
+    onPriceCheck,
+    onReport,
+    onSettings,
+    onGiftCard,
+}: POSHeaderProps) {
     const { date, time } = useLiveClock();
     const { t } = useTranslation();
 
@@ -55,10 +76,40 @@ export default function POSHeader({ storeName, cashierName, sessionActive, shift
                         <div className="text-[10px] text-zinc-400 font-medium">{date}</div>
                     </div>
                 </div>
+
+                {/* Dropdown Menu for secondary actions */}
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <button className="flex items-center justify-center px-4 hover:bg-zinc-50 border-l border-zinc-100 transition-colors">
+                            <Menu size={18} strokeWidth={1.5} className="text-zinc-500" />
+                        </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuItem onClick={onPriceCheck}>
+                            <ScanSearch className="mr-2 h-4 w-4" />
+                            <span>{t('pos.action.price_check', 'Price Check')}</span>
+                            <span className="ml-auto text-[10px] text-zinc-400 font-mono">F11</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={onReport}>
+                            <TrendingUp className="mr-2 h-4 w-4" />
+                            <span>{t('pos.action.report', 'Daily Report')}</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={onSettings}>
+                            <SlidersHorizontal className="mr-2 h-4 w-4" />
+                            <span>{t('pos.action.settings', 'Settings')}</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={onGiftCard}>
+                            <Gift className="mr-2 h-4 w-4" />
+                            <span>{t('pos.action.gift', 'Gift Card')}</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
                 {onEndShift && (
                     <button
                         onClick={onEndShift}
-                        className="flex items-center gap-2 px-4 bg-red-600 hover:bg-red-700 text-white text-xs font-medium transition-colors"
+                        className="flex items-center gap-2 px-4 bg-red-600 hover:bg-red-700 text-white text-xs font-medium transition-colors border-l border-red-500"
                         title={t('pos.action.end_shift', 'End Shift')}
                     >
                         <LogOut size={15} strokeWidth={1.5} />

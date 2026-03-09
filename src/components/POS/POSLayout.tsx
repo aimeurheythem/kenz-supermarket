@@ -16,7 +16,6 @@ import ActionGrid from './ActionGrid';
 import ManagerPinDialog from './ManagerPinDialog';
 import DiscountDialog from './DiscountDialog';
 import StockErrorDialog from './StockErrorDialog';
-import HoldRecallDialog from './HoldRecallDialog';
 import ReturnDialog from './ReturnDialog';
 import SplitPaymentPanel from './SplitPaymentPanel';
 import ReceiptPreview from './ReceiptPreview';
@@ -65,9 +64,10 @@ export default function POSLayout() {
     const cartTotalWithPromos = useSaleStore(selectCartTotalWithPromotions);
     const manualDiscountTotal = useSaleStore(selectManualDiscountTotal);
     const { setItemManualDiscount, clearItemManualDiscount, setCartDiscount, clearCartDiscount, checkout } = useSaleStore();
-    const { setSelectedProduct, holdTransaction, getHoldCount } = usePOSStore();
+    const { setSelectedProduct, switchTab, clearTab } = usePOSStore();
+    const tabs = usePOSStore((s) => s.tabs);
+    const activeTabId = usePOSStore((s) => s.activeTabId);
     const selectedProduct = usePOSStore((s) => s.selectedProduct);
-    const heldTransactions = usePOSStore((s) => s.heldTransactions);
     const keypadValue = usePOSStore((s) => s.keypadValue);
     const { appendKeypad, clearKeypad, backspaceKeypad } = usePOSStore();
     const { requestAuth } = useManagerAuth();
@@ -87,7 +87,6 @@ export default function POSLayout() {
     const [discountProductId, setDiscountProductId] = useState<number | null>(null);
     const [showEndShiftConfirm, setShowEndShiftConfirm] = useState(false);
     const [showReturnDialog, setShowReturnDialog] = useState(false);
-    const [showHoldRecallDialog, setShowHoldRecallDialog] = useState(false);
     const [returnManagerId, setReturnManagerId] = useState<number | null>(null);
     const [showSplitPayment, setShowSplitPayment] = useState(false);
     const [lastSale, setLastSale] = useState<Sale | null>(null);
@@ -152,64 +151,30 @@ export default function POSLayout() {
         [addToCart, setSelectedProduct],
     );
 
+    // === Multi-Cart Tab Switcher ===
+    const handleTabSwitch = useCallback((tabId: string) => {
+        if (tabId === activeTabId) return;
+
+        const newTab = switchTab(tabId, {
+            cart,
+            customer: selectedCustomer,
+            promotionResult,
+            cartDiscount: useSaleStore.getState().cartDiscount
+        });
+
+        if (newTab) {
+            useSaleStore.setState({
+                cart: newTab.cart,
+                promotionResult: newTab.promotionResult,
+                cartDiscount: newTab.cartDiscount,
+            });
+            setSelectedCustomer(newTab.customer);
+        }
+    }, [activeTabId, cart, selectedCustomer, promotionResult, switchTab]);
+
     // === Action handlers for ActionGrid ===
-    const holdCount = getHoldCount(user?.id ?? 0);
     const closeCashierSession = useAuthStore((s) => s.closeCashierSession);
     const authLogout = useAuthStore((s) => s.logout);
-
-    const handleHold = useCallback(() => {
-        if (cart.length === 0) {
-            toast.warning(t('pos.empty_cart_warning', 'Cart is empty'));
-            return;
-        }
-        const success = holdTransaction(
-            cart,
-            selectedCustomer,
-            promotionResult,
-            null, // cartDiscount
-            usePOSStore.getState().nextTicketNumber,
-            user?.id ?? 0,
-        );
-        if (success) {
-            clearCart();
-            setSelectedCustomer(null);
-            toast.success(t('pos.sale_held', 'Sale held'));
-        } else {
-            toast.error(t('pos.max_holds', 'Maximum 5 holds reached'));
-        }
-    }, [cart, selectedCustomer, promotionResult, user, holdTransaction, clearCart, t]);
-
-    const handleRecall = useCallback(() => {
-        setShowHoldRecallDialog(true);
-    }, []);
-
-    const handleRecallTransaction = useCallback((id: string) => {
-        if (cart.length > 0) {
-            const confirmed = window.confirm(t('pos.recall_replace_warning', 'Current cart is not empty. Replace with held transaction?'));
-            if (!confirmed) return;
-        }
-        const held = usePOSStore.getState().recallTransaction(id);
-        if (held) {
-            // Directly set the cart state with the held items to avoid async race conditions
-            useSaleStore.setState({
-                cart: held.cart.map((item) => ({
-                    product: item.product,
-                    quantity: item.quantity,
-                    discount: item.discount ?? 0,
-                })),
-                promotionResult: held.promotionResult ?? null,
-                cartDiscount: held.cartDiscount ?? null,
-            });
-            setSelectedCustomer(held.customer);
-            setShowHoldRecallDialog(false);
-            toast.success(t('pos.sale_recalled', 'Sale recalled'));
-        }
-    }, [cart, setSelectedCustomer, t]);
-
-    const handleDeleteHeld = useCallback((id: string) => {
-        usePOSStore.getState().removeHeld(id);
-        toast.info(t('pos.hold_deleted', 'Held transaction deleted'));
-    }, [t]);
 
     const handleVoid = useCallback(async () => {
         if (cart.length === 0) return;
@@ -217,11 +182,12 @@ export default function POSLayout() {
         if (result.authorized) {
             clearCart();
             setSelectedCustomer(null);
+            clearTab(activeTabId);
             toast.success(t('pos.sale_voided', 'Sale voided'), {
                 description: t('pos.authorized_by', 'Authorized by {{name}}', { name: result.managerName }),
             });
         }
-    }, [cart, requestAuth, clearCart, t]);
+    }, [cart, requestAuth, clearCart, clearTab, activeTabId, t]);
 
     const handleDiscount = useCallback(() => {
         setDiscountScope('cart');
@@ -332,6 +298,7 @@ export default function POSLayout() {
                 sessionId || undefined,
             );
             setSelectedCustomer(null);
+            clearTab(activeTabId);
             loadProducts();
             refreshTicketNumber();
             // Track last sale for reprint & show receipt
@@ -363,6 +330,7 @@ export default function POSLayout() {
             );
             setSelectedCustomer(null);
             setShowSplitPayment(false);
+            clearTab(activeTabId);
             loadProducts();
             refreshTicketNumber();
             // Track last sale for reprint & show receipt
@@ -413,8 +381,12 @@ export default function POSLayout() {
 
     // Keyboard shortcuts
     useKeyboardShortcuts({
-        onHold: handleHold,
-        onRecall: handleRecall,
+        onTab1: () => handleTabSwitch('tab-1'),
+        onTab2: () => handleTabSwitch('tab-2'),
+        onTab3: () => handleTabSwitch('tab-3'),
+        onTab4: () => handleTabSwitch('tab-4'),
+        onTab5: () => handleTabSwitch('tab-5'),
+        onTab6: () => handleTabSwitch('tab-6'),
         onVoid: handleVoid,
         onDiscount: handleDiscount,
         onReprint: handleReprintReceipt,
@@ -445,6 +417,10 @@ export default function POSLayout() {
                 sessionActive={!!currentSession?.session}
                 shiftStartTime={currentSession?.session?.login_time}
                 onEndShift={() => setShowEndShiftConfirm(true)}
+                onPriceCheck={() => searchInputRef.current?.focus()}
+                onReport={() => navigate('/pos/reports')}
+                onSettings={() => navigate('/pos/settings')}
+                onGiftCard={() => toast.info(t('pos.gift_card_not_available', 'Gift card feature is not available yet'))}
             />
 
             {/* Main 3-column grid — stacks on small screens, adapts at every breakpoint */}
@@ -547,9 +523,42 @@ export default function POSLayout() {
                         </div>
                     )}
 
-                    {/* Placeholder for future content (was NumericKeypad) */}
-                    <div className="shrink-0 min-h-[50px]">
-                        {/* NO CONTENT FOR NOW */}
+                    {/* 6 Multi-Cart Tabs */}
+                    <div className="shrink-0 bg-white border-t border-zinc-100 p-2 lg:p-3 overflow-x-auto">
+                        <div className="flex gap-2 lg:grid lg:grid-cols-3 xl:grid-cols-6 min-w-max lg:min-w-0">
+                            {Object.values(tabs).map(tab => {
+                                const isActive = tab.id === activeTabId;
+                                const tabCart = isActive ? cart : tab.cart;
+                                const itemCount = tabCart.reduce((sum, item) => sum + item.quantity, 0);
+                                const subtotal = tabCart.reduce((sum, item) => sum + (item.product.selling_price * item.quantity - (item.discount || 0)), 0);
+
+                                return (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => handleTabSwitch(tab.id)}
+                                        className={`flex flex-col justify-between p-3 min-h-[75px] xl:min-h-[85px] text-left transition-all duration-200 active:brightness-95 rounded-lg border shadow-sm ${isActive
+                                            ? 'bg-zinc-900 border-zinc-800 ring-2 ring-emerald-500/20'
+                                            : 'bg-zinc-100/80 hover:bg-zinc-200 border-zinc-200/50 hover:border-zinc-300'
+                                            }`}
+                                    >
+                                        <div className="flex justify-between w-full items-start">
+                                            <span className={`text-[12px] font-bold uppercase tracking-wider ${isActive ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                                                [{`F${tab.id.split('-')[1]}`}] {tab.name}
+                                            </span>
+                                            {itemCount > 0 && (
+                                                <span className={`text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold tabular-nums ${isActive ? 'bg-emerald-500 text-white' : 'bg-zinc-900 text-white'
+                                                    }`}>
+                                                    {itemCount}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className={`text-sm lg:text-base font-black tabular-nums tracking-tight mt-auto pt-1 ${isActive ? 'text-white' : 'text-zinc-900'}`}>
+                                            {itemCount > 0 ? formatCurrency(subtotal) : 'Total: 0.00'}
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
                 </aside>
 
@@ -644,20 +653,12 @@ export default function POSLayout() {
                 <aside className="hidden lg:flex flex-col bg-zinc-950 overflow-hidden" aria-label="Actions and checkout">
                     {/* Action Grid */}
                     <ActionGrid
-                        holdCount={holdCount}
-                        maxHolds={5}
-                        onHold={handleHold}
-                        onRecall={handleRecall}
                         onVoid={handleVoid}
                         onDiscount={handleDiscount}
                         onReprintReceipt={handleReprintReceipt}
                         onOpenDrawer={handleOpenDrawer}
-                        onPriceCheck={() => searchInputRef.current?.focus()}
                         onReturn={handleReturn}
-                        onDailyReport={() => navigate('/pos/reports')}
-                        onSettings={() => navigate('/pos/settings')}
                         onEndShift={() => setShowEndShiftConfirm(true)}
-                        onGiftCard={() => toast.info(t('pos.gift_card_not_available', 'Gift card feature is not available yet'))}
                     />
 
                     <div className="mt-auto">
@@ -706,15 +707,6 @@ export default function POSLayout() {
                 maxAmount={discountMaxAmount}
                 onApply={handleApplyDiscount}
                 onClear={handleClearDiscount}
-            />
-
-            <HoldRecallDialog
-                isOpen={showHoldRecallDialog}
-                onClose={() => setShowHoldRecallDialog(false)}
-                heldTransactions={heldTransactions}
-                onRecall={handleRecallTransaction}
-                onDelete={handleDeleteHeld}
-                formatCurrency={formatCurrency}
             />
 
             <ReturnDialog

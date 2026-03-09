@@ -455,17 +455,14 @@ export interface ManualDiscount {
     authorizedBy?: number;   // manager user_id if above threshold
 }
 
-/** A parked/held transaction (session-scoped, in-memory) */
-export interface HeldTransaction {
-    id: string;              // crypto.randomUUID()
-    ticketNumber: number;
+/** A tab slot containing a parked cart (session-scoped, active) */
+export interface CartTab {
+    id: string;              // e.g. 'tab-1'
+    name: string;            // e.g. 'Tab 1'
     cart: CartItem[];
     customer: Customer | null;
     promotionResult: PromotionApplicationResult | null;
     cartDiscount: ManualDiscount | null;
-    heldAt: string;          // ISO timestamp
-    cashierId: number;
-    note?: string;
 }
 
 /** Item selection for a return/refund */

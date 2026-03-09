@@ -3,16 +3,24 @@ import type {
     Product,
     Customer,
     CartItem,
-    HeldTransaction,
+    CartTab,
     ManualDiscount,
     PromotionApplicationResult,
 } from '@/lib/types';
 
-const MAX_HOLDS = 5;
+const INITIAL_TABS: Record<string, CartTab> = {
+    'tab-1': { id: 'tab-1', name: 'Tab 1', cart: [], customer: null, promotionResult: null, cartDiscount: null },
+    'tab-2': { id: 'tab-2', name: 'Tab 2', cart: [], customer: null, promotionResult: null, cartDiscount: null },
+    'tab-3': { id: 'tab-3', name: 'Tab 3', cart: [], customer: null, promotionResult: null, cartDiscount: null },
+    'tab-4': { id: 'tab-4', name: 'Tab 4', cart: [], customer: null, promotionResult: null, cartDiscount: null },
+    'tab-5': { id: 'tab-5', name: 'Tab 5', cart: [], customer: null, promotionResult: null, cartDiscount: null },
+    'tab-6': { id: 'tab-6', name: 'Tab 6', cart: [], customer: null, promotionResult: null, cartDiscount: null },
+};
 
 interface POSStore {
-    // Held transactions (session-scoped, max 5)
-    heldTransactions: HeldTransaction[];
+    // Active tabs
+    tabs: Record<string, CartTab>;
+    activeTabId: string;
 
     // Product detail card
     selectedProduct: Product | null;
@@ -28,17 +36,11 @@ interface POSStore {
     nextTicketNumber: number;
 
     // Actions
-    holdTransaction: (
-        cart: CartItem[],
-        customer: Customer | null,
-        promotionResult: PromotionApplicationResult | null,
-        cartDiscount: ManualDiscount | null,
-        ticketNumber: number,
-        cashierId: number,
-    ) => boolean;
-    recallTransaction: (id: string) => HeldTransaction | null;
-    removeHeld: (id: string) => void;
-    getHoldCount: (cashierId: number) => number;
+    switchTab: (
+        tabId: string,
+        currentCartState: Omit<CartTab, 'id' | 'name'>
+    ) => CartTab | null;
+    clearTab: (tabId: string) => void;
 
     setSelectedProduct: (product: Product | null) => void;
 
@@ -52,47 +54,47 @@ interface POSStore {
 }
 
 export const usePOSStore = create<POSStore>((set, get) => ({
-    heldTransactions: [],
+    tabs: INITIAL_TABS,
+    activeTabId: 'tab-1',
     selectedProduct: null,
     keypadValue: '',
     keypadMode: 'product_code',
     returnMode: false,
     nextTicketNumber: 1,
 
-    holdTransaction: (cart, customer, promotionResult, cartDiscount, ticketNumber, cashierId) => {
-        const { heldTransactions } = get();
-        const cashierHolds = heldTransactions.filter((h) => h.cashierId === cashierId);
-        if (cashierHolds.length >= MAX_HOLDS) return false;
+    switchTab: (tabId, currentCartState) => {
+        const { tabs, activeTabId } = get();
+        if (tabId === activeTabId) return null; // No change
 
-        const held: HeldTransaction = {
-            id: crypto.randomUUID(),
-            ticketNumber,
-            cart: [...cart],
-            customer,
-            promotionResult,
-            cartDiscount,
-            heldAt: new Date().toISOString(),
-            cashierId,
+        // Save current state to the active tab
+        const updatedTabs = {
+            ...tabs,
+            [activeTabId]: {
+                ...tabs[activeTabId],
+                cart: [...currentCartState.cart],
+                customer: currentCartState.customer,
+                promotionResult: currentCartState.promotionResult,
+                cartDiscount: currentCartState.cartDiscount,
+            },
         };
 
-        set({ heldTransactions: [...heldTransactions, held] });
-        return true;
+        set({
+            tabs: updatedTabs,
+            activeTabId: tabId,
+        });
+
+        // Return the required state for the newly activated tab
+        return updatedTabs[tabId];
     },
 
-    recallTransaction: (id) => {
-        const { heldTransactions } = get();
-        const found = heldTransactions.find((h) => h.id === id);
-        if (!found) return null;
-        set({ heldTransactions: heldTransactions.filter((h) => h.id !== id) });
-        return found;
-    },
-
-    removeHeld: (id) => {
-        set({ heldTransactions: get().heldTransactions.filter((h) => h.id !== id) });
-    },
-
-    getHoldCount: (cashierId) => {
-        return get().heldTransactions.filter((h) => h.cashierId === cashierId).length;
+    clearTab: (tabId) => {
+        const { tabs } = get();
+        set({
+            tabs: {
+                ...tabs,
+                [tabId]: { id: tabId, name: tabs[tabId].name, cart: [], customer: null, promotionResult: null, cartDiscount: null },
+            },
+        });
     },
 
     setSelectedProduct: (product) => set({ selectedProduct: product }),

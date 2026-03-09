@@ -2,33 +2,37 @@
 import { useEffect, useCallback } from 'react';
 
 export interface POSShortcutHandlers {
-    onHold: () => void;          // F1
-    onRecall: () => void;        // F2
-    onVoid: () => void;          // F3
-    onDiscount: () => void;      // F4
-    onReprint: () => void;       // F5
-    onDrawer: () => void;        // F6
-    onPriceCheck: () => void;    // F7
-    onReturn: () => void;        // F8
-    onReport: () => void;        // F9
-    onSettings: () => void;      // F10
-    onEndShift: () => void;      // F11
-    onGiftCard: () => void;      // F12
+    onTab1?: () => void;         // F1
+    onTab2?: () => void;         // F2
+    onTab3?: () => void;         // F3
+    onTab4?: () => void;         // F4
+    onTab5?: () => void;         // F5
+    onTab6?: () => void;         // F6
+    onVoid: () => void;          // F7
+    onDiscount: () => void;      // F8
+    onReprint: () => void;       // F9
+    onDrawer: () => void;        // F10
+    onPriceCheck: () => void;    // F11
+    onReturn: () => void;        // F12
+    onReport: () => void;
+    onSettings: () => void;
+    onEndShift: () => void;
+    onGiftCard: () => void;
 }
 
 const KEY_MAP: Record<string, keyof POSShortcutHandlers> = {
-    F1: 'onHold',
-    F2: 'onRecall',
-    F3: 'onVoid',
-    F4: 'onDiscount',
-    F5: 'onReprint',
-    F6: 'onDrawer',
-    F7: 'onPriceCheck',
-    F8: 'onReturn',
-    F9: 'onReport',
-    F10: 'onSettings',
-    F11: 'onEndShift',
-    F12: 'onGiftCard',
+    F1: 'onTab1',
+    F2: 'onTab2',
+    F3: 'onTab3',
+    F4: 'onTab4',
+    F5: 'onTab5',
+    F6: 'onTab6',
+    F7: 'onVoid',
+    F8: 'onDiscount',
+    F9: 'onReprint',
+    F10: 'onDrawer',
+    F11: 'onPriceCheck',
+    F12: 'onReturn',
 };
 
 /**

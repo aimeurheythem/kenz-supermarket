@@ -340,7 +340,7 @@ export default function POSLayout() {
                 SaleRepo.getItems(sale.id).then((items) => {
                     setLastSaleItems(items);
                     setShowReceiptPreview(true);
-                }).catch(() => {});
+                }).catch(() => { });
             }
             toast.success(t('pos.sale_complete', 'Sale complete!'));
         } catch (err: unknown) {
@@ -448,7 +448,7 @@ export default function POSLayout() {
             />
 
             {/* Main 3-column grid — stacks on small screens, adapts at every breakpoint */}
-            <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[1fr_2fr] lg:grid-cols-[2fr_3fr_minmax(200px,1fr)] xl:grid-cols-[2fr_3fr_minmax(260px,1fr)] gap-0">
+            <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[1fr_2fr] lg:grid-cols-[2fr_3fr_minmax(280px,1fr)] xl:grid-cols-[2fr_3fr_minmax(380px,1fr)] gap-0">
                 {/* LEFT PANEL — Product catalog (40%) */}
                 <aside className="hidden lg:flex flex-col border-r border-zinc-100 bg-zinc-950 overflow-hidden" aria-label="Product catalog">
                     {/* Search bar */}
@@ -547,15 +547,9 @@ export default function POSLayout() {
                         </div>
                     )}
 
-                    {/* NumericKeypad */}
-                    <div className="shrink-0">
-                        <NumericKeypad
-                            value={keypadValue}
-                            onDigit={appendKeypad}
-                            onBackspace={backspaceKeypad}
-                            onClear={clearKeypad}
-                            onConfirm={handleKeypadConfirm}
-                        />
+                    {/* Placeholder for future content (was NumericKeypad) */}
+                    <div className="shrink-0 min-h-[50px]">
+                        {/* NO CONTENT FOR NOW */}
                     </div>
                 </aside>
 
@@ -567,7 +561,7 @@ export default function POSLayout() {
                             customer={selectedCustomer}
                             onSearch={() => setShowCustomerSearch(true)}
                             onClear={() => setSelectedCustomer(null)}
-                            onEdit={() => {/* TODO: open edit modal */}}
+                            onEdit={() => {/* TODO: open edit modal */ }}
                             onAddNew={() => setShowAddCustomer(true)}
                         />
                     </div>
@@ -609,6 +603,17 @@ export default function POSLayout() {
                         grandTotal={cartTotalWithPromos + cartTotal * vatRate - manualDiscountTotal}
                         formatCurrency={formatCurrency}
                     />
+
+                    {/* NumericKeypad (Moved from left panel) */}
+                    <div className="shrink-0 bg-white border-t border-zinc-100 hidden md:block">
+                        <NumericKeypad
+                            value={keypadValue}
+                            onDigit={appendKeypad}
+                            onBackspace={backspaceKeypad}
+                            onClear={clearKeypad}
+                            onConfirm={handleKeypadConfirm}
+                        />
+                    </div>
 
                     {/* Mobile/tablet checkout — visible when right panel is hidden */}
                     <div className="lg:hidden p-3 bg-white border-t border-zinc-100 flex gap-2">
@@ -656,29 +661,29 @@ export default function POSLayout() {
                     />
 
                     <div className="mt-auto">
-                    {/* Split Payment */}
-                    <button
-                        onClick={() => {
-                            if (cart.length === 0) {
-                                toast.warning(t('pos.empty_cart_warning', 'Add items to the cart first'));
-                                return;
-                            }
-                            setShowSplitPayment(true);
-                        }}
-                        disabled={isCheckingOut}
-                        className="w-full py-10 xl:py-16 border-b border-white/[0.06] bg-zinc-900 hover:bg-zinc-800 text-white text-sm lg:text-base xl:text-lg font-black uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                        {t('pos.split_payment', 'Split Payment')}
-                    </button>
+                        {/* Split Payment */}
+                        <button
+                            onClick={() => {
+                                if (cart.length === 0) {
+                                    toast.warning(t('pos.empty_cart_warning', 'Add items to the cart first'));
+                                    return;
+                                }
+                                setShowSplitPayment(true);
+                            }}
+                            disabled={isCheckingOut}
+                            className="w-full py-10 xl:py-16 border-b border-white/[0.06] bg-zinc-900 hover:bg-zinc-800 text-white text-sm lg:text-base xl:text-lg font-black uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                            {t('pos.split_payment', 'Split Payment')}
+                        </button>
 
-                    {/* Checkout */}
-                    <button
-                        onClick={handleCheckout}
-                        disabled={isCheckingOut}
-                        className="w-full py-10 xl:py-16 bg-emerald-600 hover:bg-emerald-500 text-white text-sm lg:text-base xl:text-lg font-black uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                        {isCheckingOut ? t('pos.processing', 'Processing...') : t('pos.checkout', 'CHECKOUT')}
-                    </button>
+                        {/* Checkout */}
+                        <button
+                            onClick={handleCheckout}
+                            disabled={isCheckingOut}
+                            className="w-full py-10 xl:py-16 bg-emerald-600 hover:bg-emerald-500 text-white text-sm lg:text-base xl:text-lg font-black uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                            {isCheckingOut ? t('pos.processing', 'Processing...') : t('pos.checkout', 'CHECKOUT')}
+                        </button>
                     </div>
                 </aside>
             </div>

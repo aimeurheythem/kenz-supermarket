@@ -797,64 +797,70 @@ export default function POSLayout() {
                 formatCurrency={formatCurrency}
             />
 
-            {showScanner && (
-                <BarcodeScanner
-                    onScan={handleScan}
-                    onClose={() => setShowScanner(false)}
-                />
-            )}
+            {
+                showScanner && (
+                    <BarcodeScanner
+                        onScan={handleScan}
+                        onClose={() => setShowScanner(false)}
+                    />
+                )
+            }
 
             {/* End Shift Confirmation Dialog */}
-            {showEndShiftConfirm && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                        onClick={() => setShowEndShiftConfirm(false)}
-                    />
-                    <motion.div
-                        initial={{ scale: 0.95, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="relative bg-white border border-gray-100 rounded-2xl p-6 w-full max-w-sm shadow-2xl"
-                    >
-                        <div className="text-center mb-6">
-                            <h3 className="text-lg font-bold text-black mb-1">
-                                {t('pos.end_shift_title', 'End Shift?')}
-                            </h3>
-                            <p className="text-black/40 text-sm">
-                                {t('pos.end_shift_message', 'This will close your current cashier session and log you out. Are you sure?')}
-                            </p>
-                        </div>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => setShowEndShiftConfirm(false)}
-                                className="flex-1 py-2.5 bg-gray-50 text-black font-bold rounded-xl transition-all hover:bg-gray-100"
-                            >
-                                {t('common.cancel', 'Cancel')}
-                            </button>
-                            <button
-                                onClick={async () => {
-                                    setShowEndShiftConfirm(false);
-                                    await handleEndShift();
-                                }}
-                                className="flex-1 py-2.5 bg-red-500 text-white font-bold rounded-xl transition-all hover:bg-red-600"
-                            >
-                                {t('pos.end_shift_confirm', 'End Shift')}
-                            </button>
-                        </div>
-                    </motion.div>
-                </div>
-            )}
+            {
+                showEndShiftConfirm && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                            onClick={() => setShowEndShiftConfirm(false)}
+                        />
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="relative bg-white border border-gray-100 rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+                        >
+                            <div className="text-center mb-6">
+                                <h3 className="text-lg font-bold text-black mb-1">
+                                    {t('pos.end_shift_title', 'End Shift?')}
+                                </h3>
+                                <p className="text-black/40 text-sm">
+                                    {t('pos.end_shift_message', 'This will close your current cashier session and log you out. Are you sure?')}
+                                </p>
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setShowEndShiftConfirm(false)}
+                                    className="flex-1 py-2.5 bg-gray-50 text-black font-bold rounded-xl transition-all hover:bg-gray-100"
+                                >
+                                    {t('common.cancel', 'Cancel')}
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        setShowEndShiftConfirm(false);
+                                        await handleEndShift();
+                                    }}
+                                    className="flex-1 py-2.5 bg-red-500 text-white font-bold rounded-xl transition-all hover:bg-red-600"
+                                >
+                                    {t('pos.end_shift_confirm', 'End Shift')}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )
+            }
 
             {/* Reprint Receipt Preview */}
-            {showReceiptPreview && lastSale && (
-                <ReceiptPreview
-                    sale={lastSale}
-                    items={lastSaleItems}
-                    onClose={() => setShowReceiptPreview(false)}
-                />
-            )}
+            {
+                showReceiptPreview && lastSale && (
+                    <ReceiptPreview
+                        sale={lastSale}
+                        items={lastSaleItems}
+                        onClose={() => setShowReceiptPreview(false)}
+                    />
+                )
+            }
 
             {/* Customer Search Dialog */}
             <CustomerSearchDialog
@@ -871,6 +877,6 @@ export default function POSLayout() {
                     useCustomerStore.getState().loadCustomers();
                 }}
             />
-        </div>
+        </div >
     );
 }

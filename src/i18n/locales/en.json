@@ -128,7 +128,7 @@
             "all": "All Cashiers",
             "none": "No cashiers found"
         },
-        "shortcuts": {
+        "stock_summary": {
             "units_in_stock": "{{count}} units in stock",
             "avg_order": "{{amount}} avg",
             "needs_attention": "Needs attention",

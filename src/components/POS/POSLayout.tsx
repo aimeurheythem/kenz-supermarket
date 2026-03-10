@@ -662,9 +662,9 @@ export default function POSLayout() {
                         </div>
                     )}
 
-                    {/* 6 Multi-Cart Tabs */}
-                    <div className="shrink-0 bg-white border-t border-zinc-100 p-2 lg:p-3 overflow-x-auto">
-                        <div className="flex gap-2 lg:grid lg:grid-cols-3 xl:grid-cols-6 min-w-max lg:min-w-0">
+                    {/* 6 Multi-Cart Tabs — 3x2 Grid */}
+                    <div className="shrink-0 bg-zinc-200 border-t border-zinc-100 overflow-hidden">
+                        <div className="grid grid-cols-3 gap-px">
                             {Object.values(tabs).map(tab => {
                                 const isActive = tab.id === activeTabId;
                                 const tabCart = isActive ? cart : tab.cart;
@@ -675,13 +675,13 @@ export default function POSLayout() {
                                     <button
                                         key={tab.id}
                                         onClick={() => handleTabSwitch(tab.id)}
-                                        className={`flex flex-col justify-between p-3 min-h-[75px] xl:min-h-[85px] text-left transition-all duration-200 active:brightness-95 rounded-lg border shadow-sm ${isActive
-                                            ? 'bg-zinc-900 border-zinc-800 ring-2 ring-emerald-500/20'
-                                            : 'bg-zinc-100/80 hover:bg-zinc-200 border-zinc-200/50 hover:border-zinc-300'
+                                        className={`relative flex flex-col justify-between p-3 min-h-[85px] text-left transition-all duration-100 active:brightness-95 ${isActive
+                                            ? 'bg-zinc-900 text-white'
+                                            : 'bg-white hover:bg-zinc-50 text-zinc-900'
                                             }`}
                                     >
                                         <div className="flex justify-between w-full items-start">
-                                            <span className={`text-[12px] font-bold uppercase tracking-wider ${isActive ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                                            <span className={`text-[11px] font-bold uppercase tracking-wider ${isActive ? 'text-zinc-400' : 'text-zinc-500'}`}>
                                                 [{`F${tab.id.split('-')[1]}`}] {tab.name}
                                             </span>
                                             {itemCount > 0 && (
@@ -691,8 +691,13 @@ export default function POSLayout() {
                                                 </span>
                                             )}
                                         </div>
-                                        <div className={`text-sm lg:text-base font-black tabular-nums tracking-tight mt-auto pt-1 ${isActive ? 'text-white' : 'text-zinc-900'}`}>
-                                            {itemCount > 0 ? formatCurrency(subtotal) : 'Total: 0.00'}
+                                        <div className="mt-auto">
+                                            <div className={`text-[10px] font-medium uppercase tracking-tight ${isActive ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                                                {t('pos.tab_total', 'Total')}:
+                                            </div>
+                                            <div className={`text-sm xl:text-base font-black tabular-nums tracking-tight ${isActive ? 'text-emerald-400' : 'text-zinc-900'}`}>
+                                                {formatCurrency(subtotal)}
+                                            </div>
                                         </div>
                                     </button>
                                 );

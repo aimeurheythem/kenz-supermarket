@@ -35,6 +35,9 @@ interface POSStore {
     // Next ticket number preview
     nextTicketNumber: number;
 
+    // Selected cart item for keyboard control
+    selectedCartProductId: number | null;
+
     // Actions
     switchTab: (
         tabId: string,
@@ -51,6 +54,7 @@ interface POSStore {
 
     setReturnMode: (active: boolean) => void;
     setNextTicketNumber: (num: number) => void;
+    setSelectedCartProductId: (id: number | null) => void;
 }
 
 export const usePOSStore = create<POSStore>((set, get) => ({
@@ -61,6 +65,7 @@ export const usePOSStore = create<POSStore>((set, get) => ({
     keypadMode: 'product_code',
     returnMode: false,
     nextTicketNumber: 1,
+    selectedCartProductId: null,
 
     switchTab: (tabId, currentCartState) => {
         const { tabs, activeTabId } = get();
@@ -116,4 +121,5 @@ export const usePOSStore = create<POSStore>((set, get) => ({
 
     setReturnMode: (active) => set({ returnMode: active }),
     setNextTicketNumber: (num) => set({ nextTicketNumber: num }),
+    setSelectedCartProductId: (id) => set({ selectedCartProductId: id }),
 }));

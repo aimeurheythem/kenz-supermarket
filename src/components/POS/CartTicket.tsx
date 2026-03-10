@@ -9,9 +9,11 @@ interface CartTicketProps {
     cart: CartItem[];
     ticketNumber: number;
     promotionResult: PromotionApplicationResult | null;
+    selectedCartProductId: number | null;
     onQuantityChange: (productId: number, quantity: number) => void;
     onRemove: (productId: number) => void;
     onDiscountClick: (productId: number) => void;
+    onSelect: (productId: number) => void;
     formatCurrency: (amount: number) => string;
 }
 
@@ -19,9 +21,11 @@ export default function CartTicket({
     cart,
     ticketNumber,
     promotionResult,
+    selectedCartProductId,
     onQuantityChange,
     onRemove,
     onDiscountClick,
+    onSelect,
     formatCurrency,
 }: CartTicketProps) {
     const { t } = useTranslation();
@@ -73,6 +77,8 @@ export default function CartTicket({
                             onRemove={() => onRemove(item.product.id)}
                             onDiscountClick={() => onDiscountClick(item.product.id)}
                             isAtMaxStock={item.quantity >= item.product.stock_quantity}
+                            isSelected={item.product.id === selectedCartProductId}
+                            onSelect={() => onSelect(item.product.id)}
                             formatCurrency={formatCurrency}
                         />
                     ))}

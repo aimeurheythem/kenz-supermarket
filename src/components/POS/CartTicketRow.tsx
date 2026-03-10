@@ -15,6 +15,8 @@ interface CartTicketRowProps {
     onRemove: () => void;
     onDiscountClick: () => void;
     isAtMaxStock: boolean;
+    isSelected: boolean;
+    onSelect: () => void;
     formatCurrency: (amount: number) => string;
 }
 
@@ -28,6 +30,8 @@ export default function CartTicketRow({
     onRemove,
     onDiscountClick,
     isAtMaxStock,
+    isSelected,
+    onSelect,
     formatCurrency,
 }: CartTicketRowProps) {
     const { t } = useTranslation();
@@ -78,10 +82,12 @@ export default function CartTicketRow({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, x: -50, height: 0, marginBottom: 0, overflow: 'hidden' }}
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+            onClick={onSelect}
+            className={`cursor-pointer transition-all ${isSelected ? 'bg-emerald-50/30' : ''}`}
         >
-            <div className="flex items-center px-4 py-3 md:py-4 border-b border-zinc-100/80 hover:bg-zinc-50/50 transition-colors group">
+            <div className={`flex items-stretch pl-4 pr-0 border-b transition-colors group min-h-[50px] ${isSelected ? 'border-emerald-200/50 bg-emerald-50/50' : 'border-zinc-100/80 hover:bg-zinc-50/50'}`}>
                 {/* Left: Index + Article info */}
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 flex flex-col justify-center py-2">
                     <div className="flex items-baseline gap-2">
                         <span className="text-xs font-bold text-zinc-300 tabular-nums shrink-0">{index}</span>
                         <span className="text-base font-semibold text-zinc-800 truncate">{item.product.name}</span>
@@ -103,71 +109,72 @@ export default function CartTicketRow({
                     </div>
                 </div>
 
-                {/* Center: Quantity control */}
-                <div className="flex items-center shrink-0 mx-2">
-                    <button
-                        onClick={onDecrement}
-                        disabled={item.quantity <= 1}
-                        className="w-9 h-9 flex items-center justify-center text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 disabled:opacity-20 disabled:cursor-not-allowed transition-colors rounded-l-lg border border-zinc-200"
-                    >
-                        <Minus size={16} strokeWidth={2.5} />
-                    </button>
-                    {isEditing ? (
-                        <input
-                            ref={inputRef}
-                            type="number"
-                            min="1"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onBlur={handleEditConfirm}
-                            onKeyDown={handleEditKeyDown}
-                            className="w-12 h-9 text-sm font-bold text-center text-zinc-800 border-y border-zinc-200 bg-white outline-none tabular-nums focus:bg-zinc-50 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                        />
-                    ) : (
-                        <button
-                            onClick={handleEditStart}
-                            className="w-12 h-9 text-sm font-bold text-zinc-800 tabular-nums text-center bg-zinc-50 hover:bg-zinc-100 border-y border-zinc-200 transition-colors cursor-text"
-                            title={t('pos.click_to_edit', 'Click to edit quantity')}
-                        >
-                            {item.quantity}
-                        </button>
-                    )}
-                    <button
-                        onClick={onIncrement}
-                        disabled={isAtMaxStock}
-                        className="w-9 h-9 flex items-center justify-center text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 disabled:opacity-20 disabled:cursor-not-allowed transition-colors rounded-r-lg border border-zinc-200"
-                    >
-                        <Plus size={16} strokeWidth={2.5} />
-                    </button>
-                </div>
-
-                {/* Right: Total */}
-                <div className="w-24 text-right shrink-0 ml-2">
-                    <div className="text-base font-bold text-zinc-900 tabular-nums">
+                {/* Right-Center: Total Price (Moved here and made BIGGER) */}
+                <div className="w-28 md:w-36 flex flex-col justify-center text-right shrink-0 mx-4">
+                    <div className="text-xl md:text-2xl font-black text-zinc-900 tabular-nums tracking-tighter">
                         {formatCurrency(finalTotal)}
                     </div>
                     {totalDiscount > 0 && (
-                        <div className="text-xs text-zinc-300 line-through tabular-nums">
+                        <div className="text-xs text-zinc-400 line-through tabular-nums">
                             {formatCurrency(lineTotal)}
                         </div>
                     )}
                 </div>
 
-                {/* Actions */}
-                <div className="flex items-center shrink-0 ml-2">
+                {/* Right: Quantity control & Actions (Combined into a seamless, full-height block) */}
+                <div className="flex items-stretch shrink-0 self-stretch ml-auto">
+                    {/* Quantity section */}
+                    <div className="flex items-stretch border-l border-zinc-200/50">
+                        <button
+                            onClick={onDecrement}
+                            disabled={item.quantity <= 1}
+                            className="w-11 flex items-center justify-center bg-zinc-800 text-white hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all rounded-none border-r border-white/10"
+                        >
+                            <Minus size={20} strokeWidth={3} />
+                        </button>
+                        {isEditing ? (
+                            <input
+                                ref={inputRef}
+                                type="number"
+                                min="1"
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                onBlur={handleEditConfirm}
+                                onKeyDown={handleEditKeyDown}
+                                className="w-14 h-full text-lg font-black text-center text-zinc-900 bg-white outline-none tabular-nums focus:bg-zinc-50 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none border-r border-zinc-200/50"
+                            />
+                        ) : (
+                            <button
+                                onClick={handleEditStart}
+                                className="w-14 flex items-center justify-center text-lg font-black text-zinc-900 tabular-nums bg-white hover:bg-zinc-50 transition-colors cursor-text border-r border-zinc-200/50"
+                                title={t('pos.click_to_edit', 'Click to edit quantity')}
+                            >
+                                {item.quantity}
+                            </button>
+                        )}
+                        <button
+                            onClick={onIncrement}
+                            disabled={isAtMaxStock}
+                            className="w-11 flex items-center justify-center bg-zinc-800 text-white hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all rounded-none border-r border-white/10"
+                        >
+                            <Plus size={20} strokeWidth={3} />
+                        </button>
+                    </div>
+
+                    {/* Actions section (Discount, Remove) */}
                     <button
                         onClick={onDiscountClick}
-                        className="w-9 h-9 flex items-center justify-center text-amber-400 hover:text-amber-500 hover:bg-amber-50 transition-colors rounded-lg"
+                        className="w-14 flex items-center justify-center bg-zinc-800 text-white hover:bg-zinc-700 transition-colors rounded-none border-r border-white/10"
                         title={t('pos.discount', 'Remise')}
                     >
-                        <Percent size={16} strokeWidth={2} />
+                        <Percent size={20} strokeWidth={2.5} />
                     </button>
                     <button
                         onClick={onRemove}
-                        className="w-9 h-9 flex items-center justify-center text-red-300 hover:text-red-500 hover:bg-red-50 transition-colors rounded-lg"
+                        className="w-14 flex items-center justify-center bg-zinc-800 text-white hover:bg-zinc-700 transition-colors rounded-none"
                         title={t('pos.remove', 'Delete')}
                     >
-                        <Trash2 size={16} strokeWidth={2} />
+                        <Trash2 size={20} strokeWidth={2.5} />
                     </button>
                 </div>
             </div>

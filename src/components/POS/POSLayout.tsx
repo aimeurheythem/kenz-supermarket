@@ -65,10 +65,11 @@ export default function POSLayout() {
     const cartTotalWithPromos = useSaleStore(selectCartTotalWithPromotions);
     const manualDiscountTotal = useSaleStore(selectManualDiscountTotal);
     const { setItemManualDiscount, clearItemManualDiscount, setCartDiscount, clearCartDiscount, checkout } = useSaleStore();
-    const { setSelectedProduct, switchTab, clearTab } = usePOSStore();
+    const { setSelectedProduct, switchTab, clearTab, setSelectedCartProductId } = usePOSStore();
     const tabs = usePOSStore((s) => s.tabs);
     const activeTabId = usePOSStore((s) => s.activeTabId);
     const selectedProduct = usePOSStore((s) => s.selectedProduct);
+    const selectedCartProductId = usePOSStore((s) => s.selectedCartProductId);
     const keypadValue = usePOSStore((s) => s.keypadValue);
     const { appendKeypad, clearKeypad, backspaceKeypad } = usePOSStore();
     const { requestAuth } = useManagerAuth();
@@ -147,9 +148,10 @@ export default function POSLayout() {
             if (product.stock_quantity <= 0) return;
             await addToCart({ product, quantity: 1, discount: 0 });
             setSelectedProduct(product);
+            setSelectedCartProductId(product.id);
             setSearchQuery('');
         },
-        [addToCart, setSelectedProduct],
+        [addToCart, setSelectedProduct, setSelectedCartProductId],
     );
 
     // === Multi-Cart Tab Switcher ===
@@ -184,6 +186,7 @@ export default function POSLayout() {
             clearCart();
             setSelectedCustomer(null);
             clearTab(activeTabId);
+            setSelectedCartProductId(null);
             toast.success(t('pos.sale_voided', 'Sale voided'), {
                 description: t('pos.authorized_by', 'Authorized by {{name}}', { name: result.managerName }),
             });
@@ -300,6 +303,7 @@ export default function POSLayout() {
             );
             setSelectedCustomer(null);
             clearTab(activeTabId);
+            setSelectedCartProductId(null);
             loadProducts();
             refreshTicketNumber();
             // Track last sale for reprint & show receipt
@@ -335,6 +339,7 @@ export default function POSLayout() {
             );
             setSelectedCustomer(null);
             clearTab(activeTabId);
+            setSelectedCartProductId(null);
             loadProducts();
             refreshTicketNumber();
             if (sale) {
@@ -370,6 +375,7 @@ export default function POSLayout() {
             );
             setSelectedCustomer(null);
             clearTab(activeTabId);
+            setSelectedCartProductId(null);
             loadProducts();
             refreshTicketNumber();
             if (sale) {
@@ -401,6 +407,7 @@ export default function POSLayout() {
             setSelectedCustomer(null);
             setShowSplitPayment(false);
             clearTab(activeTabId);
+            setSelectedCartProductId(null);
             loadProducts();
             refreshTicketNumber();
             // Track last sale for reprint & show receipt
@@ -426,13 +433,14 @@ export default function POSLayout() {
             if (product) {
                 await addToCart({ product, quantity: 1, discount: 0 });
                 setSelectedProduct(product);
+                setSelectedCartProductId(product.id);
                 setShowScanner(false);
                 toast.success(product.name, { description: t('pos.scan.added', 'Added to cart'), duration: 1500 });
             } else {
                 toast.warning(t('pos.scan.not_found', 'Product not found with barcode: ') + code);
             }
         },
-        [barcodeMap, getByBarcode, addToCart, setSelectedProduct, t],
+        [barcodeMap, getByBarcode, addToCart, setSelectedProduct, setSelectedCartProductId, t],
     );
 
     const handleKeypadConfirm = useCallback(async () => {
@@ -442,12 +450,60 @@ export default function POSLayout() {
         if (product) {
             await addToCart({ product, quantity: 1, discount: 0 });
             setSelectedProduct(product);
+            setSelectedCartProductId(product.id);
             clearKeypad();
             toast.success(product.name, { description: t('pos.added_via_keypad', 'Added via keypad'), duration: 1500 });
         } else {
             toast.warning(t('pos.keypad_not_found', 'No product found for code: ') + code);
         }
-    }, [barcodeMap, getByBarcode, addToCart, setSelectedProduct, clearKeypad, t]);
+    }, [barcodeMap, getByBarcode, addToCart, setSelectedProduct, setSelectedCartProductId, clearKeypad, t]);
+
+    const handleIncrementQuantity = useCallback(() => {
+        if (!selectedCartProductId) return;
+        const item = cart.find(c => c.product.id === selectedCartProductId);
+        if (item) {
+            updateCartItem(item.product.id, item.quantity + 1);
+        }
+    }, [selectedCartProductId, cart, updateCartItem]);
+
+    const handleDecrementQuantity = useCallback(() => {
+        if (!selectedCartProductId) return;
+        const item = cart.find(c => c.product.id === selectedCartProductId);
+        if (item && item.quantity > 1) {
+            updateCartItem(item.product.id, item.quantity - 1);
+        }
+    }, [selectedCartProductId, cart, updateCartItem]);
+
+    const handleSelectPrevious = useCallback(() => {
+        if (cart.length === 0) return;
+        const currentIndex = cart.findIndex(c => c.product.id === selectedCartProductId);
+        const nextIndex = currentIndex <= 0 ? cart.length - 1 : currentIndex - 1;
+        setSelectedCartProductId(cart[nextIndex].product.id);
+    }, [cart, selectedCartProductId, setSelectedCartProductId]);
+
+    const handleSelectNext = useCallback(() => {
+        if (cart.length === 0) return;
+        const currentIndex = cart.findIndex(c => c.product.id === selectedCartProductId);
+        const nextIndex = (currentIndex === -1 || currentIndex >= cart.length - 1) ? 0 : currentIndex + 1;
+        setSelectedCartProductId(cart[nextIndex].product.id);
+    }, [cart, selectedCartProductId, setSelectedCartProductId]);
+
+    const handleDeleteSelected = useCallback(() => {
+        if (!selectedCartProductId) return;
+        const currentIndex = cart.findIndex(c => c.product.id === selectedCartProductId);
+        removeFromCart(selectedCartProductId);
+
+        // Auto-select next/previous item
+        const newCart = cart.filter(c => c.product.id !== selectedCartProductId);
+        if (newCart.length > 0) {
+            const nextIndex = Math.min(currentIndex, newCart.length - 1);
+            setSelectedCartProductId(newCart[nextIndex].product.id);
+        } else {
+            setSelectedCartProductId(null);
+        }
+
+        toast.info(t('pos.item_removed', 'Item removed from cart'));
+    }, [selectedCartProductId, cart, removeFromCart, setSelectedCartProductId, t]);
 
     // Keyboard shortcuts
     useKeyboardShortcuts({
@@ -467,6 +523,19 @@ export default function POSLayout() {
         onSettings: () => navigate('/pos/settings'),
         onEndShift: () => setShowEndShiftConfirm(true),
         onGiftCard: () => toast.info(t('pos.gift_card_not_available', 'Gift card feature is not available yet')),
+
+        // Keypad physical keyboard support
+        onDigit: appendKeypad,
+        onBackspace: backspaceKeypad,
+        onClear: clearKeypad,
+        onConfirm: handleKeypadConfirm,
+
+        // Cart quantity shortcuts
+        onArrowUp: handleSelectPrevious,
+        onArrowDown: handleSelectNext,
+        onArrowLeft: handleDecrementQuantity,
+        onArrowRight: handleIncrementQuantity,
+        onDelete: handleDeleteSelected,
     });
 
     // Discount dialog context
@@ -665,9 +734,23 @@ export default function POSLayout() {
                             cart={cart}
                             ticketNumber={ticketNumber}
                             promotionResult={promotionResult}
+                            selectedCartProductId={selectedCartProductId}
                             onQuantityChange={(productId, qty) => updateCartItem(productId, qty)}
-                            onRemove={(productId) => removeFromCart(productId)}
+                            onRemove={(productId) => {
+                                const currentIndex = cart.findIndex(c => c.product.id === productId);
+                                removeFromCart(productId);
+                                if (selectedCartProductId === productId) {
+                                    const newCart = cart.filter(c => c.product.id !== productId);
+                                    if (newCart.length > 0) {
+                                        const nextIndex = Math.min(currentIndex, newCart.length - 1);
+                                        setSelectedCartProductId(newCart[nextIndex].product.id);
+                                    } else {
+                                        setSelectedCartProductId(null);
+                                    }
+                                }
+                            }}
                             onDiscountClick={handleLineDiscount}
+                            onSelect={setSelectedCartProductId}
                             formatCurrency={formatCurrency}
                         />
                     </div>

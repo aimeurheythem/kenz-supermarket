@@ -12,12 +12,12 @@ export default function InventoryPage() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
-  const [form, setForm] = useState({ name: "", barcode: "", cost_price: "", selling_price: "", category_id: "", reorder_level: "10", unit: "piece" });
+  const [form, setForm] = useState<{ name: string; barcode: string; cost_price: string; selling_price: string; category_id: string; reorder_level: number; unit: string }>({ name: "", barcode: "", cost_price: "", selling_price: "", category_id: "", reorder_level: 10, unit: "piece" });
 
   useEffect(() => { fetchAll({ search, category_id: categoryFilter || undefined }); }, [search, categoryFilter]);
   useEffect(() => { fetchCategories(); }, []);
 
-  const resetForm = () => { setForm({ name: "", barcode: "", cost_price: "", selling_price: "", category_id: "", reorder_level: "10", unit: "piece" }); setEditing(null); setShowForm(false); };
+  const resetForm = () => { setForm({ name: "", barcode: "", cost_price: "", selling_price: "", category_id: "", reorder_level: 10, unit: "piece" }); setEditing(null); setShowForm(false); };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +34,7 @@ export default function InventoryPage() {
   };
 
   const handleEdit = (p: Product) => {
-    setForm({ name: p.name, barcode: p.barcode || "", cost_price: p.cost_price, selling_price: p.selling_price, category_id: p.category_id || "", reorder_level: String(p.reorder_level), unit: p.unit });
+    setForm({ name: p.name, barcode: p.barcode || "", cost_price: p.cost_price, selling_price: p.selling_price, category_id: p.category_id || "", reorder_level: p.reorder_level, unit: p.unit });
     setEditing(p);
     setShowForm(true);
   };
@@ -76,7 +76,7 @@ export default function InventoryPage() {
               <option value="">No Category</option>
               {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
-            <input type="number" placeholder="Reorder Level" value={form.reorder_level} onChange={(e) => setForm({ ...form, reorder_level: e.target.value })} className="rounded-lg border px-3 py-2 text-sm" />
+            <input type="number" placeholder="Reorder Level" value={form.reorder_level} onChange={(e) => setForm({ ...form, reorder_level: Number(e.target.value) })} className="rounded-lg border px-3 py-2 text-sm" />
           </div>
           <div className="mt-4 flex gap-2">
             <button type="submit" className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">{editing ? "Update" : "Create"}</button>

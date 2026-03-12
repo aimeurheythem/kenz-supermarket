@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 type MessageHandler = (data: Record<string, unknown>) => void;
 
 interface WSMessage {

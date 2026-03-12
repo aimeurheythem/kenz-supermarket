@@ -28,6 +28,18 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+.ruff_cache/
+
+# Database
+*.sqlite3
+
 # Editor directories and files
 .idea
 .vscode
@@ -36,3 +48,7 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Temp
+*.tmp
+Thumbs.db

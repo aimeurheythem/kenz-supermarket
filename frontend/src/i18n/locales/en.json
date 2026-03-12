@@ -1,0 +1,39 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search...",
+    "actions": "Actions",
+    "confirm": "Confirm",
+    "back": "Back",
+    "noResults": "No results found",
+    "error": "An error occurred"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "inventory": "Products",
+    "categories": "Categories",
+    "stock": "Stock",
+    "promotions": "Promotions",
+    "suppliers": "Suppliers",
+    "purchases": "Purchases",
+    "sales": "Sales",
+    "customers": "Customers",
+    "expenses": "Expenses",
+    "reports": "Reports",
+    "users": "Users",
+    "auditLogs": "Audit Logs",
+    "settings": "Settings"
+  },
+  "auth": {
+    "login": "Sign In",
+    "register": "Create Store",
+    "logout": "Sign Out",
+    "email": "Email",
+    "password": "Password"
+  }
+}

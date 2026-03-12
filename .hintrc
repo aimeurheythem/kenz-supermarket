@@ -30,6 +30,7 @@
           "text-wrap"
         ]
       }
-    ]
+    ],
+    "typescript-config/is-valid": "off"
   }
 }

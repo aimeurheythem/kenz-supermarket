@@ -72,7 +72,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     const token = localStorage.getItem("access_token");
     if (!token) return;
     try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
+      const parts = token.split(".");
+      const encoded = parts[1];
+      if (!encoded) return;
+      const payload = JSON.parse(atob(encoded));
       set({
         user: {
           id: payload.user_id,

@@ -10,7 +10,7 @@ export default function UsersPage() {
   const { user: currentUser } = useAuthStore();
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<User | null>(null);
-  const [form, setForm] = useState({ username: "", email: "", full_name: "", role: "cashier", password: "" });
+  const [form, setForm] = useState<{ username: string; email: string; full_name: string; role: "owner" | "manager" | "cashier"; password: string }>({ username: "", email: "", full_name: "", role: "cashier", password: "" });
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -32,7 +32,7 @@ export default function UsersPage() {
   };
 
   const handleEdit = (u: User) => {
-    setForm({ username: u.username, email: u.email, full_name: u.full_name, role: u.role, password: "" });
+    setForm({ username: u.username, email: u.email, full_name: u.full_name, role: u.role as "owner" | "manager" | "cashier", password: "" });
     setEditing(u); setShowForm(true);
   };
 
@@ -61,7 +61,7 @@ export default function UsersPage() {
             <input required placeholder="Username" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} className="rounded-lg border px-3 py-2 text-sm" />
             <input required type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="rounded-lg border px-3 py-2 text-sm" />
             <input required placeholder="Full Name" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="rounded-lg border px-3 py-2 text-sm" />
-            <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="rounded-lg border px-3 py-2 text-sm">
+            <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as "owner" | "manager" | "cashier" })} className="rounded-lg border px-3 py-2 text-sm">
               {allowedRoles.map((r) => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
             </select>
             <input type="password" placeholder={editing ? "New password (leave blank to keep)" : "Password"} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required={!editing} minLength={8} className="rounded-lg border px-3 py-2 text-sm col-span-full" />

@@ -92,6 +92,15 @@ export const CashierSessionRepo = {
                 return null;
             }
 
+            // Detect legacy/new schema so inserts work for both:
+            // - Legacy: INTEGER PRIMARY KEY AUTOINCREMENT
+            // - New: TEXT PRIMARY KEY (UUID)
+            const columns = await query<{ name: string; type: string; pk: number }>(
+                'PRAGMA table_info(cashier_sessions)',
+            );
+            const idColumn = columns.find((c) => c.name === 'id');
+            const usesIntegerPk = !!idColumn && /INT/i.test(idColumn.type || '');
+
             await executeNoSave('BEGIN TRANSACTION;');
 
             // Close any existing active sessions for this cashier first
@@ -104,14 +113,26 @@ export const CashierSessionRepo = {
                 [input.cashier_id],
             );
 
-            // Insert new session
-            const newSessionId = crypto.randomUUID();
-            await executeNoSave('INSERT INTO cashier_sessions (id, cashier_id, opening_cash, status) VALUES (?, ?, ?, ?)', [
-                newSessionId,
-                input.cashier_id,
-                input.opening_cash,
-                'active',
-            ]);
+            // Insert new session (schema-aware)
+            let newSessionId: number | string;
+            if (usesIntegerPk) {
+                await executeNoSave(
+                    'INSERT INTO cashier_sessions (cashier_id, opening_cash, status) VALUES (?, ?, ?)',
+                    [input.cashier_id, input.opening_cash, 'active'],
+                );
+                const inserted = await query<{ id: number }>('SELECT last_insert_rowid() as id');
+                newSessionId = inserted[0]?.id;
+            } else {
+                newSessionId = crypto.randomUUID();
+                await executeNoSave(
+                    'INSERT INTO cashier_sessions (id, cashier_id, opening_cash, status) VALUES (?, ?, ?, ?)',
+                    [newSessionId, input.cashier_id, input.opening_cash, 'active'],
+                );
+            }
+
+            if (!newSessionId && newSessionId !== 0) {
+                throw new Error('Failed to resolve newly created cashier session id');
+            }
 
             await executeNoSave('COMMIT;');
             triggerSave();

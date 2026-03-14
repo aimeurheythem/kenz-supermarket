@@ -800,7 +800,7 @@ export default function POSLayout() {
                         <button
                             onClick={handleCheckout}
                             disabled={cart.length === 0 || isCheckingOut}
-                            className="flex-[2] py-3 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-200 disabled:cursor-not-allowed text-white text-base font-semibold rounded-2xl transition-all active:scale-[0.98]"
+                            className="flex-[2] py-3 bg-zinc-900 hover:bg-zinc-800 disabled:hover:bg-zinc-900 disabled:cursor-not-allowed text-white text-base font-semibold rounded-2xl transition-all active:scale-[0.98]"
                         >
                             {isCheckingOut ? t('pos.processing', 'Processing...') : t('pos.checkout', 'CHECKOUT')}
                         </button>
@@ -840,7 +840,7 @@ export default function POSLayout() {
                         <button
                             onClick={handleCheckout}
                             disabled={isCheckingOut || cart.length === 0}
-                            className="w-full py-16 xl:py-24 bg-emerald-600 hover:bg-emerald-500 text-white text-xl lg:text-2xl xl:text-4xl font-black uppercase tracking-[0.2em] transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed border-t border-white/10"
+                            className="w-full h-48 lg:h-60 bg-emerald-600 hover:bg-emerald-500 disabled:hover:bg-emerald-600 text-white text-xl lg:text-2xl xl:text-4xl font-black uppercase tracking-[0.2em] transition-all active:scale-[0.98] disabled:cursor-not-allowed border-t border-white/10"
                         >
                             {isCheckingOut ? t('pos.processing', 'Processing...') : t('pos.checkout', 'CHECKOUT')}
                         </button>

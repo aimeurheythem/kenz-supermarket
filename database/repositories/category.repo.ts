@@ -1,4 +1,4 @@
-import { query, execute, lastInsertId, get } from '../db';
+import { query, execute, get } from '../db';
 import type { Category, CategoryInput } from '../../src/lib/types';
 
 export const CategoryRepo = {
@@ -6,21 +6,22 @@ export const CategoryRepo = {
         return query<Category>('SELECT * FROM categories ORDER BY name');
     },
 
-    async getById(id: number): Promise<Category | undefined> {
+    async getById(id: number | string): Promise<Category | undefined> {
         return get<Category>('SELECT * FROM categories WHERE id = ?', [id]);
     },
 
     async create(input: CategoryInput): Promise<Category> {
-        await execute('INSERT INTO categories (name, description, color) VALUES (?, ?, ?)', [
+        const id = crypto.randomUUID();
+        await execute('INSERT INTO categories (id, name, description, color) VALUES (?, ?, ?, ?)', [
+            id,
             input.name,
             input.description || '',
             input.color || '#6366f1',
         ]);
-        const id = await lastInsertId();
         return this.getById(id) as Promise<Category>;
     },
 
-    async update(id: number, input: Partial<CategoryInput>): Promise<Category> {
+    async update(id: number | string, input: Partial<CategoryInput>): Promise<Category> {
         const fields: string[] = [];
         const values: unknown[] = [];
 
@@ -44,7 +45,7 @@ export const CategoryRepo = {
         return this.getById(id) as Promise<Category>;
     },
 
-    async delete(id: number): Promise<void> {
+    async delete(id: number | string): Promise<void> {
         await execute('DELETE FROM categories WHERE id = ?', [id]);
     },
 

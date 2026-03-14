@@ -1,4 +1,4 @@
-import { query, execute, lastInsertId, get } from '../db';
+import { query, execute, get } from '../db';
 import type { User, UserInput } from '../../src/lib/types';
 import bcrypt from 'bcryptjs';
 
@@ -75,12 +75,12 @@ export const UserRepo = {
         return query<User>(`SELECT ${USER_SAFE_COLUMNS} FROM users ORDER BY full_name`);
     },
 
-    async getById(id: number): Promise<User | undefined> {
+    async getById(id: number | string): Promise<User | undefined> {
         return get<User>(`SELECT ${USER_SAFE_COLUMNS} FROM users WHERE id = ?`, [id]);
     },
 
     /** Internal only — includes password_hash & pin_code for auth verification */
-    async _getByIdFull(id: number): Promise<(User & { password_hash: string; pin_code: string | null }) | undefined> {
+    async _getByIdFull(id: number | string): Promise<(User & { password_hash: string; pin_code: string | null }) | undefined> {
         return get<User & { password_hash: string; pin_code: string | null }>(
             `SELECT ${USER_ALL_COLUMNS} FROM users WHERE id = ?`,
             [id],
@@ -102,11 +102,11 @@ export const UserRepo = {
         const passwordHash = await hashPassword(input.password);
         const pinCode = input.pin_code ? await hashPin(input.pin_code) : null;
         const pinLength = input.pin_code ? input.pin_code.length : 4;
+        const id = crypto.randomUUID();
         await execute(
-            'INSERT INTO users (username, password_hash, pin_code, pin_length, full_name, role) VALUES (?, ?, ?, ?, ?, ?)',
-            [input.username, passwordHash, pinCode, pinLength, input.full_name, input.role],
+            'INSERT INTO users (id, username, password_hash, pin_code, pin_length, full_name, role) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [id, input.username, passwordHash, pinCode, pinLength, input.full_name, input.role],
         );
-        const id = await lastInsertId();
         return this.getById(id) as Promise<User>;
     },
 
@@ -166,7 +166,7 @@ export const UserRepo = {
         `);
     },
 
-    async update(id: number, input: Partial<UserInput & { is_active?: number }>): Promise<User> {
+    async update(id: number | string, input: Partial<UserInput & { is_active?: number }>): Promise<User> {
         const fields: string[] = [];
         const values: unknown[] = [];
 
@@ -206,7 +206,7 @@ export const UserRepo = {
         return this.getById(id) as Promise<User>;
     },
 
-    async updatePassword(id: number, currentPassword: string, newPassword: string): Promise<boolean> {
+    async updatePassword(id: number | string, currentPassword: string, newPassword: string): Promise<boolean> {
         const user = await this._getByIdFull(id);
         if (!user) return false;
 
@@ -218,7 +218,7 @@ export const UserRepo = {
         return true;
     },
 
-    async delete(id: number): Promise<void> {
+    async delete(id: number | string): Promise<void> {
         await execute('UPDATE users SET is_active = 0 WHERE id = ?', [id]);
     },
 

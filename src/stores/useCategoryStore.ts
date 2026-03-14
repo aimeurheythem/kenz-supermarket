@@ -15,6 +15,7 @@ interface CategoryExtras {
  */
 export const useCategoryStore = createCrudStore<Category, CategoryInput, CategoryExtras>({
     repo: CategoryRepo,
+    entityName: 'category',
     extend: (_set, get) => ({
         loadCategories: () => get().loadAll(),
         addCategory: (input: CategoryInput) => get().add(input),

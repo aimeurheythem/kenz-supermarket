@@ -1,4 +1,4 @@
-import { query, execute, lastInsertId, get, executeNoSave, triggerSave } from '../db';
+import { query, execute, get, executeNoSave, triggerSave } from '../db';
 import type { Sale, SaleItem, CartItem, PromotionApplicationResult, PaymentEntry, PaymentEntryInput, ManualDiscount } from '../../src/lib/types';
 import { AuditLogRepo } from './audit-log.repo';
 
@@ -40,7 +40,7 @@ export const SaleRepo = {
         return query<Sale>(sql, params);
     },
 
-    async getById(id: number): Promise<Sale | undefined> {
+    async getById(id: number | string): Promise<Sale | undefined> {
         return get<Sale>(
             `SELECT s.*, u.full_name as user_name
        FROM sales s
@@ -50,7 +50,7 @@ export const SaleRepo = {
         );
     },
 
-    async getItems(saleId: number): Promise<SaleItem[]> {
+    async getItems(saleId: number | string): Promise<SaleItem[]> {
         return query<SaleItem>('SELECT * FROM sale_items WHERE sale_id = ?', [saleId]);
     },
 
@@ -85,10 +85,12 @@ export const SaleRepo = {
             await executeNoSave('BEGIN TRANSACTION;');
 
             // Create sale record
+            const saleId = crypto.randomUUID();
             await executeNoSave(
-                `INSERT INTO sales (user_id, session_id, customer_id, subtotal, tax_amount, discount_amount, total, payment_method, customer_name)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                `INSERT INTO sales (id, user_id, session_id, customer_id, subtotal, tax_amount, discount_amount, total, payment_method, customer_name)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
+                    saleId,
                     userId || null,
                     sessionId || null,
                     payment.customer_id || null, // Linked customer
@@ -100,8 +102,6 @@ export const SaleRepo = {
                     payment.customer_name || 'Walk-in Customer',
                 ],
             );
-
-            const saleId = await lastInsertId();
 
             // Handle Credit Payment
             if (payment.method === 'credit') {
@@ -123,9 +123,9 @@ export const SaleRepo = {
 
                 // Add Transaction Record
                 await executeNoSave(
-                    `INSERT INTO customer_transactions (customer_id, type, amount, balance_after, reference_type, reference_id, description)
-                     VALUES (?, 'debt', ?, ?, 'sale', ?, 'Credit Sale')`,
-                    [payment.customer_id, total, updatedCustomer?.total_debt ?? total, saleId],
+                    `INSERT INTO customer_transactions (id, customer_id, type, amount, balance_after, reference_type, reference_id, description)
+                     VALUES (?, ?, 'debt', ?, ?, 'sale', ?, 'Credit Sale')`,
+                    [crypto.randomUUID(), payment.customer_id, total, updatedCustomer?.total_debt ?? total, saleId],
                 );
             }
 
@@ -149,9 +149,10 @@ export const SaleRepo = {
                 }
 
                 await executeNoSave(
-                    `INSERT INTO sale_items (sale_id, product_id, product_name, quantity, unit_price, discount, total, promotion_id, promotion_name)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    `INSERT INTO sale_items (id, sale_id, product_id, product_name, quantity, unit_price, discount, total, promotion_id, promotion_name)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
+                        crypto.randomUUID(),
                         saleId,
                         item.product.id,
                         item.product.name,
@@ -173,9 +174,9 @@ export const SaleRepo = {
 
                 // Create stock movement
                 await executeNoSave(
-                    `INSERT INTO stock_movements (product_id, type, quantity, previous_stock, new_stock, reason, reference_id, reference_type)
-                     VALUES (?, 'out', ?, ?, ?, 'Sale', ?, 'sale')`,
-                    [item.product.id, item.quantity, previousStock, newStock, saleId],
+                    `INSERT INTO stock_movements (id, product_id, type, quantity, previous_stock, new_stock, reason, reference_id, reference_type)
+                     VALUES (?, ?, 'out', ?, ?, ?, 'Sale', ?, 'sale')`,
+                    [crypto.randomUUID(), item.product.id, item.quantity, previousStock, newStock, saleId],
                 );
             }
 
@@ -209,7 +210,7 @@ export const SaleRepo = {
         }
     },
 
-    async updateStatus(saleId: number, status: 'completed' | 'refunded' | 'voided'): Promise<void> {
+    async updateStatus(saleId: number | string, status: 'completed' | 'refunded' | 'voided'): Promise<void> {
         await execute('UPDATE sales SET status = ?, updated_at = datetime("now") WHERE id = ?', [status, saleId]);
     },
 
@@ -217,7 +218,7 @@ export const SaleRepo = {
      * Process a refund for a sale.
      * Restores stock and marks sale as refunded.
      */
-    async refundSale(saleId: number, reason: string = 'Customer Return'): Promise<void> {
+    async refundSale(saleId: number | string, reason: string = 'Customer Return'): Promise<void> {
         return this._reverseSale(saleId, 'refunded', reason);
     },
 
@@ -225,7 +226,7 @@ export const SaleRepo = {
      * Void a sale (e.g. accidental entry).
      * Restores stock and marks sale as voided.
      */
-    async voidSale(saleId: number, reason: string = 'Transaction Voided'): Promise<void> {
+    async voidSale(saleId: number | string, reason: string = 'Transaction Voided'): Promise<void> {
         return this._reverseSale(saleId, 'voided', reason);
     },
 
@@ -233,7 +234,7 @@ export const SaleRepo = {
      * Helper to reverse a sale (Refund or Void).
      * @private
      */
-    async _reverseSale(saleId: number, newStatus: 'refunded' | 'voided', reason: string): Promise<void> {
+    async _reverseSale(saleId: number | string, newStatus: 'refunded' | 'voided', reason: string): Promise<void> {
         const sale = await this.getById(saleId);
         if (!sale) throw new Error(`Sale ${saleId} not found`);
         if (sale.status === 'refunded' || sale.status === 'voided') {
@@ -271,9 +272,9 @@ export const SaleRepo = {
 
                     // 3. Log Movement
                     await executeNoSave(
-                        `INSERT INTO stock_movements (product_id, type, quantity, previous_stock, new_stock, reason, reference_id, reference_type)
-                         VALUES (?, 'return', ?, ?, ?, ?, ?, 'sale')`,
-                        [item.product_id, item.quantity, previousStock, previousStock + item.quantity, reason, saleId],
+                        `INSERT INTO stock_movements (id, product_id, type, quantity, previous_stock, new_stock, reason, reference_id, reference_type)
+                         VALUES (?, ?, 'return', ?, ?, ?, ?, ?, 'sale')`,
+                        [crypto.randomUUID(), item.product_id, item.quantity, previousStock, previousStock + item.quantity, reason, saleId],
                     );
                 }
             }
@@ -549,10 +550,12 @@ export const SaleRepo = {
 
             const ticketNumber = await this._incrementTicketNumber();
 
+            const saleId = crypto.randomUUID();
             await executeNoSave(
-                `INSERT INTO sales (user_id, session_id, customer_id, subtotal, tax_amount, discount_amount, total, payment_method, customer_name, ticket_number, cart_discount_type, cart_discount_value, cart_discount_amount)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, 'split', ?, ?, ?, ?, ?)`,
+                `INSERT INTO sales (id, user_id, session_id, customer_id, subtotal, tax_amount, discount_amount, total, payment_method, customer_name, ticket_number, cart_discount_type, cart_discount_value, cart_discount_amount)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'split', ?, ?, ?, ?, ?)`,
                 [
+                    saleId,
                     userId || null,
                     sessionId || null,
                     customer.id || null,
@@ -568,13 +571,11 @@ export const SaleRepo = {
                 ],
             );
 
-            const saleId = await lastInsertId();
-
             // Insert payment entries
             for (const entry of payments) {
                 await executeNoSave(
-                    `INSERT INTO payment_entries (sale_id, method, amount, change_amount) VALUES (?, ?, ?, ?)`,
-                    [saleId, entry.method, entry.amount, 0],
+                    `INSERT INTO payment_entries (id, sale_id, method, amount, change_amount) VALUES (?, ?, ?, ?, ?)`,
+                    [crypto.randomUUID(), saleId, entry.method, entry.amount, 0],
                 );
             }
 
@@ -598,9 +599,10 @@ export const SaleRepo = {
                 }
 
                 await executeNoSave(
-                    `INSERT INTO sale_items (sale_id, product_id, product_name, quantity, unit_price, discount, total, manual_discount_type, manual_discount_value, manual_discount_amount, promotion_id, promotion_name)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    `INSERT INTO sale_items (id, sale_id, product_id, product_name, quantity, unit_price, discount, total, manual_discount_type, manual_discount_value, manual_discount_amount, promotion_id, promotion_name)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
+                        crypto.randomUUID(),
                         saleId,
                         item.product.id,
                         item.product.name,
@@ -622,9 +624,9 @@ export const SaleRepo = {
                 );
                 const newStock = Math.max(0, previousStock - item.quantity);
                 await executeNoSave(
-                    `INSERT INTO stock_movements (product_id, type, quantity, previous_stock, new_stock, reason, reference_id, reference_type)
-                     VALUES (?, 'out', ?, ?, ?, 'Sale', ?, 'sale')`,
-                    [item.product.id, item.quantity, previousStock, newStock, saleId],
+                    `INSERT INTO stock_movements (id, product_id, type, quantity, previous_stock, new_stock, reason, reference_id, reference_type)
+                     VALUES (?, ?, 'out', ?, ?, ?, 'Sale', ?, 'sale')`,
+                    [crypto.randomUUID(), item.product.id, item.quantity, previousStock, newStock, saleId],
                 );
             }
 
@@ -655,7 +657,7 @@ export const SaleRepo = {
     /**
      * Get all payment entries for a sale.
      */
-    async getPaymentEntries(saleId: number): Promise<PaymentEntry[]> {
+    async getPaymentEntries(saleId: number | string): Promise<PaymentEntry[]> {
         return query<PaymentEntry>('SELECT * FROM payment_entries WHERE sale_id = ? ORDER BY created_at', [saleId]);
     },
 
@@ -666,7 +668,7 @@ export const SaleRepo = {
     /**
      * Get total quantities already returned for each product in a sale.
      */
-    async getReturnedQuantities(saleId: number): Promise<Map<number, number>> {
+    async getReturnedQuantities(saleId: number | string): Promise<Map<number, number>> {
         const rows = await query<{ product_id: number; total_returned: number }>(
             `SELECT si.product_id, SUM(si.quantity) as total_returned
              FROM sale_items si
@@ -711,10 +713,12 @@ export const SaleRepo = {
             const ticketNumber = await this._incrementTicketNumber();
 
             // Create return sale (negative total)
+            const returnSaleId = crypto.randomUUID();
             await executeNoSave(
-                `INSERT INTO sales (user_id, session_id, customer_id, subtotal, tax_amount, discount_amount, total, payment_method, customer_name, status, ticket_number, original_sale_id, return_type)
-                 VALUES (?, ?, ?, ?, 0, 0, ?, ?, ?, 'returned', ?, ?, ?)`,
+                `INSERT INTO sales (id, user_id, session_id, customer_id, subtotal, tax_amount, discount_amount, total, payment_method, customer_name, status, ticket_number, original_sale_id, return_type)
+                 VALUES (?, ?, ?, ?, ?, 0, 0, ?, ?, ?, 'returned', ?, ?, ?)`,
                 [
+                    returnSaleId,
                     request.authorizedBy,
                     originalSale.session_id,
                     originalSale.customer_id,
@@ -728,14 +732,13 @@ export const SaleRepo = {
                 ],
             );
 
-            const returnSaleId = await lastInsertId();
-
             // Create return sale items (positive quantities for tracking, negative totals)
             for (const item of request.items) {
                 await executeNoSave(
-                    `INSERT INTO sale_items (sale_id, product_id, product_name, quantity, unit_price, discount, total)
-                     VALUES (?, ?, ?, ?, ?, 0, ?)`,
+                    `INSERT INTO sale_items (id, sale_id, product_id, product_name, quantity, unit_price, discount, total)
+                     VALUES (?, ?, ?, ?, ?, ?, 0, ?)`,
                     [
+                        crypto.randomUUID(),
                         returnSaleId,
                         item.productId,
                         item.productName,
@@ -758,9 +761,9 @@ export const SaleRepo = {
                 );
 
                 await executeNoSave(
-                    `INSERT INTO stock_movements (product_id, type, quantity, previous_stock, new_stock, reason, reference_id, reference_type)
-                     VALUES (?, 'return', ?, ?, ?, ?, ?, 'sale')`,
-                    [item.productId, item.returnQuantity, previousStock, previousStock + item.returnQuantity, request.reason || 'Return', returnSaleId],
+                    `INSERT INTO stock_movements (id, product_id, type, quantity, previous_stock, new_stock, reason, reference_id, reference_type)
+                     VALUES (?, ?, 'return', ?, ?, ?, ?, ?, 'sale')`,
+                    [crypto.randomUUID(), item.productId, item.returnQuantity, previousStock, previousStock + item.returnQuantity, request.reason || 'Return', returnSaleId],
                 );
             }
 

@@ -185,7 +185,7 @@
 
 ### US3: Onboarding Flow
 
-- [ ] T092 [US3] Create onboarding wizard in `frontend/src/components/onboarding/OnboardingWizard.tsx` — step-by-step guide (store settings → first category → first product → invite cashier → download POS), shown when onboarding_completed=false (FR-004)
+- [x] T092 [US3] Create onboarding wizard in `frontend/src/components/onboarding/OnboardingWizard.tsx` — step-by-step guide (store settings → first category → first product → invite cashier → download POS), shown when onboarding_completed=false (FR-004)
 
 **Checkpoint**: Web admin dashboard fully functional. All 12 management sections operational, real-time updates working, public pages live. Store owners can manage their business from any browser.
 
@@ -199,41 +199,41 @@
 
 ### US4: Backend Sync Endpoints
 
-- [ ] T093 [US4] Create SyncLog model in `backend/apps/sync/models.py` with all fields from data-model.md (operation_id, entity, action, client_id, local_timestamp, sync_order, conflict_detected, conflict_resolution)
-- [ ] T094 [US4] Implement POST /sync/push/ endpoint in `backend/apps/sync/views.py` — accept ordered operation array, detect duplicates via operation_id, perform field-level LWW merge, return accepted/conflicts/rejected per contracts/api.md §4
-- [ ] T095 [US4] Implement GET /sync/pull/?since={timestamp} endpoint in `backend/apps/sync/views.py` — return all entities modified since timestamp, including soft deletes per contracts/api.md §4
-- [ ] T096 [US4] Implement GET /sync/full/ endpoint in `backend/apps/sync/views.py` — return all store entities for initial full sync per contracts/api.md §4
-- [ ] T097 [US4] Implement conflict resolution service in `backend/apps/sync/services.py` — field-level SHA-256 hash comparison, LWW merge, conflict logging per research.md decision #3
+- [x] T093 [US4] Create SyncLog model in `backend/apps/sync/models.py` with all fields from data-model.md (operation_id, entity, action, client_id, local_timestamp, sync_order, conflict_detected, conflict_resolution)
+- [x] T094 [US4] Implement POST /sync/push/ endpoint in `backend/apps/sync/views.py` — accept ordered operation array, detect duplicates via operation_id, perform field-level LWW merge, return accepted/conflicts/rejected per contracts/api.md §4
+- [x] T095 [US4] Implement GET /sync/pull/?since={timestamp} endpoint in `backend/apps/sync/views.py` — return all entities modified since timestamp, including soft deletes per contracts/api.md §4
+- [x] T096 [US4] Implement GET /sync/full/ endpoint in `backend/apps/sync/views.py` — return all store entities for initial full sync per contracts/api.md §4
+- [x] T097 [US4] Implement conflict resolution service in `backend/apps/sync/services.py` — field-level SHA-256 hash comparison, LWW merge, conflict logging per research.md decision #3
 
 ### US4: POS Auth Modifications
 
-- [ ] T098 [US4] Create POS login screen in `src/components/auth/POSLoginScreen.tsx` — authenticates against backend API POST /auth/token/ (requires internet for first login), stores JWT refresh token + user record in local SQLite cache per research.md decision #5
-- [ ] T099 [US4] Implement cached credential manager in `src/services/cachedAuth.ts` — store hashed credentials in local SQLite, validate PIN offline, enforce 7-day expiry on cached refresh token (FR-019)
-- [ ] T100 [US4] Implement token refresh logic in `src/services/apiClient.ts` — auto-refresh access token using refresh token, handle 401 with re-auth prompt
+- [x] T098 [US4] Create POS login screen in `src/components/auth/POSLoginScreen.tsx` — authenticates against backend API POST /auth/token/ (requires internet for first login), stores JWT refresh token + user record in local SQLite cache per research.md decision #5
+- [x] T099 [US4] Implement cached credential manager in `src/services/cachedAuth.ts` — store hashed credentials in local SQLite, validate PIN offline, enforce 7-day expiry on cached refresh token (FR-019)
+- [x] T100 [US4] Implement token refresh logic in `src/services/apiClient.ts` — auto-refresh access token using refresh token, handle 401 with re-auth prompt
 
 ### US4: Sync Engine
 
-- [ ] T101 [US4] Create offline queue SQLite table and OfflineQueue class in `src/services/offlineQueue.ts` — stores pending operations with operation_id (UUID v4), entity, action, payload, local_timestamp, sync_order counter, field_hashes per research.md decision #3
-- [ ] T102 [US4] Create SyncEngine service in `src/services/syncEngine.ts` — orchestrates push (flush queue), pull (incremental), and full sync operations. Calls /sync/push/, /sync/pull/, /sync/full/ endpoints
-- [ ] T103 [US4] Implement connectivity monitor in `src/services/connectivityMonitor.ts` — detect online/offline state, trigger sync on reconnect, display connection status indicator in POS UI
-- [ ] T104 [US4] Implement periodic sync timer in `src/services/syncEngine.ts` — pull incremental changes every 30 seconds while online (FR-018)
-- [ ] T105 [US4] Implement initial full sync on first login in `src/services/syncEngine.ts` — download all store data to local SQLite cache via GET /sync/full/ (FR-018)
+- [x] T101 [US4] Create offline queue SQLite table and OfflineQueue class in `src/services/offlineQueue.ts` — stores pending operations with operation_id (UUID v4), entity, action, payload, local_timestamp, sync_order counter, field_hashes per research.md decision #3
+- [x] T102 [US4] Create SyncEngine service in `src/services/syncEngine.ts` — orchestrates push (flush queue), pull (incremental), and full sync operations. Calls /sync/push/, /sync/pull/, /sync/full/ endpoints
+- [x] T103 [US4] Implement connectivity monitor in `src/services/connectivityMonitor.ts` — detect online/offline state, trigger sync on reconnect, display connection status indicator in POS UI
+- [x] T104 [US4] Implement periodic sync timer in `src/services/syncEngine.ts` — pull incremental changes every 30 seconds while online (FR-018)
+- [x] T105 [US4] Implement initial full sync on first login in `src/services/syncEngine.ts` — download all store data to local SQLite cache via GET /sync/full/ (FR-018)
 
 ### US4: POS Store Modifications
 
-- [ ] T106 [US4] Modify existing Zustand stores in `src/stores/` to use UUID v4 primary keys instead of autoincrement integers — update all store interfaces and SQLite schema (FR-040)
-- [ ] T107 [US4] Add sync hooks to existing CRUD stores in `src/stores/createCrudStore.ts` — on local create/update/delete, enqueue operation in OfflineQueue, then attempt immediate push if online
-- [ ] T108 [US4] Integrate WebSocket client in `src/services/wsClient.ts` — connect to ws/store/updates/, receive entity_change messages, update local SQLite + Zustand stores in real-time (FR-012)
+- [x] T106 [US4] Modify existing Zustand stores in `src/stores/` to use UUID v4 primary keys instead of autoincrement integers — update all store interfaces and SQLite schema (FR-040)
+- [x] T107 [US4] Add sync hooks to existing CRUD stores in `src/stores/createCrudStore.ts` — on local create/update/delete, enqueue operation in OfflineQueue, then attempt immediate push if online
+- [x] T108 [US4] Integrate WebSocket client in `src/services/wsClient.ts` — connect to ws/store/updates/, receive entity_change messages, update local SQLite + Zustand stores in real-time (FR-012)
 
 ### US4: POS UUID Migration
 
-- [ ] T109 [US4] Update `database/schema.ts` to use UUID v4 TEXT primary keys instead of INTEGER AUTOINCREMENT across all 21 tables, add synced_at and client_id columns to sale-related tables
-- [ ] T110 [US4] Update all repository files in `database/repositories/*.repo.ts` to generate UUID v4 on create, accept string IDs instead of numbers
+- [x] T109 [US4] Update `database/schema.ts` to use UUID v4 TEXT primary keys instead of INTEGER AUTOINCREMENT across all 21 tables, add synced_at and client_id columns to sale-related tables
+- [x] T110 [US4] Update all repository files in `database/repositories/*.repo.ts` to generate UUID v4 on create, accept string IDs instead of numbers
 
 ### US4: Electron IPC Updates
 
-- [ ] T111 [US4] Update `electron/main.js` to initialize SyncEngine on app startup, pass auth tokens via IPC, handle sync status events
-- [ ] T112 [US4] Update `electron/preload.js` to expose sync IPC channels: sync:start, sync:status, sync:push, sync:pull, connectivity:status
+- [x] T111 [US4] Update `electron/main.js` to initialize SyncEngine on app startup, pass auth tokens via IPC, handle sync status events
+- [x] T112 [US4] Update `electron/preload.js` to expose sync IPC channels: sync:start, sync:status, sync:push, sync:pull, connectivity:status
 
 **Checkpoint**: POS authenticates against backend, syncs data bidirectionally, works fully offline, and receives real-time updates. The core revenue-generating flow (scan items → checkout → print receipt) works with or without internet.
 
@@ -247,30 +247,30 @@
 
 ### US5: Mobile Foundation
 
-- [ ] T113 [US5] Create API client service in `mobile/services/apiClient.ts` — axios instance with JWT interceptor, base URL from env
-- [ ] T114 [US5] Create auth store in `mobile/stores/authStore.ts` — login(), logout(), token management, secure token storage via expo-secure-store
-- [ ] T115 [US5] Create WebSocket client in `mobile/services/wsClient.ts` — connect, auth, reconnect, typed handlers (same pattern as frontend)
-- [ ] T116 [US5] Create navigation structure in `mobile/app/_layout.tsx` — tab navigator with Dashboard, Products, Sales, More tabs, auth guard for login screen
+- [X] T113 [US5] Create API client service in `mobile/services/apiClient.ts` — axios instance with JWT interceptor, base URL from env
+- [X] T114 [US5] Create auth store in `mobile/stores/authStore.ts` — login(), logout(), token management, secure token storage via expo-secure-store
+- [X] T115 [US5] Create WebSocket client in `mobile/services/wsClient.ts` — connect, auth, reconnect, typed handlers (same pattern as frontend)
+- [X] T116 [US5] Create navigation structure in `mobile/app/_layout.tsx` — tab navigator with Dashboard, Products, Sales, More tabs, auth guard for login screen
 
 ### US5: Mobile Screens
 
-- [ ] T117 [P] [US5] Create mobile dashboard screen in `mobile/app/(tabs)/dashboard.tsx` — today's sales count, revenue, recent sales list, stock alerts (FR-024)
-- [ ] T118 [P] [US5] Create mobile products screen in `mobile/app/(tabs)/products.tsx` — product list with search, add/edit product form, category filter (FR-024)
-- [ ] T119 [P] [US5] Create barcode scanner screen in `mobile/app/scan.tsx` — expo-camera barcode scanner, lookup product or offer creation flow (FR-025)
-- [ ] T120 [P] [US5] Create mobile sales screen in `mobile/app/(tabs)/sales.tsx` — sale list with date filter, sale detail view
-- [ ] T121 [P] [US5] Create mobile more screen in `mobile/app/(tabs)/more.tsx` — links to customers, suppliers, users, expenses, promotions, settings, reports sub-screens
-- [ ] T122 [P] [US5] Create mobile settings screen in `mobile/app/settings.tsx` — store profile, notification preferences
-- [ ] T123 [P] [US5] Create mobile reports screen in `mobile/app/reports.tsx` — sales summary chart, top products
+- [X] T117 [P] [US5] Create mobile dashboard screen in `mobile/app/(tabs)/dashboard.tsx` — today's sales count, revenue, recent sales list, stock alerts (FR-024)
+- [X] T118 [P] [US5] Create mobile products screen in `mobile/app/(tabs)/products.tsx` — product list with search, add/edit product form, category filter (FR-024)
+- [X] T119 [P] [US5] Create barcode scanner screen in `mobile/app/scan.tsx` — expo-camera barcode scanner, lookup product or offer creation flow (FR-025)
+- [X] T120 [P] [US5] Create mobile sales screen in `mobile/app/(tabs)/sales.tsx` — sale list with date filter, sale detail view
+- [X] T121 [P] [US5] Create mobile more screen in `mobile/app/(tabs)/more.tsx` — links to customers, suppliers, users, expenses, promotions, settings, reports sub-screens
+- [X] T122 [P] [US5] Create mobile settings screen in `mobile/app/settings.tsx` — store profile, notification preferences
+- [X] T123 [P] [US5] Create mobile reports screen in `mobile/app/reports.tsx` — sales summary chart, top products
 
 ### US5: Push Notifications
 
-- [ ] T124 [US5] Implement push notification registration in `mobile/services/pushNotifications.ts` — register device token with expo-notifications, send token to backend
-- [ ] T125 [US5] Create notification endpoint POST /notifications/register-device/ in `backend/apps/realtime/views.py` — store device tokens per user
-- [ ] T126 [US5] Implement push notification dispatch in `backend/apps/realtime/services.py` — send Expo push notifications for low stock alerts, large sales, cashier session changes (FR-026)
+- [X] T124 [US5] Implement push notification registration in `mobile/services/pushNotifications.ts` — register device token with expo-notifications, send token to backend
+- [X] T125 [US5] Create notification endpoint POST /notifications/register-device/ in `backend/apps/realtime/views.py` — store device tokens per user
+- [X] T126 [US5] Implement push notification dispatch in `backend/apps/realtime/services.py` — send Expo push notifications for low stock alerts, large sales, cashier session changes (FR-026)
 
 ### US5: Mobile Offline Cache
 
-- [ ] T127 [US5] Implement light offline cache in `mobile/services/offlineCache.ts` using expo-sqlite — cache products, categories for offline viewing, queue product edits for sync (FR-027)
+- [X] T127 [US5] Implement light offline cache in `mobile/services/offlineCache.ts` using expo-sqlite — cache products, categories for offline viewing, queue product edits for sync (FR-027)
 
 **Checkpoint**: Mobile app fully functional. Owners can manage their store on the go, scan barcodes, receive push notifications, and see real-time updates from POS devices.
 
@@ -284,24 +284,24 @@
 
 ### US6: Backend Billing
 
-- [ ] T128 [US6] Configure dj-stripe in `backend/config/settings/base.py` — STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, djstripe app, webhook URL per research.md decision #4
-- [ ] T129 [US6] Create plan tier configuration in `backend/apps/billing/plans.py` — Free Trial (14 days, full access), Basic (500 products, 3 cashiers), Pro (10000 products, 50 cashiers) with feature flags
-- [ ] T130 [US6] Implement PlanLimitEnforcementMiddleware in `backend/apps/billing/middleware.py` — check limits on POST requests for products, users before view execution (FR-029)
-- [ ] T131 [US6] Implement GET /billing/subscription/ endpoint in `backend/apps/billing/views.py` — return plan, status, limits, current usage per contracts/api.md §6
-- [ ] T132 [US6] Implement POST /billing/checkout-session/ endpoint in `backend/apps/billing/views.py` — create Stripe Checkout Session for plan upgrade (FR-030)
-- [ ] T133 [US6] Implement POST /billing/portal-session/ endpoint in `backend/apps/billing/views.py` — create Stripe Customer Portal session for self-service management (FR-030)
-- [ ] T134 [US6] Implement POST /billing/webhook/ endpoint in `backend/apps/billing/views.py` — handle Stripe webhook events (subscription.created, subscription.updated, subscription.deleted, invoice.payment_succeeded, invoice.payment_failed) via dj-stripe signal receivers per research.md decision #4
-- [ ] T135 [US6] Implement subscription lifecycle management in `backend/apps/billing/services.py` — handle state transitions (trial→active, active→past_due, active→canceled, canceled→expired), grace period logic (90-day retention), 14-day deletion warning email (FR-031)
+- [X] T128 [US6] Configure dj-stripe in `backend/config/settings/base.py` — STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, djstripe app, webhook URL per research.md decision #4
+- [X] T129 [US6] Create plan tier configuration in `backend/apps/billing/plans.py` — Free Trial (14 days, full access), Basic (500 products, 3 cashiers), Pro (10000 products, 50 cashiers) with feature flags
+- [X] T130 [US6] Implement PlanLimitEnforcementMiddleware in `backend/apps/billing/middleware.py` — check limits on POST requests for products, users before view execution (FR-029)
+- [X] T131 [US6] Implement GET /billing/subscription/ endpoint in `backend/apps/billing/views.py` — return plan, status, limits, current usage per contracts/api.md §6
+- [X] T132 [US6] Implement POST /billing/checkout-session/ endpoint in `backend/apps/billing/views.py` — create Stripe Checkout Session for plan upgrade (FR-030)
+- [X] T133 [US6] Implement POST /billing/portal-session/ endpoint in `backend/apps/billing/views.py` — create Stripe Customer Portal session for self-service management (FR-030)
+- [X] T134 [US6] Implement POST /billing/webhook/ endpoint in `backend/apps/billing/views.py` — handle Stripe webhook events (subscription.created, subscription.updated, subscription.deleted, invoice.payment_succeeded, invoice.payment_failed) via dj-stripe signal receivers per research.md decision #4
+- [X] T135 [US6] Implement subscription lifecycle management in `backend/apps/billing/services.py` — handle state transitions (trial→active, active→past_due, active→canceled, canceled→expired), grace period logic (90-day retention), 14-day deletion warning email (FR-031)
 
 ### US6: Frontend Billing UI
 
-- [ ] T136 [P] [US6] Create subscription page in `frontend/src/pages/SubscriptionPage.tsx` — display current plan, usage meters, upgrade/downgrade buttons, cancel option (FR-030)
-- [ ] T137 [P] [US6] Add plan limit warnings to entity creation forms in `frontend/src/components/common/PlanLimitBanner.tsx` — show warning when approaching limits, block with upgrade CTA when at limit (FR-029)
-- [ ] T138 [P] [US6] Create grace period banner in `frontend/src/components/common/GracePeriodBanner.tsx` — persistent warning when subscription is past_due or canceled, countdown to read-only mode
+- [X] T136 [P] [US6] Create subscription page in `frontend/src/pages/SubscriptionPage.tsx` — display current plan, usage meters, upgrade/downgrade buttons, cancel option (FR-030)
+- [X] T137 [P] [US6] Add plan limit warnings to entity creation forms in `frontend/src/components/common/PlanLimitBanner.tsx` — show warning when approaching limits, block with upgrade CTA when at limit (FR-029)
+- [X] T138 [P] [US6] Create grace period banner in `frontend/src/components/common/GracePeriodBanner.tsx` — persistent warning when subscription is past_due or canceled, countdown to read-only mode
 
 ### US6: Mobile Billing UI
 
-- [ ] T139 [US6] Create subscription screen in `mobile/app/subscription.tsx` — plan display, usage, link to Stripe portal for management (FR-030)
+- [X] T139 [US6] Create subscription screen in `mobile/app/subscription.tsx` — plan display, usage, link to Stripe portal for management (FR-030)
 
 **Checkpoint**: Full billing lifecycle working. Stores start on free trial, can upgrade/downgrade, plan limits enforced, graceful degradation on subscription lapse.
 
@@ -311,16 +311,16 @@
 
 **Purpose**: Security hardening, distribution, deployment, and refinements across all components
 
-- [ ] T140 [P] Implement PII access logging middleware in `backend/apps/audit/middleware.py` — log read access to customer, user, payment endpoints (FR-036)
-- [ ] T141 [P] Add rate limiting to auth endpoints in `backend/config/settings/base.py` — throttle login/register to prevent brute force
-- [ ] T142 [P] Configure electron-builder auto-update in `electron-builder.yml` and `electron/main.js` — point to GitHub Releases for update feed (FR-039)
-- [ ] T143 [P] Create desktop installer build script in `package.json` scripts — cross-platform builds for Windows (.exe) and macOS (.dmg) via electron-builder (FR-038)
-- [ ] T144 [P] Create `backend/Dockerfile` and `backend/render.yaml` for Render deployment — Gunicorn + Daphne, PostgreSQL, Redis per research.md decision #7
-- [ ] T145 [P] Create `frontend/vercel.json` for Vercel deployment — Vite build, API proxy rewrite, environment variables
-- [ ] T146 [P] Configure Expo EAS Build in `mobile/eas.json` for iOS + Android builds per research.md decision #7
-- [ ] T147 [P] Create seed data management command `backend/apps/core/management/commands/seed_demo_store.py` — create demo store with sample products, categories, customers, sales for development/demo
-- [ ] T148 [P] Add health check endpoint GET /health/ in `backend/config/urls.py` — database + Redis connectivity check for monitoring (SC-013)
-- [ ] T149 Run quickstart.md validation — verify all four components start successfully with documented commands, environment variables, and prerequisites
+- [X] T140 [P] Implement PII access logging middleware in `backend/apps/audit/middleware.py` — log read access to customer, user, payment endpoints (FR-036)
+- [X] T141 [P] Add rate limiting to auth endpoints in `backend/config/settings/base.py` — throttle login/register to prevent brute force
+- [X] T142 [P] Configure electron-builder auto-update in `electron-builder.yml` and `electron/main.js` — point to GitHub Releases for update feed (FR-039)
+- [X] T143 [P] Create desktop installer build script in `package.json` scripts — cross-platform builds for Windows (.exe) and macOS (.dmg) via electron-builder (FR-038)
+- [X] T144 [P] Create `backend/Dockerfile` and `backend/render.yaml` for Render deployment — Gunicorn + Daphne, PostgreSQL, Redis per research.md decision #7
+- [X] T145 [P] Create `frontend/vercel.json` for Vercel deployment — Vite build, API proxy rewrite, environment variables
+- [X] T146 [P] Configure Expo EAS Build in `mobile/eas.json` for iOS + Android builds per research.md decision #7
+- [X] T147 [P] Create seed data management command `backend/apps/core/management/commands/seed_demo_store.py` — create demo store with sample products, categories, customers, sales for development/demo
+- [X] T148 [P] Add health check endpoint GET /health/ in `backend/config/urls.py` — database + Redis connectivity check for monitoring (SC-013)
+- [X] T149 Run quickstart.md validation — verify all four components start successfully with documented commands, environment variables, and prerequisites
 
 **Checkpoint**: All components production-ready. Installers built, deployment configs in place, security hardened, monitoring enabled.
 

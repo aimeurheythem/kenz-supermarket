@@ -16,6 +16,7 @@ interface SupplierExtras {
  */
 export const useSupplierStore = createCrudStore<Supplier, SupplierInput, SupplierExtras>({
     repo: SupplierRepo,
+    entityName: 'supplier',
     extend: (set, get) => ({
         loadSuppliers: () => get().loadAll(),
         addSupplier: (input: SupplierInput) => get().add(input),

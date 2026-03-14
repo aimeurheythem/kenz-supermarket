@@ -1,4 +1,4 @@
-import { query, execute, lastInsertId, get } from '../db';
+import { query, execute, get } from '../db';
 import type { QuickAccessItem, QuickAccessItemInput } from '../../src/lib/types';
 
 export const QuickAccessRepo = {
@@ -21,7 +21,7 @@ export const QuickAccessRepo = {
         });
     },
 
-    async getById(id: number): Promise<QuickAccessItem | undefined> {
+    async getById(id: number | string): Promise<QuickAccessItem | undefined> {
         const sql = `
             SELECT qa.*, COALESCE(p.name, 'Unknown Product') as product_name
             FROM pos_quick_access qa
@@ -41,10 +41,12 @@ export const QuickAccessRepo = {
     },
 
     async create(input: QuickAccessItemInput): Promise<QuickAccessItem> {
+        const id = crypto.randomUUID();
         await execute(
-            `INSERT INTO pos_quick_access (product_id, display_name, icon, color, bg_color, options)
-             VALUES (?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO pos_quick_access (id, product_id, display_name, icon, color, bg_color, options)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
+                id,
                 input.product_id,
                 input.display_name,
                 input.icon || 'ShoppingBag',
@@ -53,11 +55,10 @@ export const QuickAccessRepo = {
                 JSON.stringify(input.options || []),
             ],
         );
-        const id = await lastInsertId();
         return this.getById(id) as Promise<QuickAccessItem>;
     },
 
-    async update(id: number, input: Partial<QuickAccessItemInput>): Promise<QuickAccessItem> {
+    async update(id: number | string, input: Partial<QuickAccessItemInput>): Promise<QuickAccessItem> {
         const fields: string[] = [];
         const values: unknown[] = [];
 
@@ -93,7 +94,7 @@ export const QuickAccessRepo = {
         return this.getById(id) as Promise<QuickAccessItem>;
     },
 
-    async delete(id: number): Promise<void> {
+    async delete(id: number | string): Promise<void> {
         await execute('DELETE FROM pos_quick_access WHERE id = ?', [id]);
     },
 };

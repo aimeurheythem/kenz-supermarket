@@ -1,4 +1,4 @@
-import { query, execute, lastInsertId, get } from '../db';
+import { query, execute, get } from '../db';
 import type { Supplier, SupplierInput } from '../../src/lib/types';
 import { AuditLogRepo } from './audit-log.repo';
 
@@ -19,19 +19,20 @@ export const SupplierRepo = {
         return query<Supplier>(sql, params);
     },
 
-    async getById(id: number): Promise<Supplier | undefined> {
+    async getById(id: number | string): Promise<Supplier | undefined> {
         return get<Supplier>('SELECT * FROM suppliers WHERE id = ?', [id]);
     },
 
     async create(input: SupplierInput): Promise<Supplier> {
-        await execute('INSERT INTO suppliers (name, contact_person, phone, email, address) VALUES (?, ?, ?, ?, ?)', [
+        const id = crypto.randomUUID();
+        await execute('INSERT INTO suppliers (id, name, contact_person, phone, email, address) VALUES (?, ?, ?, ?, ?, ?)', [
+            id,
             input.name,
             input.contact_person || '',
             input.phone || '',
             input.email || '',
             input.address || '',
         ]);
-        const id = await lastInsertId();
 
         AuditLogRepo.log('CREATE', 'SUPPLIER', id, `Created supplier: ${input.name}`, null, {
             name: input.name,
@@ -42,7 +43,7 @@ export const SupplierRepo = {
         return this.getById(id) as Promise<Supplier>;
     },
 
-    async update(id: number, input: Partial<SupplierInput>): Promise<Supplier> {
+    async update(id: number | string, input: Partial<SupplierInput>): Promise<Supplier> {
         const fields: string[] = [];
         const values: unknown[] = [];
 
@@ -78,14 +79,14 @@ export const SupplierRepo = {
         return this.getById(id) as Promise<Supplier>;
     },
 
-    async updateBalance(id: number, amount: number): Promise<void> {
+    async updateBalance(id: number | string, amount: number): Promise<void> {
         await execute("UPDATE suppliers SET balance = balance + ?, updated_at = datetime('now') WHERE id = ?", [
             amount,
             id,
         ]);
     },
 
-    async delete(id: number): Promise<void> {
+    async delete(id: number | string): Promise<void> {
         const supplier = await this.getById(id);
         await execute('UPDATE suppliers SET is_active = 0 WHERE id = ?', [id]);
 

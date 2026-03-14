@@ -56,9 +56,10 @@ export const StockRepo = {
             );
 
             await executeNoSave(
-                `INSERT INTO stock_movements (product_id, type, quantity, previous_stock, new_stock, reason, reference_id, reference_type)
-           VALUES (?, 'in', ?, ?, ?, ?, ?, ?)`,
+                `INSERT INTO stock_movements (id, product_id, type, quantity, previous_stock, new_stock, reason, reference_id, reference_type)
+           VALUES (?, ?, 'in', ?, ?, ?, ?, ?, ?)`,
                 [
+                    crypto.randomUUID(),
                     productId,
                     quantity,
                     previousStock,
@@ -111,9 +112,9 @@ export const StockRepo = {
             );
 
             await executeNoSave(
-                `INSERT INTO stock_movements (product_id, type, quantity, previous_stock, new_stock, reason)
-           VALUES (?, 'out', ?, ?, ?, ?)`,
-                [productId, quantity, previousStock, newStock, reason],
+                `INSERT INTO stock_movements (id, product_id, type, quantity, previous_stock, new_stock, reason)
+           VALUES (?, ?, 'out', ?, ?, ?, ?)`,
+                [crypto.randomUUID(), productId, quantity, previousStock, newStock, reason],
             );
 
             await executeNoSave('COMMIT;');
@@ -152,9 +153,9 @@ export const StockRepo = {
             ]);
 
             await executeNoSave(
-                `INSERT INTO stock_movements (product_id, type, quantity, previous_stock, new_stock, reason)
-           VALUES (?, 'adjustment', ?, ?, ?, ?)`,
-                [productId, Math.abs(newQuantity - previousStock), previousStock, newQuantity, reason],
+                `INSERT INTO stock_movements (id, product_id, type, quantity, previous_stock, new_stock, reason)
+           VALUES (?, ?, 'adjustment', ?, ?, ?, ?)`,
+                [crypto.randomUUID(), productId, Math.abs(newQuantity - previousStock), previousStock, newQuantity, reason],
             );
 
             await executeNoSave('COMMIT;');

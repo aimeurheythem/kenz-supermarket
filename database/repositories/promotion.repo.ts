@@ -1,4 +1,4 @@
-import { query, execute, lastInsertId, get } from '../db';
+import { query, execute, get } from '../db';
 import type { Promotion, PromotionInput, PromotionProduct } from '../../src/lib/types';
 import { AuditLogRepo } from './audit-log.repo';
 
@@ -54,7 +54,7 @@ export const PromotionRepo = {
         return promotions;
     },
 
-    async getById(id: number): Promise<Promotion | undefined> {
+    async getById(id: number | string): Promise<Promotion | undefined> {
         const promo = await get<Promotion>(
             `SELECT p.*,
         CASE
@@ -73,10 +73,12 @@ export const PromotionRepo = {
     },
 
     async create(input: PromotionInput): Promise<Promotion> {
+        const id = crypto.randomUUID();
         await execute(
-            `INSERT INTO promotions (name, type, status, start_date, end_date, config)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO promotions (id, name, type, status, start_date, end_date, config)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
+                id,
                 input.name,
                 input.type,
                 input.status || 'active',
@@ -85,13 +87,12 @@ export const PromotionRepo = {
                 JSON.stringify(input.config),
             ],
         );
-        const id = await lastInsertId();
 
         // Insert product associations
         for (const productId of input.product_ids) {
             await execute(
-                'INSERT OR IGNORE INTO promotion_products (promotion_id, product_id) VALUES (?, ?)',
-                [id, productId],
+                'INSERT OR IGNORE INTO promotion_products (id, promotion_id, product_id) VALUES (?, ?, ?)',
+                [crypto.randomUUID(), id, productId],
             );
         }
 
@@ -100,7 +101,7 @@ export const PromotionRepo = {
         return (await this.getById(id)) as Promotion;
     },
 
-    async update(id: number, input: Partial<PromotionInput>): Promise<Promotion> {
+    async update(id: number | string, input: Partial<PromotionInput>): Promise<Promotion> {
         const oldPromotion = await this.getById(id);
 
         const fields: string[] = [];
@@ -142,8 +143,8 @@ export const PromotionRepo = {
             await execute('DELETE FROM promotion_products WHERE promotion_id = ?', [id]);
             for (const productId of input.product_ids) {
                 await execute(
-                    'INSERT OR IGNORE INTO promotion_products (promotion_id, product_id) VALUES (?, ?)',
-                    [id, productId],
+                    'INSERT OR IGNORE INTO promotion_products (id, promotion_id, product_id) VALUES (?, ?, ?)',
+                    [crypto.randomUUID(), id, productId],
                 );
             }
         }
@@ -153,7 +154,7 @@ export const PromotionRepo = {
         return (await this.getById(id)) as Promotion;
     },
 
-    async delete(id: number): Promise<void> {
+    async delete(id: number | string): Promise<void> {
         const promo = await this.getById(id);
         await execute("UPDATE promotions SET deleted_at = datetime('now'), updated_at = datetime('now') WHERE id = ?", [id]);
         await AuditLogRepo.log('DELETE', 'PROMOTION', id, `Soft-deleted promotion: ${promo?.name}`, promo, null);
@@ -204,7 +205,7 @@ export const PromotionRepo = {
         return result?.count ?? 0;
     },
 
-    async _getProducts(promotionId: number): Promise<PromotionProduct[]> {
+    async _getProducts(promotionId: number | string): Promise<PromotionProduct[]> {
         return query<PromotionProduct>(
             `SELECT pp.*, p.name as product_name, p.selling_price
        FROM promotion_products pp

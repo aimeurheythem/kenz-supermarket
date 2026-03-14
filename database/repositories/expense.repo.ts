@@ -1,13 +1,15 @@
-import { execute, get, query, lastInsertId } from '../db';
+import { execute, get, query } from '../db';
 import type { Expense, ExpenseInput } from '../../src/lib/types';
 import { AuditLogRepo } from './audit-log.repo';
 
 export const ExpenseRepo = {
     async create(expense: ExpenseInput): Promise<Expense> {
+        const id = crypto.randomUUID();
         await execute(
-            `INSERT INTO expenses (description, amount, category, date, payment_method, user_id)
-             VALUES (?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO expenses (id, description, amount, category, date, payment_method, user_id)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
+                id,
                 expense.description,
                 expense.amount,
                 expense.category,
@@ -16,7 +18,6 @@ export const ExpenseRepo = {
                 expense.user_id || null,
             ],
         );
-        const id = await lastInsertId();
 
         AuditLogRepo.log(
             'CREATE',
@@ -31,7 +32,7 @@ export const ExpenseRepo = {
         return this.getById(id) as Promise<Expense>;
     },
 
-    async getById(id: number): Promise<Expense | undefined> {
+    async getById(id: number | string): Promise<Expense | undefined> {
         return get<Expense>('SELECT * FROM expenses WHERE id = ?', [id]);
     },
 
@@ -59,7 +60,7 @@ export const ExpenseRepo = {
         return await query<Expense>(sql, params);
     },
 
-    async update(id: number, input: Partial<ExpenseInput>): Promise<Expense> {
+    async update(id: number | string, input: Partial<ExpenseInput>): Promise<Expense> {
         const fields: string[] = [];
         const values: unknown[] = [];
 
@@ -92,7 +93,7 @@ export const ExpenseRepo = {
         return this.getById(id) as Promise<Expense>;
     },
 
-    async delete(id: number): Promise<void> {
+    async delete(id: number | string): Promise<void> {
         const expense = await get<Expense>('SELECT * FROM expenses WHERE id = ?', [id]);
         await execute('DELETE FROM expenses WHERE id = ?', [id]);
 

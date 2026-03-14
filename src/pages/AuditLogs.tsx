@@ -268,6 +268,11 @@ export default function AuditLogs() {
     }).length;
     const uniqueUsers = [...new Set(logs.map((log) => log.user_name).filter(Boolean))].length;
 
+    const getUserInitial = (log: AuditLog) => {
+        const name = (log.user_name || t('audit_logs.system_user') || '').trim();
+        return name.charAt(0).toUpperCase() || 'S';
+    };
+
     return (
         <div className="relative flex flex-col items-start gap-8 p-6 lg:p-8 animate-fadeIn mt-4">
             {/* Grid Background */}
@@ -493,7 +498,7 @@ export default function AuditLogs() {
                                         <td className="px-6 py-4 rtl:text-right ltr:text-left">
                                             <div className="flex items-center gap-2">
                                                 <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-xs font-bold text-zinc-600">
-                                                    {log.user_name?.[0] || '?'}
+                                                    {getUserInitial(log)}
                                                 </div>
                                                 <span className="text-sm font-medium text-zinc-600">
                                                     {log.user_name || t('audit_logs.system_user')}

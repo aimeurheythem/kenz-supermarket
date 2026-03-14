@@ -19,3 +19,12 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
+mac:
+  target: dmg
+  icon: build/icon.icns
+  category: public.app-category.business
+publish:
+  provider: github
+  owner: your-org
+  repo: super-market
+  releaseType: release

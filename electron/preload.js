@@ -121,4 +121,32 @@ contextBridge.exposeInMainWorld('electronAPI', {
     onBeforeQuit: (callback) => {
         ipcRenderer.on('app:before-quit', () => callback());
     },
+
+    /**
+     * Register a callback for when the app is fully ready.
+     */
+    onAppReady: (callback) => {
+        ipcRenderer.on('app:ready', () => callback());
+    },
+
+    // ========================
+    // Sync Engine IPC
+    // ========================
+
+    /** Notify main process of current sync status. */
+    syncSetStatus: (status) => ipcRenderer.send('sync:status', status),
+
+    /** Get current sync status from main process. */
+    syncGetStatus: () => ipcRenderer.invoke('sync:get-status'),
+
+    /** Request sync start from main process. */
+    syncStart: () => ipcRenderer.send('sync:start'),
+
+    /** Listen for sync started acknowledgment. */
+    onSyncStarted: (callback) => {
+        ipcRenderer.on('sync:started', () => callback());
+    },
+
+    /** Notify main process of connectivity status. */
+    connectivitySetStatus: (status) => ipcRenderer.send('connectivity:status', status),
 });

@@ -740,6 +740,7 @@
         "payment_for": "for {{name}}",
         "total_due": "Total Due",
         "payment_amount": "Payment Amount",
+        "cancel": "Cancel",
         "processing": "Processing...",
         "confirm_payment": "Confirm Payment",
         "payment_failed": "Payment failed",

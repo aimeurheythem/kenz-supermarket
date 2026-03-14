@@ -733,6 +733,7 @@
         "payment_for": "pour {{name}}",
         "total_due": "Total Dû",
         "payment_amount": "Montant du Paiement",
+        "cancel": "Annuler",
         "processing": "Traitement en cours...",
         "confirm_payment": "Confirmer le Paiement",
         "payment_failed": "Échec du paiement",

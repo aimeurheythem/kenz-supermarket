@@ -29,7 +29,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import Portal from '@/components/common/Portal';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { usePageTitle } from '@/hooks/usePageTitle';
 
 export default function Credit() {
@@ -477,14 +477,8 @@ function PaymentModal({
     };
 
     return (
-        <Portal>
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden"
-                >
+        <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
+            <DialogContent className="max-w-md p-0 overflow-hidden">
                     <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
                         <div>
                             <h2 className="text-lg font-bold text-black">{t('credit.record_payment')}</h2>
@@ -540,7 +534,7 @@ function PaymentModal({
                                 disabled={isLoading}
                                 className="flex-1 rounded-xl"
                             >
-                                {t('credit.cancel')}
+                                {t('credit.cancel', 'Cancel')}
                             </Button>
                             <Button
                                 type="submit"
@@ -551,8 +545,7 @@ function PaymentModal({
                             </Button>
                         </div>
                     </form>
-                </motion.div>
-            </div>
-        </Portal>
+            </DialogContent>
+        </Dialog>
     );
 }

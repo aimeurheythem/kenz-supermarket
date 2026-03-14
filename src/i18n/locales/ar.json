@@ -732,6 +732,7 @@
         "payment_for": "لـ {{name}}",
         "total_due": "المبلغ المستحق",
         "payment_amount": "مبلغ الدفع",
+        "cancel": "إلغاء",
         "processing": "جاري المعالجة...",
         "confirm_payment": "تأكيد الدفع",
         "payment_failed": "فشل الدفع",

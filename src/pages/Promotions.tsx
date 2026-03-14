@@ -136,7 +136,7 @@ export default function Promotions() {
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="relative overflow-hidden p-6 bg-gray-100 rounded-[3rem]"
+                        className="relative overflow-hidden p-6 bg-gray-100 border-2 border-black/10 rounded-[3rem]"
                     >
                         <div className="relative z-10 flex items-center justify-between mb-4">
                             <div className="p-3">
@@ -155,7 +155,7 @@ export default function Promotions() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.05 }}
-                        className="relative overflow-hidden p-6 bg-black rounded-[3rem]"
+                        className="relative overflow-hidden p-6 bg-black border-2 border-black/10 rounded-[3rem]"
                     >
                         <div className="relative z-10 flex items-center justify-between mb-4">
                             <div className="p-3">
@@ -174,7 +174,7 @@ export default function Promotions() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="relative overflow-hidden p-6 bg-gray-100 rounded-[3rem]"
+                        className="relative overflow-hidden p-6 bg-gray-100 border-2 border-black/10 rounded-[3rem]"
                     >
                         <div className="relative z-10 flex items-center justify-between mb-4">
                             <div className="p-3">

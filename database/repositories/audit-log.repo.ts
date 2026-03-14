@@ -47,9 +47,10 @@ export const AuditLogRepo = {
 
             await execute(
                 `INSERT INTO audit_logs (
-                    user_id, user_name, action, entity, entity_id, details, old_value, new_value
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                    id, user_id, user_name, action, entity, entity_id, details, old_value, new_value
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
+                    crypto.randomUUID(),
                     userId,
                     userName,
                     action,

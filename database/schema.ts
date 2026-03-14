@@ -1,6 +1,10 @@
 /**
  * Database Schema — SQL Migrations
  * Applied automatically on first launch
+ *
+ * As of 006-cloud-saas-platform, new installations use UUID v4 TEXT
+ * primary keys for cloud sync compatibility.  Existing databases keep
+ * their INTEGER PKs — the repos accept both.
  */
 
 export const SCHEMA_SQL = `
@@ -8,7 +12,7 @@ export const SCHEMA_SQL = `
 -- CATEGORIES
 -- =============================================
 CREATE TABLE IF NOT EXISTS categories (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id TEXT PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   description TEXT DEFAULT '',
   color TEXT DEFAULT '#6366f1',
@@ -20,11 +24,11 @@ CREATE TABLE IF NOT EXISTS categories (
 -- PRODUCTS
 -- =============================================
 CREATE TABLE IF NOT EXISTS products (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id TEXT PRIMARY KEY,
   barcode TEXT UNIQUE,
   name TEXT NOT NULL,
   description TEXT DEFAULT '',
-  category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+  category_id TEXT REFERENCES categories(id) ON DELETE SET NULL,
   cost_price REAL NOT NULL DEFAULT 0,
   selling_price REAL NOT NULL DEFAULT 0,
   stock_quantity INTEGER NOT NULL DEFAULT 0,
@@ -40,8 +44,8 @@ CREATE TABLE IF NOT EXISTS products (
 -- PRODUCT BATCHES (for expiration/batch tracking)
 -- =============================================
 CREATE TABLE IF NOT EXISTS product_batches (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  id TEXT PRIMARY KEY,
+  product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   batch_number TEXT NOT NULL,
   manufacture_date TEXT,
   expiration_date TEXT,
@@ -54,7 +58,7 @@ CREATE TABLE IF NOT EXISTS product_batches (
 -- SUPPLIERS
 -- =============================================
 CREATE TABLE IF NOT EXISTS suppliers (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   contact_person TEXT DEFAULT '',
   phone TEXT DEFAULT '',
@@ -70,8 +74,8 @@ CREATE TABLE IF NOT EXISTS suppliers (
 -- PURCHASE ORDERS
 -- =============================================
 CREATE TABLE IF NOT EXISTS purchase_orders (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  supplier_id INTEGER NOT NULL REFERENCES suppliers(id),
+  id TEXT PRIMARY KEY,
+  supplier_id TEXT NOT NULL REFERENCES suppliers(id),
   order_date TEXT DEFAULT (datetime('now')),
   expected_date TEXT,
   status TEXT DEFAULT 'pending',
@@ -86,9 +90,9 @@ CREATE TABLE IF NOT EXISTS purchase_orders (
 -- PURCHASE ORDER ITEMS
 -- =============================================
 CREATE TABLE IF NOT EXISTS purchase_order_items (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  purchase_order_id INTEGER NOT NULL REFERENCES purchase_orders(id) ON DELETE CASCADE,
-  product_id INTEGER NOT NULL REFERENCES products(id),
+  id TEXT PRIMARY KEY,
+  purchase_order_id TEXT NOT NULL REFERENCES purchase_orders(id) ON DELETE CASCADE,
+  product_id TEXT NOT NULL REFERENCES products(id),
   quantity INTEGER NOT NULL,
   unit_cost REAL NOT NULL,
   total_cost REAL NOT NULL,
@@ -96,13 +100,10 @@ CREATE TABLE IF NOT EXISTS purchase_order_items (
 );
 
 -- =============================================
--- SALES
--- =============================================
--- =============================================
 -- CUSTOMERS
 -- =============================================
 CREATE TABLE IF NOT EXISTS customers (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id TEXT PRIMARY KEY,
   full_name TEXT NOT NULL,
   phone TEXT,
   email TEXT,
@@ -118,13 +119,13 @@ CREATE TABLE IF NOT EXISTS customers (
 -- CUSTOMER TRANSACTIONS (Ledger)
 -- =============================================
 CREATE TABLE IF NOT EXISTS customer_transactions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  customer_id INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
-  type TEXT NOT NULL, -- 'debt' (sale on credit) or 'payment' (paying off debt)
+  id TEXT PRIMARY KEY,
+  customer_id TEXT NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+  type TEXT NOT NULL,
   amount REAL NOT NULL,
   balance_after REAL NOT NULL,
-  reference_type TEXT, -- 'sale', 'payment'
-  reference_id INTEGER, -- sale_id or null
+  reference_type TEXT,
+  reference_id TEXT,
   description TEXT,
   created_at TEXT DEFAULT (datetime('now'))
 );
@@ -133,24 +134,26 @@ CREATE TABLE IF NOT EXISTS customer_transactions (
 -- SALES
 -- =============================================
 CREATE TABLE IF NOT EXISTS sales (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER REFERENCES users(id),
-  session_id INTEGER REFERENCES cashier_sessions(id),
-  customer_id INTEGER REFERENCES customers(id) ON DELETE SET NULL, -- Linked customer
+  id TEXT PRIMARY KEY,
+  user_id TEXT REFERENCES users(id),
+  session_id TEXT REFERENCES cashier_sessions(id),
+  customer_id TEXT REFERENCES customers(id) ON DELETE SET NULL,
   sale_date TEXT DEFAULT (datetime('now')),
   subtotal REAL NOT NULL DEFAULT 0,
   tax_amount REAL DEFAULT 0,
   discount_amount REAL DEFAULT 0,
   total REAL NOT NULL DEFAULT 0,
   payment_method TEXT DEFAULT 'cash',
-  customer_name TEXT DEFAULT 'Walk-in Customer', -- Fallback or denormalized name
+  customer_name TEXT DEFAULT 'Walk-in Customer',
   status TEXT DEFAULT 'completed',
   ticket_number INTEGER DEFAULT NULL,
-  original_sale_id INTEGER DEFAULT NULL REFERENCES sales(id),
+  original_sale_id TEXT DEFAULT NULL REFERENCES sales(id),
   return_type TEXT DEFAULT NULL,
   cart_discount_type TEXT DEFAULT NULL,
   cart_discount_value REAL DEFAULT 0,
   cart_discount_amount REAL DEFAULT 0,
+  synced_at TEXT DEFAULT NULL,
+  client_id TEXT DEFAULT NULL,
   created_at TEXT DEFAULT (datetime('now'))
 );
 
@@ -158,9 +161,9 @@ CREATE TABLE IF NOT EXISTS sales (
 -- SALE ITEMS
 -- =============================================
 CREATE TABLE IF NOT EXISTS sale_items (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  sale_id INTEGER NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
-  product_id INTEGER NOT NULL REFERENCES products(id),
+  id TEXT PRIMARY KEY,
+  sale_id TEXT NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
+  product_id TEXT NOT NULL REFERENCES products(id),
   product_name TEXT NOT NULL,
   quantity INTEGER NOT NULL,
   unit_price REAL NOT NULL,
@@ -169,22 +172,24 @@ CREATE TABLE IF NOT EXISTS sale_items (
   manual_discount_type TEXT DEFAULT NULL,
   manual_discount_value REAL DEFAULT 0,
   manual_discount_amount REAL DEFAULT 0,
-  promotion_id INTEGER DEFAULT NULL REFERENCES promotions(id) ON DELETE SET NULL,
-  promotion_name TEXT DEFAULT NULL
+  promotion_id TEXT DEFAULT NULL REFERENCES promotions(id) ON DELETE SET NULL,
+  promotion_name TEXT DEFAULT NULL,
+  synced_at TEXT DEFAULT NULL,
+  client_id TEXT DEFAULT NULL
 );
 
 -- =============================================
 -- STOCK MOVEMENTS
 -- =============================================
 CREATE TABLE IF NOT EXISTS stock_movements (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  id TEXT PRIMARY KEY,
+  product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   type TEXT NOT NULL,
   quantity INTEGER NOT NULL,
   previous_stock INTEGER NOT NULL,
   new_stock INTEGER NOT NULL,
   reason TEXT DEFAULT '',
-  reference_id INTEGER,
+  reference_id TEXT,
   reference_type TEXT,
   created_at TEXT DEFAULT (datetime('now'))
 );
@@ -193,13 +198,13 @@ CREATE TABLE IF NOT EXISTS stock_movements (
 -- USERS (Owner & Cashiers)
 -- =============================================
 CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id TEXT PRIMARY KEY,
   username TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
-  pin_code TEXT, -- For quick cashier login (4-6 digits)
-  pin_length INTEGER DEFAULT 4, -- Original PIN digit count (stored separately since pin_code is bcrypt-hashed)
+  pin_code TEXT,
+  pin_length INTEGER DEFAULT 4,
   full_name TEXT NOT NULL,
-  role TEXT NOT NULL DEFAULT 'cashier', -- 'admin', 'manager', 'cashier'
+  role TEXT NOT NULL DEFAULT 'cashier',
   is_active INTEGER DEFAULT 1,
   last_login TEXT,
   created_at TEXT DEFAULT (datetime('now')),
@@ -210,15 +215,15 @@ CREATE TABLE IF NOT EXISTS users (
 -- CASHIER SESSIONS (Shift tracking)
 -- =============================================
 CREATE TABLE IF NOT EXISTS cashier_sessions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  cashier_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  id TEXT PRIMARY KEY,
+  cashier_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   login_time TEXT DEFAULT (datetime('now')),
   logout_time TEXT,
-  opening_cash REAL DEFAULT 0, -- Cash in drawer at shift start
-  closing_cash REAL, -- Cash in drawer at shift end
-  expected_cash REAL, -- Calculated: opening_cash + cash_sales
-  cash_difference REAL, -- closing_cash - expected_cash
-  status TEXT DEFAULT 'active', -- 'active', 'closed', 'force_closed'
+  opening_cash REAL DEFAULT 0,
+  closing_cash REAL,
+  expected_cash REAL,
+  cash_difference REAL,
+  status TEXT DEFAULT 'active',
   notes TEXT DEFAULT '',
   created_at TEXT DEFAULT (datetime('now'))
 );
@@ -227,8 +232,8 @@ CREATE TABLE IF NOT EXISTS cashier_sessions (
 -- POS QUICK ACCESS (Customizable product shortcuts)
 -- =============================================
 CREATE TABLE IF NOT EXISTS pos_quick_access (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  id TEXT PRIMARY KEY,
+  product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   display_name TEXT NOT NULL,
   icon TEXT DEFAULT 'shopping-bag',
   color TEXT DEFAULT 'text-zinc-500',
@@ -251,13 +256,13 @@ CREATE TABLE IF NOT EXISTS app_settings (
 -- EXPENSES
 -- =============================================
 CREATE TABLE IF NOT EXISTS expenses (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id TEXT PRIMARY KEY,
   description TEXT NOT NULL,
   amount REAL NOT NULL,
   category TEXT NOT NULL,
   date TEXT DEFAULT (datetime('now')),
   payment_method TEXT DEFAULT 'cash',
-  user_id INTEGER REFERENCES users(id),
+  user_id TEXT REFERENCES users(id),
   created_at TEXT DEFAULT (datetime('now'))
 );
 
@@ -265,8 +270,8 @@ CREATE TABLE IF NOT EXISTS expenses (
 -- AUDIT LOGS
 -- =============================================
 CREATE TABLE IF NOT EXISTS audit_logs (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER REFERENCES users(id),
+  id TEXT PRIMARY KEY,
+  user_id TEXT REFERENCES users(id),
   user_name TEXT,
   action TEXT NOT NULL,
   entity TEXT NOT NULL,
@@ -282,7 +287,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 -- PROMOTIONS
 -- =============================================
 CREATE TABLE IF NOT EXISTS promotions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   type TEXT NOT NULL CHECK(type IN ('price_discount', 'quantity_discount', 'pack_discount')),
   status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive')),
@@ -298,9 +303,9 @@ CREATE TABLE IF NOT EXISTS promotions (
 -- PROMOTION PRODUCTS (junction table)
 -- =============================================
 CREATE TABLE IF NOT EXISTS promotion_products (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  promotion_id INTEGER NOT NULL REFERENCES promotions(id) ON DELETE CASCADE,
-  product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  id TEXT PRIMARY KEY,
+  promotion_id TEXT NOT NULL REFERENCES promotions(id) ON DELETE CASCADE,
+  product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   created_at TEXT DEFAULT (datetime('now')),
   UNIQUE(promotion_id, product_id)
 );
@@ -319,11 +324,13 @@ CREATE INDEX IF NOT EXISTS idx_promo_products_product ON promotion_products(prod
 -- PAYMENT ENTRIES (Split payment support)
 -- =============================================
 CREATE TABLE IF NOT EXISTS payment_entries (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  sale_id INTEGER NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
+  id TEXT PRIMARY KEY,
+  sale_id TEXT NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
   method TEXT NOT NULL CHECK(method IN ('cash','card','mobile','credit')),
   amount REAL NOT NULL CHECK(amount > 0),
   change_amount REAL DEFAULT 0,
+  synced_at TEXT DEFAULT NULL,
+  client_id TEXT DEFAULT NULL,
   created_at TEXT DEFAULT (datetime('now'))
 );
 

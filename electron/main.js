@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
+const { autoUpdater } = require('electron-updater');
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -94,6 +95,35 @@ ipcMain.handle('db:export', async () => {
         console.error('❌ Failed to export database:', err);
         return null;
     }
+});
+
+// ============================================
+// SYNC IPC HANDLERS
+// Forward sync commands from renderer to main scope.
+// The actual sync logic lives in the renderer (SyncEngine);
+// these IPC channels let the renderer communicate sync
+// status to the main process for tray/menu updates.
+// ============================================
+
+/** Store current sync status for tray/menu display */
+let currentSyncStatus = 'idle';
+
+ipcMain.on('sync:status', (_event, status) => {
+    currentSyncStatus = status;
+    console.log(`[Sync] Status: ${status}`);
+});
+
+ipcMain.handle('sync:get-status', () => {
+    return currentSyncStatus;
+});
+
+ipcMain.on('sync:start', (event) => {
+    // Renderer requests sync start — echo back acknowledgment
+    event.sender.send('sync:started');
+});
+
+ipcMain.on('connectivity:status', (_event, status) => {
+    console.log(`[Connectivity] ${status}`);
 });
 
 /**
@@ -401,6 +431,22 @@ app.whenReady().then(() => {
     console.log('✅ Electron app ready — file-based database persistence enabled');
     console.log(`📂 Database path: ${DB_PATH}`);
     mainWindow = createWindow();
+
+    // Notify renderer that it can initialize sync engine
+    mainWindow.webContents.once('did-finish-load', () => {
+        mainWindow.webContents.send('app:ready');
+    });
+
+    // Auto-updater (production only)
+    if (!isDev) {
+        autoUpdater.checkForUpdatesAndNotify();
+        autoUpdater.on('update-available', () => {
+            mainWindow?.webContents.send('update:available');
+        });
+        autoUpdater.on('update-downloaded', () => {
+            mainWindow?.webContents.send('update:downloaded');
+        });
+    }
 });
 
 app.on('window-all-closed', () => {

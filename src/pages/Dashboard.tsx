@@ -248,7 +248,7 @@ export default function Dashboard() {
                     {/* Revenue, Profit & Stock Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3 sm:gap-6">
                         {/* Revenue Card */}
-                        <motion.div className="bg-white border-2 border-black/10 flex flex-col justify-between aspect-[2/1] sm:aspect-[2/1] lg:aspect-[2/1] xl:h-40 p-4 sm:p-6 rounded-2xl sm:rounded-[2.5rem] relative overflow-hidden group cursor-pointer">
+                        <motion.div className="w-full bg-white border-2 border-black/10 flex flex-col justify-between min-h-[10rem] p-4 sm:p-6 rounded-2xl sm:rounded-[2.5rem] relative overflow-hidden group cursor-pointer">
                             <div className="flex items-center justify-between relative z-10">
                                 <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                                     {t('dashboard.stats.today_revenue')}
@@ -271,7 +271,7 @@ export default function Dashboard() {
                         </motion.div>
 
                         {/* Net Profit Card */}
-                        <motion.div className="bg-black text-white flex flex-col justify-between aspect-[2/1] sm:aspect-[2/1] lg:aspect-[2/1] xl:h-40 p-4 sm:p-6 rounded-2xl sm:rounded-[2.5rem] relative overflow-hidden group cursor-pointer">
+                        <motion.div className="w-full bg-black text-white border-2 border-black/10 flex flex-col justify-between min-h-[10rem] p-4 sm:p-6 rounded-2xl sm:rounded-[2.5rem] relative overflow-hidden group cursor-pointer">
                             <div className="absolute top-0 right-0 p-16 bg-zinc-800 rounded-full blur-2xl opacity-20 -translate-y-1/2 translate-x-1/2" />
 
                             <div className="flex items-center justify-between relative z-10">
@@ -305,7 +305,7 @@ export default function Dashboard() {
                         </motion.div>
 
                         {/* Stock Card */}
-                        <motion.div className="bg-yellow-300 border-2 border-black/10 flex flex-col justify-between aspect-[2/1] sm:aspect-[2/1] lg:aspect-[2/1] xl:h-40 p-4 sm:p-6 rounded-2xl sm:rounded-[2.5rem] relative overflow-hidden group cursor-pointer">
+                        <motion.div className="w-full bg-yellow-300 border-2 border-black/10 flex flex-col justify-between min-h-[10rem] p-4 sm:p-6 rounded-2xl sm:rounded-[2.5rem] relative overflow-hidden group cursor-pointer">
                             <div className="flex items-center justify-between relative z-10">
                                 <span className="text-[10px] font-bold text-black/60 uppercase tracking-widest">
                                     {t('dashboard.stats.total_products')}

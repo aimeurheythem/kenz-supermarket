@@ -1,4 +1,4 @@
-import { query, execute, executeNoSave, triggerSave, get, lastInsertId } from '../db';
+import { query, execute, executeNoSave, triggerSave, get } from '../db';
 import type { Customer, CustomerInput } from '../../src/lib/types';
 
 export const CustomerRepo = {
@@ -6,7 +6,7 @@ export const CustomerRepo = {
         return query<Customer>('SELECT * FROM customers ORDER BY updated_at DESC');
     },
 
-    async getById(id: number): Promise<Customer | undefined> {
+    async getById(id: number | string): Promise<Customer | undefined> {
         return get<Customer>('SELECT * FROM customers WHERE id = ?', [id]);
     },
 
@@ -20,11 +20,13 @@ export const CustomerRepo = {
         );
     },
 
-    async create(customer: CustomerInput): Promise<number> {
+    async create(customer: CustomerInput): Promise<number | string> {
+        const id = crypto.randomUUID();
         await execute(
-            `INSERT INTO customers (full_name, phone, email, address, notes, loyalty_points)
-             VALUES (?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO customers (id, full_name, phone, email, address, notes, loyalty_points)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
+                id,
                 customer.full_name,
                 customer.phone || null,
                 customer.email || null,
@@ -33,10 +35,10 @@ export const CustomerRepo = {
                 customer.loyalty_points || 0,
             ],
         );
-        return lastInsertId();
+        return id;
     },
 
-    async update(id: number, customer: Partial<Customer>): Promise<void> {
+    async update(id: number | string, customer: Partial<Customer>): Promise<void> {
         // Build dynamic update query
         const fields: string[] = [];
         const values: any[] = [];
@@ -74,7 +76,7 @@ export const CustomerRepo = {
         await execute(`UPDATE customers SET ${fields.join(', ')} WHERE id = ?`, values);
     },
 
-    async delete(id: number): Promise<void> {
+    async delete(id: number | string): Promise<void> {
         // Check if customer has sales
         const salesCount = await get<{ count: number }>('SELECT COUNT(*) as count FROM sales WHERE customer_id = ?', [
             id,
@@ -106,9 +108,9 @@ export const CustomerRepo = {
             await executeNoSave('BEGIN TRANSACTION;');
 
             await executeNoSave(
-                `INSERT INTO customer_transactions (customer_id, type, amount, balance_after, reference_type, reference_id, description)
-                 VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                [customerId, type, amount, newBalance, referenceType || null, referenceId || null, description || null],
+                `INSERT INTO customer_transactions (id, customer_id, type, amount, balance_after, reference_type, reference_id, description)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                [crypto.randomUUID(), customerId, type, amount, newBalance, referenceType || null, referenceId || null, description || null],
             );
 
             // Atomic debt update

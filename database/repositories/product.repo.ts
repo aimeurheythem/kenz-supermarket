@@ -1,4 +1,4 @@
-import { query, execute, lastInsertId, get } from '../db';
+import { query, execute, get } from '../db';
 import type { Product, ProductInput } from '../../src/lib/types';
 
 import { AuditLogRepo } from './audit-log.repo';
@@ -37,7 +37,7 @@ export const ProductRepo = {
         return query<Product>(sql, params);
     },
 
-    async getById(id: number): Promise<Product | undefined> {
+    async getById(id: number | string): Promise<Product | undefined> {
         return get<Product>(
             `SELECT p.*, c.name as category_name
        FROM products p
@@ -58,10 +58,12 @@ export const ProductRepo = {
     },
 
     async create(input: ProductInput): Promise<Product> {
+        const id = crypto.randomUUID();
         await execute(
-            `INSERT INTO products (barcode, name, description, category_id, cost_price, selling_price, stock_quantity, reorder_level, unit, image_url)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO products (id, barcode, name, description, category_id, cost_price, selling_price, stock_quantity, reorder_level, unit, image_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
+                id,
                 input.barcode || null,
                 input.name,
                 input.description || '',
@@ -74,7 +76,6 @@ export const ProductRepo = {
                 input.image_url || '',
             ],
         );
-        const id = await lastInsertId();
         const product = (await this.getById(id)) as Product;
 
         // Audit Log
@@ -83,7 +84,7 @@ export const ProductRepo = {
         return product;
     },
 
-    async update(id: number, input: Partial<ProductInput>): Promise<Product> {
+    async update(id: number | string, input: Partial<ProductInput>): Promise<Product> {
         const oldProduct = await this.getById(id);
 
         const fields: string[] = [];
@@ -142,7 +143,7 @@ export const ProductRepo = {
         return newProduct;
     },
 
-    async updateStock(id: number, newQuantity: number): Promise<void> {
+    async updateStock(id: number | string, newQuantity: number): Promise<void> {
         const product = await this.getById(id);
         const oldQty = product?.stock_quantity;
 
@@ -161,7 +162,7 @@ export const ProductRepo = {
         );
     },
 
-    async delete(id: number): Promise<void> {
+    async delete(id: number | string): Promise<void> {
         const product = await this.getById(id);
         await execute('UPDATE products SET is_active = 0 WHERE id = ?', [id]);
 

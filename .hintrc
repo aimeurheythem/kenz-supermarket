@@ -27,7 +27,8 @@
           "-webkit-app-region",
           "scrollbar-width: none",
           "-webkit-overflow-scrolling",
-          "text-wrap"
+          "text-wrap",
+          "backdrop-filter"
         ]
       }
     ],

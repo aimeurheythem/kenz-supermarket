@@ -225,6 +225,54 @@ async function initDatabaseInternal(): Promise<void> {
         /* already exists */
     }
 
+    // 006 sync columns — add synced_at + client_id to sale-related tables
+    const syncColumns = [
+        ['sales', 'synced_at', 'TEXT DEFAULT NULL'],
+        ['sales', 'client_id', 'TEXT DEFAULT NULL'],
+        ['sale_items', 'synced_at', 'TEXT DEFAULT NULL'],
+        ['sale_items', 'client_id', 'TEXT DEFAULT NULL'],
+        ['payment_entries', 'synced_at', 'TEXT DEFAULT NULL'],
+        ['payment_entries', 'client_id', 'TEXT DEFAULT NULL'],
+    ];
+    for (const [table, col, def] of syncColumns) {
+        try {
+            sqlJsDb.run(`ALTER TABLE ${table} ADD COLUMN ${col} ${def}`);
+        } catch (_) {
+            /* already exists */
+        }
+    }
+
+    // Sync queue table (for offline queue)
+    sqlJsDb.run(`
+        CREATE TABLE IF NOT EXISTS sync_queue (
+            id TEXT PRIMARY KEY,
+            operation_id TEXT UNIQUE NOT NULL,
+            entity TEXT NOT NULL,
+            action TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            local_timestamp INTEGER NOT NULL,
+            sync_order INTEGER NOT NULL,
+            client_id TEXT NOT NULL,
+            field_hashes TEXT DEFAULT '{}',
+            status TEXT DEFAULT 'pending',
+            created_at INTEGER NOT NULL
+        )
+    `);
+
+    // Cached credentials table (for offline POS auth)
+    sqlJsDb.run(`
+        CREATE TABLE IF NOT EXISTS cached_credentials (
+            id TEXT PRIMARY KEY,
+            email TEXT,
+            username TEXT,
+            full_name TEXT,
+            role TEXT,
+            refresh_token TEXT,
+            pin_hash TEXT,
+            cached_at INTEGER NOT NULL
+        )
+    `);
+
     // Enable foreign keys
     try {
         sqlJsDb.run('PRAGMA foreign_keys = ON;');

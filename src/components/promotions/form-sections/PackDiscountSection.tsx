@@ -51,6 +51,13 @@ export default function PackDiscountSection({ values, errors, onChange }: PackDi
                 placeholder={t('promotions.form.product_search_placeholder', 'Search by name or barcode...')}
             />
 
+            {selectedProducts.length > 0 && (
+                <div className="px-4 py-3 rounded-lg bg-zinc-50 border border-zinc-200 text-sm">
+                    <span className="text-zinc-500 font-semibold">{t('promotions.form.original_total', 'Original Total')}: </span>
+                    <span className="font-black text-black ml-1">{format(originalTotal)}</span>
+                </div>
+            )}
+
             {/* Bundle Price */}
             <div>
                 <label className={LABEL_CLASS}>{t('promotions.form.bundle_price_label', 'Bundle Price')}</label>

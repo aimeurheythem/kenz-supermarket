@@ -44,7 +44,14 @@ export default function PriceDiscountSection({ values, errors, onChange }: Price
     const preview = useMemo(() => {
         if (!selectedProduct) return null;
         const { discount_type, discount_value, max_discount } = values.config;
-        if (!discount_value || discount_value <= 0) return null;
+        if (!discount_value || discount_value <= 0) {
+            return {
+                original: selectedProduct.selling_price,
+                final: selectedProduct.selling_price,
+                discount: 0,
+                hasDiscount: false,
+            };
+        }
         let discountAmount: number;
         if (discount_type === 'percentage') {
             discountAmount = selectedProduct.selling_price * (discount_value / 100);
@@ -54,7 +61,12 @@ export default function PriceDiscountSection({ values, errors, onChange }: Price
         }
         discountAmount = Math.min(discountAmount, selectedProduct.selling_price);
         const finalPrice = selectedProduct.selling_price - discountAmount;
-        return { original: selectedProduct.selling_price, final: finalPrice, discount: discountAmount };
+        return {
+            original: selectedProduct.selling_price,
+            final: finalPrice,
+            discount: discountAmount,
+            hasDiscount: true,
+        };
     }, [selectedProduct, values.config]);
 
     return (
@@ -69,6 +81,15 @@ export default function PriceDiscountSection({ values, errors, onChange }: Price
                 error={errors.product_ids}
                 placeholder={t('promotions.form.product_search_placeholder', 'Search by name or barcode...')}
             />
+
+            {selectedProduct && (
+                <div className="px-4 py-3 rounded-lg bg-zinc-50 border border-zinc-200 text-sm">
+                    <span className="text-zinc-500 font-semibold">
+                        {t('promotions.form.original_price', 'Original Price')}: 
+                    </span>
+                    <span className="font-black text-black ml-1">{format(selectedProduct.selling_price)}</span>
+                </div>
+            )}
 
             {/* Discount Type */}
             <div>
@@ -135,10 +156,16 @@ export default function PriceDiscountSection({ values, errors, onChange }: Price
             {preview && (
                 <div className="px-4 py-3 rounded-lg bg-yellow-50 border border-yellow-200 text-sm">
                     <span className="text-zinc-500 font-semibold">{t('promotions.form.preview', 'Preview')}: </span>
-                    <span className="line-through text-zinc-400">{format(preview.original)}</span>
-                    <span className="mx-2 text-yellow-600 font-black">→</span>
-                    <span className="font-black text-black">{format(preview.final)}</span>
-                    <span className="ml-2 text-emerald-600 font-semibold">(-{format(preview.discount)})</span>
+                    {preview.hasDiscount ? (
+                        <>
+                            <span className="line-through text-zinc-400">{format(preview.original)}</span>
+                            <span className="mx-2 text-yellow-600 font-black">→</span>
+                            <span className="font-black text-black">{format(preview.final)}</span>
+                            <span className="ml-2 text-emerald-600 font-semibold">(-{format(preview.discount)})</span>
+                        </>
+                    ) : (
+                        <span className="font-black text-black">{format(preview.original)}</span>
+                    )}
                 </div>
             )}
         </div>

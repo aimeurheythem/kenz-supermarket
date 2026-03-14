@@ -1,4 +1,4 @@
-import { query, execute, executeNoSave, triggerSave, lastInsertId } from '../db';
+import { query, execute, executeNoSave, triggerSave } from '../db';
 import type { PurchaseOrder, PurchaseOrderItem } from '../../src/lib/types';
 import { AuditLogRepo } from './audit-log.repo';
 
@@ -12,7 +12,7 @@ export const PurchaseRepo = {
         `);
     },
 
-    async getById(id: number): Promise<PurchaseOrder | null> {
+    async getById(id: number | string): Promise<PurchaseOrder | null> {
         const pos = await query<PurchaseOrder>(
             `
             SELECT po.*, s.name as supplier_name 
@@ -25,7 +25,7 @@ export const PurchaseRepo = {
         return pos.length > 0 ? pos[0] : null;
     },
 
-    async getItems(purchaseOrderId: number): Promise<PurchaseOrderItem[]> {
+    async getItems(purchaseOrderId: number | string): Promise<PurchaseOrderItem[]> {
         return query<PurchaseOrderItem>(
             `
             SELECT poi.*, p.name as product_name
@@ -42,31 +42,32 @@ export const PurchaseRepo = {
         status: string;
         notes?: string;
         items: { product_id: number; quantity: number; unit_cost: number }[];
-    }): Promise<number> {
+    }): Promise<number | string> {
         try {
             await executeNoSave('BEGIN TRANSACTION;');
 
             // Create PO
+            const poId = crypto.randomUUID();
             await executeNoSave(
                 `
-                INSERT INTO purchase_orders (supplier_id, order_date, status, total_amount, paid_amount, notes)
-                VALUES (?, datetime('now'), ?, 0, 0, ?)
+                INSERT INTO purchase_orders (id, supplier_id, order_date, status, total_amount, paid_amount, notes)
+                VALUES (?, ?, datetime('now'), ?, 0, 0, ?)
             `,
-                [order.supplier_id, order.status, order.notes || ''],
+                [poId, order.supplier_id, order.status, order.notes || ''],
             );
 
-            const poId = await lastInsertId();
             let totalAmount = 0;
 
             // Create Items
             for (const item of order.items) {
                 const lineTotal = item.quantity * item.unit_cost;
+                const itemId = crypto.randomUUID();
                 await executeNoSave(
                     `
-                    INSERT INTO purchase_order_items (purchase_order_id, product_id, quantity, unit_cost, total_cost, received_quantity)
-                    VALUES (?, ?, ?, ?, ?, 0)
+                    INSERT INTO purchase_order_items (id, purchase_order_id, product_id, quantity, unit_cost, total_cost, received_quantity)
+                    VALUES (?, ?, ?, ?, ?, ?, 0)
                 `,
-                    [poId, item.product_id, item.quantity, item.unit_cost, lineTotal],
+                    [itemId, poId, item.product_id, item.quantity, item.unit_cost, lineTotal],
                 );
                 totalAmount += lineTotal;
             }
@@ -98,12 +99,12 @@ export const PurchaseRepo = {
         }
     },
 
-    async updateStatus(id: number, status: string): Promise<void> {
+    async updateStatus(id: number | string, status: string): Promise<void> {
         await execute(`UPDATE purchase_orders SET status = ? WHERE id = ?`, [status, id]);
     },
 
     // Receive items and update stock
-    async receive(id: number): Promise<void> {
+    async receive(id: number | string): Promise<void> {
         const po = await this.getById(id);
         if (!po || po.status === 'received') return;
 

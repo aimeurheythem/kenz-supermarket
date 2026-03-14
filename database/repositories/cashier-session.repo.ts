@@ -1,4 +1,4 @@
-import { query, execute, executeNoSave, triggerSave, lastInsertId, get } from '../db';
+import { query, execute, executeNoSave, triggerSave, get } from '../db';
 import type { CashierSession, CashierSessionInput, SessionCloseInput } from '../../src/lib/types';
 
 export const CashierSessionRepo = {
@@ -43,7 +43,7 @@ export const CashierSessionRepo = {
     /**
      * Get session by ID
      */
-    async getById(id: number): Promise<CashierSession | undefined> {
+    async getById(id: number | string): Promise<CashierSession | undefined> {
         try {
             return get<CashierSession>(
                 `
@@ -105,26 +105,13 @@ export const CashierSessionRepo = {
             );
 
             // Insert new session
-            await executeNoSave('INSERT INTO cashier_sessions (cashier_id, opening_cash, status) VALUES (?, ?, ?)', [
+            const newSessionId = crypto.randomUUID();
+            await executeNoSave('INSERT INTO cashier_sessions (id, cashier_id, opening_cash, status) VALUES (?, ?, ?, ?)', [
+                newSessionId,
                 input.cashier_id,
                 input.opening_cash,
                 'active',
             ]);
-
-            // Get the ID immediately after insert
-            let newSessionId = await lastInsertId();
-
-            // If last_insert_rowid() returns 0, try getting the max id instead
-            if (!newSessionId || newSessionId === 0) {
-                const maxResult = await query<{ max_id: number }>('SELECT MAX(id) as max_id FROM cashier_sessions');
-                newSessionId = maxResult[0]?.max_id ?? 0;
-            }
-
-            if (!newSessionId || newSessionId === 0) {
-                await executeNoSave('ROLLBACK;');
-                console.error('Invalid session ID after insert');
-                return null;
-            }
 
             await executeNoSave('COMMIT;');
             triggerSave();
@@ -189,7 +176,7 @@ export const CashierSessionRepo = {
     /**
      * Get session statistics
      */
-    async getSessionStats(session_id: number): Promise<{
+    async getSessionStats(session_id: number | string): Promise<{
         total_sales: number;
         total_transactions: number;
         cash_sales: number;

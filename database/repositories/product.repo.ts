@@ -3,6 +3,16 @@ import type { Product, ProductInput } from '../../src/lib/types';
 
 import { AuditLogRepo } from './audit-log.repo';
 
+function normalizeImageUrl(image: unknown): string {
+    if (typeof image !== 'string') return '';
+    return image.trim();
+}
+
+function normalizeCategoryId(categoryId: unknown): string | number | null {
+    if (categoryId == null || categoryId === '') return null;
+    return categoryId as string | number;
+}
+
 export const ProductRepo = {
     async getAll(filters?: {
         category_id?: number;
@@ -58,30 +68,113 @@ export const ProductRepo = {
     },
 
     async create(input: ProductInput): Promise<Product> {
-        const id = crypto.randomUUID();
-        await execute(
-            `INSERT INTO products (id, barcode, name, description, category_id, cost_price, selling_price, stock_quantity, reorder_level, unit, image_url)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-                id,
-                input.barcode || null,
-                input.name,
-                input.description || '',
-                input.category_id || null,
-                input.cost_price,
-                input.selling_price,
-                input.stock_quantity || 0,
-                input.reorder_level || 10,
-                input.unit || 'piece',
-                input.image_url || '',
-            ],
-        );
-        const product = (await this.getById(id)) as Product;
+        const columns = await query<{ name: string; type: string; pk: number }>('PRAGMA table_info(products)');
+        const idColumn = columns.find((column) => column.name === 'id');
+        const usesIntegerPk = !!idColumn && /INT/i.test(idColumn.type || '');
+        const categoryId = normalizeCategoryId(input.category_id);
+        const imageUrl = normalizeImageUrl(input.image_url);
 
-        // Audit Log
-        await AuditLogRepo.log('CREATE', 'PRODUCT', id, `Created product: ${product.name}`, null, product);
+        try {
+            if (usesIntegerPk) {
+                await execute(
+                    `INSERT INTO products (barcode, name, description, category_id, cost_price, selling_price, stock_quantity, reorder_level, unit, image_url)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        input.barcode || null,
+                        input.name,
+                        input.description || '',
+                        categoryId,
+                        input.cost_price,
+                        input.selling_price,
+                        input.stock_quantity || 0,
+                        input.reorder_level || 10,
+                        input.unit || 'piece',
+                        imageUrl,
+                    ],
+                );
 
-        return product;
+                // For INTEGER mode, query by name to get the product we just inserted
+                let product = await get<Product>(
+                    `SELECT p.*, c.name as category_name
+                     FROM products p
+                     LEFT JOIN categories c ON p.category_id = c.id
+                     WHERE p.name = ?
+                     ORDER BY p.id DESC
+                     LIMIT 1`,
+                    [input.name],
+                );
+
+                if (!product) {
+                    // Retry with small delay
+                    await new Promise((resolve) => setTimeout(resolve, 50));
+                    product = await get<Product>(
+                        `SELECT p.*, c.name as category_name
+                         FROM products p
+                         LEFT JOIN categories c ON p.category_id = c.id
+                         WHERE p.name = ?
+                         ORDER BY p.id DESC
+                         LIMIT 1`,
+                        [input.name],
+                    );
+                }
+
+                if (!product) {
+                    throw new Error(`Failed to create product: "${input.name}"`);
+                }
+
+                // Audit Log
+                await AuditLogRepo.log('CREATE', 'PRODUCT', product.id, `Created product: ${product.name}`, null, product);
+                return product;
+            } else {
+                // UUID mode
+                const id = crypto.randomUUID();
+                await execute(
+                    `INSERT INTO products (id, barcode, name, description, category_id, cost_price, selling_price, stock_quantity, reorder_level, unit, image_url)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        id,
+                        input.barcode || null,
+                        input.name,
+                        input.description || '',
+                        categoryId,
+                        input.cost_price,
+                        input.selling_price,
+                        input.stock_quantity || 0,
+                        input.reorder_level || 10,
+                        input.unit || 'piece',
+                        imageUrl,
+                    ],
+                );
+
+                let product = await this.getById(id);
+                if (!product) {
+                    // Retry with small delay
+                    await new Promise((resolve) => setTimeout(resolve, 50));
+                    product = await this.getById(id);
+                }
+
+                if (!product) {
+                    throw new Error(`Failed to create product with ID ${id}`);
+                }
+
+                // Audit Log
+                await AuditLogRepo.log('CREATE', 'PRODUCT', id, `Created product: ${product.name}`, null, product);
+                return product;
+            }
+        } catch (error: unknown) {
+            // Check if product with same barcode already exists (unique constraint recovery)
+            if (input.barcode) {
+                const existingByBarcode = await this.getByBarcode(input.barcode);
+                if (existingByBarcode) {
+                    console.warn(`[ProductRepo] Product with barcode "${input.barcode}" already exists, returning existing product`);
+                    return existingByBarcode;
+                }
+            }
+            // If not a barcode duplicate, throw the original error
+            const err = error instanceof Error ? error : new Error(String(error));
+            console.error('[ProductRepo.create] Failed:', err.message);
+            throw err;
+        }
     },
 
     async update(id: number | string, input: Partial<ProductInput>): Promise<Product> {
@@ -104,7 +197,7 @@ export const ProductRepo = {
         }
         if (input.category_id !== undefined) {
             fields.push('category_id = ?');
-            values.push(input.category_id);
+            values.push(normalizeCategoryId(input.category_id));
         }
         if (input.cost_price !== undefined) {
             fields.push('cost_price = ?');
@@ -128,7 +221,7 @@ export const ProductRepo = {
         }
         if (input.image_url !== undefined) {
             fields.push('image_url = ?');
-            values.push(input.image_url);
+            values.push(normalizeImageUrl(input.image_url));
         }
 
         fields.push("updated_at = datetime('now')");

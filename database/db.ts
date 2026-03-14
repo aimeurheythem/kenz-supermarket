@@ -225,6 +225,13 @@ async function initDatabaseInternal(): Promise<void> {
         /* already exists */
     }
 
+    // Legacy DB compatibility: older installs may not have product image column
+    try {
+        sqlJsDb.run("ALTER TABLE products ADD COLUMN image_url TEXT DEFAULT ''");
+    } catch (_) {
+        /* already exists */
+    }
+
     // 006 sync columns — add synced_at + client_id to sale-related tables
     const syncColumns = [
         ['sales', 'synced_at', 'TEXT DEFAULT NULL'],

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Save, ScanBarcode } from 'lucide-react';
+import { Save, ScanBarcode, ImagePlus, X } from 'lucide-react';
+import { toast } from 'sonner';
 import Button from '@/components/common/Button';
 import BarcodeScanner from '@/components/common/BarcodeScanner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -10,7 +11,7 @@ import type { Product, ProductInput, Category } from '@/lib/types';
 interface ProductFormModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (data: ProductInput) => void;
+    onSubmit: (data: ProductInput) => void | Promise<void>;
     product?: Product | null;
     categories: Category[];
 }
@@ -25,12 +26,14 @@ const defaultForm: ProductInput = {
     stock_quantity: 0,
     reorder_level: 10,
     unit: 'piece',
+    image_url: '',
 };
 
 export default function ProductFormModal({ isOpen, onClose, onSubmit, product, categories }: ProductFormModalProps) {
     const { t } = useTranslation();
     const [form, setForm] = useState<ProductInput>(defaultForm);
     const [showScanner, setShowScanner] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const isEditing = !!product;
 
     useEffect(() => {
@@ -45,17 +48,46 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                 stock_quantity: product.stock_quantity,
                 reorder_level: product.reorder_level,
                 unit: product.unit,
+                image_url: product.image_url || '',
             });
         } else {
             setForm(defaultForm);
         }
     }, [product, isOpen]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            const imageUrl = reader.result;
+            if (typeof imageUrl === 'string') {
+                setForm((prev) => ({ ...prev, image_url: imageUrl }));
+            }
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!form.name.trim()) return;
-        onSubmit(form);
-        onClose();
+        if (!form.name.trim() || isSubmitting) return;
+
+        try {
+            setIsSubmitting(true);
+            // Normalize barcode: empty string becomes null, not empty string
+            const submitForm = {
+                ...form,
+                barcode: form.barcode?.trim() ? form.barcode.trim() : null,
+            };
+            await Promise.resolve(onSubmit(submitForm));
+            onClose();
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : t('common.error', { defaultValue: 'Error' });
+            toast.error(message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const inputClass =
@@ -116,6 +148,53 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                             </div>
                         </div>
 
+                        {/* Product image */}
+                        <div>
+                            <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">
+                                {t('inventory.form.labels.image', { defaultValue: 'Product image' })}
+                            </label>
+
+                            <div className="flex items-center gap-3">
+                                <label className="inline-flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-input)] hover:border-[var(--color-border-hover)] transition-colors text-sm text-[var(--color-text-primary)]">
+                                    <ImagePlus size={16} />
+                                    <span>{t('inventory.form.buttons.upload_image', { defaultValue: 'Upload image' })}</span>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                        className="hidden"
+                                    />
+                                </label>
+
+                                {form.image_url && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setForm((prev) => ({ ...prev, image_url: '' }))}
+                                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-red-500 hover:border-red-300 transition-colors"
+                                    >
+                                        <X size={14} />
+                                        <span>{t('common.remove', { defaultValue: 'Remove' })}</span>
+                                    </button>
+                                )}
+                            </div>
+
+                            {form.image_url ? (
+                                <div className="mt-3 w-24 h-24 rounded-lg border border-[var(--color-border)] overflow-hidden bg-[var(--color-bg-input)]">
+                                    <img
+                                        src={form.image_url}
+                                        alt={t('inventory.form.labels.image', { defaultValue: 'Product image' })}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            ) : (
+                                <p className="mt-2 text-xs text-[var(--color-text-placeholder)]">
+                                    {t('inventory.form.placeholders.no_image_selected', {
+                                        defaultValue: 'No image selected',
+                                    })}
+                                </p>
+                            )}
+                        </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">
@@ -124,7 +203,13 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                                 <Select
                                     value={form.category_id ? String(form.category_id) : '__none__'}
                                     onValueChange={(v) =>
-                                        setForm({ ...form, category_id: v === '__none__' ? undefined : Number(v) })
+                                        setForm({
+                                            ...form,
+                                            category_id:
+                                                v === '__none__'
+                                                    ? undefined
+                                                    : (v as unknown as ProductInput['category_id']),
+                                        })
                                     }
                                 >
                                     <SelectTrigger className="w-full bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-hover)] focus:ring-1 focus:ring-[var(--color-border-hover)] transition-all h-auto font-normal">
@@ -230,6 +315,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                                 type="button"
                                 variant="secondary"
                                 onClick={onClose}
+                                disabled={isSubmitting}
                             >
                                 {t('inventory.form.buttons.cancel')}
                             </Button>
@@ -237,8 +323,13 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                                 type="submit"
                                 variant="primary"
                                 icon={<Save size={16} />}
+                                disabled={isSubmitting}
                             >
-                                {isEditing ? t('inventory.form.buttons.save') : t('inventory.form.buttons.create')}
+                                {isSubmitting
+                                    ? t('common.saving', { defaultValue: 'Saving...' })
+                                    : isEditing
+                                        ? t('inventory.form.buttons.save')
+                                        : t('inventory.form.buttons.create')}
                             </Button>
                         </div>
                     </form>

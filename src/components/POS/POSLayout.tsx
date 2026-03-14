@@ -615,30 +615,48 @@ export default function POSLayout() {
                                             key={product.id}
                                             onClick={() => handleAddProduct(product)}
                                             disabled={isOutOfStock}
-                                            className={`relative flex flex-col justify-between p-3 xl:p-4 min-h-[88px] xl:min-h-[96px] text-left transition-colors duration-100 active:brightness-95 disabled:opacity-25 disabled:cursor-not-allowed ${isInCart ? 'bg-zinc-900' : 'bg-white hover:bg-zinc-50'}`}
+                                            className={`relative flex flex-col justify-between p-0 min-h-[88px] xl:min-h-[96px] text-left transition-colors duration-100 active:brightness-95 disabled:opacity-25 disabled:cursor-not-allowed overflow-hidden ${isInCart ? 'bg-zinc-900' : 'bg-white hover:bg-zinc-50'}`}
                                         >
+                                            {/* Image background or icon */}
+                                            {product.image_url ? (
+                                                <img
+                                                    src={product.image_url}
+                                                    alt={product.name}
+                                                    className="absolute inset-0 w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                                                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V11a2 2 0 012-2z" />
+                                                    </svg>
+                                                </div>
+                                            )}
+
+                                            {/* Dark overlay for readability */}
+                                            <div className="absolute inset-0 bg-black/40" />
+
                                             {/* Quantity badge */}
                                             {isInCart && (
-                                                <span className="absolute top-2 right-2.5 bg-emerald-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                                                <span className="absolute top-2 right-2.5 bg-emerald-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center z-10">
                                                     {inCart.quantity}
                                                 </span>
                                             )}
 
-                                            {/* Product name */}
-                                            <span className={`text-[13px] font-semibold leading-snug line-clamp-2 pr-6 ${isInCart ? 'text-white' : 'text-zinc-800'}`}>
-                                                {product.name}
-                                            </span>
-
-                                            {/* Price + stock */}
-                                            <div className="flex items-end justify-between mt-auto pt-1.5">
-                                                <span className={`text-[15px] xl:text-base font-bold tabular-nums tracking-tight ${isInCart ? 'text-emerald-400' : 'text-zinc-900'}`}>
-                                                    {formatCurrency(product.selling_price)}
+                                            {/* Product info overlay - bottom */}
+                                            <div className="absolute inset-0 flex flex-col justify-end p-2 xl:p-3 z-5">
+                                                <span className={`text-[12px] font-bold leading-snug line-clamp-2 mb-1 ${isInCart ? 'text-emerald-400' : 'text-white'}`}>
+                                                    {product.name}
                                                 </span>
-                                                {!isInCart && (
-                                                    <span className={`text-[10px] font-medium tabular-nums ${isOutOfStock ? 'text-red-400' : isLowStock ? 'text-amber-500' : 'text-zinc-300'}`}>
-                                                        {product.stock_quantity}
+                                                <div className="flex items-end justify-between">
+                                                    <span className={`text-[14px] xl:text-base font-black tabular-nums tracking-tight ${isInCart ? 'text-emerald-400' : 'text-white'}`}>
+                                                        {formatCurrency(product.selling_price)}
                                                     </span>
-                                                )}
+                                                    {!isInCart && (
+                                                        <span className={`text-[10px] font-medium tabular-nums ${isOutOfStock ? 'text-red-300' : isLowStock ? 'text-amber-300' : 'text-white/70'}`}>
+                                                            {product.stock_quantity}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </button>
                                     );

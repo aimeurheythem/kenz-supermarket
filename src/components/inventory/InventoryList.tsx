@@ -76,8 +76,16 @@ export default function InventoryList({ products, handleEdit, handleDelete, cate
 
                         {/* Product Info */}
                         <div className="flex items-center gap-4 min-w-0">
-                            <div className="w-10 h-10 flex items-center justify-center shrink-0">
-                                <ShoppingBag size={18} className="text-black" />
+                            <div className="w-10 h-10 flex items-center justify-center shrink-0 rounded-lg bg-gray-100 overflow-hidden">
+                                {product.image_url ? (
+                                    <img
+                                        src={product.image_url}
+                                        alt={product.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <ShoppingBag size={18} className="text-black" />
+                                )}
                             </div>
                             <div className="flex flex-col min-w-0 pr-4">
                                 <h3 className="text-sm font-black text-black uppercase tracking-tight truncate">

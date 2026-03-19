@@ -55,9 +55,17 @@ export default function InventoryGrid({
                         {/* Header Row: Icon + Title + Actions */}
                         <div className="flex items-start justify-between mb-3 sm:mb-4">
                             <div className="flex items-center gap-2 sm:gap-4 overflow-hidden">
-                                {/* Icon - No Background */}
-                                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-[1.2rem] bg-gray-50 flex items-center justify-center shrink-0">
-                                    <ShoppingBag size={20} className="text-black" />
+                                {/* Icon/Image - No Background */}
+                                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-[1.2rem] bg-gray-50 flex items-center justify-center shrink-0 overflow-hidden">
+                                    {product.image_url ? (
+                                        <img
+                                            src={product.image_url}
+                                            alt={product.name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <ShoppingBag size={20} className="text-black" />
+                                    )}
                                 </div>
 
                                 {/* Title & Category */}
